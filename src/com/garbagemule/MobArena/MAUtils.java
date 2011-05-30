@@ -481,6 +481,18 @@ public class MAUtils
                 (ArenaManager.dCreepers    != -1)   &&
                 (ArenaManager.classes.size() > 0)   &&
                 (ArenaManager.spawnpoints.size() > 0));
-                
+    }   
+    
+    /**
+     * Verifies that all important variables are declared. Returns true
+     * if, and only if, the warppoints, region, distribution coefficients,
+     * classes and spawnpoints are all set up.
+     */
+    public static void notifyIfSetup(Player p)
+    {
+        if (verifyData())
+        {
+            ArenaManager.tellPlayer(p, "MobArena is set up and ready to roll!");
+        }
     }
 }

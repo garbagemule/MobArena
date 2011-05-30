@@ -84,16 +84,20 @@ public class MACommands implements CommandExecutor
         String cmd = args[0].toLowerCase();
         String arg = args[1].toLowerCase();
         
-        // ma setwarp arena/lobby/spectator
+        // ma setwarp [arena|lobby|spectator]
         if (cmd.equals("setwarp"))
         {
             if (!arg.equals("arena") && !arg.equals("lobby") && !arg.equals("spectator"))
-                return false;
+            {
+                ArenaManager.tellPlayer(p, "/ma setwarp [arena|lobby|spectator]");
+                return true;
+            }
             
             // Write the coordinate data to the config-file.
             MAUtils.setCoords(arg, p.getLocation());
             
             ArenaManager.tellPlayer(p, "Warp point \"" + arg + "\" set.");
+            MAUtils.notifyIfSetup(p);
             return true;
         }
         
@@ -111,6 +115,7 @@ public class MACommands implements CommandExecutor
             MAUtils.setCoords("spawnpoints." + arg, p.getLocation());
             
             ArenaManager.tellPlayer(p, "Spawn point with name \"" + arg + "\" added.");
+            MAUtils.notifyIfSetup(p);
             return true;
         }
         
@@ -134,39 +139,48 @@ public class MACommands implements CommandExecutor
             MAUtils.delCoords("spawnpoints." + arg);
             
             ArenaManager.tellPlayer(p, "Spawn point with name \"" + arg + "\" removed.");
+            MAUtils.notifyIfSetup(p);
             return true;
         }
         
-        // ma setregionpoint p1/p2
+        // ma setregion [p1|p2]
         if (cmd.equalsIgnoreCase("setregion"))
-        {            
-            if (arg.equals("p1") || arg.equals("p2"))
+        {
+            if (!arg.equals("p1") && !arg.equals("p2"))
             {
-                MAUtils.setCoords(arg, p.getLocation());
-                MAUtils.fixCoords();
-                
-                ArenaManager.tellPlayer(p, "Region point \"" + arg + "\" set.");
+                ArenaManager.tellPlayer(p, "/ma setregion [p1|p2]");
                 return true;
             }
-            ArenaManager.tellPlayer(p, "/ma setregionpoint p1, or /ma setregionpoint p2");
+            
+            MAUtils.setCoords(arg, p.getLocation());
+            MAUtils.fixCoords();
+            
+            ArenaManager.tellPlayer(p, "Region point \"" + arg + "\" set.");
+            MAUtils.notifyIfSetup(p);
             return true;
         }
         
-        // ma expandregion up/down/out <number>
+        // ma expandregion [up|down|out] <amount>
         if (cmd.equalsIgnoreCase("expandregion"))
         {
-            if (arg.equals("up") || arg.equals("down") || arg.equals("out"))
+            if (ArenaManager.p1 == null || ArenaManager.p2 == null)
             {
-                if (args.length != 3 || !args[2].matches("[0-9]+"))
-                    return false;
-                
-                int i = Integer.parseInt(args[2]);
-                MAUtils.expandRegion(arg, i);
-                
-                ArenaManager.tellPlayer(p, "Region expanded " + arg + " by " + i + " blocks.");
+                ArenaManager.tellPlayer(p, "Set up region points first: /ma setregion [p1|p2]");
                 return true;
             }
-            ArenaManager.tellPlayer(p, "Region point \"" + arg + "\" set.");
+            if (!arg.equals("up") && !arg.equals("down") && !arg.equals("out"))
+            {
+                ArenaManager.tellPlayer(p, "/ma expandregion [up|down|out] <amount>");
+                return true;
+            }
+            
+            if (args.length != 3 || !args[2].matches("[0-9]+"))
+                return false;
+            
+            int i = Integer.parseInt(args[2]);
+            MAUtils.expandRegion(arg, i);
+            
+            ArenaManager.tellPlayer(p, "Region expanded " + arg + " by " + i + " blocks.");
             return true;
         }
         
