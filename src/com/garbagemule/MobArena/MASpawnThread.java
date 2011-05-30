@@ -164,6 +164,14 @@ public class MASpawnThread implements Runnable
                 mob   = CreatureType.GHAST;
                 count = Math.max(1, noOfPlayers - 2);
                 break;
+            case 5:
+                mob   = CreatureType.WOLF;
+                count = noOfPlayers * 2;
+                break;
+	    case 6;
+                mob   = CreatureType.GIANT;
+                count = 1;
+                break;
             default:
                 mob   = CreatureType.CHICKEN;
                 count = 50;
