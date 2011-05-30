@@ -484,9 +484,7 @@ public class MAUtils
     }   
     
     /**
-     * Verifies that all important variables are declared. Returns true
-     * if, and only if, the warppoints, region, distribution coefficients,
-     * classes and spawnpoints are all set up.
+     * Notifies the player if MobArena is set up and ready to be used.
      */
     public static void notifyIfSetup(Player p)
     {
