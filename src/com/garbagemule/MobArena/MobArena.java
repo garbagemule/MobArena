@@ -54,7 +54,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.BLOCK_PLACE,      blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,   creeperListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE,    damageListener,   Priority.Normal,  this);
-        
+        pm.registerEvent(Event.Type.ENTITY_COMBUST,    creeperListener,   Priority.Normal,  this);
         System.out.println(pdfFile.getName() + " v" + pdfFile.getVersion() + " initialized." );
     }
     

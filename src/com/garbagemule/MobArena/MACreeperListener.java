@@ -21,4 +21,10 @@ public class MACreeperListener extends EntityListener
         if (MAUtils.inRegion(event.getLocation()))
             event.setCancelled(true);
     }
+    public void onEntityCombust(EntityCombustEvent event) 
+    {
+        if (MAUtils.inRegion(event.getLocation()))
+            event.setCancelled(true);
+
+    }
 }
