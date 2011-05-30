@@ -196,7 +196,7 @@ public class MAUtils
             c.setProperty("classes.Knight.armor", "306,307,308,309");
             c.setProperty("classes.Tank.items",   "iron_sword, grilled_pork:2");
             c.setProperty("classes.Tank.armor",   "310,311,312,313");
-            c.setProperty("classes.Oddjob.items", "stone_sword, flint_and_steal, netherrack:2, wood_door, fishing_rod, apple, grilled_pork:3");
+            c.setProperty("classes.Oddjob.items", "stone_sword, flint_and_steel, netherrack:2, wood_pickaxe, wood_door, fishing_rod, apple, grilled_pork:3");
             c.setProperty("classes.Oddjob.armor", "298,299,300,301");
             c.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             c.setProperty("classes.Chef.armor",   "314,315,316,317");

@@ -170,6 +170,19 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
+        // ma protect true/false
+        if (cmd.equals("protect"))
+        {
+            if (!arg.equals("true") && !arg.equals("false"))
+                return false;
+            
+            // Set the boolean
+            ArenaManager.isProtected = Boolean.valueOf(arg);
+            
+            ArenaManager.tellPlayer(p, "Region protection: " + arg);
+            return true;
+        }
+        
         return false;
     }
 }

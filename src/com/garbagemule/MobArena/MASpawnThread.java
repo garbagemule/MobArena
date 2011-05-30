@@ -5,6 +5,7 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.CreatureType;
 
@@ -25,11 +26,16 @@ public class MASpawnThread implements Runnable
     private int wave, noOfSpawnPoints, noOfPlayers;
     private int dZombies, dSkeletons, dSpiders, dCreepers;
     private Random random;
+    private Player target;
+    private Object[] playerArray;
+    private String reward, currentRewards;
     
     public MASpawnThread()
     {
+        // Turn the set into an array for lookup with random numbers.
+        playerArray = ArenaManager.playerSet.toArray();
+        noOfPlayers = playerArray.length;
         noOfSpawnPoints = ArenaManager.spawnpoints.size();
-        noOfPlayers = ArenaManager.playerSet.size();
         wave = 1;
         random = new Random();
         
@@ -41,10 +47,7 @@ public class MASpawnThread implements Runnable
     }
     
     public void run()
-    {
-        String reward;
-        String currentRewards;
-        
+    {        
         // Check if we need to grant more rewards with the recurrent waves.
         for (Integer i : ArenaManager.everyWaveMap.keySet())
         {
@@ -98,9 +101,9 @@ public class MASpawnThread implements Runnable
         Location loc;
         int ran;
         
-        for (int i = 0; i < wave+noOfPlayers; i++)
+        for (int i = 0; i < wave + noOfPlayers; i++)
         {
-            loc = ArenaManager.spawnpoints.get(random.nextInt(noOfSpawnPoints));
+            loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
             ran = random.nextInt(dCreepers);
             CreatureType mob;
             
@@ -117,6 +120,11 @@ public class MASpawnThread implements Runnable
             
             LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
             ArenaManager.monsterSet.add(e);
+            
+            // Grab a random target.
+            ran = random.nextInt(noOfPlayers);
+            Creature c = (Creature) e;
+            c.setTarget((Player)playerArray[ran]);
         }
     }
     
@@ -128,7 +136,7 @@ public class MASpawnThread implements Runnable
         Location loc;
         CreatureType mob;
         
-        int count;
+        int ran, count;
         boolean lightning = false;
         boolean slime     = false;
         
@@ -164,18 +172,27 @@ public class MASpawnThread implements Runnable
         
         for (int i = 0; i < count; i++)
         {
-            loc = ArenaManager.spawnpoints.get(random.nextInt(noOfSpawnPoints));
+            loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
             
             LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
-            if (lightning)
-            {
-                ArenaManager.world.strikeLightningEffect(loc);
-                e.setFireTicks(0);
-                e.setHealth(20);
-            }
-            if (slime) ((Slime)e).setSize(2);
-                
             ArenaManager.monsterSet.add(e);
+            
+            if (slime) ((Slime)e).setSize(2);
+            
+            // Slimes can't have targets, apparently.
+            if (!(e instanceof Creature))
+                continue;
+            
+            // Grab a random target.
+            ran = random.nextInt(noOfPlayers);
+            Creature c = (Creature) e;
+            c.setTarget((Player)playerArray[ran]);
+        }
+        
+        // Lightning, just for effect ;)
+        for (Location l : ArenaManager.spawnpoints)
+        {
+            ArenaManager.world.strikeLightningEffect(l);
         }
     }
 }

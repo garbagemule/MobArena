@@ -23,7 +23,10 @@ public class MABlockListener extends BlockListener
     
     public void onBlockDamage(BlockDamageEvent event)
     {
-        if (!ArenaManager.isSetup)
+        if (!ArenaManager.isSetup || !ArenaManager.isProtected)
+            return;
+        
+        if (ArenaManager.blockSet.contains(event.getBlock()))
             return;
         
         if (MAUtils.inRegion(event.getBlock().getLocation()))
@@ -32,7 +35,10 @@ public class MABlockListener extends BlockListener
     
     public void onBlockBreak(BlockBreakEvent event)
     {
-        if (!ArenaManager.isSetup)
+        if (!ArenaManager.isSetup || !ArenaManager.isProtected)
+            return;
+        
+        if (ArenaManager.blockSet.contains(event.getBlock()))
             return;
         
         if (MAUtils.inRegion(event.getBlock().getLocation()))
@@ -41,7 +47,7 @@ public class MABlockListener extends BlockListener
     
     public void onBlockPlace(BlockPlaceEvent event)
     {
-        if (!ArenaManager.isSetup)
+        if (!ArenaManager.isSetup || !ArenaManager.isProtected)
             return;
         
         if (MAUtils.inRegion(event.getBlock().getLocation()))

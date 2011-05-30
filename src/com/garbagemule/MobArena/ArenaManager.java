@@ -33,6 +33,7 @@ public class ArenaManager
     protected static Location spectatorLoc = null;
     protected static boolean isRunning     = false;
     protected static boolean isSetup       = false;
+    protected static boolean isProtected   = true;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -145,7 +146,7 @@ public class ArenaManager
         }
         
         MASpawnThread thread = new MASpawnThread();
-        plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,thread,100,400);
+        server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,100,400);
         
         tellAll("Let the slaughter begin!");
     }
