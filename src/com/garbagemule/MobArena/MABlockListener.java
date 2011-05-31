@@ -14,58 +14,61 @@ import org.bukkit.event.block.BlockDamageEvent;
  */
 public class MABlockListener extends BlockListener
 {
-    private MobArena plugin;
-    
-    public MABlockListener(MobArena instance)
-    {
-        plugin = instance;
-    }
-    
-    public void onBlockDamage(BlockDamageEvent event)
-    {
-        if(event.getBlock().getTypeId() == 46 || ArenaManager.blockSet.contains(event.getBlock()) 
-            return;
-	if (!ArenaManager.isSetup || !ArenaManager.isProtected)
-            return;
-        
-        if (ArenaManager.blockSet.contains(event.getBlock()))
-            return;
-        
-        if (MAUtils.inRegion(event.getBlock().getLocation()))
-            event.setCancelled(true);
-        
+	private MobArena plugin;
+
+	public MABlockListener(MobArena instance)
+	{
+		plugin = instance;
+	}
+
+	@Override
+	public void onBlockDamage(BlockDamageEvent event)
+	{
+		if(event.getBlock().getTypeId() == 46 || ArenaManager.blockSet.contains(event.getBlock()) )
+			return;
+		if (!ArenaManager.isSetup || !ArenaManager.isProtected)
+			return;
+
+		if (ArenaManager.blockSet.contains(event.getBlock()))
+			return;
+
+		if (MAUtils.inRegion(event.getBlock().getLocation()))
+			event.setCancelled(true);
 
 
-}
-    
-    public void onBlockBreak(BlockBreakEvent event)
-    {
-        if(event.getBlock().getTypeId() == 46 || ArenaManager.blockSet.contains(event.getBlock()) 
-            return;
-	if (!ArenaManager.isSetup || !ArenaManager.isProtected)
-            return;
-        
-        if (ArenaManager.blockSet.contains(event.getBlock()))
-            return;
-        
-        if (MAUtils.inRegion(event.getBlock().getLocation()))
-            event.setCancelled(true);
-    }
-    
-    public void onBlockPlace(BlockPlaceEvent event)
-    {
-        if (!ArenaManager.isSetup || !ArenaManager.isProtected)
-            return;
-        
-        if (MAUtils.inRegion(event.getBlock().getLocation()))
-        {
-            if (ArenaManager.isRunning && ArenaManager.playerSet.contains(event.getPlayer()))
-            {
-                ArenaManager.blockSet.add(event.getBlock());
-                return;
-            }
 
-            event.setCancelled(true);
-        }
-    }
+	}
+
+	@Override
+	public void onBlockBreak(BlockBreakEvent event)
+	{
+		if(event.getBlock().getTypeId() == 46 || ArenaManager.blockSet.contains(event.getBlock()) )
+			return;
+		if (!ArenaManager.isSetup || !ArenaManager.isProtected)
+			return;
+
+		if (ArenaManager.blockSet.contains(event.getBlock()))
+			return;
+
+		if (MAUtils.inRegion(event.getBlock().getLocation()))
+			event.setCancelled(true);
+	}
+
+	@Override
+	public void onBlockPlace(BlockPlaceEvent event)
+	{
+		if (!ArenaManager.isSetup || !ArenaManager.isProtected)
+			return;
+
+		if (MAUtils.inRegion(event.getBlock().getLocation()))
+		{
+			if (ArenaManager.isRunning && ArenaManager.playerSet.contains(event.getPlayer()))
+			{
+				ArenaManager.blockSet.add(event.getBlock());
+				return;
+			}
+
+			event.setCancelled(true);
+		}
+	}
 }
