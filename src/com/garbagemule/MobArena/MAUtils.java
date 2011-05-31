@@ -459,7 +459,7 @@ public class MAUtils
     
     /* ///////////////////////////////////////////////////////////////////// //
     
-            VERIFICATION METHODS
+            MISC METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
     
@@ -492,5 +492,16 @@ public class MAUtils
         {
             ArenaManager.tellPlayer(p, "MobArena is set up and ready to roll!");
         }
+    }
+    
+    /**
+     * Turns the current set of players into an array, and grabs a random
+     * element out of it.
+     */
+    public static Player getRandomPlayer()
+    {
+        Random random = new Random();
+        Object[] array = ArenaManager.playerSet.toArray();
+        return (Player) array[random.nextInt(array.length)];
     }
 }

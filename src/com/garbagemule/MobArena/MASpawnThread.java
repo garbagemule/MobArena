@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.Location;
+import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
@@ -17,10 +18,9 @@ import org.bukkit.entity.CreatureType;
  * host chooses. It is possible to create default waves that consist of
  * only one type of monster, or ones that have no creepers, for example.
  */
-// TO-DO: Allow custom special wave modulus.
+// TO-DO: Allow custom special wave interval.
 // TO-DO: Allow custom special wave monsters.
 // TO-DO: Allow additional "default" waves.
-// TO-DO: 
 public class MASpawnThread implements Runnable
 {
     private int wave, noOfSpawnPoints, noOfPlayers;
@@ -48,6 +48,7 @@ public class MASpawnThread implements Runnable
     
     public void run()
     {        
+        long start = System.nanoTime();
         // Check if we need to grant more rewards with the recurrent waves.
         for (Integer i : ArenaManager.everyWaveMap.keySet())
         {
@@ -91,6 +92,7 @@ public class MASpawnThread implements Runnable
         }
         
         wave++;
+        System.out.println("Spawns and rewards took " + (System.nanoTime() - start) + " ns");
     }
     
     /**
@@ -124,7 +126,8 @@ public class MASpawnThread implements Runnable
             // Grab a random target.
             ran = random.nextInt(noOfPlayers);
             Creature c = (Creature) e;
-            c.setTarget((Player)playerArray[ran]);
+            c.setTarget(MAUtils.getRandomPlayer());
+            //c.setTarget((Player)playerArray[ran]); // This is faster, but unstable
         }
     }
     
@@ -137,15 +140,15 @@ public class MASpawnThread implements Runnable
         CreatureType mob;
         
         int ran, count;
-        boolean lightning = false;
-        boolean slime     = false;
+        boolean slime = false;
+        boolean wolf  = false;
         
-        switch (random.nextInt(4))
+        // 5 on purpose - Ghasts act weird in Overworld.
+        switch (random.nextInt(5))
         {
             case 0:
                 mob   = CreatureType.CREEPER;
                 count = noOfPlayers * 3;
-                lightning = true;
                 break;
             case 1:
                 mob   = CreatureType.PIG_ZOMBIE;
@@ -153,14 +156,19 @@ public class MASpawnThread implements Runnable
                 break;
             case 2:
                 mob   = CreatureType.SLIME;
-                count = noOfPlayers * 5;
+                count = noOfPlayers * 4;
                 slime = true;
                 break;
             case 3:
                 mob   = CreatureType.MONSTER;
-                count = Math.max(2, noOfPlayers);
+                count = noOfPlayers + 1;
                 break;
             case 4:
+                mob   = CreatureType.WOLF;
+                count = noOfPlayers * 2;
+                wolf  = true;
+                break;
+            case 5:
                 mob   = CreatureType.GHAST;
                 count = Math.max(1, noOfPlayers - 2);
                 break;
@@ -178,6 +186,7 @@ public class MASpawnThread implements Runnable
             ArenaManager.monsterSet.add(e);
             
             if (slime) ((Slime)e).setSize(2);
+            if (wolf)  ((Wolf)e).setAngry(true);
             
             // Slimes can't have targets, apparently.
             if (!(e instanceof Creature))
@@ -186,7 +195,8 @@ public class MASpawnThread implements Runnable
             // Grab a random target.
             ran = random.nextInt(noOfPlayers);
             Creature c = (Creature) e;
-            c.setTarget((Player)playerArray[ran]);
+            c.setTarget(MAUtils.getRandomPlayer());
+            //c.setTarget((Player)playerArray[ran]); // This is faster, but unstable
         }
         
         // Lightning, just for effect ;)

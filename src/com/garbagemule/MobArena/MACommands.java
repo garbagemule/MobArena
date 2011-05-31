@@ -5,6 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.LivingEntity;
 
 public class MACommands implements CommandExecutor
 {
@@ -55,19 +58,19 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
-        if (cmd.equalsIgnoreCase("leave") || cmd.equalsIgnoreCase("l"))
+        if (cmd.equals("leave") || cmd.equals("l"))
         {
             ArenaManager.playerLeave(p);
             return true;
         }
         
-        if (cmd.equalsIgnoreCase("list") || cmd.equalsIgnoreCase("who"))
+        if (cmd.equals("list") || cmd.equals("who"))
         {
             ArenaManager.playerList(p);
             return true;
         }
 
-        if (cmd.equalsIgnoreCase("spectate") || cmd.equalsIgnoreCase("spec"))
+        if (cmd.equals("spectate") || cmd.equals("spec"))
         {
             ArenaManager.playerSpectate(p);
             return true;

@@ -386,7 +386,7 @@ public class ArenaManager
             String r = rewardMap.get(p);
             if (r.equals("")) continue;
             
-            tellPlayer(p, "You're gonna get some shit now, so be happy!");
+            tellPlayer(p, "Here are all of your rewards!");
             MAUtils.giveItems(p, r);
         }
         

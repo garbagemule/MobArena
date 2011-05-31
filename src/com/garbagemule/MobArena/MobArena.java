@@ -38,10 +38,10 @@ public class MobArena extends JavaPlugin
         PlayerListener dropListener     = new MADropListener(this);
         PlayerListener readyListener    = new MAReadyListener(this);
         PlayerListener teleportListener = new MATeleportListener(this);
+        PlayerListener discListener     = new MADisconnectListener(this);
         BlockListener  blockListener    = new MABlockListener(this);
-        EntityListener creeperListener  = new MACreeperListener(this);
         EntityListener damageListener   = new MADamageListener(this);
-        // TO-DO: PlayerListener to check for player logout during battle.
+        EntityListener monsterListener  = new MAMonsterListener(this);
         // TO-DO: PlayerListener to check for kills/deaths.
         
         // Register events.
@@ -49,11 +49,15 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, dropListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT,  readyListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_TELEPORT,  teleportListener, Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_QUIT,      discListener,     Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_KICK,      discListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_BREAK,      blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE,     blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,      blockListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_EXPLODE,   creeperListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE,    damageListener,   Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_EXPLODE,   monsterListener,  Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_COMBUST,   monsterListener,  Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_TARGET,    monsterListener,  Priority.Normal,  this);
         
         System.out.println(pdfFile.getName() + " v" + pdfFile.getVersion() + " initialized." );
     }

@@ -1,5 +1,7 @@
 package com.garbagemule.MobArena;
 
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -26,22 +28,26 @@ public class MABlockListener extends BlockListener
         if (!ArenaManager.isSetup || !ArenaManager.isProtected)
             return;
         
-        if (ArenaManager.blockSet.contains(event.getBlock()))
+        Block b = event.getBlock();
+        
+        if (ArenaManager.blockSet.contains(b))
             return;
         
-        if (MAUtils.inRegion(event.getBlock().getLocation()))
+        if (MAUtils.inRegion(b.getLocation()))
             event.setCancelled(true);
     }
     
     public void onBlockBreak(BlockBreakEvent event)
-    {
+    {        
         if (!ArenaManager.isSetup || !ArenaManager.isProtected)
             return;
         
-        if (ArenaManager.blockSet.contains(event.getBlock()))
+        Block b = event.getBlock();
+        
+        if (ArenaManager.blockSet.contains(b))
             return;
         
-        if (MAUtils.inRegion(event.getBlock().getLocation()))
+        if (MAUtils.inRegion(b.getLocation()))
             event.setCancelled(true);
     }
     
@@ -50,11 +56,13 @@ public class MABlockListener extends BlockListener
         if (!ArenaManager.isSetup || !ArenaManager.isProtected)
             return;
         
-        if (MAUtils.inRegion(event.getBlock().getLocation()))
+        Block b = event.getBlock();
+        
+        if (MAUtils.inRegion(b.getLocation()))
         {
             if (ArenaManager.isRunning && ArenaManager.playerSet.contains(event.getPlayer()))
             {
-                ArenaManager.blockSet.add(event.getBlock());
+                ArenaManager.blockSet.add(b);
                 return;
             }
 
