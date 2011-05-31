@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.Spider;
 
 /**
  * Core class for handling wave spawning.
@@ -125,7 +126,12 @@ public class MASpawnThread implements Runnable
 			// Grab a random target.
 			ran = random.nextInt(noOfPlayers);
 			Creature c = (Creature) e;
+			if(c instanceof Spider)
+			{
+				c.damage(1,(Player) playerArray[ran]);
+			}
 			c.setTarget((Player)playerArray[ran]);
+
 		}
 	}
 
