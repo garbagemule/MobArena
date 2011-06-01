@@ -574,16 +574,16 @@ public class MAUtils
         {
             for (int j = y1; j <= y2; j++)
             {
-                ArenaManager.world.getBlockAt(i,j,z1).setTypeId(5);
-                ArenaManager.world.getBlockAt(i,j,z2).setTypeId(5);
+                ArenaManager.world.getBlockAt(i,j,z1).setTypeId(24);
+                ArenaManager.world.getBlockAt(i,j,z2).setTypeId(24);
             }
         }
         for (int k = z1; k <= z2; k++)
         {
             for (int j = y1; j <= y2; j++)
             {
-                ArenaManager.world.getBlockAt(x1,j,k).setTypeId(5);
-                ArenaManager.world.getBlockAt(x2,j,k).setTypeId(5);
+                ArenaManager.world.getBlockAt(x1,j,k).setTypeId(24);
+                ArenaManager.world.getBlockAt(x2,j,k).setTypeId(24);
             }
         }
         
@@ -603,7 +603,7 @@ public class MAUtils
         for (int i = x1; i <= x2; i++)
         {
             for (int k = z1; k <= z2; k++)
-                ArenaManager.world.getBlockAt(i,y1,k).setTypeId(5);
+                ArenaManager.world.getBlockAt(i,y1,k).setTypeId(24);
         }
         
         // Make a hippie roof.
