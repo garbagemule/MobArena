@@ -50,14 +50,14 @@ public class MASpawnThread implements Runnable
     }
     
     public void run()
-    {        
+    {
         // Check if we need to grant more rewards with the recurrent waves.
         for (Integer i : ArenaManager.everyWaveMap.keySet())
         {
             if (wave % i != 0)
                 continue;
                 
-            for (Player p : playerList)
+            for (Player p : ArenaManager.playerSet)
             {                
                 currentRewards = ArenaManager.rewardMap.get(p);
                 reward = MAUtils.getRandomReward(ArenaManager.everyWaveMap.get(i));
@@ -70,7 +70,7 @@ public class MASpawnThread implements Runnable
         // Same deal, this time with the one-time waves.
         if (ArenaManager.afterWaveMap.containsKey(wave))
         {
-            for (Player p : playerList)
+            for (Player p : ArenaManager.playerSet)
             {
                 currentRewards = ArenaManager.rewardMap.get(p);
                 reward = MAUtils.getRandomReward(ArenaManager.afterWaveMap.get(wave));
