@@ -50,10 +50,7 @@ public class MASpawnThread implements Runnable
     }
     
     public void run()
-    {
-        // Make a new ArrayList with all the players for fast lookup
-        playerList  = new ArrayList<Player>(ArenaManager.playerSet);
-        
+    {        
         // Check if we need to grant more rewards with the recurrent waves.
         for (Integer i : ArenaManager.everyWaveMap.keySet())
         {
@@ -215,9 +212,9 @@ public class MASpawnThread implements Runnable
     public static Player getClosestPlayer(Entity e)
     {
         // Grab the coordinates.
-        double ex = e.getLocation().getX();
-        double ey = e.getLocation().getY();
-        double ez = e.getLocation().getZ();
+        double x = e.getLocation().getX();
+        double y = e.getLocation().getY();
+        double z = e.getLocation().getZ();
         
         // Set up the comparison variable and the result.
         double current = Double.POSITIVE_INFINITY;
@@ -225,12 +222,10 @@ public class MASpawnThread implements Runnable
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        for (int i = 0; i < playerList.size(); i++)
+        for (Player p : ArenaManager.playerSet)
         {
-            Player p = playerList.get(i);
-            double dist = distance(p.getLocation(), ex, ey, ez);
-            
-            if (dist < current || current == -1.0D)
+            double dist = distance(p.getLocation(), x, y, z);
+            if (dist < current)
             {
                 current = dist;
                 result = p;
