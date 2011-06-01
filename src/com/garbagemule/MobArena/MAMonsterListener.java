@@ -76,5 +76,8 @@ public class MAMonsterListener extends EntityListener
         
         if (event.getReason() == TargetReason.FORGOT_TARGET)
             event.setCancelled(true);
+            
+        if (event.getReason() == TargetReason.TARGET_DIED)
+            event.setTarget(MASpawnThread.getClosestPlayer(event.getEntity()));
     }
 }

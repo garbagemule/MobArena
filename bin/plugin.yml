@@ -1,6 +1,6 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.82
+version: 0.84
 commands:
   marena:
     description: Base command for MobArena

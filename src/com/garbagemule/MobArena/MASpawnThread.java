@@ -1,12 +1,14 @@
 package com.garbagemule.MobArena;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.inventory.ItemStack;
@@ -29,14 +31,13 @@ public class MASpawnThread implements Runnable
     private int dZombies, dSkeletons, dSpiders, dCreepers;
     private Random random;
     private Player target;
-    private Object[] playerArray;
     private String reward, currentRewards;
+    // TO-DO: Move this into MAUtils
+    private static List<Player> playerList;
     
     public MASpawnThread()
     {
-        // Turn the set into an array for lookup with random numbers.
-        playerArray = ArenaManager.playerSet.toArray();
-        noOfPlayers = playerArray.length;
+        noOfPlayers = ArenaManager.playerSet.size();
         noOfSpawnPoints = ArenaManager.spawnpoints.size();
         wave = 1;
         random = new Random();
@@ -50,13 +51,16 @@ public class MASpawnThread implements Runnable
     
     public void run()
     {
+        // Make a new ArrayList with all the players for fast lookup
+        playerList  = new ArrayList<Player>(ArenaManager.playerSet);
+        
         // Check if we need to grant more rewards with the recurrent waves.
         for (Integer i : ArenaManager.everyWaveMap.keySet())
         {
             if (wave % i != 0)
                 continue;
                 
-            for (Player p : ArenaManager.playerSet)
+            for (Player p : playerList)
             {                
                 currentRewards = ArenaManager.rewardMap.get(p);
                 reward = MAUtils.getRandomReward(ArenaManager.everyWaveMap.get(i));
@@ -69,7 +73,7 @@ public class MASpawnThread implements Runnable
         // Same deal, this time with the one-time waves.
         if (ArenaManager.afterWaveMap.containsKey(wave))
         {
-            for (Player p : ArenaManager.playerSet)
+            for (Player p : playerList)
             {
                 currentRewards = ArenaManager.rewardMap.get(p);
                 reward = MAUtils.getRandomReward(ArenaManager.afterWaveMap.get(wave));
@@ -124,11 +128,8 @@ public class MASpawnThread implements Runnable
             ArenaManager.monsterSet.add(e);
             
             // Grab a random target.
-            // TO-DO: Find a different solution to this.
-            //ran = random.nextInt(noOfPlayers);
-            //Creature c = (Creature) e;
-            //c.setTarget(MAUtils.getRandomPlayer());
-            //c.setTarget((Player)playerArray[ran]); // This is faster, but unstable
+            Creature c = (Creature) e;
+            c.setTarget(getClosestPlayer(e));
         }
     }
     
@@ -179,6 +180,7 @@ public class MASpawnThread implements Runnable
                 break;
         }
         
+        // Spawn the hippie monsters.
         for (int i = 0; i < count; i++)
         {
             loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
@@ -190,20 +192,63 @@ public class MASpawnThread implements Runnable
             if (wolf)  ((Wolf)e).setAngry(true);
             
             // Slimes can't have targets, apparently.
-            //if (!(e instanceof Creature))
-            //    continue;
+            if (!(e instanceof Creature))
+                continue;
             
             // Grab a random target.
-            //ran = random.nextInt(noOfPlayers);
-            //Creature c = (Creature) e;
-            //c.setTarget(MAUtils.getRandomPlayer());
-            //c.setTarget((Player)playerArray[ran]); // This is faster, but unstable
+            Creature c = (Creature) e;
+            c.setTarget(getClosestPlayer(e));
         }
         
         // Lightning, just for effect ;)
-        for (Location l : ArenaManager.spawnpoints)
+        for (Location spawn : ArenaManager.spawnpoints)
         {
-            ArenaManager.world.strikeLightningEffect(l);
+            ArenaManager.world.strikeLightningEffect(spawn);
         }
+    }
+    
+    /**
+     * Gets the player closest to the input entity. ArrayList implementation
+     * means a complexity of O(n).
+     */
+    // TO-DO: Move this into MAUtils
+    public static Player getClosestPlayer(Entity e)
+    {
+        // Grab the coordinates.
+        double ex = e.getLocation().getX();
+        double ey = e.getLocation().getY();
+        double ez = e.getLocation().getZ();
+        
+        // Set up the comparison variable and the result.
+        double current = Double.POSITIVE_INFINITY;
+        Player result = null;
+        
+        /* Iterate through the ArrayList, and update current and result every
+         * time a squared distance smaller than current is found. */
+        for (int i = 0; i < playerList.size(); i++)
+        {
+            Player p = playerList.get(i);
+            double dist = distance(p.getLocation(), ex, ey, ez);
+            
+            if (dist < current || current == -1.0D)
+            {
+                current = dist;
+                result = p;
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Calculates the squared distance between locations.
+     */
+    // TO-DO: Move this into MAUtils
+    private static double distance(Location loc, double d1, double d2, double d3)
+    {
+        double d4 = loc.getX() - d1;
+        double d5 = loc.getY() - d2;
+        double d6 = loc.getZ() - d3;
+        
+        return d4*d4 + d5*d5 + d6*d6;
     }
 }
