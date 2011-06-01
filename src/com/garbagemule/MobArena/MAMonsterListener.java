@@ -1,8 +1,8 @@
 package com.garbagemule.MobArena;
 
 import java.util.HashMap;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Spider;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -37,7 +37,10 @@ public class MAMonsterListener extends EntityListener
             final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
             for (Block b : event.blockList())
             {
-                blockMap.put(b, b.getTypeId());
+                if (b.getType() == Material.CAKE_BLOCK)
+                    blockMap.put(b, 0);
+                else
+                    blockMap.put(b, b.getTypeId());
             }
             
             // Wait a couple of ticks, then rebuild the blocks.
@@ -51,7 +54,7 @@ public class MAMonsterListener extends EntityListener
                             b.getLocation().getBlock().setTypeId(blockMap.get(b));
                         }
                     }
-                }, 3);
+                }, 5);
         }
     }
     

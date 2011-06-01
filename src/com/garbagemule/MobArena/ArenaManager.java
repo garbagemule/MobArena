@@ -225,6 +225,9 @@ public class ArenaManager
         
         if (playerSet.contains(p))
             playerSet.remove(p);
+        
+        if (readySet.contains(p))
+            readySet.remove(p);
             
         if (classMap.keySet().contains(p))
             classMap.remove(p);

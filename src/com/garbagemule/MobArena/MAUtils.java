@@ -5,11 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
+import org.bukkit.block.Sign;
+import org.bukkit.block.BlockFace;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
@@ -20,6 +23,13 @@ import org.bukkit.util.config.Configuration;
 
 public class MAUtils
 {
+    public static final int[] SWORDS_ID = {267,268,272,276,283};
+    public static final Material[] SWORDS_TYPE = {Material.WOOD_SWORD,
+                                                  Material.STONE_SWORD,
+                                                  Material.GOLD_SWORD,
+                                                  Material.IRON_SWORD,
+                                                  Material.DIAMOND_SWORD};
+    
     /* ///////////////////////////////////////////////////////////////////// //
     
             INVENTORY AND REWARD METHODS
@@ -90,11 +100,15 @@ public class MAUtils
                 {
                     id = Integer.parseInt(item[0]);
                     stack = new ItemStack(id, amount);
+                    if (Arrays.asList(SWORDS_ID).contains(id))
+                        stack.setDurability((short)-3276);
                 }
                 else
                 {
                     stack = makeItemStack(item[0], amount);
                     if (stack == null) continue;
+                    if (Arrays.asList(SWORDS_TYPE).contains(stack.getType()))
+                        stack.setDurability((short)-3276);
                 }
                 
                 // Put the item in the first empty inventory slot.
@@ -503,5 +517,186 @@ public class MAUtils
         Random random = new Random();
         Object[] array = ArenaManager.playerSet.toArray();
         return (Player) array[random.nextInt(array.length)];
+    }
+    
+    /**
+     * Stand back, I'm going to try science!
+     */
+    public static void DoooooItHippieMonster(Location loc, int radius)
+    {
+        // Get the hippie bounds.
+        int x1 = (int)loc.getX() - radius;
+        int x2 = (int)loc.getX() + radius;
+        int y1 = (int)loc.getY() - 8;
+        int y2 = (int)loc.getY() - 1;
+        int z1 = (int)loc.getZ() - radius;
+        int z2 = (int)loc.getZ() + radius;
+        
+        int lx1 = x1;
+        int lx2 = x1 + ArenaManager.classes.size() + 3;
+        int ly1 = y1-5;
+        int ly2 = y1-1;
+        int lz1 = z1;
+        int lz2 = z1 + 6;
+        
+        // Save the precious patch
+        HashMap<EntityPosition,Integer> preciousPatch = new HashMap<EntityPosition,Integer>();
+        Location lo;
+        int id;
+        for (int i = x1; i <= x2; i++)
+        {
+            for (int j = ly1; j <= y2; j++)
+            {
+                for (int k = z1; k <= z2; k++)
+                {
+                    lo = ArenaManager.world.getBlockAt(i,j,k).getLocation();
+                    id = ArenaManager.world.getBlockAt(i,j,k).getTypeId();
+                    preciousPatch.put(new EntityPosition(lo),id);
+                }
+            }
+        }
+        try
+        {
+            FileOutputStream fos = new FileOutputStream("plugins/MobArena/precious.tmp");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(preciousPatch);
+            oos.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Couldn't create backup file. Aborting...");
+            e.printStackTrace();
+            return;
+        }
+        
+        // Build some monster walls.
+        for (int i = x1; i <= x2; i++)
+        {
+            for (int j = y1; j <= y2; j++)
+            {
+                ArenaManager.world.getBlockAt(i,j,z1).setTypeId(5);
+                ArenaManager.world.getBlockAt(i,j,z2).setTypeId(5);
+            }
+        }
+        for (int k = z1; k <= z2; k++)
+        {
+            for (int j = y1; j <= y2; j++)
+            {
+                ArenaManager.world.getBlockAt(x1,j,k).setTypeId(5);
+                ArenaManager.world.getBlockAt(x2,j,k).setTypeId(5);
+            }
+        }
+        
+        // Add some hippie light.
+        for (int i = x1; i <= x2; i++)
+        {
+            ArenaManager.world.getBlockAt(i,y1+2,z1).setTypeId(89);
+            ArenaManager.world.getBlockAt(i,y1+2,z2).setTypeId(89);
+        }
+        for (int k = z1; k <= z2; k++)
+        {
+            ArenaManager.world.getBlockAt(x1,y1+2,k).setTypeId(89);
+            ArenaManager.world.getBlockAt(x2,y1+2,k).setTypeId(89);
+        }
+        
+        // Build a monster floor.
+        for (int i = x1; i <= x2; i++)
+        {
+            for (int k = z1; k <= z2; k++)
+                ArenaManager.world.getBlockAt(i,y1,k).setTypeId(5);
+        }
+        
+        // Make a hippie roof.
+        for (int i = x1; i <= x2; i++)
+        {
+            for (int k = z1; k <= z2; k++)
+                ArenaManager.world.getBlockAt(i,y2,k).setTypeId(20);
+        }
+        
+        // Monster bulldoze
+        for (int i = x1+1; i < x2; i++)
+            for (int j = y1+1; j < y2; j++)
+                for (int k = z1+1; k < z2; k++)
+                    ArenaManager.world.getBlockAt(i,j,k).setTypeId(0);
+        
+        // Build a hippie lobby
+        for (int i = lx1; i <= lx2; i++) // Walls
+        {
+            for (int j = ly1; j <= ly2; j++)
+            {
+                ArenaManager.world.getBlockAt(i,j,lz1).setTypeId(24);
+                ArenaManager.world.getBlockAt(i,j,lz2).setTypeId(24);
+            }
+        }
+        for (int k = lz1; k <= lz2; k++) // Walls
+        {
+            for (int j = ly1; j <= ly2; j++)
+            {
+                ArenaManager.world.getBlockAt(lx1,j,k).setTypeId(24);
+                ArenaManager.world.getBlockAt(lx2,j,k).setTypeId(24);
+            }
+        }
+        for (int k = lz1; k <= lz2; k++) // Lights
+        {
+            ArenaManager.world.getBlockAt(lx1,ly1+2,k).setTypeId(89);
+            ArenaManager.world.getBlockAt(lx2,ly1+2,k).setTypeId(89);
+            ArenaManager.world.getBlockAt(lx1,ly1+3,k).setTypeId(89);
+            ArenaManager.world.getBlockAt(lx2,ly1+3,k).setTypeId(89);
+        }
+        for (int i = lx1; i <= lx2; i++) // Floor
+        {
+            for (int k = lz1; k <= lz2; k++)
+                ArenaManager.world.getBlockAt(i,ly1,k).setTypeId(24);
+        }
+        for (int i = x1+1; i < lx2; i++) // Bulldoze
+            for (int j = ly1+1; j <= ly2; j++)
+                for (int k = lz1+1; k < lz2; k++)
+                    ArenaManager.world.getBlockAt(i,j,k).setTypeId(0);
+        
+        // Place the hippie signs
+        java.util.Iterator iterator = ArenaManager.classes.iterator();
+        for (int i = lx1+2; i <= lx2-2; i++) // Signs
+        {
+            ArenaManager.world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
+            Sign sign = (Sign) ArenaManager.world.getBlockAt(i,ly1+1,lz2-1).getState();
+            sign.setLine(0, (String)iterator.next());
+        }
+        ArenaManager.world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);
+        
+        // Set up the monster points.
+        setCoords("arena", new Location(ArenaManager.world, loc.getX(), y1+1, loc.getZ()));
+        setCoords("lobby", new Location(ArenaManager.world, x1+2, y1-3, z1+2));
+        setCoords("spectator", new Location(ArenaManager.world, loc.getX(), y2+1, loc.getZ()));
+        setCoords("p1", new Location(ArenaManager.world, x1, y1-4, z1));
+        setCoords("p2", new Location(ArenaManager.world, x2, y2, z2));
+        setCoords("spawnpoints.s1", new Location(ArenaManager.world, x1+3, y1+2, z1+3));
+        setCoords("spawnpoints.s2", new Location(ArenaManager.world, x1+3, y1+2, z2-3));
+        setCoords("spawnpoints.s3", new Location(ArenaManager.world, x2-3, y1+2, z1+3));
+        setCoords("spawnpoints.s4", new Location(ArenaManager.world, x2-3, y1+2, z2-3));
+    }
+    
+    public static void UnDoooooItHippieMonster()
+    {
+        HashMap<EntityPosition,Integer> preciousPatch;
+        try
+        {
+            FileInputStream fis = new FileInputStream("plugins/MobArena/precious.tmp");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            preciousPatch = (HashMap) ois.readObject();
+            ois.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Couldn't find backup file...");
+            e.printStackTrace();
+            return;
+        }
+        
+        for (EntityPosition ep : preciousPatch.keySet())
+        {
+            ArenaManager.world.getBlockAt(ep.getLocation(ArenaManager.world)).setTypeId(preciousPatch.get(ep));
+        }
+        
+        delCoords("coords");
     }
 }

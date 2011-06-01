@@ -39,6 +39,7 @@ public class MADamageListener extends EntityListener
             return;
         
         event.setCancelled(true);
+        p.setFireTicks(0);
         ArenaManager.playerDeath(p);
     }
 }

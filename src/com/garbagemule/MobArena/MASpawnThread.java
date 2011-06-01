@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.CreatureType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  * Core class for handling wave spawning.
@@ -47,8 +49,7 @@ public class MASpawnThread implements Runnable
     }
     
     public void run()
-    {        
-        long start = System.nanoTime();
+    {
         // Check if we need to grant more rewards with the recurrent waves.
         for (Integer i : ArenaManager.everyWaveMap.keySet())
         {
@@ -56,7 +57,7 @@ public class MASpawnThread implements Runnable
                 continue;
                 
             for (Player p : ArenaManager.playerSet)
-            {
+            {                
                 currentRewards = ArenaManager.rewardMap.get(p);
                 reward = MAUtils.getRandomReward(ArenaManager.everyWaveMap.get(i));
                 currentRewards += reward + ",";
@@ -92,7 +93,6 @@ public class MASpawnThread implements Runnable
         }
         
         wave++;
-        System.out.println("Spawns and rewards took " + (System.nanoTime() - start) + " ns");
     }
     
     /**
@@ -124,9 +124,10 @@ public class MASpawnThread implements Runnable
             ArenaManager.monsterSet.add(e);
             
             // Grab a random target.
-            ran = random.nextInt(noOfPlayers);
-            Creature c = (Creature) e;
-            c.setTarget(MAUtils.getRandomPlayer());
+            // TO-DO: Find a different solution to this.
+            //ran = random.nextInt(noOfPlayers);
+            //Creature c = (Creature) e;
+            //c.setTarget(MAUtils.getRandomPlayer());
             //c.setTarget((Player)playerArray[ran]); // This is faster, but unstable
         }
     }
@@ -189,13 +190,13 @@ public class MASpawnThread implements Runnable
             if (wolf)  ((Wolf)e).setAngry(true);
             
             // Slimes can't have targets, apparently.
-            if (!(e instanceof Creature))
-                continue;
+            //if (!(e instanceof Creature))
+            //    continue;
             
             // Grab a random target.
-            ran = random.nextInt(noOfPlayers);
-            Creature c = (Creature) e;
-            c.setTarget(MAUtils.getRandomPlayer());
+            //ran = random.nextInt(noOfPlayers);
+            //Creature c = (Creature) e;
+            //c.setTarget(MAUtils.getRandomPlayer());
             //c.setTarget((Player)playerArray[ran]); // This is faster, but unstable
         }
         
