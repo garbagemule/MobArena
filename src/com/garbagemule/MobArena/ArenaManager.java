@@ -221,7 +221,8 @@ public class ArenaManager
             return;
         }
         
-        MAUtils.clearInventory(p);
+        if (ArenaManager.isRunning)
+            MAUtils.clearInventory(p);
         
         if (playerSet.contains(p))
             playerSet.remove(p);

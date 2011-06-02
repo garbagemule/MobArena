@@ -208,7 +208,7 @@ public class MAUtils
         
         if (c.getKeys("classes") == null)
         {
-            c.setProperty("classes.Archer.items", "wood_sword, bow, arrow:64, arrow:64, grilled_pork");
+            c.setProperty("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
             c.setProperty("classes.Archer.armor", "298,299,300,301");
             c.setProperty("classes.Knight.items", "diamond_sword, grilled_pork");
             c.setProperty("classes.Knight.armor", "306,307,308,309");
@@ -694,6 +694,10 @@ public class MAUtils
         setCoords("spawnpoints.s4", new Location(ArenaManager.world, x2-3, y1+2, z2-3));
     }
     
+    /**
+     * This fixes everything!
+     */
+    @SuppressWarnings("unchecked")
     public static void UnDoooooItHippieMonster()
     {
         HashMap<EntityPosition,Integer> preciousPatch;
@@ -701,13 +705,13 @@ public class MAUtils
         {
             FileInputStream fis = new FileInputStream("plugins/MobArena/precious.tmp");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            preciousPatch = (HashMap) ois.readObject();
+            Object o = ois.readObject();
+            preciousPatch = (HashMap<EntityPosition,Integer>) ois.readObject();
             ois.close();
         }
         catch (Exception e)
         {
             System.out.println("Couldn't find backup file...");
-            e.printStackTrace();
             return;
         }
         
