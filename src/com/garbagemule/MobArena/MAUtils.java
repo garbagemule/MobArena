@@ -377,7 +377,7 @@ public class MAUtils
     
     /**
      * Removes coordinate information from the config-file.
-     */
+     */    
     public static void delCoords(String name)
     {
         Configuration c = ArenaManager.config;
@@ -471,6 +471,21 @@ public class MAUtils
         setCoords("p1", p1);
         setCoords("p2", p2);
         fixCoords();
+    }
+    
+    public static String spawnList()
+    {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        String result = "";
+        if (c.getKeys("coords.spawnpoints") == null)
+            return result;
+        
+        for (String s : c.getKeys("coords.spawnpoints"))
+            result += s + " ";
+        
+        return result;
     }
     
     

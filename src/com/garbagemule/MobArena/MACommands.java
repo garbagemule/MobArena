@@ -146,10 +146,11 @@ public class MACommands implements CommandExecutor
             if (MAUtils.getCoords("spawnpoints." + arg) == null)
             {
                 ArenaManager.tellPlayer(p, "Couldn't find spawnpoint \"" + arg + "\".");
+                ArenaManager.tellPlayer(p, "Spawnpoints: " + MAUtils.spawnList());
                 return true;
             }
             
-            MAUtils.delCoords("spawnpoints." + arg);
+            MAUtils.delCoords("coords.spawnpoints." + arg);
             
             ArenaManager.tellPlayer(p, "Spawn point with name \"" + arg + "\" removed.");
             MAUtils.notifyIfSetup(p);
@@ -194,6 +195,17 @@ public class MACommands implements CommandExecutor
             MAUtils.expandRegion(arg, i);
             
             ArenaManager.tellPlayer(p, "Region expanded " + arg + " by " + i + " blocks.");
+            return true;
+        }
+        
+        // ma reset coords
+        if (cmd.equals("reset"))
+        {
+            if (!arg.equals("coords"))
+                return false;
+            
+            MAUtils.delCoords("coords");
+            ArenaManager.tellPlayer(p, "All arena coords have been reset.");
             return true;
         }
         
