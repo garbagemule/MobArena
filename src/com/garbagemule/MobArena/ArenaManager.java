@@ -390,7 +390,7 @@ public class ArenaManager
             if (r.equals("")) continue;
             
             tellPlayer(p, "Here are all of your rewards!");
-            MAUtils.giveItems(p, r);
+            MAUtils.giveItems(true, p, r);
         }
         
         rewardMap.clear();

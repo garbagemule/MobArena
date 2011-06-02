@@ -66,11 +66,11 @@ public class MAUtils
 	}
     
     /* Gives all the items in the input string(s) to the player */
-    public static void giveItems(Player p, String... strings)
+    public static void giveItems(boolean reward, Player p, String... strings)
     {
         // Variables used.
-        ItemStack stack;
-        int index, id, amount;
+        ItemStack stack, current;
+        int id, amount;
         
         PlayerInventory inv = clearInventory(p);
         
@@ -100,22 +100,26 @@ public class MAUtils
                 {
                     id = Integer.parseInt(item[0]);
                     stack = new ItemStack(id, amount);
-                    if (Arrays.asList(SWORDS_ID).contains(id))
+                    if (!reward && Arrays.asList(SWORDS_ID).contains(id))
                         stack.setDurability((short)-3276);
                 }
                 else
                 {
                     stack = makeItemStack(item[0], amount);
                     if (stack == null) continue;
-                    if (Arrays.asList(SWORDS_TYPE).contains(stack.getType()))
+                    if (!reward && Arrays.asList(SWORDS_TYPE).contains(stack.getType()))
                         stack.setDurability((short)-3276);
                 }
                 
-                // Put the item in the first empty inventory slot.
-                index = inv.firstEmpty();
-                inv.setItem(index,stack);
+                inv.addItem(stack);
             }
         }
+    }
+    
+    /* Used for giving items "normally". */
+    public static void giveItems(Player p, String... strings)
+    {
+        giveItems(false, p, strings);
     }
     
     /* Helper method for grabbing a random reward */
@@ -668,7 +672,7 @@ public class MAUtils
         setCoords("lobby", new Location(ArenaManager.world, x1+2, y1-3, z1+2));
         setCoords("spectator", new Location(ArenaManager.world, loc.getX(), y2+1, loc.getZ()));
         setCoords("p1", new Location(ArenaManager.world, x1, y1-4, z1));
-        setCoords("p2", new Location(ArenaManager.world, x2, y2, z2));
+        setCoords("p2", new Location(ArenaManager.world, x2, y2+1, z2));
         setCoords("spawnpoints.s1", new Location(ArenaManager.world, x1+3, y1+2, z1+3));
         setCoords("spawnpoints.s2", new Location(ArenaManager.world, x1+3, y1+2, z2-3));
         setCoords("spawnpoints.s3", new Location(ArenaManager.world, x2-3, y1+2, z1+3));

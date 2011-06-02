@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import java.util.Arrays;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -18,7 +19,15 @@ public class MACommands implements CommandExecutor
      * valid commands (from plugin.yml).
      */
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)
-    {        
+    {
+        // Check if the server is also running Mean Admins.
+        Plugin ma = ArenaManager.server.getPluginManager().getPlugin("Mean Admins");
+        if (ma != null && !Arrays.asList(ArenaManager.plugin.COMMANDS).contains(args[0].toLowerCase()))
+        {
+            ma.onCommand(sender, command, commandLabel, args);
+            return true;
+        }
+            
         // Only accept commands from players.
         if ((sender == null) || !(sender instanceof Player))
         {
@@ -206,25 +215,10 @@ public class MACommands implements CommandExecutor
         {
             if (args.length != 4)
                 return false;
-            /*
-            if (!args[4].matches("[0-9]+"))
-                return false;
             
-            int radius = Integer.parseInt(args[4]);
-            if (radius < 5)
-            {
-                ArenaManager.tellPlayer(p, "You don't want an arena that small...");
-                return true;
-            }
-            else if (radius > 10)
-            {
-                ArenaManager.tellPlayer(p, "If you want a bigger arena, build it yourself >:O");
-                return true;
-            }
-            */
             if (args[1].equals("it") && args[2].equals("hippie") && args[3].equals("monster"))
             {
-                MAUtils.DoooooItHippieMonster(p.getLocation(), 10);
+                MAUtils.DoooooItHippieMonster(p.getLocation(), 13);
                 ArenaManager.tellPlayer(p, "Auto-generated a working MobArena!");
                 return true;
             }

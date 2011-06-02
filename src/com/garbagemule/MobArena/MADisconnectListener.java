@@ -27,7 +27,10 @@ public class MADisconnectListener extends PlayerListener
         Player p = event.getPlayer();
         
         if (ArenaManager.playerSet.contains(p))
+        {
+            MAUtils.clearInventory(p);
             ArenaManager.playerLeave(p);
+        }
     }
     
     public void onPlayerKick(PlayerKickEvent event)
@@ -35,6 +38,9 @@ public class MADisconnectListener extends PlayerListener
         Player p = event.getPlayer();
         
         if (ArenaManager.playerSet.contains(p))
+        {
+            MAUtils.clearInventory(p);
             ArenaManager.playerLeave(p);
+        }
     }
 }

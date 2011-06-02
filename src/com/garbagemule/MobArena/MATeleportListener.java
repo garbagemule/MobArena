@@ -35,6 +35,8 @@ public class MATeleportListener extends PlayerListener
             
             ArenaManager.tellPlayer(p, "Can't warp in arena! To leave, type /marena leave");
             event.setCancelled(true);
+            
+            return;
         }
     }
 }

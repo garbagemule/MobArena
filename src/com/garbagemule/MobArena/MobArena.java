@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.BlockListener;
@@ -16,6 +17,12 @@ import org.bukkit.plugin.PluginManager;
  */
 public class MobArena extends JavaPlugin
 {
+    /* Array of commands used to determine if a command belongs to MobArena
+     * or Mean Admins. */
+    public final String[] COMMANDS = {"join", "j", "leave", "l", "list", "who", "spectate", "spec",
+                                      "setwarp", "addspawn", "delspawn", "setregion", "expandregion",
+                                      "protect", "undo", "dooooo"};
+    
     public MobArena()
     {
     }
@@ -31,6 +38,7 @@ public class MobArena extends JavaPlugin
         // Bind the /ma and /marena commands to MACommands.
     	getCommand("ma").setExecutor(new MACommands());
     	getCommand("marena").setExecutor(new MACommands());
+    	getCommand("mobarena").setExecutor(new MACommands());
         
         // Create event listeners.
         PluginManager pm = getServer().getPluginManager();
@@ -64,6 +72,11 @@ public class MobArena extends JavaPlugin
     
     public void onDisable()
     {
+        for (Player p : ArenaManager.playerSet)
+        {
+            ArenaManager.playerLeave(p);
+        }
+        
         System.out.println("WAIT! WHAT ARE YOU DOING?!");
     }
 }

@@ -30,7 +30,6 @@ public class MASpawnThread implements Runnable
     private int wave, noOfSpawnPoints, noOfPlayers;
     private int dZombies, dSkeletons, dSpiders, dCreepers;
     private Random random;
-    private Player target;
     private String reward, currentRewards;
     
     public MASpawnThread()

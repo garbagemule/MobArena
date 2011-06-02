@@ -1,7 +1,12 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.84
+version: 0.87
 commands:
+  mobarena:
+    description: Base command for MobArena
+    usage: |
+           /mobarena join - Join the arena.
+           /mobarena leave - Leave the arena.
   marena:
     description: Base command for MobArena
     usage: |
