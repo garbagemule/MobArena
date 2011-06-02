@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
@@ -17,7 +18,7 @@ public class MACommands implements CommandExecutor
      * valid commands (from plugin.yml).
      */
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)
-    {
+    {        
         // Only accept commands from players.
         if ((sender == null) || !(sender instanceof Player))
         {

@@ -32,8 +32,6 @@ public class MASpawnThread implements Runnable
     private Random random;
     private Player target;
     private String reward, currentRewards;
-    // TO-DO: Move this into MAUtils
-    private static List<Player> playerList;
     
     public MASpawnThread()
     {
