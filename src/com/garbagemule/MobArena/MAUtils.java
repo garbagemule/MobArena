@@ -157,6 +157,60 @@ public class MAUtils
     // ///////////////////////////////////////////////////////////////////// */
     
     /**
+     * Replaces all tabs with 4 spaces in config.yml
+     
+    public static void fixConfigFile()
+    {
+        new File("plugins/MobArena").mkdir();
+        File configFile = new File("plugins/MobArena/config.yml");
+        
+        try
+        {
+            if(!configFile.exists())
+            {
+                configFile.createNewFile();
+            }
+            else
+            {
+                // Create an inputstream from the file
+                FileInputStream fis = new FileInputStream(configFile);
+                
+                // Read the file into a byte array, and make a String out of it.
+                byte[] bytes = new byte[(int)configFile.length()];
+                fis.read(bytes);
+                String input = new String(bytes);
+                
+                // Close the stream.
+                fis.close();
+                
+                // Replace all tabs with 4 spaces.
+                String output = "";
+                for (char c : input.toCharArray())
+                {
+                    if (c == '\t')
+                        output += "    ";
+                    else
+                        output += c;
+                }
+                
+                // Create an outputstream from the file.
+                FileOutputStream fos = new FileOutputStream(configFile);
+                
+                // Write all the bytes to it.
+                for (byte b : output.getBytes())
+                    fos.write(b);
+                
+                // Close the stream.
+                fos.close();
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println("[MobArena] ERROR: Config file could not be created.");
+        }
+    }
+    */
+    /**
      * Creates a Configuration object from the config.yml file.
      */
     public static Configuration getConfig()
@@ -164,18 +218,18 @@ public class MAUtils
         new File("plugins/MobArena").mkdir();
         File configFile = new File("plugins/MobArena/config.yml");
         
-		if(!configFile.exists())
+        try
         {
-		    try
+            if(!configFile.exists())
             {
                 configFile.createNewFile();
             }
-            catch(Exception e)
-            {
-                System.out.println("[MobArena] ERROR: Config file could not be created.");
-                return null;
-            }
-		}
+        }
+        catch(Exception e)
+        {
+            System.out.println("[MobArena] ERROR: Config file could not be created.");
+            return null;
+        }
         
         return new Configuration(configFile);
     }
