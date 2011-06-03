@@ -316,13 +316,27 @@ public class MAUtils
         int wave;
         String rewards;
         
-        /* Check if the keys exist in the config-file, if not,
-         * simply return the empty map. */
+        /* Check if the keys exist in the config-file, if not, set some. */
+        if (c.getKeys("rewards.waves." + type) == null)
+        {
+            if (type.equals("every"))
+            {
+                c.setProperty("rewards.waves.every.3", "feather, bone, stick");
+                c.setProperty("rewards.waves.every.5", "dirt:4, gravel:4, stone:4");
+                c.setProperty("rewards.waves.every.10", "iron_ingot:10, gold_ingot:8");
+            }
+            else if (type.equals("after"))
+            {
+                c.setProperty("rewards.waves.after.7", "minecart, storage_minecart, powered_minecart");
+                c.setProperty("rewards.waves.after.13", "iron_sword, iron_pickaxe, iron_spade");
+                c.setProperty("rewards.waves.after.16", "diamon_sword");
+            }
+            
+            c.save();
+        }
         List<String> waves = c.getKeys("rewards.waves." + type);
-        if (waves == null)
-            return result;
         
-        // Else, put all the rewards in the map.
+        // Put all the rewards in the map.
         for (String n : waves)
         {
             if (!n.matches("[0-9]+"))
