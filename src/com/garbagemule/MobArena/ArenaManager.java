@@ -44,7 +44,7 @@ public class ArenaManager
     
     // Spawn locations list and monster distribution fields.
     protected static List<Location> spawnpoints = new ArrayList<Location>();
-    protected static int dZombies, dSkeletons, dSpiders, dCreepers;
+    protected static int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
     
     // Set and Maps for storing players, their locations, items, armor, etc.
     protected static Set<Player> playerSet            = new HashSet<Player>();
@@ -102,6 +102,7 @@ public class ArenaManager
             dSkeletons    = MAUtils.getDistribution("skeletons");
             dSpiders      = MAUtils.getDistribution("spiders");
             dCreepers     = MAUtils.getDistribution("creepers");
+            dWolves       = MAUtils.getDistribution("wolves");
         }
         
         // Convenience variables.

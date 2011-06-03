@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 
 /**
  * This listener acts as a type of death-listener.
@@ -40,6 +41,26 @@ public class MADamageListener extends EntityListener
         
         event.setCancelled(true);
         p.setFireTicks(0);
+        ArenaManager.playerDeath(p);
+    }
+    
+    /**
+     * Clears all player drops on death.
+     */
+    public void onEntityDeath(EntityDeathEvent event)
+    {
+        if (!ArenaManager.isRunning)
+            return;
+        
+        if (!(event.getEntity() instanceof Player))
+            return;
+        
+        Player p = (Player) event.getEntity();
+        
+        if (!ArenaManager.playerSet.contains(p))
+            return;
+        
+        event.getDrops().clear();
         ArenaManager.playerDeath(p);
     }
 }

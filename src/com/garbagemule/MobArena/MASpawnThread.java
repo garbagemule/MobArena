@@ -28,7 +28,7 @@ import org.bukkit.inventory.PlayerInventory;
 public class MASpawnThread implements Runnable
 {
     private int wave, noOfSpawnPoints, noOfPlayers;
-    private int dZombies, dSkeletons, dSpiders, dCreepers;
+    private int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
     private Random random;
     private String reward, currentRewards;
     
@@ -44,6 +44,7 @@ public class MASpawnThread implements Runnable
         dSkeletons = dZombies   + ArenaManager.dSkeletons;
         dSpiders   = dSkeletons + ArenaManager.dSpiders;
         dCreepers  = dSpiders   + ArenaManager.dCreepers;
+        dWolves    = dCreepers  + ArenaManager.dWolves;
     }
     
     public void run()
@@ -104,7 +105,7 @@ public class MASpawnThread implements Runnable
         for (int i = 0; i < wave + noOfPlayers; i++)
         {
             loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
-            ran = random.nextInt(dCreepers);
+            ran = random.nextInt(dWolves);
             CreatureType mob;
             
             /* Because of the nature of the if-elseif-else statement,
@@ -116,10 +117,14 @@ public class MASpawnThread implements Runnable
             else if (ran < dSkeletons) mob = CreatureType.SKELETON;
             else if (ran < dSpiders)   mob = CreatureType.SPIDER;
             else if (ran < dCreepers)  mob = CreatureType.CREEPER;
+            else if (ran < dWolves)    mob = CreatureType.WOLF;
             else continue;
             
             LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
             ArenaManager.monsterSet.add(e);
+            
+            //if (mob == CreatureType.WOLF)
+            //    ((Wolf)e).setAngry(true);
             
             // Grab a random target.
             Creature c = (Creature) e;
@@ -161,7 +166,7 @@ public class MASpawnThread implements Runnable
                 break;
             case 4:
                 mob   = CreatureType.WOLF;
-                count = noOfPlayers * 2;
+                count = noOfPlayers * 3;
                 wolf  = true;
                 break;
             case 5:

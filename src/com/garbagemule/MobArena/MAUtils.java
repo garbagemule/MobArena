@@ -210,6 +210,7 @@ public class MAUtils
         }
     }
     */
+    
     /**
      * Creates a Configuration object from the config.yml file.
      */
@@ -243,11 +244,10 @@ public class MAUtils
         Configuration c = ArenaManager.config;
         c.load();
         
-        String world = c.getString("world");
+        String world = c.getString("world", ArenaManager.server.getWorlds().get(0).getName());
+        c.setProperty("world", world);
         
-        if (world == null)
-            return ArenaManager.server.getWorlds().get(0);
-        
+        c.save();
         return ArenaManager.server.getWorld(world);
     }
     
@@ -411,6 +411,25 @@ public class MAUtils
     }
     
     /**
+     * Grabs coordinate information from the config-file.
+     */
+    public static Location getCoords(String name)
+    {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        // Return null if coords aren't in the config file.
+        if (c.getKeys("coords." + name) == null)
+            return null;
+        
+        double x    = c.getDouble("coords." + name + ".x", 0);
+        double y    = c.getDouble("coords." + name + ".y", 0);
+        double z    = c.getDouble("coords." + name + ".z", 0);
+        
+        return new Location(ArenaManager.world, x, y, z);
+    }
+    
+    /**
      * Writes coordinate information to the config-file.
      */
     public static void setCoords(String name, Location loc)
@@ -441,25 +460,6 @@ public class MAUtils
         
         c.save();
         ArenaManager.updateVariables();
-    }
-    
-    /**
-     * Grabs coordinate information from the config-file.
-     */
-    public static Location getCoords(String name)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        // Return null if coords aren't in the config file.
-        if (c.getKeys("coords." + name) == null)
-            return null;
-        
-        double x    = c.getDouble("coords." + name + ".x", 0);
-        double y    = c.getDouble("coords." + name + ".y", 0);
-        double z    = c.getDouble("coords." + name + ".z", 0);
-        
-        return new Location(ArenaManager.world, x, y, z);
     }
     
     /**
