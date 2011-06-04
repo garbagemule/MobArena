@@ -20,8 +20,9 @@ public class MobArena extends JavaPlugin
     /* Array of commands used to determine if a command belongs to MobArena
      * or Mean Admins. */
     public final String[] COMMANDS = {"join", "j", "leave", "l", "list", "who", "spectate", "spec",
-                                      "setwarp", "addspawn", "delspawn", "setregion", "expandregion",
-                                      "protect", "undo", "dooooo", "reset", "ready", "notready"};
+                                      "ready", "notready", "enabled", "force", "config", "setwarp",
+                                      "addspawn", "delspawn", "setregion", "expandregion", "protect",
+                                      "undo", "dooooo", "reset"};
     
     public MobArena()
     {
@@ -74,9 +75,7 @@ public class MobArena extends JavaPlugin
     public void onDisable()
     {
         for (Player p : ArenaManager.playerSet)
-        {
             ArenaManager.playerLeave(p);
-        }
         
         System.out.println("WAIT! WHAT ARE YOU DOING?!");
     }

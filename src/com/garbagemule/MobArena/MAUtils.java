@@ -72,7 +72,12 @@ public class MAUtils
         ItemStack stack, current;
         int id, amount;
         
-        PlayerInventory inv = clearInventory(p);
+        PlayerInventory inv;
+        
+        if (reward)
+            inv = p.getInventory();
+        else
+            inv = clearInventory(p);
         
         for (String s : strings)
         {

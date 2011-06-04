@@ -33,6 +33,7 @@ public class ArenaManager
     protected static Location spectatorLoc = null;
     protected static boolean isRunning     = false;
     protected static boolean isSetup       = false;
+    protected static boolean isEnabled     = true;
     protected static boolean isProtected   = true;
     
     // Location variables for the arena region.
@@ -176,6 +177,11 @@ public class ArenaManager
      */
     public static void playerJoin(Player p)
     {
+        if (!isEnabled)
+        {
+            tellPlayer(p, "MobArena is not enabled.");
+            return;
+        }
         if (!isSetup)
         {
             tellPlayer(p, "MobArena has not been set up yet!");

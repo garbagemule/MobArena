@@ -103,6 +103,52 @@ public class MACommands implements CommandExecutor
         String cmd = args[0].toLowerCase();
         String arg = args[1].toLowerCase();
         
+        // ma enabled [true|false]
+        if (cmd.equals("enabled"))
+        {
+            if (!arg.equals("true") && !arg.equals("false"))
+            {
+                ArenaManager.tellPlayer(p, "/ma enabled [true|false]");
+                return true;
+            }
+            
+            // Set the boolean
+            ArenaManager.isEnabled = Boolean.valueOf(arg);
+            ArenaManager.tellPlayer(p, "Enabled: " + arg);
+            return true;
+        }
+        
+        // ma force end
+        if (cmd.equals("force"))
+        {
+            if (!arg.equals("end"))
+            {
+                ArenaManager.tellPlayer(p, "/ma force end");
+                return true;
+            }
+            
+            // End the arena.
+            for (Player player : ArenaManager.playerSet)
+                ArenaManager.playerLeave(player);
+            ArenaManager.tellPlayer(p, "Forced arena end.");
+            return true;
+        }
+        
+        // ma config reload
+        if (cmd.equals("config"))
+        {
+            if (!arg.equals("reload"))
+            {
+                ArenaManager.tellPlayer(p, "/ma config reload");
+                return true;
+            }
+            
+            // End the arena.
+            ArenaManager.init(ArenaManager.plugin);
+            ArenaManager.tellPlayer(p, "Config-file was reloaded.");
+            return true;
+        }
+        
         // ma setwarp [arena|lobby|spectator]
         if (cmd.equals("setwarp"))
         {
