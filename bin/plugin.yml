@@ -1,19 +1,28 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.88.1
+version: 0.88.2
 commands:
-  mobarena:
-    description: Base command for MobArena
-    usage: |
-           /mobarena join - Join the arena.
-           /mobarena leave - Leave the arena.
-  marena:
-    description: Base command for MobArena
-    usage: |
-           /marena join - Join the arena.
-           /marena leave - Leave the arena.
   ma:
     description: Base command for MobArena
     usage: |
-           /ma join - Join the arena.
-           /ma leave - Leave the arena.
+           /ma join      - Join the arena.
+           /ma leave     - Leave the arena.
+           /ma list      - List of players in the arena.
+           /ma notready  - List of players who aren't ready.
+           /ma spectator - Warp to the spectator area.
+  marena:
+    description: Base command for MobArena
+    usage: |
+           /marena join      - Join the arena.
+           /marena leave     - Leave the arena.
+           /marena list      - List of players in the arena.
+           /marena notready  - List of players who aren't ready.
+           /marena spectator - Warp to the spectator area.
+  mobarena:
+    description: Base command for MobArena
+    usage: |
+           /mobarena join      - Join the arena.
+           /mobarena leave     - Leave the arena.
+           /mobarena list      - List of players in the arena.
+           /mobarena notready  - List of players who aren't ready.
+           /mobarena spectator - Warp to the spectator area.

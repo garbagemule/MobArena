@@ -309,12 +309,32 @@ public class ArenaManager
 
         String list = "";
         for (Player player : playerSet)
-        {
             list += player.getName() + ", ";
-        }
         list = list.substring(0,list.length()-2);
         
         tellPlayer(p, "Survivors: " + list);
+    }
+    
+    /**
+     * Prints the list of players who aren't ready.
+     */
+    public static void notReadyList(Player p)
+    {
+        if (!playerSet.contains(p) || isRunning)
+        {
+            tellPlayer(p, "You aren't in the lobby!");
+            return;
+        }
+        
+        Set<Player> notReadySet = new HashSet<Player>(playerSet);
+        notReadySet.removeAll(readySet);
+        
+        String list = "";
+        for (Player player : notReadySet)
+            list += player.getName() + ", ";
+        list = list.substring(0,list.length()-2);
+        
+        tellPlayer(p, "Not ready: " + list);
     }
     
     

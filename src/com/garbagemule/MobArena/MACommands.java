@@ -85,6 +85,12 @@ public class MACommands implements CommandExecutor
             ArenaManager.playerSpectate(p);
             return true;
         }
+
+        if (cmd.equals("ready") || cmd.equals("notready"))
+        {
+            ArenaManager.notReadyList(p);
+            return true;
+        }
         
         return false;
     }

@@ -21,7 +21,7 @@ public class MobArena extends JavaPlugin
      * or Mean Admins. */
     public final String[] COMMANDS = {"join", "j", "leave", "l", "list", "who", "spectate", "spec",
                                       "setwarp", "addspawn", "delspawn", "setregion", "expandregion",
-                                      "protect", "undo", "dooooo", "reset"};
+                                      "protect", "undo", "dooooo", "reset", "ready", "notready"};
     
     public MobArena()
     {
