@@ -110,7 +110,6 @@ public class MAUtils
                 {
                     id = Integer.parseInt(item[0]);
                     stack = new ItemStack(id, amount);
-                    //if (!reward && Arrays.asList(SWORDS_ID).contains(id))
                     if (!reward && SWORDS_ID.contains(id))
                         stack.setDurability((short)-3276);
                 }
@@ -118,7 +117,6 @@ public class MAUtils
                 {
                     stack = makeItemStack(item[0], amount);
                     if (stack == null) continue;
-                    //if (!reward && Arrays.asList(SWORDS_TYPE).contains(stack.getType()))
                     if (!reward && SWORDS_ID.contains(stack.getTypeId()))
                         stack.setDurability((short)-3276);
                 }

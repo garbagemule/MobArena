@@ -109,13 +109,13 @@ public class ArenaManager
             dCreepers     = MAUtils.getDistribution("creepers");
             dWolves       = MAUtils.getDistribution("wolves");
             
-            dPigZombies   = MAUtils.getDistribution("poweredcreepers", "special");
-            dPigZombies   = MAUtils.getDistribution("zombiepigmen",    "special");
-            dSlimes       = MAUtils.getDistribution("slimes",          "special");
-            dMonsters     = MAUtils.getDistribution("humans",          "special");
-            dAngryWolves  = MAUtils.getDistribution("angrywolves",     "special");
-            dGiants       = MAUtils.getDistribution("giants",          "special");
-            dGhasts       = MAUtils.getDistribution("ghasts",          "special");
+            dPoweredCreepers = MAUtils.getDistribution("poweredcreepers", "special");
+            dPigZombies      = MAUtils.getDistribution("zombiepigmen",    "special");
+            dSlimes          = MAUtils.getDistribution("slimes",          "special");
+            dMonsters        = MAUtils.getDistribution("humans",          "special");
+            dAngryWolves     = MAUtils.getDistribution("angrywolves",     "special");
+            dGiants          = MAUtils.getDistribution("giants",          "special");
+            dGhasts          = MAUtils.getDistribution("ghasts",          "special");
         }
         
         // Convenience variables.
