@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.util.List;
+import java.util.Iterator;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -76,8 +77,9 @@ public class MobArena extends JavaPlugin
     
     public void onDisable()
     {
-        for (Player p : ArenaManager.playerSet)
-            ArenaManager.playerLeave(p);
+        Iterator<Player> iterator = ArenaManager.playerSet.iterator();
+        while (iterator.hasNext())
+            ArenaManager.playerLeave(iterator.next());
         
         System.out.println("WAIT! WHAT ARE YOU DOING?!");
     }

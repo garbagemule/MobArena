@@ -272,10 +272,7 @@ public class MAUtils
         
         List<String> result = new LinkedList<String>();
         for (String s : commands.split(","))
-        {
-            System.out.println(s.trim());
             result.add(s.trim());
-        }
         
         return result;
     }

@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -140,8 +141,9 @@ public class MACommands implements CommandExecutor
             }
             
             // End the arena.
-            for (Player player : ArenaManager.playerSet)
-                ArenaManager.playerLeave(player);
+            Iterator<Player> iterator = ArenaManager.playerSet.iterator();
+            while (iterator.hasNext())
+                ArenaManager.playerLeave(iterator.next());
             ArenaManager.tellPlayer(p, "Forced arena end.");
             return true;
         }
