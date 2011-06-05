@@ -110,14 +110,14 @@ public class MAUtils
                 {
                     id = Integer.parseInt(item[0]);
                     stack = new ItemStack(id, amount);
-                    if (!reward && SWORDS_ID.contains(id))
+                    if (!reward && SWORDS_TYPE.contains(stack.getType()))
                         stack.setDurability((short)-3276);
                 }
                 else
                 {
                     stack = makeItemStack(item[0], amount);
                     if (stack == null) continue;
-                    if (!reward && SWORDS_ID.contains(stack.getTypeId()))
+                    if (!reward && SWORDS_TYPE.contains(stack.getType()))
                         stack.setDurability((short)-3276);
                 }
                 
