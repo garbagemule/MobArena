@@ -22,13 +22,18 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
 public class MAUtils
-{
-    public static final int[] SWORDS_ID = {267,268,272,276,283};
-    public static final Material[] SWORDS_TYPE = {Material.WOOD_SWORD,
-                                                  Material.STONE_SWORD,
-                                                  Material.GOLD_SWORD,
-                                                  Material.IRON_SWORD,
-                                                  Material.DIAMOND_SWORD};
+{                                                  
+    public static final List<Integer>  SWORDS_ID   = new LinkedList<Integer>();
+    public static final List<Material> SWORDS_TYPE = new LinkedList<Material>();
+    static
+    {
+        SWORDS_TYPE.add(Material.WOOD_SWORD);
+        SWORDS_TYPE.add(Material.STONE_SWORD);
+        SWORDS_TYPE.add(Material.GOLD_SWORD);
+        SWORDS_TYPE.add(Material.IRON_SWORD);
+        SWORDS_TYPE.add(Material.DIAMOND_SWORD);
+    }
+
     
     /* ///////////////////////////////////////////////////////////////////// //
     
@@ -105,14 +110,16 @@ public class MAUtils
                 {
                     id = Integer.parseInt(item[0]);
                     stack = new ItemStack(id, amount);
-                    if (!reward && Arrays.asList(SWORDS_ID).contains(id))
+                    //if (!reward && Arrays.asList(SWORDS_ID).contains(id))
+                    if (!reward && SWORDS_ID.contains(id))
                         stack.setDurability((short)-3276);
                 }
                 else
                 {
                     stack = makeItemStack(item[0], amount);
                     if (stack == null) continue;
-                    if (!reward && Arrays.asList(SWORDS_TYPE).contains(stack.getType()))
+                    //if (!reward && Arrays.asList(SWORDS_TYPE).contains(stack.getType()))
+                    if (!reward && SWORDS_ID.contains(stack.getTypeId()))
                         stack.setDurability((short)-3276);
                 }
                 
@@ -238,6 +245,25 @@ public class MAUtils
         }
         
         return new Configuration(configFile);
+    }
+    
+    public static String[] getDisabledCommands()
+    {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        String commands = c.getString("disabledcommands", "kill");
+        c.setProperty("disabledcommands", commands);
+        c.save();
+        
+        String[] result = commands.split(",");
+        for (int i = 0; i < result.length; i++)
+        {
+            result[i] = result[i].trim();
+            System.out.println(result[i]);
+        }
+        
+        return result;
     }
     
     /**
@@ -388,18 +414,26 @@ public class MAUtils
      */
     public static int getDistribution(String monster)
     {
+        return getDistribution(monster, "default");
+    }
+    
+    public static int getDistribution(String monster, String type)
+    {
         Configuration c = ArenaManager.config;
         c.load();
         
-        if (c.getInt("waves.default." + monster, -1) == -1)
+        if (c.getInt("waves." + type + "." + monster, -1) == -1)
         {
-            c.setProperty("waves.default." + monster, 10);
+            int dist = 10;
+            if (monster.equals("giants") || monster.equals("ghasts") || monster.equals("slimes"))
+                dist = 0;
+            
+            c.setProperty("waves." + type + "." + monster, dist);
             c.save();
         }
         
-        return c.getInt("waves.default." + monster, -1);
+        return c.getInt("waves." + type + "." + monster, 0);
     }
-    
     
     
     /* ///////////////////////////////////////////////////////////////////// //
@@ -619,7 +653,7 @@ public class MAUtils
         // Get the hippie bounds.
         int x1 = (int)loc.getX() - radius;
         int x2 = (int)loc.getX() + radius;
-        int y1 = (int)loc.getY() - 8;
+        int y1 = (int)loc.getY() - 9;
         int y2 = (int)loc.getY() - 1;
         int z1 = (int)loc.getZ() - radius;
         int z2 = (int)loc.getZ() + radius;
@@ -778,8 +812,7 @@ public class MAUtils
         {
             FileInputStream fis = new FileInputStream("plugins/MobArena/precious.tmp");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            Object o = ois.readObject();
-            preciousPatch = (HashMap<EntityPosition,Integer>) ois.readObject();
+            preciousPatch = (HashMap) ois.readObject();
             ois.close();
         }
         catch (Exception e)

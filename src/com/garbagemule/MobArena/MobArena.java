@@ -23,6 +23,7 @@ public class MobArena extends JavaPlugin
                                       "ready", "notready", "enabled", "force", "config", "setwarp",
                                       "addspawn", "delspawn", "setregion", "expandregion", "protect",
                                       "undo", "dooooo", "reset"};
+    public String[] DISABLED_COMMANDS;
     
     public MobArena()
     {
@@ -31,10 +32,10 @@ public class MobArena extends JavaPlugin
     public void onEnable()
     {
         PluginDescriptionFile pdfFile = this.getDescription();
-        System.out.println(pdfFile.getName() + " v" + pdfFile.getVersion() + " enabled." );
         
         // Initialize convenience variables in ArenaManager.
         ArenaManager.init(this);
+        DISABLED_COMMANDS = MAUtils.getDisabledCommands();
         
         // Bind the /ma and /marena commands to MACommands.
     	getCommand("ma").setExecutor(new MACommands());
@@ -43,9 +44,8 @@ public class MobArena extends JavaPlugin
         
         // Create event listeners.
         PluginManager pm = getServer().getPluginManager();
-        PlayerListener signListener     = new MASignListener(this);
-        PlayerListener dropListener     = new MADropListener(this);
-        PlayerListener readyListener    = new MAReadyListener(this);
+        PlayerListener commandListener  = new MADisabledCommands(this);
+        PlayerListener lobbyListener    = new MALobbyListener(this);
         PlayerListener teleportListener = new MATeleportListener(this);
         PlayerListener discListener     = new MADisconnectListener(this);
         BlockListener  blockListener    = new MABlockListener(this);
@@ -54,9 +54,9 @@ public class MobArena extends JavaPlugin
         // TO-DO: PlayerListener to check for kills/deaths.
         
         // Register events.
-        pm.registerEvent(Event.Type.PLAYER_INTERACT,  signListener,     Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, dropListener,     Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_INTERACT,  readyListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, commandListener, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.PLAYER_INTERACT,  lobbyListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, lobbyListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_TELEPORT,  teleportListener, Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_QUIT,      discListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_KICK,      discListener,     Priority.Normal,  this);
@@ -69,7 +69,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.ENTITY_COMBUST,   monsterListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,    monsterListener,  Priority.Normal,  this);
         
-        System.out.println(pdfFile.getName() + " v" + pdfFile.getVersion() + " initialized." );
+        System.out.println(pdfFile.getName() + " v" + pdfFile.getVersion() + " enabled." );
     }
     
     public void onDisable()

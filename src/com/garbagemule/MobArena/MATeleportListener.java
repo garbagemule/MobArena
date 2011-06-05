@@ -22,21 +22,19 @@ public class MATeleportListener extends PlayerListener
     public void onPlayerTeleport(PlayerTeleportEvent event)
     {
         Player p = event.getPlayer();
-        if (ArenaManager.playerSet.contains(p))
+        if (!ArenaManager.playerSet.contains(p))
+            return;
+        
+        Location to = event.getTo();
+        
+        if (ArenaManager.arenaLoc.equals(to) ||
+            ArenaManager.lobbyLoc.equals(to) ||
+            ArenaManager.spectatorLoc.equals(to))
         {
-            Location to = event.getTo();
-            
-            if (ArenaManager.arenaLoc.equals(to) ||
-                ArenaManager.lobbyLoc.equals(to) ||
-                ArenaManager.spectatorLoc.equals(to))
-            {
-                return;
-            }
-            
-            ArenaManager.tellPlayer(p, "Can't warp in arena! To leave, type /marena leave");
-            event.setCancelled(true);
-            
             return;
         }
+        
+        ArenaManager.tellPlayer(p, "Can't warp in arena! To leave, type /ma leave");
+        event.setCancelled(true);
     }
 }

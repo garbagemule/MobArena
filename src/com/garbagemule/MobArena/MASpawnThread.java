@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
@@ -27,8 +28,9 @@ import org.bukkit.inventory.PlayerInventory;
 // TO-DO: Allow additional "default" waves.
 public class MASpawnThread implements Runnable
 {
-    private int wave, noOfSpawnPoints, noOfPlayers;
+    private int wave, ran, noOfSpawnPoints, noOfPlayers;
     private int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
+    private int dPoweredCreepers, dPigZombies, dSlimes, dMonsters, dAngryWolves, dGiants, dGhasts;
     private Random random;
     private String reward, currentRewards;
     
@@ -45,6 +47,14 @@ public class MASpawnThread implements Runnable
         dSpiders   = dSkeletons + ArenaManager.dSpiders;
         dCreepers  = dSpiders   + ArenaManager.dCreepers;
         dWolves    = dCreepers  + ArenaManager.dWolves;
+        
+        dPoweredCreepers = ArenaManager.dPoweredCreepers;
+        dPigZombies      = dPoweredCreepers + ArenaManager.dPigZombies;
+        dSlimes          = dPigZombies      + ArenaManager.dSlimes;
+        dMonsters        = dSlimes          + ArenaManager.dMonsters;
+        dAngryWolves     = dMonsters        + ArenaManager.dAngryWolves;
+        dGiants          = dAngryWolves     + ArenaManager.dGiants;
+        dGhasts          = dGiants          + ArenaManager.dGhasts;
     }
     
     public void run()
@@ -100,7 +110,6 @@ public class MASpawnThread implements Runnable
     private void defaultWave()
     {
         Location loc;
-        int ran;
         
         for (int i = 0; i < wave + noOfPlayers; i++)
         {
@@ -139,42 +148,59 @@ public class MASpawnThread implements Runnable
     {
         Location loc;
         CreatureType mob;
+        ran = random.nextInt(dGhasts);
         
-        int ran, count;
+        int count;
         boolean slime = false;
         boolean wolf  = false;
+        boolean ghast = false;
+        
+        if      (ran < dPoweredCreepers) mob = CreatureType.CREEPER;
+        else if (ran < dPigZombies)      mob = CreatureType.PIG_ZOMBIE;
+        else if (ran < dSlimes)          mob = CreatureType.SLIME;
+        else if (ran < dMonsters)        mob = CreatureType.MONSTER;
+        else if (ran < dAngryWolves)     mob = CreatureType.WOLF;
+        else if (ran < dGiants)          mob = CreatureType.GIANT;
+        else if (ran < dGhasts)          mob = CreatureType.GHAST;
+        else return;
         
         // 5 on purpose - Ghasts act weird in Overworld.
-        switch (random.nextInt(5))
+        switch (mob)
+        //switch (random.nextInt(5))
         {
-            case 0:
-                mob   = CreatureType.CREEPER;
+            case CREEPER:
+                //mob   = CreatureType.CREEPER;
                 count = noOfPlayers * 3;
                 break;
-            case 1:
-                mob   = CreatureType.PIG_ZOMBIE;
+            case PIG_ZOMBIE:
+                //mob   = CreatureType.PIG_ZOMBIE;
                 count = noOfPlayers * 2;
                 break;
-            case 2:
-                mob   = CreatureType.SLIME;
+            case SLIME:
+                //mob   = CreatureType.SLIME;
                 count = noOfPlayers * 4;
                 slime = true;
                 break;
-            case 3:
-                mob   = CreatureType.MONSTER;
+            case MONSTER:
+                //mob   = CreatureType.MONSTER;
                 count = noOfPlayers + 1;
                 break;
-            case 4:
-                mob   = CreatureType.WOLF;
+            case WOLF:
+                //mob   = CreatureType.WOLF;
                 count = noOfPlayers * 3;
                 wolf  = true;
                 break;
-            case 5:
-                mob   = CreatureType.GHAST;
-                count = Math.max(1, noOfPlayers - 2);
+            case GIANT:
+                //mob   = CreatureType.GIANT;
+                count = 1;
+                break;
+            case GHAST:
+                //mob   = CreatureType.GHAST;
+                count = 2;
+                ghast = true;
                 break;
             default:
-                mob   = CreatureType.CHICKEN;
+                //mob   = CreatureType.CHICKEN;
                 count = 50;
                 break;
         }
@@ -185,10 +211,14 @@ public class MASpawnThread implements Runnable
             loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
             
             LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
-            ArenaManager.monsterSet.add(e);
+            if (!ArenaManager.monsterSet.contains(e))
+                ArenaManager.monsterSet.add(e);
+            else
+                System.out.println("MASpawnThread - monsterSet contains this entity");
             
             if (slime) ((Slime)e).setSize(2);
             if (wolf)  ((Wolf)e).setAngry(true);
+            if (ghast) ((Ghast)e).setHealth(Math.min(noOfPlayers*25, 200));
             
             // Slimes can't have targets, apparently.
             if (!(e instanceof Creature))

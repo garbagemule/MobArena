@@ -1,9 +1,11 @@
 package com.garbagemule.MobArena;
 
 import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityListener;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 /**
  * This listener acts as a type of death-listener.
@@ -45,22 +47,58 @@ public class MADamageListener extends EntityListener
     }
     
     /**
-     * Clears all player drops on death.
+     * Clears all player/monster drops on death.
      */
     public void onEntityDeath(EntityDeathEvent event)
-    {
-        if (!ArenaManager.isRunning)
+    {        
+        // If player, call player death and such.
+        if (event.getEntity() instanceof Player)
+        {        
+            Player p = (Player) event.getEntity();
+            
+            if (!ArenaManager.playerSet.contains(p))
+                return;
+            
+            event.getDrops().clear();
+            ArenaManager.playerDeath(p);
+        }
+        // If monster, remove from monster set
+        else if (event.getEntity() instanceof LivingEntity)
+        {
+            LivingEntity e = (LivingEntity) event.getEntity();
+            
+            if (!ArenaManager.monsterSet.contains(e))
+                return;
+            
+            event.getDrops().clear();
+            ArenaManager.monsterSet.remove(e);
+        }
+    }
+    
+    /**
+     * Prevents monsters from spawning inside the arena unless
+     * it's running, and adds mini-slimes to the monsterSet.
+     */
+    public void onCreatureSpawn(CreatureSpawnEvent event)
+    {        
+        if (!MAUtils.inRegion(event.getLocation()))
+            return;
+            
+        if (!(event.getEntity() instanceof LivingEntity))
             return;
         
-        if (!(event.getEntity() instanceof Player))
-            return;
+        System.out.println("This is the spawn command");
         
-        Player p = (Player) event.getEntity();
+        LivingEntity e = (LivingEntity) event.getEntity();
         
-        if (!ArenaManager.playerSet.contains(p))
-            return;
-        
-        event.getDrops().clear();
-        ArenaManager.playerDeath(p);
+        if (ArenaManager.isRunning)
+        {
+            if (!ArenaManager.monsterSet.contains(e))
+                ArenaManager.monsterSet.add(e);
+        }
+        else
+        {
+            event.setCancelled(true);
+        }
     }
 }

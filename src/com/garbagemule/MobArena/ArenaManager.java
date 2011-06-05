@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.Location;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -46,6 +47,8 @@ public class ArenaManager
     // Spawn locations list and monster distribution fields.
     protected static List<Location> spawnpoints = new ArrayList<Location>();
     protected static int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
+    protected static int dPoweredCreepers, dPigZombies, dSlimes, dMonsters,
+                         dAngryWolves, dGiants, dGhasts;
     
     // Set and Maps for storing players, their locations, items, armor, etc.
     protected static Set<Player> playerSet            = new HashSet<Player>();
@@ -63,9 +66,10 @@ public class ArenaManager
     protected static Map<Integer,String> everyWaveMap = new HashMap<Integer,String>();
     protected static Map<Integer,String> afterWaveMap = new HashMap<Integer,String>();
     
-    // Entities and blocks on MobArena floor.
+    // Entities, blocks and items on MobArena floor.
     protected static Set<LivingEntity> monsterSet = new HashSet<LivingEntity>();
     protected static Set<Block> blockSet          = new HashSet<Block>();
+    protected static Set<Item> dropSet            = new HashSet<Item>();
     
     
     
@@ -104,6 +108,14 @@ public class ArenaManager
             dSpiders      = MAUtils.getDistribution("spiders");
             dCreepers     = MAUtils.getDistribution("creepers");
             dWolves       = MAUtils.getDistribution("wolves");
+            
+            dPigZombies   = MAUtils.getDistribution("poweredcreepers", "special");
+            dPigZombies   = MAUtils.getDistribution("zombiepigmen",    "special");
+            dSlimes       = MAUtils.getDistribution("slimes",          "special");
+            dMonsters     = MAUtils.getDistribution("humans",          "special");
+            dAngryWolves  = MAUtils.getDistribution("angrywolves",     "special");
+            dGiants       = MAUtils.getDistribution("giants",          "special");
+            dGhasts       = MAUtils.getDistribution("ghasts",          "special");
         }
         
         // Convenience variables.
@@ -164,6 +176,7 @@ public class ArenaManager
         server.getScheduler().cancelTasks(plugin);
         killMonsters();
         clearBlocks();
+        clearDrops();
         giveRewards();
         
         // TO-DO: Fix this, maybe add a Set<Player> dead
@@ -234,10 +247,10 @@ public class ArenaManager
             MAUtils.clearInventory(p);
         }
         
-        if (readySet.contains(p))
+        //if (readySet.contains(p))
             readySet.remove(p);
             
-        if (classMap.keySet().contains(p))
+        //if (classMap.keySet().contains(p))
             classMap.remove(p);
         
         // This must occur after playerSet.remove(p) to avoid teleport block.
@@ -276,10 +289,10 @@ public class ArenaManager
         p.setHealth(20);
         tellAll(p.getName() + " died!");
         
-        if (playerSet.contains(p))
+        //if (playerSet.contains(p))
             playerSet.remove(p);
         
-        if (classMap.keySet().contains(p))
+        //if (classMap.keySet().contains(p))
             classMap.remove(p);
             
         if (isRunning && playerSet.isEmpty())
@@ -357,10 +370,10 @@ public class ArenaManager
     public static void killMonsters()
     {
         // Remove all monsters, then clear the Set.
-        for (LivingEntity entity : monsterSet)
+        for (LivingEntity e : monsterSet)
         {
-            if (!entity.isDead())
-                entity.remove();
+            if (!e.isDead())
+                e.remove();
         }
         monsterSet.clear();
     }
@@ -376,6 +389,20 @@ public class ArenaManager
             b.setType(Material.AIR);
         }
         blockSet.clear();
+    }
+    
+    /**
+     * Removes all items on the arena floor.
+     */
+    public static void clearDrops()
+    {
+        // Remove all blocks, then clear the Set.
+        for (Item i : dropSet)
+        {
+            i.remove();
+        }
+        
+        dropSet.clear();
     }
     
     
