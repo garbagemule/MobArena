@@ -245,7 +245,7 @@ public class MAUtils
         return new Configuration(configFile);
     }
     
-    public static String[] getDisabledCommands()
+    public static List<String> getDisabledCommands()
     {
         Configuration c = ArenaManager.config;
         c.load();
@@ -254,11 +254,11 @@ public class MAUtils
         c.setProperty("disabledcommands", commands);
         c.save();
         
-        String[] result = commands.split(",");
-        for (int i = 0; i < result.length; i++)
+        List<String> result = new LinkedList<String>();
+        for (String s : commands.split(","))
         {
-            result[i] = result[i].trim();
-            System.out.println(result[i]);
+            System.out.println(s.trim());
+            result.add(s.trim());
         }
         
         return result;

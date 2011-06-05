@@ -24,7 +24,10 @@ public class MADisabledCommands extends PlayerListener
         if (!ArenaManager.playerSet.contains(p))
             return;
         
-        if (!Arrays.asList(plugin.DISABLED_COMMANDS).contains(event.getMessage().substring(1)))
+        String[] args = event.getMessage().split(" ");
+        
+        if (!plugin.DISABLED_COMMANDS.contains(event.getMessage().substring(1).trim()) &&
+            !plugin.DISABLED_COMMANDS.contains(args[0]))
             return;
         
         event.setCancelled(true);

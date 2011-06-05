@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -23,7 +24,7 @@ public class MobArena extends JavaPlugin
                                       "ready", "notready", "enabled", "force", "config", "setwarp",
                                       "addspawn", "delspawn", "setregion", "expandregion", "protect",
                                       "undo", "dooooo", "reset"};
-    public String[] DISABLED_COMMANDS;
+    public List<String> DISABLED_COMMANDS;
     
     public MobArena()
     {
