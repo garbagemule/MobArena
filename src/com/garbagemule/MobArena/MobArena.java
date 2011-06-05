@@ -61,6 +61,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_TELEPORT,  teleportListener, Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_QUIT,      discListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_KICK,      discListener,     Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_JOIN,      discListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_BREAK,      blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_DAMAGE,     blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,      blockListener,    Priority.Normal,  this);

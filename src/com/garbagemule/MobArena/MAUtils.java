@@ -1,10 +1,14 @@
 package com.garbagemule.MobArena;
 
+import java.net.URL;
+import java.net.URI;
+import java.net.HttpURLConnection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Scanner;
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
@@ -245,6 +249,18 @@ public class MAUtils
         return new Configuration(configFile);
     }
     
+    public static boolean getUpdateNotification()
+    {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        boolean result = c.getBoolean("updatenotification", false);
+        c.setProperty("updatenotification", result);
+        c.save();
+        
+        return result;
+    }
+    
     public static List<String> getDisabledCommands()
     {
         Configuration c = ArenaManager.config;
@@ -445,6 +461,9 @@ public class MAUtils
      */
     public static boolean inRegion(Location loc)
     {
+        if (!loc.getWorld().getName().equals(ArenaManager.world.getName()))
+            return false;
+        
         Location p1 = ArenaManager.p1;
         Location p2 = ArenaManager.p2;
         
@@ -629,6 +648,54 @@ public class MAUtils
         if (verifyData())
         {
             ArenaManager.tellPlayer(p, "MobArena is set up and ready to roll!");
+        }
+    }
+    
+    /**
+     * Checks if there is a new update of MobArena and notifies the
+     * player if the boolean specified is true
+     */
+    public static void checkForUpdates(final Player p, boolean response)
+    {
+        String site = "http://forums.bukkit.org/threads/818.19144/";
+        try
+        {
+            // Make a URL of the site address
+            //URL baseURL = new URL(site);
+            URI baseURL = new URI(site);
+            
+            // Open the connection and don't redirect.
+            HttpURLConnection con = (HttpURLConnection) baseURL.toURL().openConnection();
+            con.setInstanceFollowRedirects(false);
+            
+            String header = con.getHeaderField("Location");
+            
+            // If something's wrong with the connection...
+            if (header == null)
+            {
+                ArenaManager.tellPlayer(p, "Couldn't connect to the MobArena thread.");
+                return;
+            }
+            
+            // Otherwise, grab the location header to get the real URI.
+            String url = new URI(con.getHeaderField("Location")).toString();
+            
+            // If the current version is the same as the thread version.
+            if (url.contains(ArenaManager.plugin.getDescription().getVersion().replace(".", "-")))
+            {
+                if (!response)
+                    return;
+                    
+                ArenaManager.tellPlayer(p, "Your version of MobArena is up to date!");
+                return;
+            }
+            
+            // Otherwise, notify the player that there is a new version.
+            ArenaManager.tellPlayer(p, "There is a new version of MobArena available!");;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
     

@@ -36,6 +36,7 @@ public class ArenaManager
     protected static boolean isSetup       = false;
     protected static boolean isEnabled     = true;
     protected static boolean isProtected   = true;
+    protected static boolean checkUpdates  = true;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -125,6 +126,7 @@ public class ArenaManager
         p1            = MAUtils.getCoords("p1");
         p2            = MAUtils.getCoords("p2");
         spawnpoints   = MAUtils.getSpawnPoints();
+        checkUpdates  = MAUtils.getUpdateNotification();
         
         // Set the boolean if all variables are valid.
         ArenaManager.isSetup = MAUtils.verifyData();
@@ -286,6 +288,7 @@ public class ArenaManager
     {
         p.teleport(spectatorLoc);
         MAUtils.clearInventory(p);
+        p.setFireTicks(0);
         p.setHealth(20);
         tellAll(p.getName() + " died!");
         

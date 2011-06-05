@@ -7,6 +7,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 /**
  * This listener acts when a player is kicked or disconnected
@@ -42,5 +43,25 @@ public class MADisconnectListener extends PlayerListener
             MAUtils.clearInventory(p);
             ArenaManager.playerLeave(p);
         }
+    }
+    
+    public void onPlayerJoin(PlayerJoinEvent event)
+    {
+        if (!ArenaManager.checkUpdates)
+            return;
+        
+        final Player p = event.getPlayer();
+        
+        if (!event.getPlayer().isOp())
+            return;
+            
+        ArenaManager.server.getScheduler().scheduleSyncDelayedTask(ArenaManager.plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    MAUtils.checkForUpdates(p, true);
+                }
+            }, 100);
     }
 }

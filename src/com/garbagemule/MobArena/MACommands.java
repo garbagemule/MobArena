@@ -118,6 +118,18 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
+        if (cmd.equals("check"))
+        {
+            if (!arg.equals("updates"))
+            {
+                ArenaManager.tellPlayer(p, "/ma check updates");
+                return true;
+            }
+            
+            MAUtils.checkForUpdates(p, true);
+            return true;
+        }
+        
         // ma force end
         if (cmd.equals("force"))
         {
