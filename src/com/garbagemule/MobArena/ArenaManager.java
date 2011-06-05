@@ -1,27 +1,22 @@
 package com.garbagemule.MobArena;
 
-import java.io.File;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.HashMap;
-import org.bukkit.World;
-import org.bukkit.Server;
-import org.bukkit.Material;
-import org.bukkit.Location;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
-import org.bukkit.event.Event;
-import org.bukkit.plugin.EventExecutor;
 
 public class ArenaManager
 {
@@ -220,7 +215,7 @@ public class ArenaManager
         
         playerSet.add(p);
         
-        if (!locationMap.keySet().contains(p))
+        if (!locationMap.containsKey(p))
         {
             locationMap.put(p, p.getLocation());
         }
@@ -237,7 +232,7 @@ public class ArenaManager
      */
     public static void playerLeave(Player p)
     {   
-        if (!locationMap.keySet().contains(p))
+        if (!locationMap.containsKey(p))
         {
             tellPlayer(p, "You are not in the arena.");
             return;
@@ -329,12 +324,15 @@ public class ArenaManager
             return;
         }
 
-        String list = "";
+        StringBuffer list = new StringBuffer();
+        final String SEPARATOR = ", ";
         for (Player player : playerSet)
-            list += player.getName() + ", ";
-        list = list.substring(0,list.length()-2);
+        {
+            list.append(player.getName());
+            list.append(SEPARATOR);
+        }
         
-        tellPlayer(p, "Survivors: " + list);
+        tellPlayer(p, "Survivors: " + list.substring(0, list.length() - 2));
     }
     
     /**
@@ -351,12 +349,15 @@ public class ArenaManager
         Set<Player> notReadySet = new HashSet<Player>(playerSet);
         notReadySet.removeAll(readySet);
         
-        String list = "";
+        StringBuffer list = new StringBuffer();
+        final String SEPARATOR = ", ";
         for (Player player : notReadySet)
-            list += player.getName() + ", ";
-        list = list.substring(0,list.length()-2);
+        {
+            list.append(player.getName());
+            list.append(SEPARATOR);
+        }
         
-        tellPlayer(p, "Not ready: " + list);
+        tellPlayer(p, "Not ready: " + list.substring(0, list.length() - 2));
     }
     
     
@@ -445,7 +446,7 @@ public class ArenaManager
         for (Player p : rewardMap.keySet())
         {
             String r = rewardMap.get(p);
-            if (r.equals("")) continue;
+            if (r.isEmpty()) continue;
             
             tellPlayer(p, "Here are all of your rewards!");
             MAUtils.giveItems(true, p, r);
