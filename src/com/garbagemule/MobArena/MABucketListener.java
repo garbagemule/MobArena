@@ -12,12 +12,13 @@ import org.bukkit.event.player.PlayerListener;
  * arena correcty - written desmin88
  */
 public class MABucketListener extends PlayerListener{
-
+	//TODO
+	//Merge into another playerlistener
 	public void onPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event)
 	{
 		Player p = event.getPlayer();
-		//Best way to do this I think. Seems playerset only contains players in the Arena, so no other checking needed.
-		if(ArenaManager.playerSet.contains(p)) {
+		//This should work!
+		if(ArenaManager.playerSet.contains(p) && ArenaManager.isRunning) {
 			Block water = event.getBlockClicked().getFace(event.getBlockFace());
 			ArenaManager.blockSet.add(water);
 		}
