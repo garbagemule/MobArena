@@ -37,10 +37,13 @@ public class MAMonsterListener extends EntityListener
             final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
             for (Block b : event.blockList())
             {
-                if (b.getType() == Material.CAKE_BLOCK)
-                    blockMap.put(b, 0);
-                else
-                    blockMap.put(b, b.getTypeId());
+            	// Destroy any user-placed blocks
+            	if (!ArenaManager.blockSet.remove(b)) {
+            		// System.out.println("Respawning destroyed block of type: " + b.getType());
+            		blockMap.put(b, b.getTypeId());
+            	} else {
+            		// System.out.println("Ignoring destruction of block type: " + b.getType());
+            	}
             }
             
             // Wait a couple of ticks, then rebuild the blocks.

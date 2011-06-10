@@ -261,6 +261,39 @@ public class MAUtils
         return result;
     }
     
+    public static boolean getEnableOnLoad() {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        boolean result = c.getBoolean("enableonload", true);
+        c.setProperty("enableonload", result);
+        c.save();
+        
+        return result;
+    }
+
+    public static long getFirstRoundDelay() {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        long result = c.getInt("firstrounddelay", 100);
+        c.setProperty("firstrounddelay", result);
+        c.save();
+        
+        return result;
+    }
+
+    public static long getNormalRoundDelay() {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        long result = c.getInt("normalrounddelay", 400);
+        c.setProperty("normalrounddelay", result);
+        c.save();
+        
+        return result;
+    }
+
     public static List<String> getDisabledCommands()
     {
         Configuration c = ArenaManager.config;
@@ -371,7 +404,7 @@ public class MAUtils
             {
                 c.setProperty("rewards.waves.after.7", "minecart, storage_minecart, powered_minecart");
                 c.setProperty("rewards.waves.after.13", "iron_sword, iron_pickaxe, iron_spade");
-                c.setProperty("rewards.waves.after.16", "diamon_sword");
+                c.setProperty("rewards.waves.after.16", "diamond_sword");
             }
             
             c.save();

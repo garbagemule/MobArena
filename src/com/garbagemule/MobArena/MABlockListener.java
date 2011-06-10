@@ -62,8 +62,15 @@ public class MABlockListener extends BlockListener
         {
             if (ArenaManager.isRunning && ArenaManager.playerSet.contains(event.getPlayer()))
             {
-                ArenaManager.blockSet.add(b);
-                return;
+            	// Forbid the placement of multi-block blocks
+            	// They cause all kinds of issues on clean-up and explosion
+            	if (b.getTypeId() != Material.WOODEN_DOOR.getId() && b.getTypeId() != Material.IRON_DOOR.getId() 
+            			&& b.getTypeId() != Material.TRAP_DOOR.getId() && b.getTypeId() != Material.WOOD_DOOR.getId()
+            			&& b.getTypeId() != Material.IRON_DOOR_BLOCK.getId()) {
+            		// System.out.println("Allowing placement of : " + b.getType());
+	                ArenaManager.blockSet.add(b);
+	                return;
+            	}
             }
 
             event.setCancelled(true);

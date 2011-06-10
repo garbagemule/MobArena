@@ -77,10 +77,7 @@ public class MobArena extends JavaPlugin
     
     public void onDisable()
     {
-        Iterator<Player> iterator = ArenaManager.playerSet.iterator();
-        while (iterator.hasNext())
-            ArenaManager.playerLeave(iterator.next());
-        
+        ArenaManager.forceEnd();        
         System.out.println("WAIT! WHAT ARE YOU DOING?!");
     }
 }

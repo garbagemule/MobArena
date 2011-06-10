@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,8 @@ public class ArenaManager
     protected static boolean isEnabled     = true;
     protected static boolean isProtected   = true;
     protected static boolean checkUpdates  = true;
+    protected static long  firstRoundDelay = 100L;
+    protected static long normalRoundDelay = 400L;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -122,6 +125,9 @@ public class ArenaManager
         p2            = MAUtils.getCoords("p2");
         spawnpoints   = MAUtils.getSpawnPoints();
         checkUpdates  = MAUtils.getUpdateNotification();
+        isEnabled     = MAUtils.getEnableOnLoad();
+        firstRoundDelay = MAUtils.getFirstRoundDelay();
+        normalRoundDelay = MAUtils.getNormalRoundDelay();
         
         // Set the boolean if all variables are valid.
         ArenaManager.isSetup = MAUtils.verifyData();
@@ -157,7 +163,7 @@ public class ArenaManager
         }
         
         MASpawnThread thread = new MASpawnThread();
-        server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,100,400);
+        server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,firstRoundDelay,normalRoundDelay);
         
         tellAll("Let the slaughter begin!");
     }
@@ -258,6 +264,62 @@ public class ArenaManager
         
         tellPlayer(p, "You left the arena. Thanks for playing!");
     }
+
+	/**
+	 * Force an arena session to end by removing all players from
+	 * all sets, etc.
+	 */
+	public static void forceEnd() {
+		// Iterate over playerSet as that should be our definitive list of who's
+		// actually registered as an arena participant.
+		Iterator<Player> iter = playerSet.iterator();
+		while (iter.hasNext()) {
+			Player p = iter.next();
+
+			// Clear inventory
+			MAUtils.clearInventory(p);
+
+			// Remove from all maps/sets
+			readySet.remove(p);
+			classMap.remove(p);
+
+			tellPlayer(p, "Arena ended. Thanks for playing!");
+			iter.remove();
+			
+			// Note, we have to teleport AFTER iter.remove() else we get blocked
+			// by the teleport listener.
+			p.teleport(locationMap.remove(p));
+		}
+		// playerSet will always be empty at this point. End the arena.
+		endArena();
+	}
+
+	/**
+	 * Force an arena to start if the arena is not currently active and has
+	 * ready players. Remove all un-ready players.
+	 */
+	public static void forceStart() {
+		if (isRunning) {
+			System.out.println("[MobArena] Could not force start, arena is currently active.");
+			return;
+		}
+		if (readySet.isEmpty()) {
+			System.out.println("[MobArena] Could not force start, no one is ready.");
+			return;
+		}
+
+		// Pre-conditions passed, remove players not flagged as ready.
+        Set<Player> notReadySet = new HashSet<Player>(playerSet);
+        notReadySet.removeAll(readySet);
+        for (Player p : notReadySet) {
+        	tellPlayer(p, "The arena was force-started. You are being removed as you are not ready.");
+        	playerLeave(p);
+        }
+
+        // Clear out the ready set and start the arena!
+        readySet.clear();
+        startArena();
+	}
 
     /**
      * Adds a joined arena player to the set of ready players.
