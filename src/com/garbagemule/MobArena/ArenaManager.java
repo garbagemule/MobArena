@@ -32,6 +32,8 @@ public class ArenaManager
     protected static boolean isEnabled     = true;
     protected static boolean isProtected   = true;
     protected static boolean checkUpdates  = true;
+    protected static long  firstRoundDelay = 100L;
+    protected static long normalRoundDelay = 400L;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -123,6 +125,8 @@ public class ArenaManager
         spawnpoints   = MAUtils.getSpawnPoints();
         checkUpdates  = MAUtils.getUpdateNotification();
         isEnabled     = MAUtils.getEnableOnLoad();
+        firstRoundDelay = MAUtils.getFirstRoundDelay();
+        normalRoundDelay = MAUtils.getNormalRoundDelay();
         
         // Set the boolean if all variables are valid.
         ArenaManager.isSetup = MAUtils.verifyData();
@@ -158,7 +162,7 @@ public class ArenaManager
         }
         
         MASpawnThread thread = new MASpawnThread();
-        server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,100,400);
+        server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,firstRoundDelay,normalRoundDelay);
         
         tellAll("Let the slaughter begin!");
     }
