@@ -33,6 +33,9 @@ public class MADamageListener extends EntityListener
         if (!(event.getEntity() instanceof Player))
             return;
         
+        if (event.isCancelled())
+        	return;
+        
         Player p = (Player) event.getEntity();
         
         if (!ArenaManager.playerSet.contains(p))
