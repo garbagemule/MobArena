@@ -261,6 +261,17 @@ public class MAUtils
         return result;
     }
     
+    public static boolean getEnableOnLoad() {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        boolean result = c.getBoolean("enableonload", true);
+        c.setProperty("enableonload", result);
+        c.save();
+        
+        return result;
+    }
+
     public static List<String> getDisabledCommands()
     {
         Configuration c = ArenaManager.config;

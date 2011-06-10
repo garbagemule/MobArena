@@ -122,6 +122,7 @@ public class ArenaManager
         p2            = MAUtils.getCoords("p2");
         spawnpoints   = MAUtils.getSpawnPoints();
         checkUpdates  = MAUtils.getUpdateNotification();
+        isEnabled     = MAUtils.getEnableOnLoad();
         
         // Set the boolean if all variables are valid.
         ArenaManager.isSetup = MAUtils.verifyData();
