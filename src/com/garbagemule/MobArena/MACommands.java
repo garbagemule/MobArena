@@ -134,18 +134,20 @@ public class MACommands implements CommandExecutor
         // ma force end
         if (cmd.equals("force"))
         {
-            if (!arg.equals("end"))
-            {
-                ArenaManager.tellPlayer(p, "/ma force end");
+        	if (arg.equals("start")) {
+        		// Start the arena.
+        		ArenaManager.forceStart();
+        		ArenaManager.tellPlayer(p, "Forced arena start.");
+        		return true;
+        	} else if (arg.equals("end")) {
+                // End the arena.
+                ArenaManager.forceEnd();
+                ArenaManager.tellPlayer(p, "Forced arena end.");
+                return true;
+        	} else {
+                ArenaManager.tellPlayer(p, "/ma force [start|end]");
                 return true;
             }
-            
-            // End the arena.
-            Iterator<Player> iterator = ArenaManager.playerSet.iterator();
-            while (iterator.hasNext())
-                ArenaManager.playerLeave(iterator.next());
-            ArenaManager.tellPlayer(p, "Forced arena end.");
-            return true;
         }
         
         // ma config reload
