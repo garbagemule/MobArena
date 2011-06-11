@@ -53,7 +53,7 @@ public class MobArena extends JavaPlugin
         BlockListener  blockListener    = new MABlockListener(this);
         EntityListener damageListener   = new MADamageListener(this);
         EntityListener monsterListener  = new MAMonsterListener(this);
-        PlayerListener bucketListner    = new MABucketListener(this)
+        PlayerListener bucketListener    = new MABucketListener(this)
         // TO-DO: PlayerListener to check for kills/deaths.
         
         // Register events.
