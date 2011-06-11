@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerListener;
  */
 public class MABucketListener extends PlayerListener{
     private MobArena plugin;
-    public MADisconnectListener(MobArena instance)
+    public MADBucketListener(MobArena instance)
     {
         plugin = instance;
     }
