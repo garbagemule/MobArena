@@ -12,7 +12,12 @@ import org.bukkit.event.player.PlayerListener;
  * arena correcty - written desmin88
  */
 public class MABucketListener extends PlayerListener{
-	//TODO
+    private MobArena plugin;
+    public MADisconnectListener(MobArena instance)
+    {
+        plugin = instance;
+    }
+        //TODO
 	//Merge into another playerlistener
 	public void onPlayerBucketEmptyEvent(PlayerBucketEmptyEvent event)
 	{
