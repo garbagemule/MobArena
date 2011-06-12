@@ -1,16 +1,11 @@
 package com.garbagemule.MobArena;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.LivingEntity;
 
 public class MACommands implements CommandExecutor
 {
@@ -131,20 +126,24 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
-        // ma force end
+        // ma force [start|end]
         if (cmd.equals("force"))
         {
-            if (!arg.equals("end"))
+            // Start arena.
+            if (arg.equals("start"))
             {
-                ArenaManager.tellPlayer(p, "/ma force end");
+                ArenaManager.forceStart(p);
+                return true;
+            }
+
+            // End the arena.
+            if (arg.equals("end"))
+            {
+                ArenaManager.forceEnd(p);
                 return true;
             }
             
-            // End the arena.
-            Iterator<Player> iterator = ArenaManager.playerSet.iterator();
-            while (iterator.hasNext())
-                ArenaManager.playerLeave(iterator.next());
-            ArenaManager.tellPlayer(p, "Forced arena end.");
+            ArenaManager.tellPlayer(p, "/ma force [start|end]");
             return true;
         }
         
@@ -275,7 +274,7 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
-        // ma protect true/false
+        // ma protect [true|false]
         if (cmd.equals("protect"))
         {
             if (!arg.equals("true") && !arg.equals("false"))
@@ -301,7 +300,8 @@ public class MACommands implements CommandExecutor
                 return true;
             }
         }
-        
+
+        // ma undo it hippie monster
         if (cmd.equals("undo"))
         {
             if (args.length != 4)

@@ -17,12 +17,9 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
  */
 // TO-DO: Perhaps implement TeamFluff's respawn-packet-code.
 public class MADamageListener extends EntityListener
-{
-    private MobArena plugin;
-    
+{    
     public MADamageListener(MobArena instance)
     {
-        plugin = instance;
     }
     
     public void onEntityDamage(EntityDamageEvent event)
@@ -76,7 +73,7 @@ public class MADamageListener extends EntityListener
     
     /**
      * Prevents monsters from spawning inside the arena unless
-     * it's running, and adds mini-slimes to the monsterSet.
+     * it's running.
      */
     public void onCreatureSpawn(CreatureSpawnEvent event)
     {        
@@ -86,18 +83,7 @@ public class MADamageListener extends EntityListener
         if (!(event.getEntity() instanceof LivingEntity))
             return;
         
-        System.out.println("This is the spawn command");
-        
-        LivingEntity e = (LivingEntity) event.getEntity();
-        
-        if (ArenaManager.isRunning)
-        {
-            if (!ArenaManager.monsterSet.contains(e))
-                ArenaManager.monsterSet.add(e);
-        }
-        else
-        {
+        if (!ArenaManager.isRunning)
             event.setCancelled(true);
-        }
     }
 }

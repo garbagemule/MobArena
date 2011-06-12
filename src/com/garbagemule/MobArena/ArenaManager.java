@@ -3,19 +3,23 @@ package com.garbagemule.MobArena;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.util.config.Configuration;
 
 public class ArenaManager
@@ -31,7 +35,9 @@ public class ArenaManager
     protected static boolean isSetup       = false;
     protected static boolean isEnabled     = true;
     protected static boolean isProtected   = true;
-    protected static boolean checkUpdates  = true;
+    protected static int spawnTaskId       = -1;
+    protected static int waveDelay, waveInterval, specialModulo, repairDelay;
+    protected static boolean checkUpdates, lightning;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -46,13 +52,13 @@ public class ArenaManager
     protected static int dPoweredCreepers, dPigZombies, dSlimes, dMonsters,
                          dAngryWolves, dGiants, dGhasts;
     
-    // Set and Maps for storing players, their locations, items, armor, etc.
+    // Sets and Maps for storing players, their locations, and their rewards.
     protected static Set<Player> playerSet            = new HashSet<Player>();
     protected static Set<Player> readySet             = new HashSet<Player>();
     protected static Map<Player,String> rewardMap     = new HashMap<Player,String>();
     protected static Map<Player,Location> locationMap = new HashMap<Player,Location>();
     
-    // Maps for storing class items and armor.
+    // Maps for storing player classes, class items and armor.
     protected static List<String> classes              = new ArrayList<String>();
     protected static Map<Player,String> classMap       = new HashMap<Player,String>();
     protected static Map<String,String> classItemMap   = new HashMap<String,String>();
@@ -65,7 +71,6 @@ public class ArenaManager
     // Entities, blocks and items on MobArena floor.
     protected static Set<LivingEntity> monsterSet = new HashSet<LivingEntity>();
     protected static Set<Block> blockSet          = new HashSet<Block>();
-    protected static Set<Item> dropSet            = new HashSet<Item>();
     
     
     
@@ -84,10 +89,12 @@ public class ArenaManager
         if (instance != null)
         {
             // General variables.
-            config = MAUtils.getConfig();
-            plugin = instance;
-            server = plugin.getServer();
-            world  = MAUtils.getWorld();
+            config      = MAUtils.getConfig();
+            plugin      = instance;
+            server      = plugin.getServer();
+            world       = MAUtils.getWorld();
+            lightning   = MAUtils.getBoolean("settings.lightning", true);
+            repairDelay = MAUtils.getInt("settings.repairdelay", 5);
         
             // Class list and maps.
             classes       = MAUtils.getClasses();
@@ -95,6 +102,9 @@ public class ArenaManager
             classArmorMap = MAUtils.getClassItems("armor");
             
             // Waves and rewards.
+            waveDelay     = MAUtils.getInt("settings.firstwavedelay", 5) * 20;
+            waveInterval  = MAUtils.getInt("settings.waveinterval",  20) * 20;
+            specialModulo = MAUtils.getInt("settings.specialmodulo",  4);
             everyWaveMap  = MAUtils.getWaveMap("every");
             afterWaveMap  = MAUtils.getWaveMap("after");
             
@@ -121,7 +131,7 @@ public class ArenaManager
         p1            = MAUtils.getCoords("p1");
         p2            = MAUtils.getCoords("p2");
         spawnpoints   = MAUtils.getSpawnPoints();
-        checkUpdates  = MAUtils.getUpdateNotification();
+        checkUpdates  = MAUtils.getBoolean("settings.updatenotification", true);
         
         // Set the boolean if all variables are valid.
         ArenaManager.isSetup = MAUtils.verifyData();
@@ -149,6 +159,7 @@ public class ArenaManager
     public static void startArena()
     {
         isRunning = true;
+        readySet.clear();
         
         for (Player p : playerSet)
         {
@@ -157,7 +168,7 @@ public class ArenaManager
         }
         
         MASpawnThread thread = new MASpawnThread();
-        server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,100,400);
+        spawnTaskId = server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,(long)waveDelay,(long)waveInterval);
         
         tellAll("Let the slaughter begin!");
     }
@@ -168,12 +179,13 @@ public class ArenaManager
      * and stops the spawning of monsters.
      */
     public static void endArena()
-    {            
+    {
         isRunning = false;
-        server.getScheduler().cancelTasks(plugin);
+        server.getScheduler().cancelTask(spawnTaskId);
+        
         killMonsters();
         clearBlocks();
-        clearDrops();
+        clearEntities();
         giveRewards();
         
         // TO-DO: Fix this, maybe add a Set<Player> dead
@@ -204,7 +216,7 @@ public class ArenaManager
         }
         if (isRunning)
         {
-            tellPlayer(p, "Arena in progress. Type /marena spectate to watch.");
+            tellPlayer(p, "Arena in progress. Type /ma spec to watch.");
             return;
         }
         if (!MAUtils.hasEmptyInventory(p))
@@ -231,30 +243,27 @@ public class ArenaManager
      * is removed from all the sets and maps.
      */
     public static void playerLeave(Player p)
-    {   
+    {
         if (!locationMap.containsKey(p))
         {
             tellPlayer(p, "You are not in the arena.");
             return;
         }
         
-        if (playerSet.contains(p))
-        {
-            playerSet.remove(p);
+        // This must occur before playerSet.remove(p) to avoid teleport block.
+        p.teleport(locationMap.get(p));
+        locationMap.remove(p);
+        readySet.remove(p);
+        classMap.remove(p);
+        
+        if (playerSet.remove(p))
             MAUtils.clearInventory(p);
-        }
-        
-        //if (readySet.contains(p))
-            readySet.remove(p);
-            
-        //if (classMap.keySet().contains(p))
-            classMap.remove(p);
-        
-        // This must occur after playerSet.remove(p) to avoid teleport block.
-        p.teleport(locationMap.remove(p));
         
         if (isRunning && playerSet.isEmpty())
             endArena();
+
+        if (!readySet.isEmpty() && readySet.equals(playerSet))
+            startArena();
         
         tellPlayer(p, "You left the arena. Thanks for playing!");
     }
@@ -267,10 +276,7 @@ public class ArenaManager
         readySet.add(p);
 
         if (readySet.equals(playerSet))
-        {
-            readySet.clear();
             startArena();
-        }
     }
     
     /**
@@ -360,6 +366,57 @@ public class ArenaManager
         tellPlayer(p, "Not ready: " + list.substring(0, list.length() - 2));
     }
     
+    /**
+     * Forcefully starts the arena, causing all players in the
+     * playerSet who aren't ready to leave, and starting the
+     * arena for everyone else.
+     */
+    public static void forceStart(Player p)
+    {
+        if (ArenaManager.isRunning)
+        {
+            ArenaManager.tellPlayer(p, "Arena has already started.");
+            return;
+        }
+        if (ArenaManager.readySet.isEmpty())
+        {
+            ArenaManager.tellPlayer(p, "Can't force start, no players are ready.");
+            return;
+        }
+        
+        Iterator<Player> iterator = ArenaManager.playerSet.iterator();
+        while (iterator.hasNext())
+        {
+            Player player = iterator.next();
+            if (!ArenaManager.readySet.contains(player))
+                ArenaManager.playerLeave(player);
+        }
+        
+        ArenaManager.tellPlayer(p, "Forced arena start.");
+    }
+    
+    /**
+     * Forcefully ends the arena, causing all players to leave and
+     * all relevant sets and maps to be cleared.
+     */
+    public static void forceEnd(Player p)
+    {
+        if (ArenaManager.playerSet.isEmpty())
+        {
+            ArenaManager.tellPlayer(p, "No one is in the arena.");
+            return;
+        }
+        
+        Iterator<Player> iterator = ArenaManager.playerSet.iterator();
+        while (iterator.hasNext())
+            ArenaManager.playerLeave(iterator.next());
+        
+        // Just for good measure.
+        endArena();
+        
+        ArenaManager.tellPlayer(p, "Forced arena end.");
+    }
+    
     
     
     /* ///////////////////////////////////////////////////////////////////// //
@@ -372,7 +429,7 @@ public class ArenaManager
      * Kills all monsters currently on the arena floor.
      */
     public static void killMonsters()
-    {
+    {        
         // Remove all monsters, then clear the Set.
         for (LivingEntity e : monsterSet)
         {
@@ -389,24 +446,28 @@ public class ArenaManager
     {
         // Remove all blocks, then clear the Set.
         for (Block b : blockSet)
-        {
             b.setType(Material.AIR);
-        }
+        
         blockSet.clear();
     }
     
     /**
-     * Removes all items on the arena floor.
+     * Removes all items and slimes in the arena region.
      */
-    public static void clearDrops()
+    public static void clearEntities()
     {
-        // Remove all blocks, then clear the Set.
-        for (Item i : dropSet)
-        {
-            i.remove();
-        }
+        Chunk c1 = world.getChunkAt(p1);
+        Chunk c2 = world.getChunkAt(p2);
         
-        dropSet.clear();
+        /* Yes, ugly nesting, but it's necessary. This bit
+         * removes all the entities in the arena region without
+         * bloatfully iterating through all entities in the
+         * world. Much faster on large servers especially. */ 
+        for (int i = c1.getX(); i <= c2.getX(); i++)
+            for (int j = c1.getZ(); j <= c2.getZ(); j++)
+                for (Entity e : world.getChunkAt(i,j).getEntities())
+                    if ((e instanceof Item) || (e instanceof Slime))
+                        e.remove();
     }
     
     
@@ -468,6 +529,9 @@ public class ArenaManager
      */
     public static void tellPlayer(Player p, String msg)
     {
+        if (p == null)
+            return;
+        
         p.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.WHITE + msg);
 	}
     
@@ -476,9 +540,14 @@ public class ArenaManager
      */
     public static void tellAll(String msg)
     {
-        for (Player p : playerSet)
-        {
-            tellPlayer(p, msg);
-        }
+        Chunk c1 = world.getChunkAt(p1);
+        Chunk c2 = world.getChunkAt(p2);
+
+        for (int i = c1.getX(); i <= c2.getX(); i++)
+            for (int j = c1.getZ(); j <= c2.getZ(); j++)
+                for (Entity p : world.getChunkAt(i,j).getEntities())
+                    if (p instanceof Player)
+                        tellPlayer((Player)p, msg);
+            
 	}
 }

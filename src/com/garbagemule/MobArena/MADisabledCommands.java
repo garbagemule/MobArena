@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena;
 
-import java.util.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;

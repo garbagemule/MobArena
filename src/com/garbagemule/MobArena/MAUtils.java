@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena;
 
-import java.net.URL;
 import java.net.URI;
 import java.net.HttpURLConnection;
 import java.io.File;
@@ -8,15 +7,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Scanner;
-import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Iterator;
 import org.bukkit.block.Sign;
-import org.bukkit.block.BlockFace;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
@@ -78,7 +75,7 @@ public class MAUtils
     public static void giveItems(boolean reward, Player p, String... strings)
     {
         // Variables used.
-        ItemStack stack, current;
+        ItemStack stack;
         int id, amount;
         
         PlayerInventory inv;
@@ -171,61 +168,6 @@ public class MAUtils
     // ///////////////////////////////////////////////////////////////////// */
     
     /**
-     * Replaces all tabs with 4 spaces in config.yml
-     
-    public static void fixConfigFile()
-    {
-        new File("plugins/MobArena").mkdir();
-        File configFile = new File("plugins/MobArena/config.yml");
-        
-        try
-        {
-            if(!configFile.exists())
-            {
-                configFile.createNewFile();
-            }
-            else
-            {
-                // Create an inputstream from the file
-                FileInputStream fis = new FileInputStream(configFile);
-                
-                // Read the file into a byte array, and make a String out of it.
-                byte[] bytes = new byte[(int)configFile.length()];
-                fis.read(bytes);
-                String input = new String(bytes);
-                
-                // Close the stream.
-                fis.close();
-                
-                // Replace all tabs with 4 spaces.
-                String output = "";
-                for (char c : input.toCharArray())
-                {
-                    if (c == '\t')
-                        output += "    ";
-                    else
-                        output += c;
-                }
-                
-                // Create an outputstream from the file.
-                FileOutputStream fos = new FileOutputStream(configFile);
-                
-                // Write all the bytes to it.
-                for (byte b : output.getBytes())
-                    fos.write(b);
-                
-                // Close the stream.
-                fos.close();
-            }
-        }
-        catch(Exception e)
-        {
-            System.out.println("[MobArena] ERROR: Config file could not be created.");
-        }
-    }
-    */
-    
-    /**
      * Creates a Configuration object from the config.yml file.
      */
     public static Configuration getConfig()
@@ -249,25 +191,13 @@ public class MAUtils
         return new Configuration(configFile);
     }
     
-    public static boolean getUpdateNotification()
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        boolean result = c.getBoolean("updatenotification", false);
-        c.setProperty("updatenotification", result);
-        c.save();
-        
-        return result;
-    }
-    
     public static List<String> getDisabledCommands()
     {
         Configuration c = ArenaManager.config;
         c.load();
         
-        String commands = c.getString("disabledcommands", "kill");
-        c.setProperty("disabledcommands", commands);
+        String commands = c.getString("settings.disabledcommands", "/kill");
+        c.setProperty("settings.disabledcommands", commands);
         c.save();
         
         List<String> result = new LinkedList<String>();
@@ -286,8 +216,8 @@ public class MAUtils
         Configuration c = ArenaManager.config;
         c.load();
         
-        String world = c.getString("world", ArenaManager.server.getWorlds().get(0).getName());
-        c.setProperty("world", world);
+        String world = c.getString("settings.world", ArenaManager.server.getWorlds().get(0).getName());
+        c.setProperty("settings.world", world);
         
         c.save();
         return ArenaManager.server.getWorld(world);
@@ -306,11 +236,11 @@ public class MAUtils
         {
             c.setProperty("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
             c.setProperty("classes.Archer.armor", "298,299,300,301");
-            c.setProperty("classes.Knight.items", "diamond_sword, grilled_pork");
+            c.setProperty("classes.Knight.items", "diamond_sword, grilled_pork:2");
             c.setProperty("classes.Knight.armor", "306,307,308,309");
-            c.setProperty("classes.Tank.items",   "iron_sword, grilled_pork:2");
+            c.setProperty("classes.Tank.items",   "iron_sword, grilled_pork:3, apple");
             c.setProperty("classes.Tank.armor",   "310,311,312,313");
-            c.setProperty("classes.Oddjob.items", "stone_sword, flint_and_steel, netherrack:2, wood_pickaxe, wood_door, fishing_rod, apple, grilled_pork:3");
+            c.setProperty("classes.Oddjob.items", "stone_sword, flint_and_steel, netherrack:2, wood_pickaxe, tnt:4, fishing_rod, apple, grilled_pork:3");
             c.setProperty("classes.Oddjob.armor", "298,299,300,301");
             c.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             c.setProperty("classes.Chef.armor",   "314,315,316,317");
@@ -436,7 +366,7 @@ public class MAUtils
         if (c.getInt("waves." + type + "." + monster, -1) == -1)
         {
             int dist = 10;
-            if (monster.equals("giants") || monster.equals("ghasts") || monster.equals("slimes"))
+            if (monster.equals("giants") || monster.equals("ghasts"))
                 dist = 0;
             
             c.setProperty("waves." + type + "." + monster, dist);
@@ -444,6 +374,36 @@ public class MAUtils
         }
         
         return c.getInt("waves." + type + "." + monster, 0);
+    }
+    
+    /**
+     * Grabs an integer from the config-file.
+     */
+    public static int getInt(String path, int def)
+    {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        int result = c.getInt(path, def);
+        c.setProperty(path, result);
+        
+        c.save();
+        return result;
+    }
+    
+    /**
+     * Grabs a boolean from the config-file.
+     */
+    public static boolean getBoolean(String path, boolean def)
+    {
+        Configuration c = ArenaManager.config;
+        c.load();
+        
+        boolean result = c.getBoolean(path, def);
+        c.setProperty(path, result);
+        
+        c.save();
+        return result;
     }
     
     
@@ -842,7 +802,7 @@ public class MAUtils
                     ArenaManager.world.getBlockAt(i,j,k).setTypeId(0);
         
         // Place the hippie signs
-        java.util.Iterator iterator = ArenaManager.classes.iterator();
+        Iterator<String> iterator = ArenaManager.classes.iterator();
         for (int i = lx1+2; i <= lx2-2; i++) // Signs
         {
             ArenaManager.world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
@@ -874,7 +834,7 @@ public class MAUtils
         {
             FileInputStream fis = new FileInputStream("plugins/MobArena/precious.tmp");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            preciousPatch = (HashMap) ois.readObject();
+            preciousPatch = (HashMap<EntityPosition,Integer>) ois.readObject();
             ois.close();
         }
         catch (Exception e)

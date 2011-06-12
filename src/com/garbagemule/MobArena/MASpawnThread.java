@@ -1,7 +1,5 @@
 package com.garbagemule.MobArena;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.entity.Wolf;
@@ -12,8 +10,6 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.CreatureType;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 /**
  * Core class for handling wave spawning.
@@ -28,7 +24,7 @@ import org.bukkit.inventory.PlayerInventory;
 // TO-DO: Allow additional "default" waves.
 public class MASpawnThread implements Runnable
 {
-    private int wave, ran, noOfSpawnPoints, noOfPlayers;
+    private int wave, ran, noOfSpawnPoints, noOfPlayers, modulo;
     private int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
     private int dPoweredCreepers, dPigZombies, dSlimes, dMonsters, dAngryWolves, dGiants, dGhasts;
     private Random random;
@@ -36,6 +32,9 @@ public class MASpawnThread implements Runnable
     
     public MASpawnThread()
     {
+        modulo = ArenaManager.specialModulo;
+        if (modulo <= 0) modulo = -32768;
+        
         noOfPlayers = ArenaManager.playerSet.size();
         noOfSpawnPoints = ArenaManager.spawnpoints.size();
         wave = 1;
@@ -89,8 +88,7 @@ public class MASpawnThread implements Runnable
         }
         
         // Check if this is a special wave.
-        // TO-DO: Get this value from the config-file.
-        if (wave % 4 == 0)
+        if (wave % modulo == 0)
         {
             ArenaManager.tellAll("Get ready for wave #" + wave + "! [SPECIAL]");
             specialWave();
@@ -132,9 +130,6 @@ public class MASpawnThread implements Runnable
             LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
             ArenaManager.monsterSet.add(e);
             
-            //if (mob == CreatureType.WOLF)
-            //    ((Wolf)e).setAngry(true);
-            
             // Grab a random target.
             Creature c = (Creature) e;
             c.setTarget(getClosestPlayer(e));
@@ -165,42 +160,33 @@ public class MASpawnThread implements Runnable
         else return;
         
         // 5 on purpose - Ghasts act weird in Overworld.
-        switch (mob)
-        //switch (random.nextInt(5))
+        switch(mob)
         {
             case CREEPER:
-                //mob   = CreatureType.CREEPER;
                 count = noOfPlayers * 3;
                 break;
             case PIG_ZOMBIE:
-                //mob   = CreatureType.PIG_ZOMBIE;
                 count = noOfPlayers * 2;
                 break;
             case SLIME:
-                //mob   = CreatureType.SLIME;
                 count = noOfPlayers * 4;
                 slime = true;
                 break;
             case MONSTER:
-                //mob   = CreatureType.MONSTER;
                 count = noOfPlayers + 1;
                 break;
             case WOLF:
-                //mob   = CreatureType.WOLF;
                 count = noOfPlayers * 3;
                 wolf  = true;
                 break;
             case GIANT:
-                //mob   = CreatureType.GIANT;
                 count = 1;
                 break;
             case GHAST:
-                //mob   = CreatureType.GHAST;
                 count = 2;
                 ghast = true;
                 break;
             default:
-                //mob   = CreatureType.CHICKEN;
                 count = 50;
                 break;
         }
@@ -229,6 +215,9 @@ public class MASpawnThread implements Runnable
             c.setTarget(getClosestPlayer(e));
         }
         
+        if (!ArenaManager.lightning)
+            return;
+            
         // Lightning, just for effect ;)
         for (Location spawn : ArenaManager.spawnpoints)
         {

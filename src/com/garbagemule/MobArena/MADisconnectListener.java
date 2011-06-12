@@ -1,10 +1,7 @@
 package com.garbagemule.MobArena;
 
-import java.util.List;
-import java.util.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerListener;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -16,11 +13,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
  */
 public class MADisconnectListener extends PlayerListener
 {
-    private MobArena plugin;
-    
     public MADisconnectListener(MobArena instance)
     {
-        plugin = instance;
     }
     
     public void onPlayerQuit(PlayerQuitEvent event)
