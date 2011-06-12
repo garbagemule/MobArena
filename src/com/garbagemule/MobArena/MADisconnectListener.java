@@ -54,7 +54,7 @@ public class MADisconnectListener extends PlayerListener
             {
                 public void run()
                 {
-                    MAUtils.checkForUpdates(p, true);
+                    MAUtils.checkForUpdates(p, false);
                 }
             }, 100);
     }
