@@ -4,6 +4,8 @@ import java.util.HashMap;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -25,14 +27,40 @@ public class MAMonsterListener extends EntityListener
     }
     
     /**
+     * Prevents monsters from spawning inside the arena unless
+     * it's running.
+     */
+    public void onCreatureSpawn(CreatureSpawnEvent event)
+    {        
+        if (!MAUtils.inRegion(event.getLocation()))
+            return;
+            
+        if (!(event.getEntity() instanceof LivingEntity))
+            return;
+        
+        if (!ArenaManager.isRunning)
+            event.setCancelled(true);
+    }
+    
+    /**
      * Handles all explosion events, also from TNT.
      */
     public void onEntityExplode(EntityExplodeEvent event)
     {
-        /* This could be done by simply cancelling the event, but that
-         * also cancels the explosion animation. This is a workaround. */
+        // Check if any of the block "victims" are in the region.
         if (!MAUtils.inRegion(event.getLocation()))
-            return;
+        {
+            boolean inRegion = false;
+            for (Block b : event.blockList())
+            {
+                if (!MAUtils.inRegion(b.getLocation()))
+                    continue;
+                inRegion = true;
+                break;
+            }
+            if (!inRegion)
+                return;
+        }
         
         // Don't drop any blocks from the explosion.
         event.setYield(0);

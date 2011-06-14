@@ -421,6 +421,9 @@ public class MAUtils
         if (!loc.getWorld().getName().equals(ArenaManager.world.getName()))
             return false;
         
+        if (!ArenaManager.isSetup)
+            return false;
+        
         Location p1 = ArenaManager.p1;
         Location p2 = ArenaManager.p2;
         
@@ -593,6 +596,7 @@ public class MAUtils
                 (ArenaManager.dSkeletons   != -1)   &&
                 (ArenaManager.dSpiders     != -1)   &&
                 (ArenaManager.dCreepers    != -1)   &&
+                (ArenaManager.dWolves      != -1)   &&
                 (ArenaManager.classes.size() > 0)   &&
                 (ArenaManager.spawnpoints.size() > 0));
     }   

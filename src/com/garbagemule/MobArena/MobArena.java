@@ -55,21 +55,20 @@ public class MobArena extends JavaPlugin
         
         // Register events.
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, commandListener, Priority.Monitor, this);
-        pm.registerEvent(Event.Type.PLAYER_INTERACT,  lobbyListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, lobbyListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, lobbyListener, Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_TELEPORT,  teleportListener, Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_QUIT,      discListener,     Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_KICK,      discListener,     Priority.Normal,  this);
-        pm.registerEvent(Event.Type.PLAYER_JOIN,      discListener,     Priority.Normal,  this);
-        pm.registerEvent(Event.Type.BLOCK_BREAK,      blockListener,    Priority.Normal,  this);
-        //pm.registerEvent(Event.Type.BLOCK_DAMAGE,     blockListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.BLOCK_PLACE,      blockListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGE,    damageListener,   Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_DEATH,     damageListener,   Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_EXPLODE,   monsterListener,  Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_COMBUST,   monsterListener,  Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_TARGET,    monsterListener,  Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_INTERACT,     lobbyListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_DROP_ITEM,    lobbyListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_BUCKET_EMPTY, lobbyListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_TELEPORT,     teleportListener, Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_QUIT,         discListener,     Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_KICK,         discListener,     Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_JOIN,         discListener,     Priority.Normal,  this);
+        pm.registerEvent(Event.Type.BLOCK_BREAK,         blockListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.BLOCK_PLACE,         blockListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_DEATH,        damageListener,   Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_EXPLODE,      monsterListener,  Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_COMBUST,      monsterListener,  Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_TARGET,       monsterListener,  Priority.Normal,  this);
+        pm.registerEvent(Event.Type.CREATURE_SPAWN,      monsterListener,  Priority.Normal,  this);
         
         System.out.println(pdfFile.getName() + " v" + pdfFile.getVersion() + " enabled." );
     }

@@ -3,7 +3,6 @@ package com.garbagemule.MobArena;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -161,6 +160,9 @@ public class ArenaManager
         isRunning = true;
         readySet.clear();
         
+        // Clear the floor for good measure.
+        clearEntities();
+        
         for (Player p : playerSet)
         {
             p.teleport(arenaLoc);
@@ -293,11 +295,8 @@ public class ArenaManager
         p.setHealth(20);
         tellAll(p.getName() + " died!");
         
-        //if (playerSet.contains(p))
-            playerSet.remove(p);
-        
-        //if (classMap.keySet().contains(p))
-            classMap.remove(p);
+        playerSet.remove(p);
+        classMap.remove(p);
             
         if (isRunning && playerSet.isEmpty())
             endArena();
@@ -384,10 +383,9 @@ public class ArenaManager
             return;
         }
         
-        Iterator<Player> iterator = ArenaManager.playerSet.iterator();
-        while (iterator.hasNext())
+        Set<Player> set = new HashSet<Player>(playerSet);
+        for (Player player : set)
         {
-            Player player = iterator.next();
             if (!ArenaManager.readySet.contains(player))
                 ArenaManager.playerLeave(player);
         }
@@ -407,9 +405,9 @@ public class ArenaManager
             return;
         }
         
-        Iterator<Player> iterator = ArenaManager.playerSet.iterator();
-        while (iterator.hasNext())
-            ArenaManager.playerLeave(iterator.next());
+        Set<Player> set = new HashSet<Player>(playerSet);
+        for (Player player : set)
+            ArenaManager.playerLeave(player);
         
         // Just for good measure.
         endArena();

@@ -19,24 +19,6 @@ public class MABlockListener extends BlockListener
     public MABlockListener(MobArena instance)
     {
     }
-    
-    /* Removed for testing purposes.
-    public void onBlockDamage(BlockDamageEvent event)
-    {
-        if (!ArenaManager.isSetup || !ArenaManager.isProtected)
-            return;
-        
-        Block b = event.getBlock();
-        
-        if (ArenaManager.blockSet.contains(b))
-            return;
-        
-        System.out.println("This is block damage.");
-        
-        if (MAUtils.inRegion(b.getLocation()))
-            event.setCancelled(true);
-    }
-    */
 
     /**
      * Prevents blocks from breaking if block protection is on.
@@ -50,8 +32,6 @@ public class MABlockListener extends BlockListener
         
         if (ArenaManager.blockSet.remove(b) || b.getType() == Material.TNT)
             return;
-        
-        System.out.println("This is block break.");
         
         if (MAUtils.inRegion(b.getLocation()))
             event.setCancelled(true);

@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -146,9 +147,10 @@ public class MASpawnThread implements Runnable
         ran = random.nextInt(dGhasts);
         
         int count;
-        boolean slime = false;
-        boolean wolf  = false;
-        boolean ghast = false;
+        boolean slime   = false;
+        boolean wolf    = false;
+        boolean ghast   = false;
+        boolean creeper = false;
         
         if      (ran < dPoweredCreepers) mob = CreatureType.CREEPER;
         else if (ran < dPigZombies)      mob = CreatureType.PIG_ZOMBIE;
@@ -164,6 +166,7 @@ public class MASpawnThread implements Runnable
         {
             case CREEPER:
                 count = noOfPlayers * 3;
+                creeper = true;
                 break;
             case PIG_ZOMBIE:
                 count = noOfPlayers * 2;
@@ -202,9 +205,10 @@ public class MASpawnThread implements Runnable
             else
                 System.out.println("MASpawnThread - monsterSet contains this entity");
             
-            if (slime) ((Slime)e).setSize(2);
-            if (wolf)  ((Wolf)e).setAngry(true);
-            if (ghast) ((Ghast)e).setHealth(Math.min(noOfPlayers*25, 200));
+            if (slime)   ((Slime)e).setSize(2);
+            if (wolf)    ((Wolf)e).setAngry(true);
+            if (ghast)   ((Ghast)e).setHealth(Math.min(noOfPlayers*25, 200));
+            if (creeper) ((Creeper)e).setPowered(true);
             
             // Slimes can't have targets, apparently.
             if (!(e instanceof Creature))

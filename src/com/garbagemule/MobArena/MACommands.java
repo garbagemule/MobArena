@@ -223,7 +223,7 @@ public class MACommands implements CommandExecutor
         }
         
         // ma setregion [p1|p2]
-        if (cmd.equalsIgnoreCase("setregion"))
+        if (cmd.equals("setregion"))
         {
             if (!arg.equals("p1") && !arg.equals("p2"))
             {
@@ -240,7 +240,7 @@ public class MACommands implements CommandExecutor
         }
         
         // ma expandregion [up|down|out] <amount>
-        if (cmd.equalsIgnoreCase("expandregion"))
+        if (cmd.equals("expandregion"))
         {
             if (ArenaManager.p1 == null || ArenaManager.p2 == null)
             {
