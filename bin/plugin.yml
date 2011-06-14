@@ -1,6 +1,7 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
 version: 0.90.2
+softdepend: [MultiVerse]
 commands:
   ma:
     description: Base command for MobArena
