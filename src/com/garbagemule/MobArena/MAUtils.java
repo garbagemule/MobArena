@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Iterator;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
@@ -221,6 +222,35 @@ public class MAUtils
         
         c.save();
         return ArenaManager.server.getWorld(world);
+    }
+    
+    /**
+     * Handles all spawn-monster bypassing.
+     * If toggle is true, swap the allowMonsters field if possible. Otherwise, just
+     * return the current value.
+     */
+    public static boolean spawnBypass(boolean toggle)
+    {
+        // Cast the world to an nmsWorld.
+        net.minecraft.server.World nmsWorld = ((CraftWorld) ArenaManager.world).getHandle();
+        
+        // If not toggling, just return the current variable.
+        if (!toggle)
+            return nmsWorld.allowMonsters;
+        
+        // If arena is running, allow monsters, otherwise don't.
+        if (ArenaManager.isRunning)
+        {
+            nmsWorld.allowMonsters = true;
+            nmsWorld.spawnMonsters = 1;
+        }
+        else
+        {
+            nmsWorld.allowMonsters = false;
+            nmsWorld.spawnMonsters = 0;
+        }
+        
+        return true;
     }
     
     /**

@@ -49,7 +49,7 @@ public class MobArena extends JavaPlugin
         PlayerListener teleportListener = new MATeleportListener(this);
         PlayerListener discListener     = new MADisconnectListener(this);
         BlockListener  blockListener    = new MABlockListener(this);
-        EntityListener damageListener   = new MADamageListener(this);
+        EntityListener deathListener    = new MADeathListener(this);
         EntityListener monsterListener  = new MAMonsterListener(this);
         // TO-DO: PlayerListener to check for kills/deaths.
         
@@ -64,7 +64,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_JOIN,         discListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_BREAK,         blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,         blockListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_DEATH,        damageListener,   Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENTITY_DEATH,        deathListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,      monsterListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST,      monsterListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,       monsterListener,  Priority.Normal,  this);

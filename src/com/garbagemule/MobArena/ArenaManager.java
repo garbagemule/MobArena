@@ -36,7 +36,7 @@ public class ArenaManager
     protected static boolean isProtected   = true;
     protected static int spawnTaskId       = -1;
     protected static int waveDelay, waveInterval, specialModulo, repairDelay;
-    protected static boolean checkUpdates, lightning;
+    protected static boolean checkUpdates, lightning, spawnMonsters;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -88,12 +88,13 @@ public class ArenaManager
         if (instance != null)
         {
             // General variables.
-            config      = MAUtils.getConfig();
-            plugin      = instance;
-            server      = plugin.getServer();
-            world       = MAUtils.getWorld();
-            lightning   = MAUtils.getBoolean("settings.lightning", true);
-            repairDelay = MAUtils.getInt("settings.repairdelay", 5);
+            config        = MAUtils.getConfig();
+            plugin        = instance;
+            server        = plugin.getServer();
+            world         = MAUtils.getWorld();
+            lightning     = MAUtils.getBoolean("settings.lightning", true);
+            repairDelay   = MAUtils.getInt("settings.repairdelay", 5);
+            spawnMonsters = MAUtils.spawnBypass(false);
         
             // Class list and maps.
             classes       = MAUtils.getClasses();
@@ -159,6 +160,7 @@ public class ArenaManager
     {
         isRunning = true;
         readySet.clear();
+        MAUtils.spawnBypass(true);
         
         // Clear the floor for good measure.
         clearEntities();
@@ -184,13 +186,13 @@ public class ArenaManager
     {
         isRunning = false;
         server.getScheduler().cancelTask(spawnTaskId);
+        MAUtils.spawnBypass(true);
         
         killMonsters();
         clearBlocks();
         clearEntities();
         giveRewards();
         
-        // TO-DO: Fix this, maybe add a Set<Player> dead
         tellAll("Arena finished.");
     }
     
@@ -502,16 +504,24 @@ public class ArenaManager
      */
     public static void giveRewards()
     {
-        for (Player p : rewardMap.keySet())
-        {
-            String r = rewardMap.get(p);
-            if (r.isEmpty()) continue;
-            
-            tellPlayer(p, "Here are all of your rewards!");
-            MAUtils.giveItems(true, p, r);
-        }
-        
-        rewardMap.clear();
+        /* This has to be delayed for players to actually receive
+         * their rewards after they die. Not sure why. */
+        server.getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    for (Player p : rewardMap.keySet())
+                    {
+                        String r = rewardMap.get(p);
+                        if (r.isEmpty()) continue;
+                        
+                        tellPlayer(p, "Here are all of your rewards!");
+                        MAUtils.giveItems(true, p, r);
+                    }
+                    
+                    rewardMap.clear();
+                }}, 20);
     }
     
     

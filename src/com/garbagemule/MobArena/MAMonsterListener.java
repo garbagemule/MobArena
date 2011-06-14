@@ -31,13 +31,23 @@ public class MAMonsterListener extends EntityListener
      * it's running.
      */
     public void onCreatureSpawn(CreatureSpawnEvent event)
-    {        
+    {
+        // If monster spawning is disabled, only spawn inside the region.
+        if (!ArenaManager.spawnMonsters)
+        {
+            if (ArenaManager.isRunning && MAUtils.inRegion(event.getLocation()))
+                return;
+            event.setCancelled(true);
+        }
+        
+        // Otherwise, ignore spawns inside the region...
         if (!MAUtils.inRegion(event.getLocation()))
             return;
             
         if (!(event.getEntity() instanceof LivingEntity))
             return;
         
+        // .. And cancel those inside the region if the arena isn't running.
         if (!ArenaManager.isRunning)
             event.setCancelled(true);
     }

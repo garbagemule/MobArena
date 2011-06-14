@@ -14,9 +14,9 @@ import org.bukkit.event.entity.EntityDeathEvent;
  * By the end of the arena session, the rewards are given.
  */
 // TO-DO: Perhaps implement TeamFluff's respawn-packet-code.
-public class MADamageListener extends EntityListener
+public class MADeathListener extends EntityListener
 {    
-    public MADamageListener(MobArena instance)
+    public MADeathListener(MobArena instance)
     {
     }
     
