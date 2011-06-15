@@ -2,7 +2,6 @@ package com.garbagemule.MobArena;
 
 import java.util.List;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.BlockListener;
@@ -82,10 +81,5 @@ public class MobArena extends JavaPlugin
         System.out.println("WAIT! WHAT ARE YOU DOING?!");
         
         ArenaManager.forceEnd(null);
-    }
-    
-    public boolean isPlaying(Player p)
-    {
-        return ArenaManager.playerSet.contains(p);
     }
 }

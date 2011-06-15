@@ -245,11 +245,14 @@ public class MAUtils
         if (ArenaManager.isRunning)
         {
             nmsWorld.allowMonsters = true;
-            nmsWorld.spawnMonsters = 1;
+            if (ArenaManager.spawnMonstersInt == 0)
+                nmsWorld.spawnMonsters = 1;
         }
         else
         {
-            nmsWorld.allowMonsters = false;
+            // If the server wasn't allowing monsters, set it back to false.
+            if (!ArenaManager.spawnMonsters)
+                nmsWorld.allowMonsters = false;
             nmsWorld.spawnMonsters = ArenaManager.spawnMonstersInt;
         }
         
