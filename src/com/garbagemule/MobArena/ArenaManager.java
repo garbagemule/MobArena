@@ -34,9 +34,12 @@ public class ArenaManager
     protected static boolean isSetup       = false;
     protected static boolean isEnabled     = true;
     protected static boolean isProtected   = true;
+    protected static int wave              = 0;
     protected static int spawnTaskId       = -1;
     protected static int waveDelay, waveInterval, specialModulo, repairDelay;
     protected static boolean checkUpdates, lightning, spawnMonsters;
+    protected static int spawnMonstersInt;
+    protected static MASpawnThread spawnThread = null;
     
     // Location variables for the arena region.
     protected static Location p1 = null;
@@ -70,6 +73,9 @@ public class ArenaManager
     // Entities, blocks and items on MobArena floor.
     protected static Set<LivingEntity> monsterSet = new HashSet<LivingEntity>();
     protected static Set<Block> blockSet          = new HashSet<Block>();
+    
+    // Hook listeners
+    protected static Set<MobArenaListener> listeners = new HashSet<MobArenaListener>();
     
     
     
@@ -171,10 +177,13 @@ public class ArenaManager
             rewardMap.put(p,"");
         }
         
-        MASpawnThread thread = new MASpawnThread();
-        spawnTaskId = server.getScheduler().scheduleSyncRepeatingTask(plugin,thread,(long)waveDelay,(long)waveInterval);
+        spawnThread = new MASpawnThread();
+        spawnTaskId = server.getScheduler().scheduleSyncRepeatingTask(plugin,spawnThread,(long)waveDelay,(long)waveInterval);
         
         tellAll("Let the slaughter begin!");
+        
+        for (MobArenaListener m : listeners)
+            m.onArenaStart();
     }
     
     /**
@@ -185,6 +194,7 @@ public class ArenaManager
     public static void endArena()
     {
         isRunning = false;
+        wave = 0;
         server.getScheduler().cancelTask(spawnTaskId);
         MAUtils.spawnBypass(true);
         
@@ -194,6 +204,9 @@ public class ArenaManager
         giveRewards();
         
         tellAll("Arena finished.");
+        
+        for (MobArenaListener m : listeners)
+            m.onArenaEnd();
     }
     
     /**
@@ -239,6 +252,9 @@ public class ArenaManager
         p.teleport(lobbyLoc);
         
         tellPlayer(p, "You joined the arena. Have fun!");
+        
+        for (MobArenaListener m : listeners)
+            m.onPlayerJoin(p);
     }
     
     /**
@@ -270,6 +286,9 @@ public class ArenaManager
             startArena();
         
         tellPlayer(p, "You left the arena. Thanks for playing!");
+        
+        for (MobArenaListener m : listeners)
+            m.onPlayerLeave(p);
     }
 
     /**
@@ -302,6 +321,9 @@ public class ArenaManager
             
         if (isRunning && playerSet.isEmpty())
             endArena();
+        
+        for (MobArenaListener m : listeners)
+            m.onPlayerDeath(p);
     }
     
     /**

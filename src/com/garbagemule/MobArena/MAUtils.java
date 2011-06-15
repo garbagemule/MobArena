@@ -236,7 +236,10 @@ public class MAUtils
         
         // If not toggling, just return the current variable.
         if (!toggle)
+        {
+            ArenaManager.spawnMonstersInt = nmsWorld.spawnMonsters;
             return nmsWorld.allowMonsters;
+        }
         
         // If arena is running, allow monsters, otherwise don't.
         if (ArenaManager.isRunning)
@@ -247,7 +250,7 @@ public class MAUtils
         else
         {
             nmsWorld.allowMonsters = false;
-            nmsWorld.spawnMonsters = 0;
+            nmsWorld.spawnMonsters = ArenaManager.spawnMonstersInt;
         }
         
         return true;

@@ -92,14 +92,19 @@ public class MASpawnThread implements Runnable
         if (wave % modulo == 0)
         {
             ArenaManager.tellAll("Get ready for wave #" + wave + "! [SPECIAL]");
+            for (MobArenaListener m : ArenaManager.listeners)
+                m.onSpecialWave(wave, wave/modulo);
             specialWave();
         }
         else
         {
             ArenaManager.tellAll("Get ready for wave #" + wave + "!");
+            for (MobArenaListener m : ArenaManager.listeners)
+                m.onDefaultWave(wave);
             defaultWave();
         }
-        
+
+        ArenaManager.wave = wave;
         wave++;
     }
     
