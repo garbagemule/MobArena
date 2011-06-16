@@ -172,8 +172,8 @@ public class MACommands implements CommandExecutor
             }
             
             // Write the coordinate data to the config-file.
-            MAUtils.setCoords(arg, p.getLocation());
-            
+            MAUtils.setCoords(arg, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
+
             ArenaManager.tellPlayer(p, "Warp point \"" + arg + "\" set.");
             MAUtils.notifyIfSetup(p);
             return true;
@@ -190,7 +190,7 @@ public class MACommands implements CommandExecutor
             }
             
             // Write the coordinate data to the config-file.
-            MAUtils.setCoords("spawnpoints." + arg, p.getLocation());
+            MAUtils.setCoords("spawnpoints." + arg, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
             
             ArenaManager.tellPlayer(p, "Spawn point with name \"" + arg + "\" added.");
             MAUtils.notifyIfSetup(p);

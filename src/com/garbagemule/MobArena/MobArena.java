@@ -67,7 +67,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_JOIN,         discListener,     Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_BREAK,         blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,         blockListener,    Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_DEATH,        deathListener,    Priority.Lowest,  this);
+        pm.registerEvent(Event.Type.ENTITY_DEATH,        deathListener,    Priority.Lowest,  this); // Lowest because of Tombstone
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,      monsterListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST,      monsterListener,  Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,       monsterListener,  Priority.Normal,  this);

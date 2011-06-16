@@ -28,4 +28,7 @@ public class MobArenaHandler
     
     // Get the current wave number.
     public int getWave()                   { return ArenaManager.wave; }
+    
+    // Check if a location is in the arena region
+    public boolean inRegion(Location l)    { return MAUtils.inRegion(l); }
 }
