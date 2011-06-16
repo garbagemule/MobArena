@@ -36,6 +36,7 @@ public class MADeathListener extends EntityListener
             
             event.getDrops().clear();
             ArenaManager.playerDeath(p);
+            p.getInventory().clear();
         }
         // If monster, remove from monster set
         else if (event.getEntity() instanceof LivingEntity)
