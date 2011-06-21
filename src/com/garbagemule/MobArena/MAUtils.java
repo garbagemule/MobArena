@@ -337,7 +337,7 @@ public class MAUtils
             {
                 c.setProperty("rewards.waves.after.7", "minecart, storage_minecart, powered_minecart");
                 c.setProperty("rewards.waves.after.13", "iron_sword, iron_pickaxe, iron_spade");
-                c.setProperty("rewards.waves.after.16", "diamon_sword");
+                c.setProperty("rewards.waves.after.16", "diamond_sword");
             }
             
             c.save();
