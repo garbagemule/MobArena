@@ -92,8 +92,8 @@ public class MACommands implements CommandExecutor
         
         // Grab the command base and any arguments.
         String base = args[0].toLowerCase();
-        String arg1 = (args.length >= 2) ? args[1].toLowerCase() : null;
-        String arg2 = (args.length >= 3) ? args[2].toLowerCase() : null;
+        String arg1 = (args.length > 1) ? args[1].toLowerCase() : "";
+        String arg2 = (args.length > 2) ? args[2].toLowerCase() : "";
         //String arg3 = (args.length >= 4) ? args[3].toLowerCase() : null;
 
         
@@ -109,15 +109,15 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("join") || base.equals("j"))
         {            
-            if (!player)
+            if (!player || !MobArena.has(p, "mobarena.use.join"))
             {
-                MAUtils.tellPlayer(sender, "Players only.");
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
 
             boolean error;
             
-            if (arg1 != null)
+            if (!arg1.isEmpty())
             {
                 Arena arena = am.getArenaWithName(arg1);
                 
@@ -152,8 +152,7 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
                 return true;
             }
-            
-            if (arg1 == null)
+            else
             {
                 if (am.arenas.size() < 1)
                 {
@@ -202,9 +201,9 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("leave") || base.equals("l"))
         {
-            if (!player)
+            if (!player || !MobArena.has(p, "mobarena.use.leave"))
             {
-                MAUtils.tellPlayer(sender, "Players only.");
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
             
@@ -225,16 +224,16 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("spectate") || base.equals("spec"))
         {
-            if (!player)
+            if (!player || !MobArena.has(p, "mobarena.use.spectate"))
             {
-                MAUtils.tellPlayer(sender, "Players only.");
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
 
             boolean error;
             Arena arena = null;
             
-            if (arg1 != null)
+            if (!arg1.isEmpty())
             {
                 arena = am.getArenaWithName(arg1);
 
@@ -285,7 +284,7 @@ public class MACommands implements CommandExecutor
          * Prints a list of all arenas.
          */
         if (base.equals("arenas"))
-        {
+        {            
             String list = MAUtils.listToString(am.arenas);
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_ARENAS, list));
             return true;
@@ -296,7 +295,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("players") || base.equals("list"))
         {
-            if (arg1 != null)
+            if (!arg1.isEmpty())
             {
                 Arena arena = am.getArenaWithName(arg1);
                 if (arena == null)
@@ -312,9 +311,44 @@ public class MACommands implements CommandExecutor
             {
                 StringBuffer buffy = new StringBuffer();
                 for (Arena arena : am.arenas)
-                    buffy.append(MAUtils.listToString(arena.getLivingPlayers()));
+                    buffy.append(MAUtils.listToString(arena.getLivingPlayers(), false));
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
             }
+            return true;
+        }
+        
+        /*
+         * Prints a list of all non-ready players in current arena, or non-ready players in a specific arena.
+         */
+        if (base.equals("notready"))
+        {
+            Arena arena;
+            if (!arg1.isEmpty())
+            {
+                arena = am.getArenaWithName(arg1);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    return true;
+                }
+            }
+            else if (player)
+            {
+                arena = am.getArenaWithPlayer(p);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.LEAVE_NOT_PLAYING));
+                    return true;
+                }
+            }
+            else
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma notready <arena name>");
+                return true;
+            }
+            
+            String list = MAUtils.listToString(arena.getNonreadyPlayers());
+            MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             return true;
         }
         
@@ -323,9 +357,9 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("restore"))
         {
-            if (arg1 == null && player)
+            if (arg1.isEmpty() && player)
             {
-                if (am.getArenaWithPlayer((Player) sender) != null)
+                if (am.getArenaWithPlayer(p) != null)
                 {
                     MAUtils.tellPlayer(sender, "You must first leave the current arena.");
                     return true;
@@ -335,7 +369,7 @@ public class MACommands implements CommandExecutor
                     MAUtils.tellPlayer(sender, "Restored your inventory!");
                 return true;
             }
-            if (arg1 != null && (op || console))
+            if (!arg1.isEmpty() && (op || console))
             {
                 if (am.getArenaWithPlayer(arg1) != null)
                 {
@@ -362,13 +396,14 @@ public class MACommands implements CommandExecutor
          */
         if ((base.equals("enable") || base.equals("disable")))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.admin.enable")) && !op)
+            //if (player && !MobArena.has(p, "mobarena.admin.enable"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
             
-            if (arg1 != null)
+            if (!arg1.isEmpty())
             {
                 Arena arena = am.getArenaWithName(arg1);
                 if (arena != null)
@@ -396,12 +431,12 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("protect"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.admin.protect")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || arg2 == null || !(arg2.equals("true") || arg2.equals("false")))
+            if (arg1.isEmpty() || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || !(arg2.equals("true") || arg2.equals("false")))
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma protect <arena name> [true|false]");
                 return true;
@@ -424,32 +459,22 @@ public class MACommands implements CommandExecutor
         /*
          * Force start/end arenas.
          */
-        if (base.equals("force"))
-        {
-            if (!(op || console))
-            {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
-                return true;
-            }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
-            {
-                MAUtils.tellPlayer(sender, "Usage: /ma force [start|end] (<arena name>)");
-                return true;
-            }
-            
+        if (base.equals("force") && arg1.equals("end"))
+        {            
             if (arg1.equals("end"))
             {
-                if (arg2 == null)
+                if (!console && !(player && MobArena.has(p, "mobarena.admin.force.end")) && !op)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                    return true;
+                }
+                
+                if (arg2.isEmpty())
                 {
                     for (Arena arena : am.arenas)
                         arena.forceEnd();
                     
                     am.arenaMap.clear();
-                    return true;
-                }
-                if (!arg2.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
-                {
-                    MAUtils.tellPlayer(sender, "Usage: /ma force end (<arena name>)");
                     return true;
                 }
                 
@@ -460,7 +485,6 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                // The arena exists.
                 if (arena.livePlayers.isEmpty())
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_EMPTY));
@@ -471,10 +495,15 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_ENDED));
                 return true;
             }
-            
-            if (arg1.equals("start"))
+            else if (arg1.equals("start"))
             {
-                if (arg2 == null || !arg2.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+                if (!console && !(player && MobArena.has(p, "mobarena.admin.force.start")) && !op)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                    return true;
+                }
+                
+                if (arg2.isEmpty())
                 {
                     MAUtils.tellPlayer(sender, "Usage: /ma force start <arena name>");
                     return true;
@@ -487,7 +516,6 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                // The arena exists.
                 if (arena.running)
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_RUNNING));
@@ -503,14 +531,19 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_STARTED));
                 return true;
             }
+            else
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma force [start|end] (<arena name>)");
+                return true;
+            }
         }
         
         /*
          * Reload the config-file.
          */
-        if (base.equals("config") && arg1 != null)
+        if (base.equals("config"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.admin.config.reload")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -532,7 +565,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("arena"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.arena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -558,12 +591,12 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setarena"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.setarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            if (arg1.isEmpty())
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma setarena <arena name>");
                 return true;
@@ -571,9 +604,14 @@ public class MACommands implements CommandExecutor
             
             Arena arena = am.getArenaWithName(arg1);
             if (arena != null)
+            {
                 am.selectedArena = arena;
+                MAUtils.tellPlayer(sender, "Currently selected arena: " + arena.configName());
+            }
             else
+            {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+            }
             return true;
         }
         
@@ -582,12 +620,12 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("addarena"))
         {
-            if (!op)
+            if (!(player && MobArena.has(p, "mobarena.setup.addarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            if (arg1.isEmpty())
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma addarena <arena name>");
                 return true;
@@ -610,17 +648,17 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("delarena"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.delarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            if (arg1.isEmpty())
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma delarena <arena name>");
                 return true;
             }
-            if (am.arenas.size() == 1)
+            if (am.arenas.size() < 2)
             {
                 MAUtils.tellPlayer(sender, "At least one arena must exist.");
                 return true;
@@ -643,12 +681,12 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("editarena"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.editarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || arg2 == null || (!arg2.equals("true") && !arg2.equals("false")))
+            if (arg1.isEmpty() || !(arg2.equals("true") || arg2.equals("false")))
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma editarena <arena name> [true|false]");
                 return true;
@@ -672,13 +710,13 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setregion"))
         {
-            if (!op)
+            if (!(player && MobArena.has(p, "mobarena.setup.setregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
             
-            if (arg1 == null || !(arg1.equals("p1") || arg1.equals("p2")))
+            if (!(arg1.equals("p1") || arg1.equals("p2")))
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma setregion [p1|p2]");
                 return true;
@@ -694,7 +732,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("expandregion"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.expandregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -737,12 +775,12 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setwarp"))
         {
-            if (!op)
+            if (!(player && MobArena.has(p, "mobarena.setup.setwarp")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !(arg1.equals("arena") || arg1.equals("lobby") || arg1.equals("spectator")))
+            if (!(arg1.equals("arena") || arg1.equals("lobby") || arg1.equals("spectator")))
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma setwarp [arena|lobby|spectator]");
                 return true;
@@ -758,7 +796,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("spawnpoints"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.spawnpoints")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -789,7 +827,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("addspawn"))
         {
-            if (!op)
+            if (!(player && MobArena.has(p, "mobarena.setup.addspawn")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -810,7 +848,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("delspawn"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.delspawn")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -830,7 +868,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("auto-generate"))
         {
-            if (!op)
+            if (!(player && MobArena.has(p, "mobarena.setup.autogenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -855,14 +893,19 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("auto-degenerate"))
         {
-            if (!(op || console))
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.autodegenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            if (arg1.isEmpty())
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma auto-degenerate <arena name>");
+                return true;
+            }
+            if (am.arenas.size() < 2)
+            {
+                MAUtils.tellPlayer(sender, "At least one arena must exist!");
                 return true;
             }
             if (am.getArenaWithName(arg1) == null)

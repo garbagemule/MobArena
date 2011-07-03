@@ -36,7 +36,6 @@ public class MAMessages
         SPEC_EMPTY_INV,
         SPEC_ALREADY_PLAYING,
         NOT_READY_PLAYERS,
-        NOT_READY_RUNNING,
         FORCE_START_STARTED,
         FORCE_START_RUNNING,
         FORCE_START_NOT_READY,
@@ -45,6 +44,7 @@ public class MAMessages
         FORCE_END_IDLE,
         REWARDS_GIVE,
         LOBBY_CLASS_PICKED,
+        LOBBY_CLASS_PERMISSION,
         LOBBY_PLAYER_READY,
         LOBBY_DROP_ITEM,
         LOBBY_PICK_CLASS,
@@ -86,7 +86,6 @@ public class MAMessages
         defaults.put(Msg.SPEC_ARG_NEEDED, "You must specify an arena. Type /ma arenas for a list.");
         defaults.put(Msg.SPEC_EMPTY_INV, "Empty your inventory first!");
         defaults.put(Msg.SPEC_ALREADY_PLAYING, "Can't spectate when in the arena!");
-        defaults.put(Msg.NOT_READY_RUNNING, "The lobby is empty!");
         defaults.put(Msg.NOT_READY_PLAYERS, "Not ready: %");
         defaults.put(Msg.FORCE_START_RUNNING, "Arena has already started.");
         defaults.put(Msg.FORCE_START_NOT_READY, "Can't force start, no players are ready.");
@@ -100,6 +99,7 @@ public class MAMessages
         defaults.put(Msg.LOBBY_PICK_CLASS, "You must first pick a class!");
         defaults.put(Msg.LOBBY_RIGHT_CLICK, "Punch the sign. Don't right-click.");
         defaults.put(Msg.LOBBY_CLASS_PICKED, "You have chosen % as your class!");
+        defaults.put(Msg.LOBBY_CLASS_PERMISSION, "You don't have permission to use this class!");
         defaults.put(Msg.WARP_TO_ARENA, "Can't warp to the arena during battle!");
         defaults.put(Msg.WARP_FROM_ARENA, "Warping not allowed in the arena!");
         defaults.put(Msg.WAVE_DEFAULT, "Get ready for wave #%!");

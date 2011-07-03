@@ -288,9 +288,8 @@ public class Arena
         if (deadPlayers.remove(p))  clear = false;
         if (specPlayers.remove(p))  clear = false;
         
-        if (clear)
-            MAUtils.clearInventory(p);
-        MAUtils.restoreInventory(p);
+        if (clear)     MAUtils.clearInventory(p);
+        if (!emptyInv) MAUtils.restoreInventory(p);
         
         if (running && livePlayers.isEmpty())
             endArena();
@@ -942,6 +941,12 @@ public class Arena
             String className = sign.getLine(0);
             if (!classes.contains(className))
                 return;
+            
+            if (!MobArena.hasDefTrue(p, "mobarena.classes." + className))
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PERMISSION));
+                return;
+            }
 
             // Set the player's class.
             assignClass(p, className);
@@ -1067,6 +1072,14 @@ public class Arena
     {
         List<Player> result = new LinkedList<Player>();
         result.addAll(livePlayers);
+        return result;
+    }
+    
+    public List<Player> getNonreadyPlayers()
+    {
+        List<Player> result = new LinkedList<Player>();
+        result.addAll(livePlayers);
+        result.removeAll(readyPlayers);
         return result;
     }
     

@@ -33,6 +33,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
+import com.garbagemule.MobArena.MAMessages.Msg;
+
 public class MAUtils
 {         
     public static final String sep = File.separator;
@@ -827,10 +829,18 @@ public class MAUtils
     }
     
     /**
-     * Turn a list into a space-separated list.
+     * Turn a list into a space-separated string-representation of the list.
      */
     public static <E> String listToString(List<E> list)
+    {        
+        return listToString(list, true);
+    }
+    
+    public static <E> String listToString(List<E> list, boolean none)
     {
+        if (none && list.isEmpty())
+            return MAMessages.get(Msg.MISC_NONE);
+        
         StringBuffer buffy = new StringBuffer();
         for (E e : list)
         {

@@ -289,9 +289,16 @@ public class MASpawnThread implements Runnable
         List<Location> result = new ArrayList<Location>();
         
         for (Location s : arena.spawnpoints.values())
+        {
             for (Player p : arena.livePlayers)
-                if (s.distanceSquared(p.getLocation()) < MIN_DISTANCE)
-                    result.add(s);
+            {
+                if (s.distanceSquared(p.getLocation()) > MIN_DISTANCE)
+                    continue;
+                
+                result.add(s);
+                break;
+            }
+        }
         
         // If no players are in range, just use all the spawnpoints.
         if (result.isEmpty())

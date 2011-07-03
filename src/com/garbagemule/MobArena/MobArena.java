@@ -2,25 +2,32 @@ package com.garbagemule.MobArena;
 
 import java.io.File;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.entity.EntityListener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
+
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 /**
  * MobArena
  * @author garbagemule
  */
 public class MobArena extends JavaPlugin
-{    
-    /* Other useful variables. */
+{
     private Configuration config;
     private ArenaMaster am;
+    
+    // Permissions stuff
+    protected static PermissionHandler permissionHandler;
     
     public MobArena()
     {
@@ -30,10 +37,14 @@ public class MobArena extends JavaPlugin
     {
         PluginDescriptionFile pdfFile = this.getDescription();
         
+        // Config, messages and ArenaMaster initialization
         loadConfig();
         MAMessages.init(this);
         am = new ArenaMaster(this);
         am.initialize();
+        
+        // Permissions
+        setupPermissions();
         
         // Bind the /ma, /marena, and /mobarena commands to MACommands.
         MACommands commandExecutor = new MACommands(this, am);
@@ -129,6 +140,29 @@ public class MobArena extends JavaPlugin
         config.load();
         config.setHeader("# MobArena Configuration-file\r\n# Please go to https://github.com/garbagemule/MobArena/wiki/Installing-MobArena for more details.");
         config.save();
+    }
+    
+    // Permissions stuff
+    public static boolean has(Player p, String s)
+    {
+        //return (permissionHandler != null && permissionHandler.has(p, s));
+        return (permissionHandler == null || permissionHandler.has(p, s));
+    }
+    
+    public static boolean hasDefTrue(Player p, String s)
+    {
+        return (permissionHandler == null || permissionHandler.has(p, s));
+    }
+    
+    private void setupPermissions()
+    {
+        if (permissionHandler != null)
+            return;
+    
+        Plugin permissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
+        if (permissionsPlugin == null) return;
+        
+        permissionHandler = ((Permissions) permissionsPlugin).getHandler();
     }
     
     public Configuration getConfig()      { return config; }
