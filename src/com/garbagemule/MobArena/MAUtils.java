@@ -7,35 +7,302 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Iterator;
+import java.util.Set;
+
+import net.minecraft.server.WorldServer;
+
 import org.bukkit.block.Sign;
+import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
 public class MAUtils
-{                                                  
-    public static final List<Integer>  SWORDS_ID   = new LinkedList<Integer>();
-    public static final List<Material> SWORDS_TYPE = new LinkedList<Material>();
+{         
+    public static final String sep = File.separator;
+    // Weapons
+    public static final List<Material> WEAPONS_TYPE     = new LinkedList<Material>();
+    public static final List<Material> SWORDS_TYPE      = new LinkedList<Material>();
+    public static final List<Material> AXES_TYPE        = new LinkedList<Material>();
+    public static final List<Material> PICKAXES_TYPE    = new LinkedList<Material>();
+    public static final List<Material> SPADES_TYPE      = new LinkedList<Material>();
+    public static final List<Material> HOES_TYPE        = new LinkedList<Material>();
+    // Armor
+    public static final List<Material> ARMORS_TYPE      = new LinkedList<Material>();
+    public static final List<Material> HELMETS_TYPE     = new LinkedList<Material>();
+    public static final List<Material> CHESTPLATES_TYPE = new LinkedList<Material>();
+    public static final List<Material> LEGGINGS_TYPE    = new LinkedList<Material>();
+    public static final List<Material> BOOTS_TYPE       = new LinkedList<Material>();
     static
     {
+        // Weapons
         SWORDS_TYPE.add(Material.WOOD_SWORD);
         SWORDS_TYPE.add(Material.STONE_SWORD);
         SWORDS_TYPE.add(Material.GOLD_SWORD);
         SWORDS_TYPE.add(Material.IRON_SWORD);
         SWORDS_TYPE.add(Material.DIAMOND_SWORD);
+        
+        AXES_TYPE.add(Material.WOOD_AXE);
+        AXES_TYPE.add(Material.STONE_AXE);
+        AXES_TYPE.add(Material.GOLD_AXE);
+        AXES_TYPE.add(Material.IRON_AXE);
+        AXES_TYPE.add(Material.DIAMOND_AXE);
+        
+        PICKAXES_TYPE.add(Material.WOOD_PICKAXE);
+        PICKAXES_TYPE.add(Material.STONE_PICKAXE);
+        PICKAXES_TYPE.add(Material.GOLD_PICKAXE);
+        PICKAXES_TYPE.add(Material.IRON_PICKAXE);
+        PICKAXES_TYPE.add(Material.DIAMOND_PICKAXE);
+        
+        SPADES_TYPE.add(Material.WOOD_SPADE);
+        SPADES_TYPE.add(Material.STONE_SPADE);
+        SPADES_TYPE.add(Material.GOLD_SPADE);
+        SPADES_TYPE.add(Material.IRON_SPADE);
+        SPADES_TYPE.add(Material.DIAMOND_SPADE);
+        
+        HOES_TYPE.add(Material.WOOD_HOE);
+        HOES_TYPE.add(Material.STONE_HOE);
+        HOES_TYPE.add(Material.GOLD_HOE);
+        HOES_TYPE.add(Material.IRON_HOE);
+        HOES_TYPE.add(Material.DIAMOND_HOE);
+
+        WEAPONS_TYPE.addAll(SWORDS_TYPE);
+        WEAPONS_TYPE.addAll(AXES_TYPE);
+        WEAPONS_TYPE.addAll(PICKAXES_TYPE);
+        WEAPONS_TYPE.addAll(SPADES_TYPE);
+        WEAPONS_TYPE.addAll(HOES_TYPE);
+
+        // Armor
+        HELMETS_TYPE.add(Material.LEATHER_HELMET);
+        HELMETS_TYPE.add(Material.GOLD_HELMET);
+        HELMETS_TYPE.add(Material.CHAINMAIL_HELMET);
+        HELMETS_TYPE.add(Material.IRON_HELMET);
+        HELMETS_TYPE.add(Material.DIAMOND_HELMET);
+        
+        CHESTPLATES_TYPE.add(Material.LEATHER_CHESTPLATE);
+        CHESTPLATES_TYPE.add(Material.GOLD_CHESTPLATE);
+        CHESTPLATES_TYPE.add(Material.CHAINMAIL_CHESTPLATE);
+        CHESTPLATES_TYPE.add(Material.IRON_CHESTPLATE);
+        CHESTPLATES_TYPE.add(Material.DIAMOND_CHESTPLATE);
+        
+        LEGGINGS_TYPE.add(Material.LEATHER_LEGGINGS);
+        LEGGINGS_TYPE.add(Material.GOLD_LEGGINGS);
+        LEGGINGS_TYPE.add(Material.CHAINMAIL_LEGGINGS);
+        LEGGINGS_TYPE.add(Material.IRON_LEGGINGS);
+        LEGGINGS_TYPE.add(Material.DIAMOND_LEGGINGS);
+
+        BOOTS_TYPE.add(Material.LEATHER_BOOTS);
+        BOOTS_TYPE.add(Material.GOLD_BOOTS);
+        BOOTS_TYPE.add(Material.CHAINMAIL_BOOTS);
+        BOOTS_TYPE.add(Material.IRON_BOOTS);
+        BOOTS_TYPE.add(Material.DIAMOND_BOOTS);
+
+        ARMORS_TYPE.addAll(HELMETS_TYPE);
+        ARMORS_TYPE.addAll(CHESTPLATES_TYPE);
+        ARMORS_TYPE.addAll(LEGGINGS_TYPE);
+        ARMORS_TYPE.addAll(BOOTS_TYPE);        
+    }
+    
+      
+    
+    /* ///////////////////////////////////////////////////////////////////// //
+    
+            INITIALIZATION METHODS
+    
+    // ///////////////////////////////////////////////////////////////////// */
+    
+    /**
+     * Grab all the spawnpoints for a specific arena.
+     */
+    public static Map<String,Location> getArenaSpawnpoints(Configuration config, World world, String arena)
+    {
+        Map<String,Location> spawnpoints = new HashMap<String,Location>();
+        String arenaPath = "arenas." + arena + ".coords.spawnpoints";
+        
+        if (config.getKeys(arenaPath) == null)
+            return spawnpoints;
+        
+        for (String point : config.getKeys(arenaPath))
+            spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        
+        return spawnpoints;
+    }
+    
+    /**
+     * Returns a map of classnames mapped to lists of ItemStacks.
+     */
+    public static Map<String,List<ItemStack>> getClassItems(Configuration config, String type)
+    {
+        Map<String,List<ItemStack>> result = new HashMap<String,List<ItemStack>>();
+        
+        for (String className : config.getKeys("classes"))
+            result.put(className, makeItemStackList(config.getString("classes." + className + "." + type)));
+        
+        return result;
+    }
+    
+    /**
+     * Takes a comma-separated list of items in the <type>:<amount> format and
+     * returns a list of ItemStacks created from that data.
+     */
+    public static List<ItemStack> makeItemStackList(String string)
+    {
+        List<ItemStack> result = new LinkedList<ItemStack>();
+        if (string == null) return result;
+        
+        string = string.trim();
+        if (string.endsWith(","))
+            string = string.substring(0, string.length()-1);
+        String[] items = string.split(",");
+        
+        for (String item : items)
+        {
+            item = item.trim();
+            String[] parts = item.split(":");
+            
+            // Grab the amount.
+            int amount = (parts.length == 2 && parts[1].matches("[0-9]+")) ?
+                    Integer.parseInt(parts[1]) :
+                    1;
+            
+            // Make the ItemStack.
+            ItemStack stack = (parts[0].matches("[0-9]+")) ?
+                    makeItemStack(Integer.parseInt(parts[0]), amount) :
+                    makeItemStack(parts[0], amount);
+            
+            result.add(stack);
+        }
+        return result;
+    }
+    
+    /**
+     * Generates a map of wave numbers and rewards based on the
+     * type of wave ("after" or "every") and the config-file. If
+     * no keys exist in the config-file, an empty map is returned.
+     */    
+    public static Map<Integer,List<ItemStack>> getArenaRewardMap(Configuration config, String arena, String type)
+    {
+        String arenaPath = "arenas." + arena + ".rewards.waves.";
+        Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
+        
+        if (config.getKeys(arenaPath + type) == null)
+        {
+            if (type.equals("every"))
+            {
+                config.setProperty(arenaPath + "every.3", "feather, bone, stick");
+                config.setProperty(arenaPath + "every.5", "dirt:4, gravel:4, stone:4");
+                config.setProperty(arenaPath + "every.10", "iron_ingot:10, gold_ingot:8");
+            }
+            else if (type.equals("after"))
+            {
+                config.setProperty(arenaPath + "after.7", "minecart, storage_minecart, powered_minecart");
+                config.setProperty(arenaPath + "after.13", "iron_sword, iron_pickaxe, iron_spade");
+                config.setProperty(arenaPath + "after.16", "diamond_sword");
+            }
+        }
+        
+        List<String> waves = config.getKeys(arenaPath + type);
+        if (waves == null) return result;
+        
+        for (String n : waves)
+        {
+            if (!n.matches("[0-9]+"))
+                continue;
+            
+            int wave = Integer.parseInt(n);
+            String rewards = config.getString(arenaPath + type + "." + n);
+            
+            result.put(wave, makeItemStackList(rewards));
+        }
+        return result;
+    }
+    
+    /**
+     * Grabs the distribution coefficients from the config-file. If
+     * no coefficients are found, defaults (10) are added.
+     */
+    public static Map<String,Integer> getArenaDistributions(Configuration config, String arena, String wave)
+    {
+        //config.load();
+        String arenaPath = "arenas." + arena + ".waves." + wave;
+        Map<String,Integer> result = new HashMap<String,Integer>();
+        List<String> dists = config.getKeys(arenaPath);
+        
+        // If there are no distributions yet, add them.
+        if (dists == null)
+        {
+            if (wave.equals("default"))
+            {
+                config.setProperty(arenaPath + ".zombies",   10);
+                config.setProperty(arenaPath + ".skeletons", 10);
+                config.setProperty(arenaPath + ".spiders",   10);
+                config.setProperty(arenaPath + ".creepers",  10);
+                config.setProperty(arenaPath + ".wolves",    10);
+            }
+            else if (wave.equals("special"))
+            {
+                config.setProperty(arenaPath + ".powered-creepers", 10);
+                config.setProperty(arenaPath + ".zombie-pigmen",    10);
+                config.setProperty(arenaPath + ".slimes",          10);
+                config.setProperty(arenaPath + ".humans",          10);
+                config.setProperty(arenaPath + ".angry-wolves",     10);
+                config.setProperty(arenaPath + ".giants",           0);
+                config.setProperty(arenaPath + ".ghasts",           0);
+            }
+            //config.save();
+            dists = config.getKeys(arenaPath);
+        }
+        
+        for (String monster : dists)
+        {
+            int value = config.getInt(arenaPath + "." + monster, -1);
+            
+            // If no distribution value was found, set one.
+            if (value == -1)
+            {
+                value = 10;
+                if (monster.equals("giant") || monster.equals("ghast"))
+                    value = 0;
+                
+                config.setProperty(arenaPath + "." + monster, value);
+                //config.save();
+            }
+            
+            result.put(monster, value);
+        }
+        return result;
+    }
+    
+    public static List<String> getAllowedCommands(Configuration config)
+    {
+        String commands = config.getString("global-settings.allowed-commands");
+        if (commands == null)
+        {
+            config.setProperty("global-settings.allowed-commands", "/list");
+            config.save();
+            commands = config.getString("global-settings.allowed-commands");
+        }
+        
+        return stringToList(commands);
     }
 
+    
     
     /* ///////////////////////////////////////////////////////////////////// //
     
@@ -55,11 +322,110 @@ public class MAUtils
         return inv;
     }
     
-    /* Checks if all inventory and armor slots are empty. */
-    public static boolean hasEmptyInventory(Player player)
+    public static boolean storeInventory(Player p)
     {
-		ItemStack[] inventory = player.getInventory().getContents();
-		ItemStack[] armor     = player.getInventory().getArmorContents();
+        // Grab the contents.
+        ItemStack[] armor = p.getInventory().getArmorContents();
+        ItemStack[] items = p.getInventory().getContents();
+
+        String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
+        new File(invPath).mkdir();
+        File backupFile = new File(invPath + sep + p.getName() + ".inv");
+        
+        try
+        {
+            if (backupFile.exists())
+                return false;
+
+            backupFile.createNewFile();
+            
+            MAInventoryItem[] inv = new MAInventoryItem[armor.length + items.length];
+            for (int i = 0; i < armor.length; i++)
+                inv[i] = stackToItem(armor[i]);
+            for (int i = 0; i < items.length; i++)
+                inv[armor.length + i] = stackToItem(items[i]);
+            
+            FileOutputStream   fos = new FileOutputStream(backupFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(inv);
+            oos.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("[MobArena] ERROR! Could not create backup file for " + p.getName() + ".");
+            return false;
+        }
+        
+        clearInventory(p);
+        return true;
+    }
+    
+    public static boolean restoreInventory(Player p)
+    {
+        String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
+        File backupFile = new File(invPath + sep + p.getName() + ".inv");
+        
+        try
+        {
+            // If the backup-file couldn't be found, return.
+            if (!backupFile.exists())
+                return false;
+            
+            // Grab the MAInventoryItem array from the backup-file.
+            FileInputStream   fis      = new FileInputStream(backupFile);
+            ObjectInputStream ois      = new ObjectInputStream(fis);
+            MAInventoryItem[] fromFile = (MAInventoryItem[]) ois.readObject();
+            ois.close();
+            
+            // Split that shit.
+            ItemStack[] armor = new ItemStack[4];
+            ItemStack[] items = new ItemStack[fromFile.length-4];
+            
+            for (int i = 0; i < 4; i++)
+                armor[i] = itemToStack(fromFile[i]);
+            for (int i = 4; i < fromFile.length; i++)
+                items[i - 4] = itemToStack(fromFile[i]);
+            
+            // Restore the inventory.
+            PlayerInventory inv = p.getInventory();
+            inv.setArmorContents(armor);
+            for (ItemStack stack : items)
+                if (stack != null)
+                    inv.addItem(stack);
+            
+            // Remove the backup-file.
+            backupFile.delete();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.out.println("[MobArena] ERROR! Could not restore inventory for " + p.getName());
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private static MAInventoryItem stackToItem(ItemStack stack)
+    {
+        if (stack == null)
+            return new MAInventoryItem(-1, -1, (short)0);
+        return new MAInventoryItem(stack.getTypeId(), stack.getAmount(), stack.getDurability());
+    }
+    
+    private static ItemStack itemToStack(MAInventoryItem item)
+    {
+        if (item.getTypeId() == -1)
+            return null;
+        return new ItemStack(item.getTypeId(), item.getAmount(), item.getDurability());
+    }
+    
+    /* Checks if all inventory and armor slots are empty. */
+    public static boolean hasEmptyInventory(Player p)
+    {
+		ItemStack[] inventory = p.getInventory().getContents();
+		ItemStack[] armor     = p.getInventory().getArmorContents();
         
         // For inventory, check for null
         for (ItemStack stack : inventory)
@@ -72,540 +438,286 @@ public class MAUtils
         return true;
 	}
     
-    /* Gives all the items in the input string(s) to the player */
-    public static void giveItems(boolean reward, Player p, String... strings)
+    /**
+     * Gives the player all of the items in the list of ItemStacks.
+     */
+    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, boolean rewards)
     {
-        // Variables used.
-        ItemStack stack;
-        int id, amount;
+        PlayerInventory inv = p.getInventory();
         
-        PlayerInventory inv;
-        
-        if (reward)
-            inv = p.getInventory();
-        else
-            inv = clearInventory(p);
-        
-        for (String s : strings)
+        for (ItemStack stack : stacks)
         {
-            /* Trim the list, remove possible trailing commas, split by
-             * commas, and start the item loop. */
-            s = s.trim();
-            if (s.endsWith(","))
-                s = s.substring(0, s.length()-1);
-            String[] items = s.split(",");
-            
-            // For every item in the list
-            for (String i : items)
+            // If these are rewards, don't tamper with them.
+            if (rewards)
             {
-                /* Take into account possible amount, and if there is
-                 * one, set the amount variable to that amount, else 1. */
-                i = i.trim();
-                String[] item = i.split(":");
-                if (item.length == 2 && item[1].matches("[0-9]+"))
-                    amount = Integer.parseInt(item[1]);
-                else
-                    amount = 1;
-                
-                // Create ItemStack with appropriate constructor.
-                if (item[0].matches("[0-9]+"))
-                {
-                    id = Integer.parseInt(item[0]);
-                    stack = new ItemStack(id, amount);
-                    if (!reward && SWORDS_TYPE.contains(stack.getType()))
-                        stack.setDurability((short)-3276);
-                }
-                else
-                {
-                    stack = makeItemStack(item[0], amount);
-                    if (stack == null) continue;
-                    if (!reward && SWORDS_TYPE.contains(stack.getType()))
-                        stack.setDurability((short)-3276);
-                }
-                
                 inv.addItem(stack);
+                continue;
             }
+
+            // If this is an armor piece, equip it and continue.
+            if (autoEquip && ARMORS_TYPE.contains(stack.getType()))
+            {
+                equipArmorPiece(stack, inv);
+                continue;
+            }
+            
+            // If this is a sword, set its durability to "unlimited".
+            //if (SWORDS_TYPE.contains(stack.getType()))
+            if (WEAPONS_TYPE.contains(stack.getType()))
+                stack.setDurability((short) -32768);
+            
+            inv.addItem(stack);
         }
     }
     
-    /* Used for giving items "normally". */
-    public static void giveItems(Player p, String... strings)
+    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip)
     {
-        giveItems(false, p, strings);
+        giveItems(p, stacks, autoEquip, false);
     }
     
-    /* Helper method for grabbing a random reward */
-    public static String getRandomReward(String rewardlist)
+    public static void giveRewards(Player p, List<ItemStack> stacks)
     {
-        Random ran = new Random();
+        giveItems(p, stacks, false, true);
+    }
+    
+    public static int getPetAmount(Player p)
+    {
+        int result = 0;
         
-        String[] rewards = rewardlist.split(",");
-        String item = rewards[ran.nextInt(rewards.length)];
-        return item.trim();
+        for (ItemStack stack : p.getInventory().getContents())
+        {
+            if (stack == null || stack.getTypeId() != 352)
+                continue;
+
+            result += stack.getAmount();
+        }
+        
+        return result;
     }
     
-    /* Helper method for making an ItemStack out of a string */
-    private static ItemStack makeItemStack(String s, int amount)
+    /* Helper method for equipping armor pieces. */
+    public static void equipArmorPiece(ItemStack stack, PlayerInventory inv)
     {
-        Material mat;
+        Material type = stack.getType();
+        
+        if (HELMETS_TYPE.contains(type))
+            inv.setHelmet(stack);
+        else if (CHESTPLATES_TYPE.contains(type))
+            inv.setChestplate(stack);
+        else if (LEGGINGS_TYPE.contains(type))
+            inv.setLeggings(stack);
+        else if (BOOTS_TYPE.contains(type))
+            inv.setBoots(stack);
+    }
+    
+    /* Helper methods for making ItemStacks out of strings and ints */
+    private static ItemStack makeItemStack(String name, int amount)
+    {
         try
         {
-            mat = Material.valueOf(s.toUpperCase());
-            return new ItemStack(mat, amount);
+            Material material = Material.valueOf(name.toUpperCase());
+            return new ItemStack(material, amount);
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! Could not create item " + s + ". Check config.yml");
+            System.out.println("[MobArena] ERROR! Could not create item \"" + name + "\". Check config.yml");
             return null;
         }
     }
     
-    
-    
-    /* ///////////////////////////////////////////////////////////////////// //
-    
-            INITIALIZATION METHODS
-    
-    // ///////////////////////////////////////////////////////////////////// */
-    
-    /**
-     * Creates a Configuration object from the config.yml file.
-     */
-    public static Configuration getConfig()
+    private static ItemStack makeItemStack(int id, int amount)
     {
-        new File("plugins/MobArena").mkdir();
-        File configFile = new File("plugins/MobArena/config.yml");
-        
         try
         {
-            if(!configFile.exists())
-            {
-                configFile.createNewFile();
-            }
+            Material material = Material.getMaterial(id);
+            return new ItemStack(material, amount);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR: Config file could not be created.");
+            System.out.println("[MobArena] ERROR! Could not create item with id " + id + ". Check config.yml");
             return null;
         }
-        
-        return new Configuration(configFile);
     }
     
-    public static List<String> getDisabledCommands()
+    /* Helper method for grabbing a random reward */
+    public static ItemStack getRandomReward(List<ItemStack> rewards)
     {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        String commands = c.getString("settings.disabledcommands", "/kill");
-        c.setProperty("settings.disabledcommands", commands);
-        c.save();
-        
-        List<String> result = new LinkedList<String>();
-        for (String s : commands.split(","))
-            result.add(s.trim());
-        
-        return result;
+        Random ran = new Random();
+        return rewards.get(ran.nextInt(rewards.size()));
     }
     
-    /**
-     * Grabs the world from the config-file, or the "default" world
-     * from the list of worlds in the server object.
-     */
-    public static World getWorld()
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        String world = c.getString("settings.world", ArenaManager.server.getWorlds().get(0).getName());
-        c.setProperty("settings.world", world);
-        
-        c.save();
-        return ArenaManager.server.getWorld(world);
-    }
-    
-    /**
-     * Handles all spawn-monster bypassing.
-     * If toggle is true, swap the allowMonsters field if possible. Otherwise, just
-     * return the current value.
-     */
-    public static boolean spawnBypass(boolean toggle)
-    {
-        // Cast the world to an nmsWorld.
-        net.minecraft.server.World nmsWorld = ((CraftWorld) ArenaManager.world).getHandle();
-        
-        // If not toggling, just return the current variable.
-        if (!toggle)
-        {
-            ArenaManager.spawnMonstersInt = nmsWorld.spawnMonsters;
-            return nmsWorld.allowMonsters;
-        }
-        
-        // If arena is running, allow monsters, otherwise don't.
-        if (ArenaManager.isRunning)
-        {
-            nmsWorld.allowMonsters = true;
-            if (ArenaManager.spawnMonstersInt == 0)
-                nmsWorld.spawnMonsters = 1;
-        }
-        else
-        {
-            // If the server wasn't allowing monsters, set it back to false.
-            if (!ArenaManager.spawnMonsters)
-                nmsWorld.allowMonsters = false;
-            nmsWorld.spawnMonsters = ArenaManager.spawnMonstersInt;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Grabs the list of classes from the config-file. If no list is
-     * found, generate a set of default classes.
-     */
-    public static List<String> getClasses()
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        if (c.getKeys("classes") == null)
-        {
-            c.setProperty("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
-            c.setProperty("classes.Archer.armor", "298,299,300,301");
-            c.setProperty("classes.Knight.items", "diamond_sword, grilled_pork:2");
-            c.setProperty("classes.Knight.armor", "306,307,308,309");
-            c.setProperty("classes.Tank.items",   "iron_sword, grilled_pork:3, apple");
-            c.setProperty("classes.Tank.armor",   "310,311,312,313");
-            c.setProperty("classes.Oddjob.items", "stone_sword, flint_and_steel, netherrack:2, wood_pickaxe, tnt:4, fishing_rod, apple, grilled_pork:3");
-            c.setProperty("classes.Oddjob.armor", "298,299,300,301");
-            c.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
-            c.setProperty("classes.Chef.armor",   "314,315,316,317");
-            
-            c.save();
-        }
-        
-        return c.getKeys("classes");
-    }
-    
-    /**
-     * Generates a map of class names and class items based on the
-     * type of items ("items" or "armor") and the config-file.
-     * Will explode if the classes aren't well-defined.
-     */
-    public static Map<String,String> getClassItems(String type)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        Map<String,String> result = new HashMap<String,String>();
-        
-        // Assuming well-defined classes.
-        List<String> classes = c.getKeys("classes");
-        for (String s : classes)
-        {
-            result.put(s, c.getString("classes." + s + "." + type, null));
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Generates a map of wave numbers and rewards based on the
-     * type of wave ("after" or "every") and the config-file. If
-     * no keys exist in the config-file, an empty map is returned.
-     */
-    public static Map<Integer,String> getWaveMap(String type)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        // Set up variables and resulting map.
-        Map<Integer,String> result = new HashMap<Integer,String>();
-        int wave;
-        String rewards;
-        
-        /* Check if the keys exist in the config-file, if not, set some. */
-        if (c.getKeys("rewards.waves." + type) == null)
-        {
-            if (type.equals("every"))
-            {
-                c.setProperty("rewards.waves.every.3", "feather, bone, stick");
-                c.setProperty("rewards.waves.every.5", "dirt:4, gravel:4, stone:4");
-                c.setProperty("rewards.waves.every.10", "iron_ingot:10, gold_ingot:8");
-            }
-            else if (type.equals("after"))
-            {
-                c.setProperty("rewards.waves.after.7", "minecart, storage_minecart, powered_minecart");
-                c.setProperty("rewards.waves.after.13", "iron_sword, iron_pickaxe, iron_spade");
-                c.setProperty("rewards.waves.after.16", "diamon_sword");
-            }
-            
-            c.save();
-        }
-        List<String> waves = c.getKeys("rewards.waves." + type);
-        
-        // Put all the rewards in the map.
-        for (String n : waves)
-        {
-            if (!n.matches("[0-9]+"))
-                continue;
-            
-            wave = Integer.parseInt(n);
-            rewards = c.getString("rewards.waves." + type + "." + n);
-            
-            result.put(wave,rewards);
-        }
-        
-        // And return the resulting map.
-        return result;
-    }
-    
-    /**
-     * Grabs all the spawnpoints from the config-file. IF no points
-     * are found, an empty list is returned.
-     */
-    public static List<Location> getSpawnPoints()
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        List<String> spawnpoints = c.getKeys("coords.spawnpoints");
-        if (spawnpoints == null)
-            return new LinkedList<Location>();
-        
-        List<Location> result = new LinkedList<Location>();
-        for (String s : spawnpoints)
-        {
-            Location loc = getCoords("spawnpoints." + s);
-            
-            if (loc != null)
-                result.add(loc);
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Grabs the distribution coefficients from the config-file. If
-     * no coefficients are found, defaults (10) are added.
-     */
-    public static int getDistribution(String monster)
-    {
-        return getDistribution(monster, "default");
-    }
-    
-    public static int getDistribution(String monster, String type)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        if (c.getInt("waves." + type + "." + monster, -1) == -1)
-        {
-            int dist = 10;
-            if (monster.equals("giants") || monster.equals("ghasts"))
-                dist = 0;
-            
-            c.setProperty("waves." + type + "." + monster, dist);
-            c.save();
-        }
-        
-        return c.getInt("waves." + type + "." + monster, 0);
-    }
-    
-    /**
-     * Grabs an integer from the config-file.
-     */
-    public static int getInt(String path, int def)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        int result = c.getInt(path, def);
-        c.setProperty(path, result);
-        
-        c.save();
-        return result;
-    }
-    
-    /**
-     * Grabs a boolean from the config-file.
-     */
-    public static boolean getBoolean(String path, boolean def)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        boolean result = c.getBoolean(path, def);
-        c.setProperty(path, result);
-        
-        c.save();
-        return result;
-    }
     
     
     /* ///////////////////////////////////////////////////////////////////// //
     
-            REGION AND SETUP METHODS
+            PET CLASS METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
     
     /**
-     * Checks if the Location object is within the arena region.
+     * Makes all nearby wolves sit if their owner is the given player.
      */
-    public static boolean inRegion(Location loc)
+    public static void sitPets(Player p)
     {
-        if (!loc.getWorld().getName().equals(ArenaManager.world.getName()))
+        List<Entity> entities = p.getNearbyEntities(80, 40, 80);
+        for (Entity e : entities)
+        {
+            if (!(e instanceof Wolf))
+                continue;
+            
+            Wolf w = (Wolf) e;
+            if (w.getOwner().equals(p))
+                w.setSitting(true);
+        }
+    }
+    
+    /**
+     * Removes all the pets belonging to this player.
+     */
+    public static void clearPets(Arena arena, Player p)
+    {
+        for (Wolf w : arena.pets)
+        {
+            if (w.getOwner().equals(p))
+                w.remove();
+        }
+    }
+    
+    
+    
+    /* ///////////////////////////////////////////////////////////////////// //
+    
+            REGION METHODS
+    
+    // ///////////////////////////////////////////////////////////////////// */
+    
+    /**
+     * Create a Location object from the config-file.
+     */
+    public static Location getArenaCoord(Configuration config, World world, String arena, String coord)
+    {
+        //config.load();
+        String str = config.getString("arenas." + arena + ".coords." + coord);
+        if (str == null)
+            return null;
+        return makeLocation(world, str);
+    }
+    
+    /**
+     * Save an arena location to the Configuration.
+     */    
+    public static void setArenaCoord(Configuration config, Arena arena, String coord, Location loc)
+    {
+        config.setProperty("arenas." + arena.configName() + ".coords." + coord, makeCoord(loc));
+        config.save();
+        arena.load(config);
+        
+        if (coord.equals("p1") || coord.equals("p2"))
+            fixRegion(config, loc.getWorld(), arena);
+    }
+    
+    public static boolean delArenaCoord(Configuration config, Arena arena, String coord)
+    {
+        if (config.getString("arenas." + arena.configName() + ".coords." + coord) == null)
             return false;
         
-        if (!ArenaManager.isSetup)
-            return false;
-        
-        Location p1 = ArenaManager.p1;
-        Location p2 = ArenaManager.p2;
-        
-        // Return false if the location is outside of the region.
-        if ((loc.getX() < p1.getX()) || (loc.getX() > p2.getX()))
-            return false;
-            
-        if ((loc.getZ() < p1.getZ()) || (loc.getZ() > p2.getZ()))
-            return false;
-            
-        if ((loc.getY() < p1.getY()) || (loc.getY() > p2.getY()))
-            return false;
-            
+        config.removeProperty("arenas." + arena.configName() + ".coords." + coord);
+        config.save();
+        arena.load(config);
         return true;
     }
     
-    /**
-     * Grabs coordinate information from the config-file.
-     */
-    public static Location getCoords(String name)
+    private static void fixRegion(Configuration config, World world, Arena arena)
     {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        // Return null if coords aren't in the config file.
-        if (c.getKeys("coords." + name) == null)
-            return null;
-        
-        double x    = c.getDouble("coords." + name + ".x", 0);
-        double y    = c.getDouble("coords." + name + ".y", 0);
-        double z    = c.getDouble("coords." + name + ".z", 0);
-        
-        return new Location(ArenaManager.world, x, y, z);
-    }
-    
-    /**
-     * Writes coordinate information to the config-file.
-     */
-    public static void setCoords(String name, Location loc)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        c.setProperty("coords." + name + ".world", loc.getWorld().getName());
-        c.setProperty("coords." + name + ".x",     loc.getX());
-        c.setProperty("coords." + name + ".y",     loc.getY());
-        c.setProperty("coords." + name + ".z",     loc.getZ());
-        c.setProperty("coords." + name + ".yaw",   loc.getYaw());
-        c.setProperty("coords." + name + ".pitch", loc.getPitch());
-        
-        c.save();
-        ArenaManager.updateVariables();
-    }
-    
-    /**
-     * Removes coordinate information from the config-file.
-     */    
-    public static void delCoords(String name)
-    {
-        Configuration c = ArenaManager.config;
-        c.load();
-        
-        c.removeProperty(name);
-        
-        c.save();
-        ArenaManager.updateVariables();
-    }
-    
-    /**
-     * Maintains the invariant that p1's coordinates are of lower
-     * values than their respective counter-parts of p2. Makes the
-     * inRegion()-method much faster/easier.
-     */
-    public static void fixCoords()
-    {
-        Location p1 = getCoords("p1");
-        Location p2 = getCoords("p2");
-        double tmp;
-        
-        if (p1 == null || p2 == null)
+        if (arena.p1 == null || arena.p2 == null)
             return;
-            
-        if (p1.getX() > p2.getX())
+        
+        if (arena.p1.getX() > arena.p2.getX())
         {
-            tmp = p1.getX();
-            p1.setX(p2.getX());
-            p2.setX(tmp);
+            double tmp = arena.p1.getX();
+            arena.p1.setX(arena.p2.getX());
+            arena.p2.setX(tmp);
         }
         
-        if (p1.getY() > p2.getY())
+        if (arena.p1.getZ() > arena.p2.getZ())
         {
-            tmp = p1.getY();
-            p1.setY(p2.getY());
-            p2.setY(tmp);
+            double tmp = arena.p1.getZ();
+            arena.p1.setZ(arena.p2.getZ());
+            arena.p2.setZ(tmp);
         }
         
-        if (p1.getZ() > p2.getZ())
+        if (arena.p1.getY() > arena.p2.getY())
         {
-            tmp = p1.getZ();
-            p1.setZ(p2.getZ());
-            p2.setZ(tmp);
+            double tmp = arena.p1.getY();
+            arena.p1.setY(arena.p2.getY());
+            arena.p2.setY(tmp);
         }
-        
-        setCoords("p1", p1);
-        setCoords("p2", p2);
+        arena.serializeConfig();
+        arena.load(config);
     }
     
     /**
-     * Expands the arena region either upwards, downwards, or
-     * outwards (meaning on both the X and Z axes).
+     * Create a Location from the input String in the input World.
      */
-    public static void expandRegion(String direction, int i)
+    public static Location makeLocation(World world, String str, boolean extras)
     {
-        Location p1 = ArenaManager.p1;
-        Location p2 = ArenaManager.p2;
+        String[] parts = str.split(",");
         
-        if (direction.equals("up"))
-            p2.setY(p2.getY() + i);
-        else if (direction.equals("down"))
-            p1.setY(p1.getY() - i);
-        else if (direction.equals("out"))
+        double x     = Double.parseDouble(parts[0]);
+        double y     = Double.parseDouble(parts[1]);
+        double z     = Double.parseDouble(parts[2]);
+        
+        if (extras && parts.length == 5)
         {
-            p1.setX(p1.getX() - i);
-            p1.setZ(p1.getZ() - i);
-            p2.setX(p2.getX() + i);
-            p2.setZ(p2.getZ() + i);
+            float yaw   = Float.parseFloat(parts[3]);
+            float pitch = Float.parseFloat(parts[4]);
+            return new Location(world, x, y, z, yaw, pitch);
         }
-        
-        setCoords("p1", p1);
-        setCoords("p2", p2);
-        fixCoords();
+
+        return new Location(world, x, y, z);
     }
     
-    public static String spawnList()
+    public static Location makeLocation(World world, String str)
     {
-        Configuration c = ArenaManager.config;
-        c.load();
+        return makeLocation(world, str, true);
+    }
+    
+    /**
+     * Create a location String from the input Location.
+     */
+    public static String makeCoord(Location loc, boolean extras)
+    {
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
         
-        String result = "";
-        if (c.getKeys("coords.spawnpoints") == null)
-            return result;
+        if (extras)
+        {
+            float yaw   = loc.getYaw();
+            float pitch = loc.getPitch();
+            return x + "," + y + "," + z + "," + yaw + "," + pitch;
+        }
         
-        for (String s : c.getKeys("coords.spawnpoints"))
-            result += s + " ";
+        return x + "," + y + "," + z;
+    }
+    
+    public static String makeCoord(Location loc)
+    {
+        return makeCoord(loc, true);
+    }
+    
+    /**
+     * Check if a location is within any arena region.
+     */
+    public static boolean inRegions(Location loc, Arena... arenas)
+    {
+        for (Arena arena : arenas)
+        {
+            if (arena.inRegion(loc))
+                return true;
+        }
         
-        return result;
+        return false;
     }
     
     
@@ -617,52 +729,173 @@ public class MAUtils
     // ///////////////////////////////////////////////////////////////////// */
     
     /**
-     * Verifies that all important variables are declared. Returns true
-     * if, and only if, the warppoints, region, distribution coefficients,
-     * classes and spawnpoints are all set up.
+     * Sends a message to a player.
      */
-    public static boolean verifyData()
+    public static boolean tellPlayer(CommandSender p, String msg)
     {
-        return ((ArenaManager.arenaLoc     != null) &&
-                (ArenaManager.lobbyLoc     != null) &&
-                (ArenaManager.spectatorLoc != null) &&
-                (ArenaManager.p1           != null) &&
-                (ArenaManager.p2           != null) &&
-                (ArenaManager.dZombies     != -1)   &&
-                (ArenaManager.dSkeletons   != -1)   &&
-                (ArenaManager.dSpiders     != -1)   &&
-                (ArenaManager.dCreepers    != -1)   &&
-                (ArenaManager.dWolves      != -1)   &&
-                (ArenaManager.classes.size() > 0)   &&
-                (ArenaManager.spawnpoints.size() > 0));
-    }   
-    
-    /**
-     * Notifies the player if MobArena is set up and ready to be used.
-     */
-    public static void notifyIfSetup(Player p)
-    {
-        if (verifyData())
-        {
-            ArenaManager.tellPlayer(p, "MobArena is set up and ready to roll!");
-        }
+        if (p == null)
+            return false;
+        
+        p.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.WHITE + msg);
+        return true;
     }
     
+    /**
+     * Sends a message to all players in and around the arena.
+     */
+    public static void tellAll(Arena arena, String msg)
+    {
+        Set<Player> tmp = new HashSet<Player>();
+        tmp.addAll(arena.livePlayers);
+        tmp.addAll(arena.deadPlayers);
+        tmp.addAll(arena.specPlayers);
+        tmp.addAll(arena.readyPlayers);
+        for (Player p : tmp)
+            tellPlayer(p, msg);
+    }
+    
+    public static Player getClosestPlayer(Entity e, Arena arena)
+    {
+        // Set up the comparison variable and the result.
+        double current = Double.POSITIVE_INFINITY;
+        Player result = null;
+        
+        /* Iterate through the ArrayList, and update current and result every
+         * time a squared distance smaller than current is found. */
+        for (Player p : arena.livePlayers)
+        {
+            double dist = p.getLocation().distanceSquared(e.getLocation()); //distance(p.getLocation(), e.getLocation());
+            if (dist < current && dist < 256)
+            {
+                current = dist;
+                result = p;
+            }
+        }
+        return result;
+    }
+    
+    public static double distance(Location loc1, Location loc2)
+    {
+        double x = loc1.getX() - loc2.getX();
+        double y = loc1.getY() - loc2.getY();
+        double z = loc1.getZ() - loc2.getZ();
+        
+        return x*x + y*y + z*z;
+    }
+    
+    /**
+     * Convert a proper arena name to a config-file name.
+     * All spaces are replaced by underscores, and the whole String is
+     * lowercased.
+     */
+    public static String nameArenaToConfig(String name)
+    {
+        String tmp = name.replace(" ", "_");
+        return tmp.toLowerCase();
+    }
+    
+    /**
+     * Convert a config-name to a proper spaced and capsed arena name.
+     * The input String is split around all underscores, and every part
+     * of the String array is properly capsed.
+     */
+    public static String nameConfigToArena(String name)
+    {
+        String[] parts = name.split("_");
+        if (parts.length == 1)
+            return toCamelCase(parts[0]);
+        
+        String separator = " ";
+        StringBuffer buffy = new StringBuffer(name.length());
+        for (String part : parts)
+        {
+            buffy.append(toCamelCase(part));
+            buffy.append(separator);
+        }
+        buffy.replace(buffy.length()-1, buffy.length(), "");
+        
+        return buffy.toString();
+    }
+    
+    /**
+     * Returns the input String with a capital first letter, and all the
+     * other letters become lower case. 
+     */
+    public static String toCamelCase(String name)
+    {
+        return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+    }
+    
+    /**
+     * Turn a list into a space-separated list.
+     */
+    public static <E> String listToString(List<E> list)
+    {
+        StringBuffer buffy = new StringBuffer();
+        for (E e : list)
+        {
+            buffy.append(e.toString());
+            buffy.append(" ");
+        }
+        return buffy.toString();
+    }
+    
+    /**
+     * Returns a String-list version of a comma-separated list.
+     */
+    public static List<String> stringToList(String list)
+    {
+        List<String> result = new LinkedList<String>();
+        if (list == null) return result;
+        
+        String[] parts = list.trim().split(",");
+        
+        for (String part : parts)
+            result.add(part.trim());
+        
+        return result;
+    }
+    
+    /**
+     * Turns the current set of players into an array, and grabs a random
+     * element out of it.
+     */
+    public static Player getRandomPlayer(Arena arena)
+    {
+        Random random = new Random();
+        Player[] array = (Player[]) arena.livePlayers.toArray();
+        return array[random.nextInt(array.length)];
+    }
+    
+    /**
+     * Verifies that all important variables are declared. Returns true
+     * if, and only if, the warppoints, region, distribution coefficients,
+     * and spawnpoints are all set up.
+     */    
+    public static boolean verifyData(Arena arena)
+    {        
+        return ((arena.arenaLoc       != null) &&
+                (arena.lobbyLoc       != null) &&
+                (arena.spectatorLoc   != null) &&
+                (arena.p1             != null) &&
+                (arena.p2             != null) &&
+                (arena.spawnpoints.size() > 0));
+    }
+
     /**
      * Checks if there is a new update of MobArena and notifies the
      * player if the boolean specified is true
      */
-    public static void checkForUpdates(final Player p, boolean response)
+    public static void checkForUpdates(MobArena plugin, final Player p, boolean response)
     {
         String site = "http://forums.bukkit.org/threads/818.19144/";
         try
         {
-            // Make a URL of the site address
-            //URL baseURL = new URL(site);
-            URI baseURL = new URI(site);
+            // Make a URI of the site address
+            URI baseURI = new URI(site);
             
             // Open the connection and don't redirect.
-            HttpURLConnection con = (HttpURLConnection) baseURL.toURL().openConnection();
+            HttpURLConnection con = (HttpURLConnection) baseURI.toURL().openConnection();
             con.setInstanceFollowRedirects(false);
             
             String header = con.getHeaderField("Location");
@@ -670,7 +903,7 @@ public class MAUtils
             // If something's wrong with the connection...
             if (header == null)
             {
-                ArenaManager.tellPlayer(p, "Couldn't connect to the MobArena thread.");
+                tellPlayer(p, "Couldn't connect to the MobArena thread.");
                 return;
             }
             
@@ -678,17 +911,17 @@ public class MAUtils
             String url = new URI(con.getHeaderField("Location")).toString();
             
             // If the current version is the same as the thread version.
-            if (url.contains(ArenaManager.plugin.getDescription().getVersion().replace(".", "-")))
+            if (url.contains(plugin.getDescription().getVersion().replace(".", "-")))
             {
                 if (!response)
                     return;
                     
-                ArenaManager.tellPlayer(p, "Your version of MobArena is up to date!");
+                tellPlayer(p, "Your version of MobArena is up to date!");
                 return;
             }
             
             // Otherwise, notify the player that there is a new version.
-            ArenaManager.tellPlayer(p, "There is a new version of MobArena available!");;
+            tellPlayer(p, "There is a new version of MobArena available!");;
         }
         catch (Exception e)
         {
@@ -696,22 +929,35 @@ public class MAUtils
         }
     }
     
-    /**
-     * Turns the current set of players into an array, and grabs a random
-     * element out of it.
-     */
-    public static Player getRandomPlayer()
+    public static void setSpawnFlags(MobArena plugin, World world, int spawnMonsters, boolean allowMonsters, boolean allowAnimals)
     {
-        Random random = new Random();
-        Object[] array = ArenaManager.playerSet.toArray();
-        return (Player) array[random.nextInt(array.length)];
+        for (Arena arena : plugin.getAM().getArenasInWorld(world))
+            if (arena.running)
+                return;
+        
+        WorldServer ws = ((CraftWorld) world).getHandle();
+        ws.spawnMonsters = spawnMonsters;
+        ws.allowMonsters = allowMonsters;
+        ws.allowAnimals  = allowAnimals;
     }
     
     /**
      * Stand back, I'm going to try science!
      */
-    public static void DoooooItHippieMonster(Location loc, int radius)
+    public static boolean doooooItHippieMonster(Location loc, int radius, String name, MobArena plugin)
     {
+        // Try to restore the old patch first.
+        undoItHippieMonster(name, plugin, false);
+        
+        // Grab the Configuration and ArenaMaster
+        ArenaMaster am = plugin.getAM();
+                
+        // Create the arena node in the config-file.
+        World world = loc.getWorld();
+        Arena arena = am.createArenaNode(name, world);
+        am.arenas.add(arena);
+        am.selectedArena = arena;
+        
         // Get the hippie bounds.
         int x1 = (int)loc.getX() - radius;
         int x2 = (int)loc.getX() + radius;
@@ -721,9 +967,9 @@ public class MAUtils
         int z2 = (int)loc.getZ() + radius;
         
         int lx1 = x1;
-        int lx2 = x1 + ArenaManager.classes.size() + 3;
-        int ly1 = y1-5;
-        int ly2 = y1-1;
+        int lx2 = x1 + am.classes.size() + 3;
+        int ly1 = y1-6;
+        int ly2 = y1-2;
         int lz1 = z1;
         int lz2 = z1 + 6;
         
@@ -737,24 +983,25 @@ public class MAUtils
             {
                 for (int k = z1; k <= z2; k++)
                 {
-                    lo = ArenaManager.world.getBlockAt(i,j,k).getLocation();
-                    id = ArenaManager.world.getBlockAt(i,j,k).getTypeId();
+                    lo = world.getBlockAt(i,j,k).getLocation();
+                    id = world.getBlockAt(i,j,k).getTypeId();
                     preciousPatch.put(new EntityPosition(lo),id);
                 }
             }
         }
         try
         {
-            FileOutputStream fos = new FileOutputStream("plugins/MobArena/precious.tmp");
+            new File("plugins" + sep + "MobArena" + sep + "agbackup").mkdir();
+            FileOutputStream fos = new FileOutputStream("plugins" + sep + "MobArena" + sep + "agbackup" + sep + name + ".tmp");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(preciousPatch);
             oos.close();
         }
         catch (Exception e)
         {
-            System.out.println("Couldn't create backup file. Aborting...");
             e.printStackTrace();
-            return;
+            System.out.println("Couldn't create backup file. Aborting auto-generate...");
+            return false;
         }
         
         // Build some monster walls.
@@ -762,132 +1009,148 @@ public class MAUtils
         {
             for (int j = y1; j <= y2; j++)
             {
-                ArenaManager.world.getBlockAt(i,j,z1).setTypeId(24);
-                ArenaManager.world.getBlockAt(i,j,z2).setTypeId(24);
+                world.getBlockAt(i,j,z1).setTypeId(24);
+                world.getBlockAt(i,j,z2).setTypeId(24);
             }
         }
         for (int k = z1; k <= z2; k++)
         {
             for (int j = y1; j <= y2; j++)
             {
-                ArenaManager.world.getBlockAt(x1,j,k).setTypeId(24);
-                ArenaManager.world.getBlockAt(x2,j,k).setTypeId(24);
+                world.getBlockAt(x1,j,k).setTypeId(24);
+                world.getBlockAt(x2,j,k).setTypeId(24);
             }
         }
         
         // Add some hippie light.
         for (int i = x1; i <= x2; i++)
         {
-            ArenaManager.world.getBlockAt(i,y1+2,z1).setTypeId(89);
-            ArenaManager.world.getBlockAt(i,y1+2,z2).setTypeId(89);
+            world.getBlockAt(i,y1+2,z1).setTypeId(89);
+            world.getBlockAt(i,y1+2,z2).setTypeId(89);
         }
         for (int k = z1; k <= z2; k++)
         {
-            ArenaManager.world.getBlockAt(x1,y1+2,k).setTypeId(89);
-            ArenaManager.world.getBlockAt(x2,y1+2,k).setTypeId(89);
+            world.getBlockAt(x1,y1+2,k).setTypeId(89);
+            world.getBlockAt(x2,y1+2,k).setTypeId(89);
         }
         
-        // Build a monster floor.
+        // Build a monster floor, and some Obsidian foundation.
         for (int i = x1; i <= x2; i++)
         {
             for (int k = z1; k <= z2; k++)
-                ArenaManager.world.getBlockAt(i,y1,k).setTypeId(24);
+            {
+                world.getBlockAt(i,y1,k).setTypeId(24);
+                world.getBlockAt(i,y1-1,k).setTypeId(49);
+            }
         }
         
         // Make a hippie roof.
         for (int i = x1; i <= x2; i++)
         {
             for (int k = z1; k <= z2; k++)
-                ArenaManager.world.getBlockAt(i,y2,k).setTypeId(20);
+                world.getBlockAt(i,y2,k).setTypeId(20);
         }
         
         // Monster bulldoze
         for (int i = x1+1; i < x2; i++)
             for (int j = y1+1; j < y2; j++)
                 for (int k = z1+1; k < z2; k++)
-                    ArenaManager.world.getBlockAt(i,j,k).setTypeId(0);
+                    world.getBlockAt(i,j,k).setTypeId(0);
         
         // Build a hippie lobby
         for (int i = lx1; i <= lx2; i++) // Walls
         {
             for (int j = ly1; j <= ly2; j++)
             {
-                ArenaManager.world.getBlockAt(i,j,lz1).setTypeId(24);
-                ArenaManager.world.getBlockAt(i,j,lz2).setTypeId(24);
+                world.getBlockAt(i,j,lz1).setTypeId(24);
+                world.getBlockAt(i,j,lz2).setTypeId(24);
             }
         }
         for (int k = lz1; k <= lz2; k++) // Walls
         {
             for (int j = ly1; j <= ly2; j++)
             {
-                ArenaManager.world.getBlockAt(lx1,j,k).setTypeId(24);
-                ArenaManager.world.getBlockAt(lx2,j,k).setTypeId(24);
+                world.getBlockAt(lx1,j,k).setTypeId(24);
+                world.getBlockAt(lx2,j,k).setTypeId(24);
             }
         }
         for (int k = lz1; k <= lz2; k++) // Lights
         {
-            ArenaManager.world.getBlockAt(lx1,ly1+2,k).setTypeId(89);
-            ArenaManager.world.getBlockAt(lx2,ly1+2,k).setTypeId(89);
-            ArenaManager.world.getBlockAt(lx1,ly1+3,k).setTypeId(89);
-            ArenaManager.world.getBlockAt(lx2,ly1+3,k).setTypeId(89);
+            world.getBlockAt(lx1,ly1+2,k).setTypeId(89);
+            world.getBlockAt(lx2,ly1+2,k).setTypeId(89);
+            world.getBlockAt(lx1,ly1+3,k).setTypeId(89);
+            world.getBlockAt(lx2,ly1+3,k).setTypeId(89);
         }
         for (int i = lx1; i <= lx2; i++) // Floor
         {
             for (int k = lz1; k <= lz2; k++)
-                ArenaManager.world.getBlockAt(i,ly1,k).setTypeId(24);
+                world.getBlockAt(i,ly1,k).setTypeId(24);
         }
         for (int i = x1+1; i < lx2; i++) // Bulldoze
             for (int j = ly1+1; j <= ly2; j++)
                 for (int k = lz1+1; k < lz2; k++)
-                    ArenaManager.world.getBlockAt(i,j,k).setTypeId(0);
+                    world.getBlockAt(i,j,k).setTypeId(0);
         
         // Place the hippie signs
-        Iterator<String> iterator = ArenaManager.classes.iterator();
+        Iterator<String> iterator = am.classes.iterator();
         for (int i = lx1+2; i <= lx2-2; i++) // Signs
         {
-            ArenaManager.world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
-            Sign sign = (Sign) ArenaManager.world.getBlockAt(i,ly1+1,lz2-1).getState();
+            world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
+            Sign sign = (Sign) world.getBlockAt(i,ly1+1,lz2-1).getState();
             sign.setLine(0, (String)iterator.next());
         }
-        ArenaManager.world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);
+        world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);
         
-        // Set up the monster points.
-        setCoords("arena", new Location(ArenaManager.world, loc.getX(), y1+1, loc.getZ()));
-        setCoords("lobby", new Location(ArenaManager.world, x1+2, y1-3, z1+2));
-        setCoords("spectator", new Location(ArenaManager.world, loc.getX(), y2+1, loc.getZ()));
-        setCoords("p1", new Location(ArenaManager.world, x1, y1-4, z1));
-        setCoords("p2", new Location(ArenaManager.world, x2, y2+1, z2));
-        setCoords("spawnpoints.s1", new Location(ArenaManager.world, x1+3, y1+2, z1+3));
-        setCoords("spawnpoints.s2", new Location(ArenaManager.world, x1+3, y1+2, z2-3));
-        setCoords("spawnpoints.s3", new Location(ArenaManager.world, x2-3, y1+2, z1+3));
-        setCoords("spawnpoints.s4", new Location(ArenaManager.world, x2-3, y1+2, z2-3));
+        // Set up the monster points.            
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "p1", new Location(world, x1, ly1, z1));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "p2", new Location(world, x2, y2+1, z2));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, y1-3, z1+2));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s3", new Location(world, x2-3, y1+2, z1+3));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s4", new Location(world, x2-3, y1+2, z2-3));
+        
+        am.updateAll();
+        return true;
     }
     
     /**
      * This fixes everything!
      */
     @SuppressWarnings("unchecked")
-    public static void UnDoooooItHippieMonster()
+    public static boolean undoItHippieMonster(String name, MobArena plugin, boolean error)
     {
+        File file = new File("plugins" + sep + "MobArena" + sep + "agbackup" + sep + name + ".tmp");
         HashMap<EntityPosition,Integer> preciousPatch;
         try
         {
-            FileInputStream fis = new FileInputStream("plugins/MobArena/precious.tmp");
+            FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
             preciousPatch = (HashMap<EntityPosition,Integer>) ois.readObject();
             ois.close();
         }
         catch (Exception e)
         {
-            System.out.println("Couldn't find backup file...");
-            return;
+            if (error) System.out.println("Couldn't find backup file for arena '" + name + "'");
+            return false;
         }
         
-        for (EntityPosition ep : preciousPatch.keySet())
+        World world = Bukkit.getServer().getWorld(preciousPatch.keySet().iterator().next().getWorld());
+        
+        for (Map.Entry<EntityPosition,Integer> entry : preciousPatch.entrySet())
         {
-            ArenaManager.world.getBlockAt(ep.getLocation(ArenaManager.world)).setTypeId(preciousPatch.get(ep));
+            world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
         }
         
-        delCoords("coords");
+        Configuration config = plugin.getConfig();
+        config.removeProperty("arenas." + name);
+        config.save();
+        
+        file.delete();
+        
+        plugin.getAM().updateAll();
+        return true;
     }
 }

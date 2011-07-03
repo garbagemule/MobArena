@@ -1,320 +1,884 @@
 package com.garbagemule.MobArena;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.LinkedList;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.ConsoleCommandSender;
+
+import com.garbagemule.MobArena.MAMessages.Msg;
 
 public class MACommands implements CommandExecutor
 {
+    public static List<String> ALLOWED_COMMANDS = new LinkedList<String>();
+    public static final List<String> COMMANDS = new LinkedList<String>();
+    static
+    {
+        COMMANDS.add("j");               // Join
+        COMMANDS.add("join");            // Join
+        COMMANDS.add("l");               // Leave
+        COMMANDS.add("leave");           // Leave
+        COMMANDS.add("notready");        // List of players who aren't ready
+        COMMANDS.add("spec");            // Watch arena
+        COMMANDS.add("spectate");        // Watch arena
+        COMMANDS.add("arenas");          // List of arenas
+        COMMANDS.add("list");            // List of players
+        COMMANDS.add("players");         // List of players
+        COMMANDS.add("restore");         // Restore inventory
+        COMMANDS.add("enable");          // Enabling
+        COMMANDS.add("disable");         // Disabling
+        COMMANDS.add("protect");         // Protection on/off
+        COMMANDS.add("force");           // Force start/end
+        COMMANDS.add("config");          // Reload config
+        COMMANDS.add("arena");           // Current arena
+        COMMANDS.add("setarena");        // Set current arena
+        COMMANDS.add("addarena");        // Add a new arena
+        COMMANDS.add("delarena");        // Delete current aren
+        COMMANDS.add("editarena");       // Editing
+        COMMANDS.add("setregion");       // Set a region point
+        COMMANDS.add("setwarp");         // Set arena/lobby/spec
+        COMMANDS.add("spawnpoints");     // List spawnpoints
+        COMMANDS.add("addspawn");        // Add a spawnpoint
+        COMMANDS.add("delspawn");        // Delete a spawnpoint 
+        COMMANDS.add("expandregion");    // Expand the region
+        COMMANDS.add("reset");           // Reset arena coordinates
+        COMMANDS.add("auto-generate");   // Auto-generate arena
+        COMMANDS.add("auto-degenerate"); // Restore cuboid
+    }
+    private boolean player, op, console, meanAdmins;
+    private Server server;
+    private MobArena plugin;
+    private ArenaMaster am;
+    
+    public MACommands(MobArena plugin, ArenaMaster am)
+    {
+        this.plugin      = plugin;
+        this.am          = am;
+        server           = Bukkit.getServer();
+        meanAdmins       = (server.getPluginManager().getPlugin("Mean Admins") != null);
+        ALLOWED_COMMANDS = MAUtils.getAllowedCommands(plugin.getConfig());
+    }
+    
     /**
      * Handles all command parsing.
      * Unrecognized commands return false, giving the sender a list of
      * valid commands (from plugin.yml).
      */
-    public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
-        // Check if the server is also running Mean Admins.
-        Plugin ma = ArenaManager.server.getPluginManager().getPlugin("Mean Admins");
-        if (ma != null && !Arrays.asList(ArenaManager.plugin.COMMANDS).contains(args[0].toLowerCase()))
+        // Play nice with Mean Admins.
+        if (meanAdmins && !COMMANDS.contains(args[0].toLowerCase()))
         {
-            ma.onCommand(sender, command, commandLabel, args);
-            return true;
-        }
-            
-        // Only accept commands from players.
-        if ((sender == null) || !(sender instanceof Player))
-        {
-            System.out.println("Only players can use these commands, silly.");
+            server.getPluginManager().getPlugin("Mean Admins").onCommand(sender, command, label, args);
             return true;
         }
         
-        // Cast the sender to a Player object.
-        Player p = (Player) sender;
+        // Determine if the sender is a player (and an op), or the console.
+        player  = (sender instanceof Player);
+        op      = player && ((Player) sender).isOp();
+        console = (sender instanceof ConsoleCommandSender);
         
-        /* If more than one argument, must be an advanced command.
-         * Only allow operators to access these commands. */
-        if (args.length > 1)
-        {
-            if (p.isOp())
-                return advancedCommands(p, args);
-            
-            ArenaManager.tellPlayer(p, "Must be operator for advanced commands.");
-            return true;
-        }
+        // Cast the sender to Player if possible.
+        Player p = (player) ? (Player)sender : null;
         
-        // If not exactly one argument, must be an invalid command.
-        if (args.length != 1)
+        if (args.length == 0)
             return false;
         
-        // Exactly one argument, return whatever simpleCommands returns.
-        return basicCommands(p, args[0].toLowerCase());
-    }
-    
-    /**
-     * Handles basic commands.
-     */
-    private boolean basicCommands(Player p, String cmd)
-    {
-        if (cmd.equals("join") || cmd.equals("j"))
-        {
-            ArenaManager.playerJoin(p);
-            return true;
-        }
-        
-        if (cmd.equals("leave") || cmd.equals("l"))
-        {
-            ArenaManager.playerLeave(p);
-            return true;
-        }
-        
-        if (cmd.equals("list") || cmd.equals("who"))
-        {
-            ArenaManager.playerList(p);
-            return true;
-        }
+        // Grab the command base and any arguments.
+        String base = args[0].toLowerCase();
+        String arg1 = (args.length >= 2) ? args[1].toLowerCase() : null;
+        String arg2 = (args.length >= 3) ? args[2].toLowerCase() : null;
+        //String arg3 = (args.length >= 4) ? args[3].toLowerCase() : null;
 
-        if (cmd.equals("spectate") || cmd.equals("spec"))
-        {
-            ArenaManager.playerSpectate(p);
-            return true;
-        }
-
-        if (cmd.equals("ready") || cmd.equals("notready"))
-        {
-            ArenaManager.notReadyList(p);
-            return true;
-        }
         
-        return false;
-    }
-    
-    /**
-     * Handles advanced commands, mainly for setting up the arena.
-     */
-    private boolean advancedCommands(Player p, String[] args)
-    {        
-        String cmd = args[0].toLowerCase();
-        String arg = args[1].toLowerCase();
         
-        // ma enabled [true|false]
-        if (cmd.equals("enabled"))
-        {
-            if (!arg.equals("true") && !arg.equals("false"))
+        /*////////////////////////////////////////////////////////////////
+        //
+        //      Basics
+        //
+        ////////////////////////////////////////////////////////////////*/
+        
+        /*
+         * Player join
+         */
+        if (base.equals("join") || base.equals("j"))
+        {            
+            if (!player)
             {
-                ArenaManager.tellPlayer(p, "/ma enabled [true|false]");
-                return true;
-            }
-            
-            // Set the boolean
-            ArenaManager.isEnabled = Boolean.valueOf(arg);
-            ArenaManager.tellPlayer(p, "Enabled: " + arg);
-            return true;
-        }
-        
-        if (cmd.equals("check"))
-        {
-            if (!arg.equals("updates"))
-            {
-                ArenaManager.tellPlayer(p, "/ma check updates");
-                return true;
-            }
-            
-            MAUtils.checkForUpdates(p, true);
-            return true;
-        }
-        
-        // ma force [start|end]
-        if (cmd.equals("force"))
-        {
-            // Start arena.
-            if (arg.equals("start"))
-            {
-                ArenaManager.forceStart(p);
+                MAUtils.tellPlayer(sender, "Players only.");
                 return true;
             }
 
-            // End the arena.
-            if (arg.equals("end"))
+            boolean error;
+            
+            if (arg1 != null)
             {
-                ArenaManager.forceEnd(p);
+                Arena arena = am.getArenaWithName(arg1);
+                
+                // Crap-load of sanity-checks.
+                if (!am.enabled)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                else if (arena == null)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
+                else if (!arena.enabled)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
+                else if (!arena.setup)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
+                else if (arena.running)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
+                else if (arena.livePlayers.contains(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+                else if (arena.emptyInv && !MAUtils.hasEmptyInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
+                else if (!arena.emptyInv && !MAUtils.storeInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
+                else error = false;
+                
+                // If there was an error, don't join.
+                if (error)
+                    return true;
+                
+                am.arenaMap.put(p,arena);
+                arena.playerJoin(p, p.getLocation());
+                
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
                 return true;
             }
             
-            ArenaManager.tellPlayer(p, "/ma force [start|end]");
+            if (arg1 == null)
+            {
+                if (am.arenas.size() < 1)
+                {
+                    MAUtils.tellPlayer(sender, "There are no arenas loaded. Check your config-file.");
+                    return true;
+                }
+                
+                Arena arena = am.arenas.get(0);
+                
+                if (!am.enabled)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                else if (am.arenas.size() > 1)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
+                else if (arena == null)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
+                else if (!arena.enabled)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
+                else if (!arena.setup)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
+                else if (arena.running)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
+                else if (arena.livePlayers.contains(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+                else if (arena.emptyInv && !MAUtils.hasEmptyInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
+                else if (!arena.emptyInv && !MAUtils.storeInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
+                else error = false;
+                
+                // If there was an error, don't join.
+                if (error)
+                    return true;
+                
+                am.arenaMap.put(p,arena);
+                arena.playerJoin(p, p.getLocation());
+                
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
+                return true;
+            }
+        }
+        
+        /*
+         * Player leave
+         */
+        if (base.equals("leave") || base.equals("l"))
+        {
+            if (!player)
+            {
+                MAUtils.tellPlayer(sender, "Players only.");
+                return true;
+            }
+            
+            if (!am.arenaMap.containsKey(p))
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_NOT_PLAYING));
+                return true;
+            }
+            
+            Arena arena = am.arenaMap.remove(p);            
+            arena.playerLeave(p);
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_PLAYER_LEFT));
             return true;
         }
         
-        // ma config reload
-        if (cmd.equals("config"))
+        /*
+         * Player spectate
+         */
+        if (base.equals("spectate") || base.equals("spec"))
         {
-            if (!arg.equals("reload"))
+            if (!player)
             {
-                ArenaManager.tellPlayer(p, "/ma config reload");
+                MAUtils.tellPlayer(sender, "Players only.");
                 return true;
             }
-            
-            // End the arena.
-            ArenaManager.init(ArenaManager.plugin);
-            ArenaManager.tellPlayer(p, "Config-file was reloaded.");
-            return true;
-        }
-        
-        // ma setwarp [arena|lobby|spectator]
-        if (cmd.equals("setwarp"))
-        {
-            if (!arg.equals("arena") && !arg.equals("lobby") && !arg.equals("spectator"))
-            {
-                ArenaManager.tellPlayer(p, "/ma setwarp [arena|lobby|spectator]");
-                return true;
-            }
-            
-            // Write the coordinate data to the config-file.
-            MAUtils.setCoords(arg, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
 
-            ArenaManager.tellPlayer(p, "Warp point \"" + arg + "\" set.");
-            MAUtils.notifyIfSetup(p);
+            boolean error;
+            Arena arena = null;
+            
+            if (arg1 != null)
+            {
+                arena = am.getArenaWithName(arg1);
+
+                if (!am.enabled)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                else if (am.arenaMap.containsKey(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
+                else if (arena == null)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                /*else if (!arena.running)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_NOT_RUNNING));
+                else if (!MAUtils.hasEmptyInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));*/
+                else error = false;
+                
+                if (error)
+                    return true;
+            }
+            else
+            {
+                arena = am.arenas.get(0);
+                
+                if (!am.enabled)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                else if (am.arenaMap.containsKey(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
+                else if (am.arenas.size() > 1)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
+                else if (arena == null)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                /*else if (!arena.running)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_NOT_RUNNING));
+                else if (!MAUtils.hasEmptyInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));*/
+                else error = false;
+                
+                if (error)
+                    return true;
+            }
+
+            am.arenaMap.put(p,arena);
+            arena.playerSpec(p, p.getLocation());
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_PLAYER_SPECTATE));
             return true;
         }
         
-        // ma addspawn <name>
-        if (cmd.equals("addspawn"))
+        /*
+         * Prints a list of all arenas.
+         */
+        if (base.equals("arenas"))
         {
-            // The name must start with a letter, followed by any letter(s) or number(s).
-            if (!arg.matches("[a-z]+([[0-9][a-z]])*"))
+            String list = MAUtils.listToString(am.arenas);
+            MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_ARENAS, list));
+            return true;
+        }
+        
+        /*
+         * Prints a list of all live players in all arenas, or live players in a specific arena.
+         */
+        if (base.equals("players") || base.equals("list"))
+        {
+            if (arg1 != null)
             {
-                ArenaManager.tellPlayer(p, "Name must consist of only letters a-z and numbers 0-9");
+                Arena arena = am.getArenaWithName(arg1);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    return true;
+                }
+                
+                String list = MAUtils.listToString(arena.getLivingPlayers());
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
+            }
+            else
+            {
+                StringBuffer buffy = new StringBuffer();
+                for (Arena arena : am.arenas)
+                    buffy.append(MAUtils.listToString(arena.getLivingPlayers()));
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
+            }
+            return true;
+        }
+        
+        /*
+         * Restore a player's inventory.
+         */
+        if (base.equals("restore"))
+        {
+            if (arg1 == null && player)
+            {
+                if (am.getArenaWithPlayer((Player) sender) != null)
+                {
+                    MAUtils.tellPlayer(sender, "You must first leave the current arena.");
+                    return true;
+                }
+                
+                if (MAUtils.restoreInventory(p))
+                    MAUtils.tellPlayer(sender, "Restored your inventory!");
                 return true;
             }
-            
-            // Write the coordinate data to the config-file.
-            MAUtils.setCoords("spawnpoints." + arg, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
-            
-            ArenaManager.tellPlayer(p, "Spawn point with name \"" + arg + "\" added.");
-            MAUtils.notifyIfSetup(p);
-            return true;
-        }
-        
-        // ma delspawn <name>
-        if (cmd.equals("delspawn"))
-        {
-            // The name must start with a letter, followed by any letter(s) or number(s).
-            if (!arg.matches("[a-z]+([[0-9][a-z]])*"))
+            if (arg1 != null && (op || console))
             {
-                ArenaManager.tellPlayer(p, "Name must consist of only letters a-z and numbers 0-9");
-                return true;
-            }
-            
-            // If the spawnpoint does not exist, notify the player.
-            if (MAUtils.getCoords("spawnpoints." + arg) == null)
-            {
-                ArenaManager.tellPlayer(p, "Couldn't find spawnpoint \"" + arg + "\".");
-                ArenaManager.tellPlayer(p, "Spawnpoints: " + MAUtils.spawnList());
-                return true;
-            }
-            
-            MAUtils.delCoords("coords.spawnpoints." + arg);
-            
-            ArenaManager.tellPlayer(p, "Spawn point with name \"" + arg + "\" removed.");
-            MAUtils.notifyIfSetup(p);
-            return true;
-        }
-        
-        // ma setregion [p1|p2]
-        if (cmd.equals("setregion"))
-        {
-            if (!arg.equals("p1") && !arg.equals("p2"))
-            {
-                ArenaManager.tellPlayer(p, "/ma setregion [p1|p2]");
-                return true;
-            }
-            
-            MAUtils.setCoords(arg, p.getLocation());
-            MAUtils.fixCoords();
-            
-            ArenaManager.tellPlayer(p, "Region point \"" + arg + "\" set.");
-            MAUtils.notifyIfSetup(p);
-            return true;
-        }
-        
-        // ma expandregion [up|down|out] <amount>
-        if (cmd.equals("expandregion"))
-        {
-            if (ArenaManager.p1 == null || ArenaManager.p2 == null)
-            {
-                ArenaManager.tellPlayer(p, "Set up region points first: /ma setregion [p1|p2]");
-                return true;
-            }
-            if (!arg.equals("up") && !arg.equals("down") && !arg.equals("out"))
-            {
-                ArenaManager.tellPlayer(p, "/ma expandregion [up|down|out] <amount>");
-                return true;
-            }
-            
-            if (args.length != 3 || !args[2].matches("[0-9]+"))
-                return false;
-            
-            int i = Integer.parseInt(args[2]);
-            MAUtils.expandRegion(arg, i);
-            
-            ArenaManager.tellPlayer(p, "Region expanded " + arg + " by " + i + " blocks.");
-            return true;
-        }
-        
-        // ma reset coords
-        if (cmd.equals("reset"))
-        {
-            if (!arg.equals("coords"))
-                return false;
-            
-            MAUtils.delCoords("coords");
-            ArenaManager.tellPlayer(p, "All arena coords have been reset.");
-            return true;
-        }
-        
-        // ma protect [true|false]
-        if (cmd.equals("protect"))
-        {
-            if (!arg.equals("true") && !arg.equals("false"))
-                return false;
-            
-            // Set the boolean
-            ArenaManager.isProtected = Boolean.valueOf(arg);
-            
-            ArenaManager.tellPlayer(p, "Region protection: " + arg);
-            return true;
-        }
-        
-        // ma dooooo it hippie monster
-        if (cmd.equals("dooooo"))
-        {
-            if (args.length != 4)
-                return false;
-            
-            if (args[1].equals("it") && args[2].equals("hippie") && args[3].equals("monster"))
-            {
-                MAUtils.DoooooItHippieMonster(p.getLocation(), 13);
-                ArenaManager.tellPlayer(p, "Auto-generated a working MobArena!");
+                if (am.getArenaWithPlayer(arg1) != null)
+                {
+                    MAUtils.tellPlayer(sender, "Player is currently in an arena.");
+                    return true;
+                }
+                
+                if (MAUtils.restoreInventory(Bukkit.getServer().getPlayer(arg1)));
+                    MAUtils.tellPlayer(sender, "Restored " + arg1 + "'s inventory!");
                 return true;
             }
         }
 
-        // ma undo it hippie monster
-        if (cmd.equals("undo"))
+
+        
+        /*////////////////////////////////////////////////////////////////
+        //
+        //      Setup & Reload
+        //
+        ////////////////////////////////////////////////////////////////*/
+        
+        /*
+         * Enable or disable arena(s)
+         */
+        if ((base.equals("enable") || base.equals("disable")))
         {
-            if (args.length != 4)
-                return false;
-            
-            if (args[1].equals("it") && args[2].equals("hippie") && args[3].equals("monster"))
+            if (!(op || console))
             {
-                MAUtils.UnDoooooItHippieMonster();
-                ArenaManager.tellPlayer(p, "Restored your precious little patch >_>");
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (arg1 != null)
+            {
+                Arena arena = am.getArenaWithName(arg1);
+                if (arena != null)
+                {
+                    arena.enabled = base.equals("enable");
+                    arena.serializeConfig();
+                    MAUtils.tellPlayer(sender, "Arena '" + arena.configName() + "' " + ((arena.enabled) ? ChatColor.GREEN : ChatColor.RED) + base + "d");
+                }
+                else
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                }
+            }
+            else
+            {
+                am.enabled = base.equals("enable");
+                am.serializeSettings();
+                MAUtils.tellPlayer(sender, "All arenas " + ((am.enabled) ? ChatColor.GREEN : ChatColor.RED) + base + "d");
+            }
+            return true;
+        }
+        
+        /*
+         * Enable or disable protection
+         */
+        if (base.equals("protect"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || arg2 == null || !(arg2.equals("true") || arg2.equals("false")))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma protect <arena name> [true|false]");
+                return true;
+            }
+            
+            Arena arena = am.getArenaWithName(arg1);
+            if (arena == null)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                return true;
+            }
+            
+            arena.protect = arg2.equals("true");
+            arena.serializeConfig();
+            arena.load(plugin.getConfig());
+            MAUtils.tellPlayer(sender, "Protection for arena '" + arg1 + "' set to " + arg2);
+            return true;
+        }
+        
+        /*
+         * Force start/end arenas.
+         */
+        if (base.equals("force"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma force [start|end] (<arena name>)");
+                return true;
+            }
+            
+            if (arg1.equals("end"))
+            {
+                if (arg2 == null)
+                {
+                    for (Arena arena : am.arenas)
+                        arena.forceEnd();
+                    
+                    am.arenaMap.clear();
+                    return true;
+                }
+                if (!arg2.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+                {
+                    MAUtils.tellPlayer(sender, "Usage: /ma force end (<arena name>)");
+                    return true;
+                }
+                
+                Arena arena = am.getArenaWithName(arg2);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    return true;
+                }
+                
+                // The arena exists.
+                if (arena.livePlayers.isEmpty())
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_EMPTY));
+                    return true;
+                }
+                
+                arena.forceEnd();
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_ENDED));
+                return true;
+            }
+            
+            if (arg1.equals("start"))
+            {
+                if (arg2 == null || !arg2.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+                {
+                    MAUtils.tellPlayer(sender, "Usage: /ma force start <arena name>");
+                    return true;
+                }
+                
+                Arena arena = am.getArenaWithName(arg2);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    return true;
+                }
+                
+                // The arena exists.
+                if (arena.running)
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_RUNNING));
+                    return true;
+                }
+                if (arena.readyPlayers.isEmpty())
+                {
+                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_NOT_READY));
+                    return true;
+                }
+                
+                arena.forceStart();
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_STARTED));
                 return true;
             }
         }
         
-        return false;
+        /*
+         * Reload the config-file.
+         */
+        if (base.equals("config") && arg1 != null)
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (!arg1.equals("reload"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma config reload");
+                return true;
+            }
+            
+            am.updateAll();
+            MAUtils.tellPlayer(sender, "Config reloaded.");
+            return true;
+        }
+        
+        /* 
+         * Get the current arena, and list all other arenas.
+         */
+        if (base.equals("arena"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            MAUtils.tellPlayer(sender, "Currently selected arena: " + ChatColor.GREEN + am.selectedArena.configName());
+
+            StringBuffer buffy = new StringBuffer();
+            if (am.arenas.size() > 1)
+            {
+                for (Arena arena : am.arenas)
+                    if (!arena.equals(am.selectedArena))
+                        buffy.append(arena.configName() + " ");
+            }
+            else buffy.append(MAMessages.get(Msg.MISC_NONE));
+            
+            MAUtils.tellPlayer(sender, "Other arenas: " + buffy.toString());
+            return true;
+        }
+        
+        /*
+         * Set the current arena
+         */
+        if (base.equals("setarena"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma setarena <arena name>");
+                return true;
+            }
+            
+            Arena arena = am.getArenaWithName(arg1);
+            if (arena != null)
+                am.selectedArena = arena;
+            else
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+            return true;
+        }
+        
+        /*
+         * Create a new arena, and set the current arena to this new arena.
+         */
+        if (base.equals("addarena"))
+        {
+            if (!op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma addarena <arena name>");
+                return true;
+            }
+            
+            Arena arena = am.getArenaWithName(arg1);
+            if (arena != null)
+            {
+                MAUtils.tellPlayer(sender, "An arena with that name already exists.");
+                return true;
+            }
+            
+            arena = am.createArenaNode(arg1, p.getWorld());
+            am.arenas.add(arena);
+            am.selectedArena = arena;
+            
+            MAUtils.tellPlayer(sender, "New arena with name '" + arg1 + "' created!");
+            return true;
+        }
+        
+        if (base.equals("delarena"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma delarena <arena name>");
+                return true;
+            }
+            if (am.arenas.size() == 1)
+            {
+                MAUtils.tellPlayer(sender, "At least one arena must exist.");
+                return true;
+            }
+            
+            Arena arena = am.getArenaWithName(arg1);
+            if (arena == null)
+            {
+                MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                return true;
+            }
+            
+            am.removeArenaNode(arg1);
+            am.arenas.remove(arena);
+            am.selectedArena = (am.selectedArena.equals(arena)) ? am.arenas.get(0) : am.selectedArena;
+            
+            MAUtils.tellPlayer(sender, "Arena '" + arena.configName() + "' deleted.");
+            return true;
+        }
+        
+        if (base.equals("editarena"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || arg2 == null || (!arg2.equals("true") && !arg2.equals("false")))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma editarena <arena name> [true|false]");
+                return true;
+            }
+            
+            Arena arena = am.getArenaWithName(arg1);
+            if (arena == null)
+            {
+                MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                return true;
+            }
+            
+            arena.edit = arg2.equals("true");
+            MAUtils.tellPlayer(sender, "Edit mode for arena '" + arg1 + "': " + ((arena.edit) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
+            if (arena.edit) MAUtils.tellPlayer(sender, "Remember to turn it back off after editing!"); 
+            return true;
+        }
+        
+        /*
+         * Set region points [p1|p2] for the current arena.
+         */
+        if (base.equals("setregion"))
+        {
+            if (!op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (arg1 == null || !(arg1.equals("p1") || arg1.equals("p2")))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma setregion [p1|p2]");
+                return true;
+            }
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation());
+            MAUtils.tellPlayer(sender, "Set region point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+        
+        /*
+         * Expand the region <amount> (arg1) [up|down|out]
+         */
+        if (base.equals("expandregion"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (args.length != 3 || !arg1.matches("[0-9]+"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma expandregion <amount> [up|down|out]");
+                return true;
+            }
+            
+            if (arg2.equals("up"))
+            {
+                am.selectedArena.p2.setY(Math.min(127, am.selectedArena.p2.getY() + Integer.parseInt(arg1)));
+            }
+            else if (arg2.equals("down"))
+            {
+                am.selectedArena.p1.setY(Math.max(0, am.selectedArena.p1.getY() - Integer.parseInt(arg1)));
+            }
+            else if (arg2.equals("out"))
+            {
+                am.selectedArena.p1.setX(am.selectedArena.p1.getX() - Integer.parseInt(arg1));
+                am.selectedArena.p1.setZ(am.selectedArena.p1.getZ() - Integer.parseInt(arg1));
+                am.selectedArena.p2.setX(am.selectedArena.p2.getX() + Integer.parseInt(arg1));
+                am.selectedArena.p2.setZ(am.selectedArena.p2.getZ() + Integer.parseInt(arg1));
+            }
+            else
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma expandregion <amount> [up|down|out]");
+                return true;
+            }
+            
+            MAUtils.tellPlayer(sender, "Region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
+            am.selectedArena.serializeConfig();
+            am.selectedArena.load(plugin.getConfig());
+            return true;
+        }
+        
+        /*
+         * Set warp points [arena|lobby|spectator] for the current arena. 
+         */
+        if (base.equals("setwarp"))
+        {
+            if (!op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !(arg1.equals("arena") || arg1.equals("lobby") || arg1.equals("spectator")))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma setwarp [arena|lobby|spectator]");
+                return true;
+            }
+
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
+            MAUtils.tellPlayer(sender, "Set warp point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+        
+        /*
+         * List all the current spawnpoints for the current arena.
+         */
+        if (base.equals("spawnpoints"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            StringBuffer buffy = new StringBuffer();
+            List<String> spawnpoints = plugin.getConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.spawnpoints");
+            
+            if (spawnpoints != null)
+            {
+                for (String s : spawnpoints)
+                {
+                    buffy.append(s);
+                    buffy.append(" ");
+                }
+            }
+            else
+            {
+                buffy.append(MAMessages.get(Msg.MISC_NONE));
+            }
+            
+            MAUtils.tellPlayer(sender, "Spawnpoints for arena '" + am.selectedArena.configName() + "': " + buffy.toString());
+            return true;
+        }
+        
+        /*
+         * Add a spawnpoint for the current arena.
+         */
+        if (base.equals("addspawn"))
+        {
+            if (!op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma addspawn <spawn name>");
+                return true;
+            }
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1, p.getLocation());
+            MAUtils.tellPlayer(sender, "Added spawnpoint " + arg1 + " for arena \"" + am.selectedArena.configName() + "\"");
+            return true;
+        }
+        
+        /*
+         * Delete a spawnpoint for the current arena.
+         */
+        if (base.equals("delspawn"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma delspawn <spawn name>");
+                return true;
+            }
+
+            if (MAUtils.delArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1))
+                MAUtils.tellPlayer(sender, "Deleted spawnpoint " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+            else
+                MAUtils.tellPlayer(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+        
+        if (base.equals("auto-generate"))
+        {
+            if (!op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma autogenerate <arena name>");
+                return true;
+            }
+            if (am.getArenaWithName(arg1) != null)
+            {
+                MAUtils.tellPlayer(sender, "An arena with that name already exists.");
+                return true;
+            }
+            
+            if (MAUtils.doooooItHippieMonster(p.getLocation(), 13, arg1, plugin))
+                MAUtils.tellPlayer(sender, "Arena with name '" + arg1 + "' generated.");
+            else
+                MAUtils.tellPlayer(sender, "Could not auto-generate arena.");
+            return true;
+        }
+        
+        if (base.equals("auto-degenerate"))
+        {
+            if (!(op || console))
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma auto-degenerate <arena name>");
+                return true;
+            }
+            if (am.getArenaWithName(arg1) == null)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                return true;
+            }
+            
+            if (MAUtils.undoItHippieMonster(arg1, plugin, true))
+                MAUtils.tellPlayer(sender, "Arena with name '" + arg1 + "' degenerated.");
+            else
+                MAUtils.tellPlayer(sender, "Could not degenerate arena.");
+            return true;
+        }
+        
+        MAUtils.tellPlayer(sender, "Command not found.");
+        return true;
     }
 }
