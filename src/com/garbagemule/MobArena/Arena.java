@@ -1166,7 +1166,7 @@ public class Arena
                         MAUtils.tellPlayer(p, MAMessages.get(Msg.FORCE_END_IDLE));
                     }
                 }
-            }, maxIdleTime*20);
+            }, maxIdleTime);
     }
     
     /**
