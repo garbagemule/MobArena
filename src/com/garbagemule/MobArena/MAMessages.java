@@ -209,7 +209,7 @@ public class MAMessages
         String[] split = s.split("=");
         if (split.length != 2)
         {
-            System.out.println("[MobArena] ERROR: Couldn't parse \"" + s + "\".");
+            System.out.println("[MobArena] ERROR: Couldn't parse \"" + s + "\". Check announcements-file.");
             return;
         }
         
@@ -225,7 +225,7 @@ public class MAMessages
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR: " + key + " is not a valid key!");
+            System.out.println("[MobArena] ERROR: " + key + " is not a valid key. Check announcements-file.");
             return;
         }
     }

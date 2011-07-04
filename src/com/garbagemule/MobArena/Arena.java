@@ -62,7 +62,7 @@ public class Arena
     // Setup fields
     protected String name;
     protected World world;
-    protected boolean enabled, running, setup, protect, autoEquip, forceRestore, softRestore, emptyInv, pvp, monsterInfight;
+    protected boolean enabled, running, setup, protect, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
     protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds;
     protected Location p1, p2, arenaLoc, lobbyLoc, spectatorLoc;
     protected Map<String,Location> spawnpoints;
@@ -170,11 +170,15 @@ public class Arena
         }
         
         // Start the spawnThread.
-        spawnThread = new MASpawnThread(this);
+        spawnThread = new MASpawnThread(plugin, this);
         spawnTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, waveInterval);
         
         readyPlayers.clear();
         MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onArenaStart();
     }
     
     /**
@@ -191,7 +195,7 @@ public class Arena
             Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
         }
         
-        if (!emptyInv)
+        if (!emptyInvJoin)
             for (Player p : deadPlayers)
                 MAUtils.restoreInventory(p);
         
@@ -202,7 +206,6 @@ public class Arena
         // Clear all the sets and maps.
         livePlayers.clear();
         deadPlayers.clear();
-        //specPlayers.clear();
         pets.clear();
         classMap.clear();
         rewardMap.clear();
@@ -216,6 +219,10 @@ public class Arena
         // Set the spawn flags to restore monster spawning.
         MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
         MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_END));
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onArenaEnd();
     }
     
     /**
@@ -256,6 +263,10 @@ public class Arena
         MAUtils.sitPets(p);
         livePlayers.add(p);
         p.teleport(lobbyLoc);
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerJoin(p);
     }
     
     /**
@@ -287,14 +298,19 @@ public class Arena
         if (livePlayers.remove(p))  clear = true;
         if (deadPlayers.remove(p))  clear = false;
         if (specPlayers.remove(p))  clear = false;
+        removePets(p);
         
-        if (clear)     MAUtils.clearInventory(p);
-        if (!emptyInv) MAUtils.restoreInventory(p);
+        if (clear)         MAUtils.clearInventory(p);
+        if (!emptyInvJoin) MAUtils.restoreInventory(p);
         
         if (running && livePlayers.isEmpty())
             endArena();
         else if (!readyPlayers.isEmpty() && readyPlayers.equals(livePlayers))
             startArena();
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerLeave(p);
     }
     
     public void playerQuit(Player p)
@@ -304,6 +320,7 @@ public class Arena
         livePlayers.remove(p);
         deadPlayers.remove(p);
         specPlayers.remove(p);
+        removePets(p);
         
         if (running && livePlayers.isEmpty())
             endArena();
@@ -320,6 +337,7 @@ public class Arena
         // Add to the list of dead players.
         livePlayers.remove(p);
         deadPlayers.add(p);
+        removePets(p);
 
         // Has to be delayed for TombStone not to fuck shit up.
         if (running && livePlayers.isEmpty())
@@ -332,6 +350,10 @@ public class Arena
                             endArena();
                         }
                     }, 10);
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerDeath(p);
     }
     
     public void playerSpec(Player p, Location loc)
@@ -407,6 +429,13 @@ public class Arena
             w.remove();
     }
     
+    private void removePets(Player p)
+    {
+        for (Wolf w : pets)
+            if (w.getOwner().equals(p))
+                w.remove();
+    }
+    
     private void removeEntities()
     {
         Chunk c1 = world.getChunkAt(p1);
@@ -434,43 +463,46 @@ public class Arena
         String arenaPath = "arenas." + MAUtils.nameArenaToConfig(name) + ".settings.";
         String configName = MAUtils.nameArenaToConfig(name);
         
-        enabled        = config.getBoolean(arenaPath + "enabled", true);
-        protect        = config.getBoolean(arenaPath + "protect", true);
-        autoEquip      = config.getBoolean(arenaPath + "auto-equip-armor", true);
-        waveClear      = config.getBoolean(arenaPath + "wave-clear", false);
-        detCreepers    = config.getBoolean(arenaPath + "detonate-creepers", false);
-        detDamage      = config.getBoolean(arenaPath + "detonate-damage", false);
-        lightning      = config.getBoolean(arenaPath + "lightning", true);
-        forceRestore   = config.getBoolean(arenaPath + "force-restore", false);
-        softRestore    = config.getBoolean(arenaPath + "soft-restore", false);
-        emptyInv       = config.getBoolean(arenaPath + "require-empty-inventory", false);
-        hellhounds     = config.getBoolean(arenaPath + "hellhounds", false);
-        pvp            = config.getBoolean(arenaPath + "pvp-enabled", false);
-        monsterInfight = config.getBoolean(arenaPath + "monster-infight", false);
-        waveDelay      = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
-        waveInterval   = config.getInt(arenaPath + "wave-interval", 20) * 20;
-        specialModulo  = config.getInt(arenaPath + "special-modulo", 4);
-        maxIdleTime    = config.getInt(arenaPath + "max-idle-time", 0);
+        enabled          = config.getBoolean(arenaPath + "enabled", true);
+        protect          = config.getBoolean(arenaPath + "protect", true);
+        autoEquip        = config.getBoolean(arenaPath + "auto-equip-armor", true);
+        waveClear        = config.getBoolean(arenaPath + "clear-wave-before-next", false);
+        detCreepers      = config.getBoolean(arenaPath + "detonate-creepers", false);
+        detDamage        = config.getBoolean(arenaPath + "detonate-damage", false);
+        lightning        = config.getBoolean(arenaPath + "lightning", true);
+        forceRestore     = config.getBoolean(arenaPath + "force-restore", false);
+        softRestore      = config.getBoolean(arenaPath + "soft-restore", false);
+        softRestoreDrops = config.getBoolean(arenaPath + "soft-restore-drops", false);
+        emptyInvJoin     = config.getBoolean(arenaPath + "require-empty-inv-join", false);
+        emptyInvSpec     = config.getBoolean(arenaPath + "require-empty-inv-spec", false);
+        hellhounds       = config.getBoolean(arenaPath + "hellhounds", false);
+        pvp              = config.getBoolean(arenaPath + "pvp-enabled", false);
+        monsterInfight   = config.getBoolean(arenaPath + "monster-infight", false);
+        allowWarp        = config.getBoolean(arenaPath + "allow-teleporting", false);
+        repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
+        waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
+        waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
+        specialModulo    = config.getInt(arenaPath + "special-modulo", 4);
+        maxIdleTime      = config.getInt(arenaPath + "max-idle-time", 0) * 20;
 
-        distDefault    = MAUtils.getArenaDistributions(config, configName, "default");
-        distSpecial    = MAUtils.getArenaDistributions(config, configName, "special");
-        everyWaveMap   = MAUtils.getArenaRewardMap(config, configName, "every");
-        afterWaveMap   = MAUtils.getArenaRewardMap(config, configName, "after");
+        distDefault      = MAUtils.getArenaDistributions(config, configName, "default");
+        distSpecial      = MAUtils.getArenaDistributions(config, configName, "special");
+        everyWaveMap     = MAUtils.getArenaRewardMap(config, configName, "every");
+        afterWaveMap     = MAUtils.getArenaRewardMap(config, configName, "after");
         
-        p1             = MAUtils.getArenaCoord(config, world, configName, "p1");
-        p2             = MAUtils.getArenaCoord(config, world, configName, "p2");
-        arenaLoc       = MAUtils.getArenaCoord(config, world, configName, "arena");
-        lobbyLoc       = MAUtils.getArenaCoord(config, world, configName, "lobby");
-        spectatorLoc   = MAUtils.getArenaCoord(config, world, configName, "spectator");
-        spawnpoints    = MAUtils.getArenaSpawnpoints(config, world, configName);
+        p1               = MAUtils.getArenaCoord(config, world, configName, "p1");
+        p2               = MAUtils.getArenaCoord(config, world, configName, "p2");
+        arenaLoc         = MAUtils.getArenaCoord(config, world, configName, "arena");
+        lobbyLoc         = MAUtils.getArenaCoord(config, world, configName, "lobby");
+        spectatorLoc     = MAUtils.getArenaCoord(config, world, configName, "spectator");
+        spawnpoints      = MAUtils.getArenaSpawnpoints(config, world, configName);
         
-        classes        = plugin.getAM().classes;
-        classItems     = plugin.getAM().classItems;
-        classArmor     = plugin.getAM().classArmor;
-        repairDelay    = plugin.getAM().repairDelay;
+        classes          = plugin.getAM().classes;
+        classItems       = plugin.getAM().classItems;
+        classArmor       = plugin.getAM().classArmor;
         
         // Determine if the arena is properly set up. Then add the to arena list.
-        setup         = MAUtils.verifyData(this);
+        setup            = MAUtils.verifyData(this);
     }
     
     public void serializeConfig()
@@ -623,6 +655,19 @@ public class Arena
         Block b = event.getBlock();
         if (blocks.remove(b) || b.getType() == Material.TNT)
             return;
+        
+        if (softRestore)
+        {
+            int[] buffer = new int[5];
+            buffer[0] = b.getX();
+            buffer[1] = b.getY();
+            buffer[2] = b.getZ();
+            buffer[3] = b.getTypeId();
+            buffer[4] = (int) b.getData();
+            repairList.add(buffer);
+            if (!softRestoreDrops) event.getBlock().setTypeId(0);
+            return;
+        }
         
         event.setCancelled(true);
     }
@@ -979,7 +1024,7 @@ public class Arena
     // Teleport Listener
     public void onPlayerTeleport(PlayerTeleportEvent event)
     {
-        if (edit || !enabled || !setup)
+        if (edit || !enabled || !setup || allowWarp)
             return;
         
         if (!inRegion(event.getTo()) && !inRegion(event.getFrom()))
@@ -1110,7 +1155,7 @@ public class Arena
                             monsters.remove(e);
                     
                     // Compare the current size with the previous size.
-                    if (monsters.size() != spawnThread.previousSize || spawnThread.previousSize == 0)
+                    if (monsters.size() < spawnThread.previousSize || spawnThread.previousSize == 0)
                         return;
                     
                     // Clear all player inventories, and "kill" all players.

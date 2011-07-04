@@ -24,7 +24,6 @@ public class ArenaMaster
     
     // Settings
     protected boolean enabled, updateNotify, autoEquip, emptyInvs, hellhounds;
-    protected int repairDelay;
     
     // Classes
     protected List<String> classes;
@@ -76,17 +75,50 @@ public class ArenaMaster
         return result;
     }
     
+    public List<Player> getAllPlayers()
+    {
+        List<Player> result = new LinkedList<Player>();
+        for (Arena arena : arenas)
+            result.addAll(arena.getAllPlayers());
+        return result;
+    }
+    
+    public List<Player> getAllPlayersInArena(String arenaName)
+    {
+        Arena arena = getArenaWithName(arenaName);
+        return (arena != null) ? arena.getLivingPlayers() : new LinkedList<Player>();
+    }
+    
+    public List<Player> getAllLivingPlayers()
+    {
+        List<Player> result = new LinkedList<Player>();
+        for (Arena arena : arenas)
+            result.addAll(arena.getLivingPlayers());
+        return result;
+    }
+    
+    public List<Player> getLivingPlayersInArena(String arenaName)
+    {
+        Arena arena = getArenaWithName(arenaName);
+        return (arena != null) ? arena.getLivingPlayers() : new LinkedList<Player>();
+    }
+    
     public Arena getArenaWithPlayer(Player p)
     {
         return arenaMap.get(p);
     }
     
-    public Arena getArenaWithPlayer(String s)
+    public Arena getArenaWithPlayer(String playerName)
     {
-        for (Map.Entry<Player,Arena> entry : arenaMap.entrySet())
+        return arenaMap.get(Bukkit.getServer().getPlayer(playerName));
+    }
+    
+    public Arena getArenaWithSpectator(Player p)
+    {
+        for (Arena arena : arenas)
         {
-            if (entry.getKey().getName().equals(s))
-                return entry.getValue();
+            if (arena.specPlayers.contains(p))
+                return arena;
         }
         return null;
     }
@@ -141,12 +173,10 @@ public class ArenaMaster
         {
             config.setProperty("global-settings.enabled", true);
             config.setProperty("global-settings.update-notification", true);
-            config.setProperty("global-settings.repair-delay", 5);
         }
         
         enabled      = config.getBoolean("global-settings.enabled", true);
         updateNotify = config.getBoolean("global-settings.update-notification", true);
-        repairDelay  = config.getInt("global-settings.repair-delay", 5);
     }
     
     /**
@@ -217,19 +247,23 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.protect", true);
         config.save();
         config.load();
-        config.setProperty("arenas." + configName + ".settings.wave-clear", false);
+        config.setProperty("arenas." + configName + ".settings.clear-wave-before-next", false);
         config.setProperty("arenas." + configName + ".settings.detonate-creepers", false);
         config.setProperty("arenas." + configName + ".settings.detonate-damage", false);
         config.setProperty("arenas." + configName + ".settings.lightning", true);
         config.setProperty("arenas." + configName + ".settings.auto-equip-armor", true);
         config.setProperty("arenas." + configName + ".settings.force-restore", false);
         config.setProperty("arenas." + configName + ".settings.soft-restore", false);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inventory", false);
+        config.setProperty("arenas." + configName + ".settings.soft-restore-drops", false);
+        config.setProperty("arenas." + configName + ".settings.require-empty-inv-join", false);
+        config.setProperty("arenas." + configName + ".settings.require-empty-inv-spec", false);
         config.setProperty("arenas." + configName + ".settings.hellhounds", false);
         config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
         config.setProperty("arenas." + configName + ".settings.monster-infight", false);
+        config.setProperty("arenas." + configName + ".settings.allow-teleporting", false);
         config.save();
         config.load();
+        config.setProperty("arenas." + configName + ".settings.repair-delay", 5);
         config.setProperty("arenas." + configName + ".settings.first-wave-delay", 5);
         config.setProperty("arenas." + configName + ".settings.wave-interval", 20);
         config.setProperty("arenas." + configName + ".settings.special-modulo", 4);
@@ -316,8 +350,6 @@ public class ArenaMaster
         
         // Remove all Arenas no longer in the config.
         arenas.retainAll(configArenas);
-        //for (Arena arena : arenas)
-        //    arena.serializeConfig();
         
         for (Arena arena : arenas)
             arena.deserializeConfig();

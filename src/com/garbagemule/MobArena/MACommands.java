@@ -94,7 +94,6 @@ public class MACommands implements CommandExecutor
         String base = args[0].toLowerCase();
         String arg1 = (args.length > 1) ? args[1].toLowerCase() : "";
         String arg2 = (args.length > 2) ? args[2].toLowerCase() : "";
-        //String arg3 = (args.length >= 4) ? args[3].toLowerCase() : null;
 
         
         
@@ -136,9 +135,9 @@ public class MACommands implements CommandExecutor
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
                 else if (arena.livePlayers.contains(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-                else if (arena.emptyInv && !MAUtils.hasEmptyInventory(p))
+                else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-                else if (!arena.emptyInv && !MAUtils.storeInventory(p))
+                else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
                 else error = false;
                 
@@ -178,9 +177,9 @@ public class MACommands implements CommandExecutor
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
                 else if (arena.livePlayers.contains(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-                else if (arena.emptyInv && !MAUtils.hasEmptyInventory(p))
+                else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-                else if (!arena.emptyInv && !MAUtils.storeInventory(p))
+                else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
                 else error = false;
                 
@@ -209,6 +208,14 @@ public class MACommands implements CommandExecutor
             
             if (!am.arenaMap.containsKey(p))
             {
+                Arena arena = am.getArenaWithSpectator(p);
+                if (arena != null)
+                {            
+                    arena.playerLeave(p);
+                    MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_PLAYER_LEFT));
+                    return true;
+                }
+                
                 MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_NOT_PLAYING));
                 return true;
             }
@@ -243,10 +250,8 @@ public class MACommands implements CommandExecutor
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
                 else if (arena == null)
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                /*else if (!arena.running)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_NOT_RUNNING));
-                else if (!MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));*/
+                else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
                 else error = false;
                 
                 if (error)
@@ -264,17 +269,14 @@ public class MACommands implements CommandExecutor
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
                 else if (arena == null)
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                /*else if (!arena.running)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_NOT_RUNNING));
-                else if (!MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));*/
+                else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
                 else error = false;
                 
                 if (error)
                     return true;
             }
 
-            am.arenaMap.put(p,arena);
             arena.playerSpec(p, p.getLocation());
             MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_PLAYER_SPECTATE));
             return true;
@@ -351,37 +353,6 @@ public class MACommands implements CommandExecutor
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             return true;
         }
-        
-        /*
-         * Restore a player's inventory.
-         */
-        if (base.equals("restore"))
-        {
-            if (arg1.isEmpty() && player)
-            {
-                if (am.getArenaWithPlayer(p) != null)
-                {
-                    MAUtils.tellPlayer(sender, "You must first leave the current arena.");
-                    return true;
-                }
-                
-                if (MAUtils.restoreInventory(p))
-                    MAUtils.tellPlayer(sender, "Restored your inventory!");
-                return true;
-            }
-            if (!arg1.isEmpty() && (op || console))
-            {
-                if (am.getArenaWithPlayer(arg1) != null)
-                {
-                    MAUtils.tellPlayer(sender, "Player is currently in an arena.");
-                    return true;
-                }
-                
-                if (MAUtils.restoreInventory(Bukkit.getServer().getPlayer(arg1)));
-                    MAUtils.tellPlayer(sender, "Restored " + arg1 + "'s inventory!");
-                return true;
-            }
-        }
 
 
         
@@ -397,7 +368,6 @@ public class MACommands implements CommandExecutor
         if ((base.equals("enable") || base.equals("disable")))
         {
             if (!console && !(player && MobArena.has(p, "mobarena.admin.enable")) && !op)
-            //if (player && !MobArena.has(p, "mobarena.admin.enable"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -454,6 +424,31 @@ public class MACommands implements CommandExecutor
             arena.load(plugin.getConfig());
             MAUtils.tellPlayer(sender, "Protection for arena '" + arg1 + "' set to " + arg2);
             return true;
+        }
+        
+        /*
+         * Restore a player's inventory.
+         */
+        if (base.equals("restore"))
+        {
+            if (!console && !(player && MobArena.has(p, "mobarena.admin.restore")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (!arg1.isEmpty())
+            {
+                if (am.getArenaWithPlayer(arg1) != null)
+                {
+                    MAUtils.tellPlayer(sender, "Player is currently in an arena.");
+                    return true;
+                }
+                
+                if (MAUtils.restoreInventory(Bukkit.getServer().getPlayer(arg1)));
+                    MAUtils.tellPlayer(sender, "Restored " + arg1 + "'s inventory!");
+                return true;
+            }
         }
         
         /*

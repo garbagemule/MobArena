@@ -191,9 +191,6 @@ public class MobArena extends JavaPlugin
         config.setProperty("global-settings.update-notification", true);
         config.save();
         config.load();
-        config.setProperty("global-settings.repair-delay", 5);
-        config.save();
-        config.load();
         
         // Copy classes
         for (String s : oldConfig.getKeys("classes"))
@@ -208,17 +205,6 @@ public class MobArena extends JavaPlugin
         config.save();
         config.load();
         config.setProperty("arenas.default.settings.world", oldConfig.getString("settings.world"));
-        config.save();
-        config.load();
-        
-        // Copy the waves and rewards to the new default arena.
-        for (String s : oldConfig.getKeys("waves.default"))
-            config.setProperty("arenas.default.waves.default." + s, oldConfig.getString("waves.default." + s));
-        config.save();
-        for (String s : oldConfig.getKeys("rewards.waves.every"))
-            config.setProperty("arenas.default.rewards.waves.every." + s, oldConfig.getString("rewards.waves.every." + s));
-        for (String s : oldConfig.getKeys("rewards.waves.after"))
-            config.setProperty("arenas.default.rewards.waves.after." + s, oldConfig.getString("rewards.waves.after." + s));
         config.save();
         config.load();
         

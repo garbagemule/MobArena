@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena;
 
 import java.util.List;
-import java.util.LinkedList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,32 +32,15 @@ public class MobArenaHandler
     // Arena getters
     public Arena getArenaWithName(String arenaName)  { return plugin.getAM().getArenaWithName(arenaName); }
     public Arena getArenaWithPlayer(Player p)        { return plugin.getAM().getArenaWithPlayer(p); }
-    public Arena getArenaWithPlayer(String player)   { return plugin.getAM().getArenaWithPlayer(player); }
     public Arena getArenaWithPet(Entity wolf)        { return plugin.getAM().getArenaWithPet(wolf); }
     public Arena getArenaWithMonster(Entity monster) { return plugin.getAM().getArenaWithMonster(monster); }
     public Arena getArenaInLocation(Location l)      { return plugin.getAM().getArenaInLocation(l); }
     
     // Player lists
-    public List<Player> getAllPlayers()                 { return new LinkedList<Player>(plugin.getAM().arenaMap.keySet()); }
-    public List<Player> getAllPlayers(Arena arena)      { return arena.getAllPlayers(); }
-    public List<Player> getAllPlayers(String arenaName) { return getAllPlayers(plugin.getAM().getArenaWithName(arenaName)); }
-    
-    public List<Player> getLivingPlayers()
-    {
-        List<Player> result = new LinkedList<Player>();
-        for (Arena arena : plugin.getAM().arenas)
-            result.addAll(arena.getLivingPlayers());
-        return result;
-    }
-    
-    public List<Player> getLivingPlayers(String arenaName)
-    {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
-        
-        return new LinkedList<Player>(arena.livePlayers);
-    }
+    public List<Player> getAllPlayers()                              { return plugin.getAM().getAllPlayers(); }
+    public List<Player> getAllLivingPlayers()                        { return plugin.getAM().getAllLivingPlayers(); }
+    public List<Player> getAllPlayersInArena(String arenaName)       { return plugin.getAM().getAllPlayersInArena(arenaName); }
+    public List<Player> getLivingPlayersInArena(String arenaName) { return plugin.getAM().getLivingPlayersInArena(arenaName); }
     
     // Warp locations.
     public Location getArenaLocation(String arenaName)

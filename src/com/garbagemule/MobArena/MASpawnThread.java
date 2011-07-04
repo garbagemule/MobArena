@@ -38,11 +38,13 @@ public class MASpawnThread implements Runnable
     private int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
     private int dPoweredCreepers, dPigZombies, dSlimes, dMonsters, dAngryWolves, dGiants, dGhasts;
     private Random random;
+    private MobArena plugin;
     private Arena arena;
     private final double MIN_DISTANCE = 256;
     
-    public MASpawnThread(Arena arena)
+    public MASpawnThread(MobArena plugin, Arena arena)
     {
+        this.plugin = plugin;
         this.arena = arena;
         modulo = arena.specialModulo;
         if (modulo <= 0) modulo = -32768;
@@ -94,20 +96,22 @@ public class MASpawnThread implements Runnable
         if (wave % modulo == 0)
         {
             MAUtils.tellAll(arena, MAMessages.get(Msg.WAVE_SPECIAL, ""+wave));
-            /*for (MobArenaListener m : ArenaManager.listeners) TODO: Get API back up to speed.
-                m.onSpecialWave(wave, wave/modulo);*/
             detonateCreepers(arena.detCreepers);
-            
             specialWave();
+            
+            // Notify listeners.
+            for (MobArenaListener listener : plugin.getAM().listeners)
+                listener.onSpecialWave(wave, wave/modulo);
         }
         else
         {
             MAUtils.tellAll(arena, MAMessages.get(Msg.WAVE_DEFAULT, ""+wave));
-            /*for (MobArenaListener m : ArenaManager.listeners) TODO: More API
-                m.onDefaultWave(wave);*/
             detonateCreepers(arena.detCreepers);
-            
             defaultWave();
+            
+            // Notify listeners.
+            for (MobArenaListener listener : plugin.getAM().listeners)
+                listener.onDefaultWave(wave);
         }
 
         wave++;

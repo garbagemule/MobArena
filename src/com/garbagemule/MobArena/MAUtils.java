@@ -296,7 +296,7 @@ public class MAUtils
         String commands = config.getString("global-settings.allowed-commands");
         if (commands == null)
         {
-            config.setProperty("global-settings.allowed-commands", "/list");
+            config.setProperty("global-settings.allowed-commands", "/list, /pl");
             config.save();
             commands = config.getString("global-settings.allowed-commands");
         }
