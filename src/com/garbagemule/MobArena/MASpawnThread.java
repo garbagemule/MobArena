@@ -1,6 +1,12 @@
 package com.garbagemule.MobArena;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Ghast;
@@ -11,6 +17,9 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.CreatureType;
+import org.bukkit.inventory.ItemStack;
+
+import com.garbagemule.MobArena.MAMessages.Msg;
 
 /**
  * Core class for handling wave spawning.
@@ -20,92 +29,107 @@ import org.bukkit.entity.CreatureType;
  * host chooses. It is possible to create default waves that consist of
  * only one type of monster, or ones that have no creepers, for example.
  */
-// TO-DO: Allow custom special wave interval.
-// TO-DO: Allow custom special wave monsters.
-// TO-DO: Allow additional "default" waves.
+// TODO: Allow custom special wave monsters.
+// TODO: Allow additional "default" waves.
 public class MASpawnThread implements Runnable
 {
-    private int wave, ran, noOfSpawnPoints, noOfPlayers, modulo;
+    protected int wave, previousSize, taskId;
+    private int ran, noOfPlayers, modulo;
     private int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
     private int dPoweredCreepers, dPigZombies, dSlimes, dMonsters, dAngryWolves, dGiants, dGhasts;
     private Random random;
-    private String reward, currentRewards;
+    private MobArena plugin;
+    private Arena arena;
+    private final double MIN_DISTANCE = 256;
     
-    public MASpawnThread()
+    public MASpawnThread(MobArena plugin, Arena arena)
     {
-        modulo = ArenaManager.specialModulo;
+        this.plugin = plugin;
+        this.arena = arena;
+        modulo = arena.specialModulo;
         if (modulo <= 0) modulo = -32768;
         
-        noOfPlayers = ArenaManager.playerSet.size();
-        noOfSpawnPoints = ArenaManager.spawnpoints.size();
+        taskId = -32768;
+        
+        noOfPlayers = arena.livePlayers.size();
         wave = 1;
         random = new Random();
         
         // Set up the distribution variables for the random spawner.
-        dZombies   = ArenaManager.dZombies;
-        dSkeletons = dZombies   + ArenaManager.dSkeletons;
-        dSpiders   = dSkeletons + ArenaManager.dSpiders;
-        dCreepers  = dSpiders   + ArenaManager.dCreepers;
-        dWolves    = dCreepers  + ArenaManager.dWolves;
+        dZombies   = arena.distDefault.get("zombies");
+        dSkeletons = dZombies   + arena.distDefault.get("skeletons");
+        dSpiders   = dSkeletons + arena.distDefault.get("spiders");
+        dCreepers  = dSpiders   + arena.distDefault.get("creepers");
+        dWolves    = dCreepers  + arena.distDefault.get("wolves");
         
-        dPoweredCreepers = ArenaManager.dPoweredCreepers;
-        dPigZombies      = dPoweredCreepers + ArenaManager.dPigZombies;
-        dSlimes          = dPigZombies      + ArenaManager.dSlimes;
-        dMonsters        = dSlimes          + ArenaManager.dMonsters;
-        dAngryWolves     = dMonsters        + ArenaManager.dAngryWolves;
-        dGiants          = dAngryWolves     + ArenaManager.dGiants;
-        dGhasts          = dGiants          + ArenaManager.dGhasts;
+        dPoweredCreepers = arena.distSpecial.get("powered-creepers");
+        dPigZombies      = dPoweredCreepers + arena.distSpecial.get("zombie-pigmen");
+        dSlimes          = dPigZombies      + arena.distSpecial.get("slimes");
+        dMonsters        = dSlimes          + arena.distSpecial.get("humans");
+        dAngryWolves     = dMonsters        + arena.distSpecial.get("angry-wolves");
+        dGiants          = dAngryWolves     + arena.distSpecial.get("giants");
+        dGhasts          = dGiants          + arena.distSpecial.get("ghasts");
     }
     
     public void run()
-    {
-        // Check if we need to grant more rewards with the recurrent waves.
-        for (Integer i : ArenaManager.everyWaveMap.keySet())
+    {        
+        // Check if wave needs to be cleared first. If so, return!
+        if (arena.waveClear && wave > 1)
         {
-            if (wave % i != 0)
-                continue;
-                
-            for (Player p : ArenaManager.playerSet)
-            {                
-                currentRewards = ArenaManager.rewardMap.get(p);
-                reward = MAUtils.getRandomReward(ArenaManager.everyWaveMap.get(i));
-                currentRewards += reward + ",";
-                ArenaManager.rewardMap.put(p, currentRewards);
-                ArenaManager.tellPlayer(p, "You just earned a reward: " + reward);
-            }
+            if (!arena.monsters.isEmpty())
+                return;
         }
         
+        // If maxIdleTime is defined, reset the timer.
+        //if (arena.maxIdleTime > 0) arena.resetIdleTimer();
+
+        // Check if we need to grant more rewards with the recurrent waves.
+        for (Map.Entry<Integer,List<ItemStack>> entry : arena.everyWaveMap.entrySet())
+            if (wave % entry.getKey() == 0)
+                addReward(entry.getValue());
+
         // Same deal, this time with the one-time waves.
-        if (ArenaManager.afterWaveMap.containsKey(wave))
-        {
-            for (Player p : ArenaManager.playerSet)
-            {
-                currentRewards = ArenaManager.rewardMap.get(p);
-                reward = MAUtils.getRandomReward(ArenaManager.afterWaveMap.get(wave));
-                currentRewards += reward + ",";
-                ArenaManager.rewardMap.put(p, currentRewards);
-                ArenaManager.tellPlayer(p, "You just earned a reward: " + reward);
-            }
-        }
+        if (arena.afterWaveMap.containsKey(wave))
+            addReward(arena.afterWaveMap.get(wave));
         
         // Check if this is a special wave.
         if (wave % modulo == 0)
         {
-            ArenaManager.tellAll("Get ready for wave #" + wave + "! [SPECIAL]");
-            for (MobArenaListener m : ArenaManager.listeners)
-                m.onSpecialWave(wave, wave/modulo);
+            MAUtils.tellAll(arena, MAMessages.get(Msg.WAVE_SPECIAL, ""+wave));
+            detonateCreepers(arena.detCreepers);
             specialWave();
+            
+            // Notify listeners.
+            for (MobArenaListener listener : plugin.getAM().listeners)
+                listener.onSpecialWave(wave, wave/modulo);
         }
         else
         {
-            ArenaManager.tellAll("Get ready for wave #" + wave + "!");
-            for (MobArenaListener m : ArenaManager.listeners)
-                m.onDefaultWave(wave);
+            MAUtils.tellAll(arena, MAMessages.get(Msg.WAVE_DEFAULT, ""+wave));
+            detonateCreepers(arena.detCreepers);
             defaultWave();
+            
+            // Notify listeners.
+            for (MobArenaListener listener : plugin.getAM().listeners)
+                listener.onDefaultWave(wave);
         }
 
-        ArenaManager.wave = wave;
         wave++;
+        if (arena.maxIdleTime > 0) arena.resetIdleTimer();
+    }
+    
+    /**
+     * Rewards all players with an item from the input String.
+     */
+    private void addReward(List<ItemStack> rewards)
+    {
+        for (Player p : arena.livePlayers)
+        {
+            ItemStack reward = MAUtils.getRandomReward(rewards);
+            arena.rewardMap.get(p).add(reward);
+            
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount()));
+        }
     }
     
     /**
@@ -114,12 +138,15 @@ public class MASpawnThread implements Runnable
     private void defaultWave()
     {
         Location loc;
-        
-        for (int i = 0; i < wave + noOfPlayers; i++)
+        List<Location> spawnpoints = getValidSpawnpoints();
+        int noOfSpawnpoints = spawnpoints.size();
+        int count = wave + noOfPlayers;
+        CreatureType mob;
+            
+        for (int i = 0; i < count; i++)
         {
-            loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
+            loc = spawnpoints.get(i % noOfSpawnpoints);
             ran = random.nextInt(dWolves);
-            CreatureType mob;
             
             /* Because of the nature of the if-elseif-else statement,
              * we're able to evaluate the random number in this way.
@@ -133,8 +160,8 @@ public class MASpawnThread implements Runnable
             else if (ran < dWolves)    mob = CreatureType.WOLF;
             else continue;
             
-            LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
-            ArenaManager.monsterSet.add(e);
+            LivingEntity e = arena.world.spawnCreature(loc,mob);
+            arena.monsters.add(e);
             
             // Grab a random target.
             Creature c = (Creature) e;
@@ -148,6 +175,8 @@ public class MASpawnThread implements Runnable
     private void specialWave()
     {
         Location loc;
+        List<Location> spawnpoints = getValidSpawnpoints();
+        int noOfSpawnpoints = spawnpoints.size();
         CreatureType mob;
         ran = random.nextInt(dGhasts);
         
@@ -202,13 +231,10 @@ public class MASpawnThread implements Runnable
         // Spawn the hippie monsters.
         for (int i = 0; i < count; i++)
         {
-            loc = ArenaManager.spawnpoints.get(i % noOfSpawnPoints);
+            loc = spawnpoints.get(i % noOfSpawnpoints);
             
-            LivingEntity e = ArenaManager.world.spawnCreature(loc,mob);
-            if (!ArenaManager.monsterSet.contains(e))
-                ArenaManager.monsterSet.add(e);
-            else
-                System.out.println("MASpawnThread - monsterSet contains this entity");
+            LivingEntity e = arena.world.spawnCreature(loc,mob);
+            arena.monsters.add(e);
             
             if (slime)   ((Slime)e).setSize(2);
             if (wolf)    ((Wolf)e).setAngry(true);
@@ -224,56 +250,90 @@ public class MASpawnThread implements Runnable
             c.setTarget(getClosestPlayer(e));
         }
         
-        if (!ArenaManager.lightning)
+        if (!arena.lightning)
             return;
             
         // Lightning, just for effect ;)
-        for (Location spawn : ArenaManager.spawnpoints)
+        for (Location spawn : arena.spawnpoints.values())
+            arena.world.strikeLightningEffect(spawn);
+    }
+    
+    /**
+     * "Detonates" all the Creepers in the monsterSet.
+     */
+    public void detonateCreepers(boolean really)
+    {
+        if (!really)
+            return;
+        
+        Set<Entity> tmp = new HashSet<Entity>();
+        for (Entity e : arena.monsters)
         {
-            ArenaManager.world.strikeLightningEffect(spawn);
+            if (!(e instanceof Creeper) || e.isDead())
+                continue;
+            
+            tmp.add(e);
+        }
+
+        Location loc;
+        for (Entity e : tmp)
+        {
+            arena.monsters.remove(e);
+            loc = e.getLocation().getBlock().getRelative(0,2,0).getLocation();
+            arena.world.createExplosion(loc, 2);
+            e.remove();
         }
     }
     
     /**
-     * Gets the player closest to the input entity. ArrayList implementation
-     * means a complexity of O(n).
+     * Get all the spawnpoints that have players nearby.
      */
-    // TO-DO: Move this into MAUtils
-    public static Player getClosestPlayer(Entity e)
+    public List<Location> getValidSpawnpoints()
     {
-        // Grab the coordinates.
-        double x = e.getLocation().getX();
-        double y = e.getLocation().getY();
-        double z = e.getLocation().getZ();
+        List<Location> result = new ArrayList<Location>();
         
+        for (Location s : arena.spawnpoints.values())
+        {
+            for (Player p : arena.livePlayers)
+            {
+                if (s.distanceSquared(p.getLocation()) > MIN_DISTANCE)
+                    continue;
+                
+                result.add(s);
+                break;
+            }
+        }
+        
+        // If no players are in range, just use all the spawnpoints.
+        if (result.isEmpty())
+            result.addAll(arena.spawnpoints.values());
+        
+        return result;
+    }
+    
+    /**
+     * Get the player closest to the input entity.
+     */
+    // TODO: Move this into MAUtils
+    public Player getClosestPlayer(Entity e)
+    {
         // Set up the comparison variable and the result.
+        double dist    = 0;
         double current = Double.POSITIVE_INFINITY;
         Player result = null;
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        for (Player p : ArenaManager.playerSet)
+        for (Player p : arena.livePlayers)
         {
-            double dist = distance(p.getLocation(), x, y, z);
-            if (dist < current)
+            dist = p.getLocation().distance(e.getLocation());
+            //double dist = MAUtils.distance(p.getLocation(), e.getLocation());
+            if (dist < current && dist < 256)
             {
                 current = dist;
                 result = p;
             }
         }
         return result;
-    }
-    
-    /**
-     * Calculates the squared distance between locations.
-     */
-    // TO-DO: Move this into MAUtils
-    private static double distance(Location loc, double d1, double d2, double d3)
-    {
-        double d4 = loc.getX() - d1;
-        double d5 = loc.getY() - d2;
-        double d6 = loc.getZ() - d3;
-        
-        return d4*d4 + d5*d5 + d6*d6;
     }
 }

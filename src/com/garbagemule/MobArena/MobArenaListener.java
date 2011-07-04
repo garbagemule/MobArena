@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class MobArenaListener
@@ -7,9 +8,9 @@ public class MobArenaListener
     protected MobArena plugin;
     
     public MobArenaListener()
-    {
-        plugin = ArenaManager.plugin;
-        ArenaManager.listeners.add(this);
+    {       
+        plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
+        plugin.getAM().listeners.add(this);
     }
     
     public void onArenaStart() {}
