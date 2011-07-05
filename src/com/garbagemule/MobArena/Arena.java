@@ -476,8 +476,8 @@ public class Arena
         forceRestore     = config.getBoolean(arenaPath + "force-restore", false);
         softRestore      = config.getBoolean(arenaPath + "soft-restore", false);
         softRestoreDrops = config.getBoolean(arenaPath + "soft-restore-drops", false);
-        emptyInvJoin     = config.getBoolean(arenaPath + "require-empty-inv-join", false);
-        emptyInvSpec     = config.getBoolean(arenaPath + "require-empty-inv-spec", false);
+        emptyInvJoin     = config.getBoolean(arenaPath + "require-empty-inv-join", true);
+        emptyInvSpec     = config.getBoolean(arenaPath + "require-empty-inv-spec", true);
         hellhounds       = config.getBoolean(arenaPath + "hellhounds", false);
         pvp              = config.getBoolean(arenaPath + "pvp-enabled", false);
         monsterInfight   = config.getBoolean(arenaPath + "monster-infight", false);

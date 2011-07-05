@@ -255,8 +255,8 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.force-restore", false);
         config.setProperty("arenas." + configName + ".settings.soft-restore", false);
         config.setProperty("arenas." + configName + ".settings.soft-restore-drops", false);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inv-join", false);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inv-spec", false);
+        config.setProperty("arenas." + configName + ".settings.require-empty-inv-join", true);
+        config.setProperty("arenas." + configName + ".settings.require-empty-inv-spec", true);
         config.setProperty("arenas." + configName + ".settings.hellhounds", false);
         config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
         config.setProperty("arenas." + configName + ".settings.monster-infight", false);
