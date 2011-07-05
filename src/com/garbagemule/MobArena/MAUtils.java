@@ -449,6 +449,9 @@ public class MAUtils
         
         for (ItemStack stack : stacks)
         {
+            if (stack == null)
+                continue;
+            
             // If these are rewards, don't tamper with them.
             if (rewards)
             {
@@ -869,7 +872,8 @@ public class MAUtils
      * Turn a list into a space-separated string-representation of the list.
      */
     public static <E> String listToString(List<E> list)
-    {        
+    {
+        System.out.println(list.getClass());
         return listToString(list, true);
     }
     
@@ -881,21 +885,7 @@ public class MAUtils
         StringBuffer buffy = new StringBuffer();
         for (E e : list)
         {
-            buffy.append(e.toString());
-            buffy.append(" ");
-        }
-        return buffy.toString();
-    }
-    
-    public static String playerListToString(List<Player> list)
-    {
-        if (list.isEmpty())
-            return MAMessages.get(Msg.MISC_NONE);
-        
-        StringBuffer buffy = new StringBuffer();
-        for (Player p : list)
-        {
-            buffy.append(p.getName());
+            buffy.append((e instanceof Player) ? ((Player) e).getName() : e.toString());
             buffy.append(" ");
         }
         return buffy.toString();

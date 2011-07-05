@@ -308,14 +308,14 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                String list = MAUtils.playerListToString(arena.getLivingPlayers());
+                String list = MAUtils.listToString(arena.getLivingPlayers());
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             }
             else
             {
                 StringBuffer buffy = new StringBuffer();
                 for (Arena arena : am.arenas)
-                    buffy.append(MAUtils.playerListToString(arena.getLivingPlayers()));
+                    buffy.append(MAUtils.listToString(arena.getLivingPlayers()));
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
             }
             return true;
@@ -351,7 +351,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            String list = MAUtils.playerListToString(arena.getNonreadyPlayers());
+            String list = MAUtils.listToString(arena.getNonreadyPlayers());
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             return true;
         }
