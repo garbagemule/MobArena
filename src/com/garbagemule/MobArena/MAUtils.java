@@ -261,11 +261,11 @@ public class MAUtils
             {
                 config.setProperty(arenaPath + ".powered-creepers", 10);
                 config.setProperty(arenaPath + ".zombie-pigmen",    10);
-                config.setProperty(arenaPath + ".slimes",          10);
-                config.setProperty(arenaPath + ".humans",          10);
+                config.setProperty(arenaPath + ".slimes",           10);
+                config.setProperty(arenaPath + ".humans",           10);
                 config.setProperty(arenaPath + ".angry-wolves",     10);
-                config.setProperty(arenaPath + ".giants",           0);
-                config.setProperty(arenaPath + ".ghasts",           0);
+                config.setProperty(arenaPath + ".giants",            0);
+                config.setProperty(arenaPath + ".ghasts",            0);
             }
             //config.save();
             dists = config.getKeys(arenaPath);
@@ -561,14 +561,20 @@ public class MAUtils
      */
     public static void sitPets(Player p)
     {
+        if (p == null)
+        {
+            System.out.println("Player is null!");
+            return;
+        }
+        
         List<Entity> entities = p.getNearbyEntities(80, 40, 80);
         for (Entity e : entities)
         {
             if (!(e instanceof Wolf))
                 continue;
             
-            Wolf w = (Wolf) e;
-            if (w.getOwner().equals(p))
+            Wolf w = (Wolf) e;            
+            if (w.isTamed() && w.getOwner() != null && w.getOwner().equals(p))
                 w.setSitting(true);
         }
     }
@@ -616,6 +622,8 @@ public class MAUtils
         
         if (coord.equals("p1") || coord.equals("p2"))
             fixRegion(config, loc.getWorld(), arena);
+        if (coord.equals("l1") || coord.equals("l2"))
+            fixLobby(config, loc.getWorld(), arena);
     }
     
     public static boolean delArenaCoord(Configuration config, Arena arena, String coord)
@@ -658,6 +666,35 @@ public class MAUtils
         arena.load(config);
     }
     
+    private static void fixLobby(Configuration config, World world, Arena arena)
+    {
+        if (arena.l1 == null || arena.l2 == null)
+            return;
+        
+        if (arena.l1.getX() > arena.l2.getX())
+        {
+            double tmp = arena.l1.getX();
+            arena.l1.setX(arena.l2.getX());
+            arena.l2.setX(tmp);
+        }
+        
+        if (arena.l1.getZ() > arena.l2.getZ())
+        {
+            double tmp = arena.l1.getZ();
+            arena.l1.setZ(arena.l2.getZ());
+            arena.l2.setZ(tmp);
+        }
+        
+        if (arena.l1.getY() > arena.l2.getY())
+        {
+            double tmp = arena.l1.getY();
+            arena.l1.setY(arena.l2.getY());
+            arena.l2.setY(tmp);
+        }
+        arena.serializeConfig();
+        arena.load(config);
+    }
+    
     /**
      * Create a Location from the input String in the input World.
      */
@@ -665,14 +702,14 @@ public class MAUtils
     {
         String[] parts = str.split(",");
         
-        double x     = Double.parseDouble(parts[0]);
-        double y     = Double.parseDouble(parts[1]);
-        double z     = Double.parseDouble(parts[2]);
+        double x     = Double.parseDouble(parts[0].trim());
+        double y     = Double.parseDouble(parts[1].trim());
+        double z     = Double.parseDouble(parts[2].trim());
         
         if (extras && parts.length == 5)
         {
-            float yaw   = Float.parseFloat(parts[3]);
-            float pitch = Float.parseFloat(parts[4]);
+            float yaw   = Float.parseFloat(parts[3].trim());
+            float pitch = Float.parseFloat(parts[4].trim());
             return new Location(world, x, y, z, yaw, pitch);
         }
 
@@ -850,6 +887,20 @@ public class MAUtils
         return buffy.toString();
     }
     
+    public static String playerListToString(List<Player> list)
+    {
+        if (list.isEmpty())
+            return MAMessages.get(Msg.MISC_NONE);
+        
+        StringBuffer buffy = new StringBuffer();
+        for (Player p : list)
+        {
+            buffy.append(p.getName());
+            buffy.append(" ");
+        }
+        return buffy.toString();
+    }
+    
     /**
      * Returns a String-list version of a comma-separated list.
      */
@@ -890,6 +941,12 @@ public class MAUtils
                 (arena.p1             != null) &&
                 (arena.p2             != null) &&
                 (arena.spawnpoints.size() > 0));
+    }
+    
+    public static boolean verifyLobby(Arena arena)
+    {
+        return ((arena.l1 != null) &&
+                (arena.l2 != null));
     }
 
     /**

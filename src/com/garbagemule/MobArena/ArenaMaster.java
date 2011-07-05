@@ -20,7 +20,7 @@ public class ArenaMaster
     private MobArena plugin;
     private Configuration config;
     protected Arena selectedArena;
-    protected Lobby masterLobby;
+    //protected Lobby masterLobby;
     
     // Settings
     protected boolean enabled, updateNotify, autoEquip, emptyInvs, hellhounds;

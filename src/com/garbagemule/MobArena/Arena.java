@@ -62,9 +62,9 @@ public class Arena
     // Setup fields
     protected String name;
     protected World world;
-    protected boolean enabled, running, setup, protect, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
+    protected boolean enabled, running, setup, lobbySetup, protect, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
     protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds;
-    protected Location p1, p2, arenaLoc, lobbyLoc, spectatorLoc;
+    protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
     protected Map<String,Location> spawnpoints;
 
     // Wave/reward fields
@@ -127,8 +127,6 @@ public class Arena
     public Arena(String name, World world, ArenaMaster am)
     {
         this(name, world);
-        //classItems  = am.classItems;
-        //classArmor  = am.classArmor;
     }
     
     public void startArena()
@@ -238,7 +236,10 @@ public class Arena
         
         // Force leave.
         for (Player p : tmp)
+        {
+            plugin.getAM().arenaMap.remove(p);
             playerLeave(p);
+        }
     }
     
     /**
@@ -321,6 +322,8 @@ public class Arena
         deadPlayers.remove(p);
         specPlayers.remove(p);
         removePets(p);
+
+        if (!emptyInvJoin) MAUtils.restoreInventory(p);
         
         if (running && livePlayers.isEmpty())
             endArena();
@@ -492,6 +495,8 @@ public class Arena
         
         p1               = MAUtils.getArenaCoord(config, world, configName, "p1");
         p2               = MAUtils.getArenaCoord(config, world, configName, "p2");
+        l1               = MAUtils.getArenaCoord(config, world, configName, "l1");
+        l2               = MAUtils.getArenaCoord(config, world, configName, "l2");
         arenaLoc         = MAUtils.getArenaCoord(config, world, configName, "arena");
         lobbyLoc         = MAUtils.getArenaCoord(config, world, configName, "lobby");
         spectatorLoc     = MAUtils.getArenaCoord(config, world, configName, "spectator");
@@ -503,17 +508,20 @@ public class Arena
         
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
+        lobbySetup       = MAUtils.verifyLobby(this);
     }
     
     public void serializeConfig()
     {
-        String coords   = "arenas." + configName() + ".coords.";
+        String coords = "arenas." + configName() + ".coords.";
         Configuration config = plugin.getConfig();
         
         config.setProperty("arenas." + configName() + ".settings.enabled", enabled);
         config.setProperty("arenas." + configName() + ".settings.protect", protect);
         if (p1 != null)           config.setProperty(coords + "p1",        MAUtils.makeCoord(p1));
         if (p2 != null)           config.setProperty(coords + "p2",        MAUtils.makeCoord(p2));
+        if (l1 != null)           config.setProperty(coords + "l1",        MAUtils.makeCoord(l1));
+        if (l2 != null)           config.setProperty(coords + "l2",        MAUtils.makeCoord(l2));
         if (arenaLoc != null)     config.setProperty(coords + "arena",     MAUtils.makeCoord(arenaLoc));
         if (lobbyLoc != null)     config.setProperty(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
         if (spectatorLoc != null) config.setProperty(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
@@ -612,16 +620,26 @@ public class Arena
      */
     public boolean inRegion(Location loc)
     {
-        if (!loc.getWorld().getName().equals(world.getName()))
+        if (!loc.getWorld().getName().equals(world.getName()) || !setup)
             return false;
         
-        if (!setup)
-            return false;
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+        
+        // Check the lobby first.
+        if (lobbySetup)
+        {
+            if ((x >= l1.getBlockX() && x <= l2.getBlockX()) &&            
+                (z >= l1.getBlockZ() && z <= l2.getBlockZ()) &&           
+                (y >= l1.getBlockY() && y <= l2.getBlockY()))
+                return true;
+        }
         
         // Returns false if the location is outside of the region.
-        return ((loc.getX() >= p1.getX() && loc.getX() <= p2.getX()) &&            
-                (loc.getZ() >= p1.getZ() && loc.getZ() <= p2.getZ()) &&           
-                (loc.getY() >= p1.getY() && loc.getY() <= p2.getY()));
+        return ((x >= p1.getBlockX() && x <= p2.getBlockX()) &&            
+                (z >= p1.getBlockZ() && z <= p2.getBlockZ()) &&           
+                (y >= p1.getBlockY() && y <= p2.getBlockY()));
     }
     
     /**
@@ -633,9 +651,22 @@ public class Arena
         if (!loc.getWorld().getName().equals(world.getName()) || !setup)
             return false;
         
-        return ((loc.getX() + radius >= p1.getX() && loc.getX() - radius <= p2.getX()) &&
-                (loc.getZ() + radius >= p1.getZ() && loc.getZ() - radius <= p2.getZ()) &&
-                (loc.getY() + radius >= p1.getY() && loc.getY() - radius <= p2.getY()));
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+        
+        // Check the lobby first.
+        if (lobbySetup)
+        {
+            if ((x + radius >= l1.getBlockX() && x - radius <= l2.getBlockX()) &&            
+                (z + radius >= l1.getBlockZ() && z - radius <= l2.getBlockZ()) &&           
+                (y + radius >= l1.getBlockY() && y - radius <= l2.getBlockY()))
+                return true;
+        }
+        
+        return ((x + radius >= p1.getBlockX() && x - radius <= p2.getBlockX()) &&
+                (z + radius >= p1.getBlockZ() && z - radius <= p2.getBlockZ()) &&
+                (y + radius >= p1.getBlockY() && y - radius <= p2.getBlockY()));
     }
     
     
@@ -649,14 +680,14 @@ public class Arena
     // Block Listener
     public void onBlockBreak(BlockBreakEvent event)
     {
-        if (edit || !inRegion(event.getBlock().getLocation()))
+        if (!inRegion(event.getBlock().getLocation()) || edit)
             return;
         
         Block b = event.getBlock();
         if (blocks.remove(b) || b.getType() == Material.TNT)
             return;
         
-        if (softRestore)
+        if (softRestore && running)
         {
             int[] buffer = new int[5];
             buffer[0] = b.getX();
@@ -674,8 +705,7 @@ public class Arena
     
     public void onBlockPlace(BlockPlaceEvent event)
     {
-        // If in edit mode or the event didn't happen in this region, return.
-        if (edit || !inRegion(event.getBlock().getLocation()))
+        if (!inRegion(event.getBlock().getLocation()) || edit)
             return;
         
         Block b = event.getBlock();
@@ -708,17 +738,30 @@ public class Arena
         if (!monsters.contains(event.getEntity()) && !inRegionRadius(event.getLocation(), 10))
             return;
         
+        event.setYield(0);
+        monsters.remove(event.getEntity());
+        
         // If the arena isn't running
         if (!running || repairDelay == 0)
         {
             event.setCancelled(true);
             return;
         }
+        
+        // If there is a sign in the blocklist, cancel
+        for (Block b : event.blockList())
+        {
+            if (!(b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN))
+            {
+                continue;
+            }
+            
+            event.setCancelled(true);
+            return;
+        }
 
         // Uncancel, just in case.
         event.setCancelled(false);
-        event.setYield(0);
-        monsters.remove(event.getEntity());
 
         int[] buffer;
         final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
@@ -784,7 +827,7 @@ public class Arena
         if (!running) return;
         
         if (pets.contains(event.getEntity()))
-        {      
+        {
             if (event.getReason() != TargetReason.TARGET_ATTACKED_OWNER && event.getReason() != TargetReason.OWNER_ATTACKED_TARGET)
                 return;
             
@@ -870,6 +913,8 @@ public class Arena
                 damagee.setFireTicks(32768); // For mcMMO
                 event.setCancelled(true);
             }
+            if (e != null && damager instanceof Player)
+                event.setCancelled(true);
             
             event.setDamage(0);
             return;
@@ -919,7 +964,7 @@ public class Arena
         if (running) return;
         
         Player p = event.getPlayer();
-        if (!inRegion(p.getLocation()) || !livePlayers.contains(p))
+        if (!livePlayers.contains(p))
             return;
         
         MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_DROP_ITEM));
@@ -1156,7 +1201,10 @@ public class Arena
                     
                     // Compare the current size with the previous size.
                     if (monsters.size() < spawnThread.previousSize || spawnThread.previousSize == 0)
+                    {
+                        resetIdleTimer();
                         return;
+                    }
                     
                     // Clear all player inventories, and "kill" all players.
                     for (Player p : livePlayers)

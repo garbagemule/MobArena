@@ -20,38 +20,40 @@ public class MACommands implements CommandExecutor
     public static final List<String> COMMANDS = new LinkedList<String>();
     static
     {
-        COMMANDS.add("j");               // Join
-        COMMANDS.add("join");            // Join
-        COMMANDS.add("l");               // Leave
-        COMMANDS.add("leave");           // Leave
-        COMMANDS.add("notready");        // List of players who aren't ready
-        COMMANDS.add("spec");            // Watch arena
-        COMMANDS.add("spectate");        // Watch arena
-        COMMANDS.add("arenas");          // List of arenas
-        COMMANDS.add("list");            // List of players
-        COMMANDS.add("players");         // List of players
-        COMMANDS.add("restore");         // Restore inventory
-        COMMANDS.add("enable");          // Enabling
-        COMMANDS.add("disable");         // Disabling
-        COMMANDS.add("protect");         // Protection on/off
-        COMMANDS.add("force");           // Force start/end
-        COMMANDS.add("config");          // Reload config
-        COMMANDS.add("arena");           // Current arena
-        COMMANDS.add("setarena");        // Set current arena
-        COMMANDS.add("addarena");        // Add a new arena
-        COMMANDS.add("delarena");        // Delete current aren
-        COMMANDS.add("editarena");       // Editing
-        COMMANDS.add("setregion");       // Set a region point
-        COMMANDS.add("setwarp");         // Set arena/lobby/spec
-        COMMANDS.add("spawnpoints");     // List spawnpoints
-        COMMANDS.add("addspawn");        // Add a spawnpoint
-        COMMANDS.add("delspawn");        // Delete a spawnpoint 
-        COMMANDS.add("expandregion");    // Expand the region
-        COMMANDS.add("reset");           // Reset arena coordinates
-        COMMANDS.add("auto-generate");   // Auto-generate arena
-        COMMANDS.add("auto-degenerate"); // Restore cuboid
+        COMMANDS.add("j");                 // Join
+        COMMANDS.add("join");              // Join
+        COMMANDS.add("l");                 // Leave
+        COMMANDS.add("leave");             // Leave
+        COMMANDS.add("notready");          // List of players who aren't ready
+        COMMANDS.add("spec");              // Watch arena
+        COMMANDS.add("spectate");          // Watch arena
+        COMMANDS.add("arenas");            // List of arenas
+        COMMANDS.add("list");              // List of players
+        COMMANDS.add("players");           // List of players
+        COMMANDS.add("restore");           // Restore inventory
+        COMMANDS.add("enable");            // Enabling
+        COMMANDS.add("disable");           // Disabling
+        COMMANDS.add("protect");           // Protection on/off
+        COMMANDS.add("force");             // Force start/end
+        COMMANDS.add("config");            // Reload config
+        COMMANDS.add("arena");             // Current arena
+        COMMANDS.add("setarena");          // Set current arena
+        COMMANDS.add("addarena");          // Add a new arena
+        COMMANDS.add("delarena");          // Delete current aren
+        COMMANDS.add("editarena");         // Editing
+        COMMANDS.add("setregion");         // Set a region point
+        COMMANDS.add("expandregion");      // Expand the region
+        COMMANDS.add("setlobbyregion");    // Set a region point
+        COMMANDS.add("expandlobbyregion"); // Expand the region
+        COMMANDS.add("setwarp");           // Set arena/lobby/spec
+        COMMANDS.add("spawnpoints");       // List spawnpoints
+        COMMANDS.add("addspawn");          // Add a spawnpoint
+        COMMANDS.add("delspawn");          // Delete a spawnpoint 
+        COMMANDS.add("reset");             // Reset arena coordinates
+        COMMANDS.add("auto-generate");     // Auto-generate arena
+        COMMANDS.add("auto-degenerate");   // Restore cuboid
     }
-    private boolean player, op, console, meanAdmins;
+    private boolean meanAdmins;
     private Server server;
     private MobArena plugin;
     private ArenaMaster am;
@@ -80,9 +82,9 @@ public class MACommands implements CommandExecutor
         }
         
         // Determine if the sender is a player (and an op), or the console.
-        player  = (sender instanceof Player);
-        op      = player && ((Player) sender).isOp();
-        console = (sender instanceof ConsoleCommandSender);
+        boolean player  = (sender instanceof Player);
+        boolean op      = player && ((Player) sender).isOp();
+        boolean console = (sender instanceof ConsoleCommandSender);
         
         // Cast the sender to Player if possible.
         Player p = (player) ? (Player)sender : null;
@@ -306,14 +308,14 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                String list = MAUtils.listToString(arena.getLivingPlayers());
+                String list = MAUtils.playerListToString(arena.getLivingPlayers());
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             }
             else
             {
                 StringBuffer buffy = new StringBuffer();
                 for (Arena arena : am.arenas)
-                    buffy.append(MAUtils.listToString(arena.getLivingPlayers(), false));
+                    buffy.append(MAUtils.playerListToString(arena.getLivingPlayers()));
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
             }
             return true;
@@ -349,7 +351,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            String list = MAUtils.listToString(arena.getNonreadyPlayers());
+            String list = MAUtils.playerListToString(arena.getNonreadyPlayers());
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             return true;
         }
@@ -454,7 +456,7 @@ public class MACommands implements CommandExecutor
         /*
          * Force start/end arenas.
          */
-        if (base.equals("force") && arg1.equals("end"))
+        if (base.equals("force"))
         {            
             if (arg1.equals("end"))
             {
@@ -737,6 +739,11 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, "Usage: /ma expandregion <amount> [up|down|out]");
                 return true;
             }
+            if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
+            {
+                MAUtils.tellPlayer(sender, "You must first define p1 and p2");
+                return true;
+            }
             
             if (arg2.equals("up"))
             {
@@ -760,6 +767,70 @@ public class MACommands implements CommandExecutor
             }
             
             MAUtils.tellPlayer(sender, "Region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
+            am.selectedArena.serializeConfig();
+            am.selectedArena.load(plugin.getConfig());
+            return true;
+        }
+        
+        if (base.equals("setlobbyregion"))
+        {
+            if (!(player && MobArena.has(p, "mobarena.setup.setlobbyregion")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (!(arg1.equals("l1") || arg1.equals("l2")))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma setlobbyregion [l1|l2]");
+                return true;
+            }
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation());
+            MAUtils.tellPlayer(sender, "Set lobby point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+
+        if (base.equals("expandlobbyregion"))
+        {
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.expandlobbyregion")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (args.length != 3 || !arg1.matches("[0-9]+"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma expandlobbyregion <amount> [up|down|out]");
+                return true;
+            }
+            if (am.selectedArena.l1 == null || am.selectedArena.l2 == null)
+            {
+                MAUtils.tellPlayer(sender, "You must first define l1 and l2");
+                return true;
+            }
+            
+            if (arg2.equals("up"))
+            {
+                am.selectedArena.l2.setY(Math.min(127, am.selectedArena.l2.getY() + Integer.parseInt(arg1)));
+            }
+            else if (arg2.equals("down"))
+            {
+                am.selectedArena.l1.setY(Math.max(0, am.selectedArena.l1.getY() - Integer.parseInt(arg1)));
+            }
+            else if (arg2.equals("out"))
+            {
+                am.selectedArena.l1.setX(am.selectedArena.l1.getX() - Integer.parseInt(arg1));
+                am.selectedArena.l1.setZ(am.selectedArena.l1.getZ() - Integer.parseInt(arg1));
+                am.selectedArena.l2.setX(am.selectedArena.l2.getX() + Integer.parseInt(arg1));
+                am.selectedArena.l2.setZ(am.selectedArena.l2.getZ() + Integer.parseInt(arg1));
+            }
+            else
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma expandlobbyregion <amount> [up|down|out]");
+                return true;
+            }
+            
+            MAUtils.tellPlayer(sender, "Lobby region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
             am.selectedArena.serializeConfig();
             am.selectedArena.load(plugin.getConfig());
             return true;
