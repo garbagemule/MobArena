@@ -333,6 +333,9 @@ public class Arena
     
     public void playerDeath(final Player p)
     {
+        // teleport them back to the arena location to pop any items out of their hand
+        p.teleport(arenaLoc);
+        
         p.teleport(spectatorLoc);
         p.setFireTicks(0);
         p.setHealth(20);
