@@ -261,6 +261,7 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
         config.setProperty("arenas." + configName + ".settings.monster-infight", false);
         config.setProperty("arenas." + configName + ".settings.allow-teleporting", false);
+        config.setProperty("arenas." + configName + ".settings.player-limit", 0);
         config.save();
         config.load();
         config.setProperty("arenas." + configName + ".settings.repair-delay", 5);

@@ -25,6 +25,7 @@ public class MAMessages
         JOIN_ARENA_IS_RUNNING,
         JOIN_ALREADY_PLAYING,
         JOIN_ARG_NEEDED,
+        JOIN_PLAYER_LIMIT_REACHED,
         JOIN_EMPTY_INV,
         JOIN_STORE_INV_FAIL,
         LEAVE_PLAYER_LEFT,
@@ -76,6 +77,7 @@ public class MAMessages
         defaults.put(Msg.JOIN_ALREADY_PLAYING, "You are already playing!");
         defaults.put(Msg.JOIN_ARG_NEEDED, "You must specify an arena. Type /ma arenas for a list.");
         defaults.put(Msg.JOIN_EMPTY_INV, "You must empty your inventory to join the arena.");
+        defaults.put(Msg.JOIN_PLAYER_LIMIT_REACHED, "The player limit of this arena has been reached.");
         defaults.put(Msg.JOIN_STORE_INV_FAIL, "Failed to store inventory. Try again.");
         defaults.put(Msg.JOIN_PLAYER_JOINED, "You joined the arena. Have fun!");
         defaults.put(Msg.LEAVE_NOT_PLAYING, "You are not in the arena.");
@@ -108,7 +110,7 @@ public class MAMessages
         defaults.put(Msg.MISC_LIST_PLAYERS, "Live players: %");
         defaults.put(Msg.MISC_LIST_ARENAS, "Available arenas: %");
         defaults.put(Msg.MISC_COMMAND_NOT_ALLOWED, "You can't use that command in the arena!");
-        defaults.put(Msg.MISC_NO_ACCESS, "You don't have access to this comand.");
+        defaults.put(Msg.MISC_NO_ACCESS, "You don't have access to this command.");
         defaults.put(Msg.MISC_NONE, "<none>");
     }  
     

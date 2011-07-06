@@ -330,6 +330,12 @@ public class MAUtils
         ItemStack[] armor = p.getInventory().getArmorContents();
         ItemStack[] items = p.getInventory().getContents();
 
+        /*p.getLocation().getBlock().getRelative(BlockFace.UP).setType(Material.CHEST);
+        Chest chest = (Chest) p.getLocation().getBlock().getRelative(BlockFace.UP).getState();
+        for (ItemStack stack : p.getInventory().getContents())
+            if (stack != null)
+                chest.getInventory().addItem(stack);*/
+        
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         new File(invPath).mkdir();
         File backupFile = new File(invPath + sep + p.getName() + ".inv");

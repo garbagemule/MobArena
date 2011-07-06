@@ -89,8 +89,8 @@ public class Arena
     protected int spawnMonsters;
     protected boolean allowMonsters, allowAnimals;
     
-    // Global settings
-    protected int repairDelay;
+    // Other settings
+    protected int repairDelay, playerLimit;
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     
@@ -314,25 +314,9 @@ public class Arena
             listener.onPlayerLeave(p);
     }
     
-    public void playerQuit(Player p)
-    {
-        p.teleport(locations.get(p));
-        readyPlayers.remove(p);
-        livePlayers.remove(p);
-        deadPlayers.remove(p);
-        specPlayers.remove(p);
-        removePets(p);
-
-        if (!emptyInvJoin) MAUtils.restoreInventory(p);
-        
-        if (running && livePlayers.isEmpty())
-            endArena();
-        else if (!readyPlayers.isEmpty() && readyPlayers.equals(livePlayers))
-            startArena();
-    }
-    
     public void playerDeath(final Player p)
     {
+        p.teleport(arenaLoc); // This will force players to drop any items held
         p.teleport(spectatorLoc);
         p.setFireTicks(0);
         p.setHealth(20);
@@ -482,6 +466,7 @@ public class Arena
         pvp              = config.getBoolean(arenaPath + "pvp-enabled", false);
         monsterInfight   = config.getBoolean(arenaPath + "monster-infight", false);
         allowWarp        = config.getBoolean(arenaPath + "allow-teleporting", false);
+        playerLimit      = config.getInt(arenaPath + "player-limit", 0);
         repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
@@ -1049,21 +1034,23 @@ public class Arena
     public void onPlayerQuit(PlayerQuitEvent event)
     {
         Player p = event.getPlayer();
-        if (!enabled || !getAllPlayers().contains(p))
+        if (!enabled || !livePlayers.contains(p))
             return;
         
-        MAUtils.clearInventory(p);
-        playerQuit(p);
+        //MAUtils.clearInventory(p);
+        plugin.getAM().arenaMap.remove(p);
+        playerLeave(p);
     }
     
     public void onPlayerKick(PlayerKickEvent event)
     {
         Player p = event.getPlayer();
-        if (!enabled || !getAllPlayers().contains(p))
+        if (!enabled || !livePlayers.contains(p))
             return;
         
-        MAUtils.clearInventory(p);
-        playerQuit(p);
+        //MAUtils.clearInventory(p);
+        plugin.getAM().arenaMap.remove(p);
+        playerLeave(p);
     }
 
     // Teleport Listener
@@ -1210,8 +1197,9 @@ public class Arena
                     for (Player p : livePlayers)
                     {
                         MAUtils.clearInventory(p);
-                        playerDeath(p);
                         MAUtils.tellPlayer(p, MAMessages.get(Msg.FORCE_END_IDLE));
+                        p.damage(32768);
+                        //playerDeath(p);
                     }
                 }
             }, maxIdleTime);

@@ -137,6 +137,8 @@ public class MACommands implements CommandExecutor
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
                 else if (arena.livePlayers.contains(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+                else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
                 else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
                 else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
@@ -146,6 +148,8 @@ public class MACommands implements CommandExecutor
                 // If there was an error, don't join.
                 if (error)
                     return true;
+                
+                System.out.println("playerLimit: " + arena.playerLimit + ", livePlayers: " + arena.livePlayers.size());
                 
                 am.arenaMap.put(p,arena);
                 arena.playerJoin(p, p.getLocation());
@@ -179,6 +183,8 @@ public class MACommands implements CommandExecutor
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
                 else if (arena.livePlayers.contains(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+                else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
+                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));   
                 else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
                     error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
                 else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
