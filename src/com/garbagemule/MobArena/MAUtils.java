@@ -23,6 +23,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
@@ -168,24 +169,29 @@ public class MAUtils
         List<ItemStack> result = new LinkedList<ItemStack>();
         if (string == null) return result;
         
+        // Trim commas and whitespace, and split items by commas
         string = string.trim();
         if (string.endsWith(","))
             string = string.substring(0, string.length()-1);
         String[] items = string.split(",");
         
+        
         for (String item : items)
         {
+            // Trim whitespace and split by colons.
             item = item.trim();
             String[] parts = item.split(":");
             
             // Grab the amount.
-            int amount = (parts.length == 2 && parts[1].matches("[0-9]+")) ?
-                    Integer.parseInt(parts[1]) :
-                    1;
+            int amount = 1;
+            if (parts.length == 2 && parts[1].matches("(-)?[0-9]+"))
+                amount = Integer.parseInt(parts[1]);
+            else if (parts.length == 3 && parts[2].matches("(-)?[0-9]+"))
+                amount = Integer.parseInt(parts[2]);
             
             // Make the ItemStack.
-            ItemStack stack = (parts[0].matches("[0-9]+")) ?
-                    makeItemStack(Integer.parseInt(parts[0]), amount) :
+            ItemStack stack = (parts.length == 3) ?
+                    makeItemStack(parts[0], amount, parts[1]) :
                     makeItemStack(parts[0], amount);
             
             result.add(stack);
@@ -329,12 +335,6 @@ public class MAUtils
         // Grab the contents.
         ItemStack[] armor = p.getInventory().getArmorContents();
         ItemStack[] items = p.getInventory().getContents();
-
-        /*p.getLocation().getBlock().getRelative(BlockFace.UP).setType(Material.CHEST);
-        Chest chest = (Chest) p.getLocation().getBlock().getRelative(BlockFace.UP).getState();
-        for (ItemStack stack : p.getInventory().getContents())
-            if (stack != null)
-                chest.getInventory().addItem(stack);*/
         
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         new File(invPath).mkdir();
@@ -476,7 +476,13 @@ public class MAUtils
             //if (SWORDS_TYPE.contains(stack.getType()))
             if (WEAPONS_TYPE.contains(stack.getType()))
                 stack.setDurability((short) -32768);
-            
+
+            /*if (stack.getAmount() < 0)
+            {
+                stack = new ItemStack(stack.getType(), 32768);
+                inv.setItem(inv.firstEmpty(), stack);
+                continue;
+            }*/
             inv.addItem(stack);
         }
     }
@@ -522,12 +528,24 @@ public class MAUtils
     }
     
     /* Helper methods for making ItemStacks out of strings and ints */
-    private static ItemStack makeItemStack(String name, int amount)
+    private static ItemStack makeItemStack(String name, int amount, String data)
     {
         try
         {
-            Material material = Material.valueOf(name.toUpperCase());
-            return new ItemStack(material, amount);
+            byte offset = 0;
+            
+            Material material = (name.matches("[0-9]+")) ?
+                Material.getMaterial(Integer.parseInt(name)) :
+                Material.valueOf(name.toUpperCase());
+            
+            if (material == Material.INK_SACK)
+                offset = 15;
+                
+            DyeColor dye = (data.matches("[0-9]+")) ?
+                DyeColor.getByData(Byte.parseByte(data)) :
+                DyeColor.valueOf(data.toUpperCase());
+                
+            return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
         }
         catch (Exception e)
         {
@@ -535,20 +553,7 @@ public class MAUtils
             return null;
         }
     }
-    
-    private static ItemStack makeItemStack(int id, int amount)
-    {
-        try
-        {
-            Material material = Material.getMaterial(id);
-            return new ItemStack(material, amount);
-        }
-        catch (Exception e)
-        {
-            System.out.println("[MobArena] ERROR! Could not create item with id " + id + ". Check config.yml");
-            return null;
-        }
-    }
+    private static ItemStack makeItemStack(String name, int amount) { return makeItemStack(name, amount, "0"); }
     
     /* Helper method for grabbing a random reward */
     public static ItemStack getRandomReward(List<ItemStack> rewards)

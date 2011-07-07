@@ -977,6 +977,20 @@ public class Arena
 
     public void onPlayerInteract(PlayerInteractEvent event)
     {
+        /*if (running && livePlayers.contains(event.getPlayer()))
+        {
+            Player p = event.getPlayer();
+            Action a = event.getAction();
+            if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
+            {
+                if (p.getItemInHand().getType() == Material.BOW)
+                    p.shootArrow();
+                event.setUseItemInHand(Result.DENY);
+                event.setCancelled(true);
+            }
+            return;
+        }*/
+        
         if (running || !livePlayers.contains(event.getPlayer()))
             return;
         
