@@ -710,6 +710,9 @@ public class MAUtils
      */    
     public static void setArenaCoord(Configuration config, Arena arena, String coord, Location loc)
     {
+        if (coord.equals("arena") || coord.equals("lobby") || coord.equals("spectator"))
+            loc.setY(loc.getY() + 1);
+        
         config.setProperty("arenas." + arena.configName() + ".coords." + coord, makeCoord(loc));
         config.save();
         arena.load(config);
@@ -800,7 +803,7 @@ public class MAUtils
         double y     = Double.parseDouble(parts[1].trim());
         double z     = Double.parseDouble(parts[2].trim());
         
-        if (extras && parts.length == 5)
+        if (extras && parts.length > 3)
         {
             float yaw   = Float.parseFloat(parts[3].trim());
             float pitch = Float.parseFloat(parts[4].trim());
@@ -964,7 +967,6 @@ public class MAUtils
      */
     public static <E> String listToString(List<E> list)
     {
-        System.out.println(list.getClass());
         return listToString(list, true);
     }
     

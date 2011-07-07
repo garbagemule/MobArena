@@ -916,8 +916,8 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, "Usage: /ma setwarp [arena|lobby|spectator]");
                 return true;
             }
-
-            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation());
             MAUtils.tellPlayer(sender, "Set warp point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
             return true;
         }
