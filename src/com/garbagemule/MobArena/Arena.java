@@ -250,7 +250,10 @@ public class Arena
     {        
         // Force leave.
         for (Player p : getAllPlayers())
+        {
+            plugin.getAM().arenaMap.remove(p);
             playerLeave(p);
+        }
     }
     
     /**
@@ -316,7 +319,7 @@ public class Arena
     
     public void playerDeath(final Player p)
     {
-        p.teleport(arenaLoc); // This will force players to drop any items held
+        p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)
         p.teleport(spectatorLoc);
         p.setFireTicks(0);
         p.setHealth(20);
@@ -1198,8 +1201,7 @@ public class Arena
                     {
                         MAUtils.clearInventory(p);
                         MAUtils.tellPlayer(p, MAMessages.get(Msg.FORCE_END_IDLE));
-                        p.damage(32768);
-                        //playerDeath(p);
+                        playerDeath(p);
                     }
                 }
             }, maxIdleTime);

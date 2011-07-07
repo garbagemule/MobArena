@@ -2,10 +2,14 @@ package com.garbagemule.MobArena;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -43,6 +47,7 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("editarena");         // Editing
         COMMANDS.add("setregion");         // Set a region point
         COMMANDS.add("expandregion");      // Expand the region
+        COMMANDS.add("showregion");        // Show the region
         COMMANDS.add("setlobbyregion");    // Set a region point
         COMMANDS.add("expandlobbyregion"); // Expand the region
         COMMANDS.add("setwarp");           // Set arena/lobby/spec
@@ -53,7 +58,7 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("auto-generate");     // Auto-generate arena
         COMMANDS.add("auto-degenerate");   // Restore cuboid
     }
-    private boolean meanAdmins;
+    private boolean meanAdmins, showingRegion;
     private Server server;
     private MobArena plugin;
     private ArenaMaster am;
@@ -148,8 +153,6 @@ public class MACommands implements CommandExecutor
                 // If there was an error, don't join.
                 if (error)
                     return true;
-                
-                System.out.println("playerLimit: " + arena.playerLimit + ", livePlayers: " + arena.livePlayers.size());
                 
                 am.arenaMap.put(p,arena);
                 arena.playerJoin(p, p.getLocation());
@@ -689,21 +692,61 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1.isEmpty() || !(arg2.equals("true") || arg2.equals("false")))
+            
+            Arena arena;
+            
+            // No arguments.
+            if (arg1.isEmpty())
             {
-                MAUtils.tellPlayer(sender, "Usage: /ma editarena <arena name> [true|false]");
-                return true;
+                arena = am.selectedArena;
+                arena.edit = !arena.edit;
             }
             
-            Arena arena = am.getArenaWithName(arg1);
-            if (arena == null)
+            // One argument.
+            else if (arg2.isEmpty())
             {
-                MAUtils.tellPlayer(sender, "There is no arena with that name.");
-                return true;
+                // Argument is [true|false]
+                if (arg1.equals("true") || arg1.equals("false"))
+                {
+                    arena = am.selectedArena;
+                    arena.edit = arg1.equals("true");
+                }
+                // Argument is <arena name>
+                else
+                {
+                    arena = am.getArenaWithName(arg1);
+                    if (arena == null)
+                    {
+                        MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                        MAUtils.tellPlayer(sender, "Usage: /ma editarena ([true|false])");
+                        MAUtils.tellPlayer(sender, "    or /ma editarena <arena name> ([true|false])");
+                        return true;
+                    }
+                    arena.edit = !arena.edit;
+                }
             }
             
-            arena.edit = arg2.equals("true");
-            MAUtils.tellPlayer(sender, "Edit mode for arena '" + arg1 + "': " + ((arena.edit) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
+            // Two arguments
+            else
+            {
+                if (!(arg2.equals("true") || arg2.equals("false")))
+                {
+                    MAUtils.tellPlayer(sender, "Usage: /ma editarena ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma editarena <arena name> ([true|false])");
+                    return true;
+                }
+                arena = am.getArenaWithName(arg1);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                    MAUtils.tellPlayer(sender, "Usage: /ma editarena ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma editarena <arena name> ([true|false])");
+                    return true;
+                }
+                arena.edit = arg2.equals("true");
+            }
+            
+            MAUtils.tellPlayer(sender, "Edit mode for arena '" + arena.configName() + "': " + ((arena.edit) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
             if (arena.edit) MAUtils.tellPlayer(sender, "Remember to turn it back off after editing!"); 
             return true;
         }
@@ -775,6 +818,58 @@ public class MACommands implements CommandExecutor
             MAUtils.tellPlayer(sender, "Region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
             am.selectedArena.serializeConfig();
             am.selectedArena.load(plugin.getConfig());
+            return true;
+        }
+        
+        if (base.equals("showregion"))
+        {
+            if (!(player && MobArena.has(p, "mobarena.setup.showregion")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
+            {
+                MAUtils.tellPlayer(sender, "The region is not defined for the selected arena.");
+                return true;
+            }
+            if (showingRegion || !am.selectedArena.edit)
+            {
+                MAUtils.tellPlayer(sender, "Must be in edit mode.");
+                return true;
+            }
+
+            Material mat = Material.WOOL;
+            byte color = (byte)0;
+            
+            if (arg1.equals("glowstone"))
+                mat = Material.GLOWSTONE;
+            else if (arg1.equals("white") || arg1.equals("red") || arg1.equals("blue"))
+                color = DyeColor.valueOf(arg1.toUpperCase()).getData();
+            else if (arg1.equals("green")) // Dark green sucks
+                color = 0x5;
+            else
+                mat = Material.GLASS;
+            
+            // Set the variable so we don't overwrite the region.
+            showingRegion = true;
+            
+            // Show the frame.
+            final World world = am.selectedArena.world;
+            final Set<int[]> blocks = MAUtils.showRegion(world, am.selectedArena.p1, am.selectedArena.p2, mat.getId(), color);
+            
+            // And hide the frame.
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+                new Runnable()
+                {
+                    public void run()
+                    {
+                        for (int[] buffer : blocks)
+                            world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) 0, false);
+                        showingRegion = false;
+                    }
+                }, 2*20);
+            
             return true;
         }
         
