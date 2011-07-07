@@ -58,6 +58,15 @@ public class ArenaMaster
     //
     /////////////////////////////////////////////////////////////////////////*/
     
+    public List<Arena> getEnabledArenas()
+    {
+        List<Arena> result = new LinkedList<Arena>();
+        for (Arena arena : arenas)
+            if (arena.enabled)
+                result.add(arena);
+        return result;
+    }
+    
     public Arena getArenaInLocation(Location loc)
     {
         for (Arena arena : arenas)

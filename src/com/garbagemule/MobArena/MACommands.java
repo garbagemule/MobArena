@@ -120,90 +120,54 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
+            List<Arena> arenas = am.getEnabledArenas();
+            if (!am.enabled || arenas.size() < 1)
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                return true;
+            }
 
             boolean error;
+            Arena arena;
             
             if (!arg1.isEmpty())
-            {
-                Arena arena = am.getArenaWithName(arg1);
-                
-                // Crap-load of sanity-checks.
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
-                else if (!arena.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
-                else if (!arena.setup)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-                else if (arena.running)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
-                else if (arena.livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-                else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
-                else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-                else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
-                else error = false;
-                
-                // If there was an error, don't join.
-                if (error)
-                    return true;
-                
-                am.arenaMap.put(p,arena);
-                arena.playerJoin(p, p.getLocation());
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
-                return true;
-            }
+                arena = am.getArenaWithName(arg1);
+            else if (arenas.size() == 1)
+                arena = arenas.get(0);
             else
-            {
-                if (am.arenas.size() < 1)
-                {
-                    MAUtils.tellPlayer(sender, "There are no arenas loaded. Check your config-file.");
-                    return true;
-                }
-                
-                Arena arena = am.arenas.get(0);
-                
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (am.arenas.size() > 1)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
-                else if (!arena.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
-                else if (!arena.setup)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-                else if (arena.running)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
-                else if (arena.livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-                else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));   
-                else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-                else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
-                else error = false;
-                
-                // If there was an error, don't join.
-                if (error)
-                    return true;
-                
-                am.arenaMap.put(p,arena);
-                arena.playerJoin(p, p.getLocation());
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
+                arena = null;
+            
+            if (arenas.size() > 1 && arg1.isEmpty())
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
+            else if (arena == null)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+            else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
+            else if (!arena.enabled)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
+            else if (!arena.setup || arena.edit)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
+            else if (arena.running)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
+            else if (arena.livePlayers.contains(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+            else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
+            else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
+            else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
+            else error = false;
+            
+            // If there was an error, don't join.
+            if (error)
                 return true;
-            }
+            
+            am.arenaMap.put(p,arena);
+            arena.playerJoin(p, p.getLocation());
+            
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
+            return true;
         }
         
         /*
