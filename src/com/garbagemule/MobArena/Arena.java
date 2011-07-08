@@ -300,8 +300,8 @@ public class Arena
         // Only clear the inventory if the player has class items.
         if (readyPlayers.remove(p)) clear = true; 
         if (livePlayers.remove(p))  clear = true;
-        if (deadPlayers.remove(p))  clear = false;
-        if (specPlayers.remove(p))  clear = false;
+        /*if (deadPlayers.remove(p))  clear = false;
+        if (specPlayers.remove(p))  clear = false;*/
         removePets(p);
         
         if (clear)         MAUtils.clearInventory(p);
