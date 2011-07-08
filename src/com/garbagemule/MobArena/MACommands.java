@@ -206,54 +206,52 @@ public class MACommands implements CommandExecutor
          * Player spectate
          */
         if (base.equals("spectate") || base.equals("spec"))
-        {
+        {            
             if (!player || !MobArena.has(p, "mobarena.use.spectate"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
+            List<Arena> arenas = am.getEnabledArenas();
+            if (!am.enabled || arenas.size() < 1)
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                return true;
+            }
 
             boolean error;
-            Arena arena = null;
+            Arena arena;
             
             if (!arg1.isEmpty())
-            {
                 arena = am.getArenaWithName(arg1);
-
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (am.arenaMap.containsKey(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
-                else error = false;
-                
-                if (error)
-                    return true;
-            }
+            else if (arenas.size() == 1)
+                arena = arenas.get(0);
             else
-            {
-                arena = am.arenas.get(0);
-                
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (am.arenaMap.containsKey(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
-                else if (am.arenas.size() > 1)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
-                else error = false;
-                
-                if (error)
-                    return true;
-            }
-
+                arena = null;
+            
+            if (arenas.size() > 1 && arg1.isEmpty())
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
+            else if (arena == null)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+            else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
+            else if (!arena.enabled)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
+            else if (!arena.setup || arena.edit)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
+            else if (arena.livePlayers.contains(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
+            else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
+            else error = false;
+            
+            // If there was an error, don't join.
+            if (error)
+                return true;
+            
+            am.arenaMap.put(p,arena);
             arena.playerSpec(p, p.getLocation());
+            
             MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_PLAYER_SPECTATE));
             return true;
         }
