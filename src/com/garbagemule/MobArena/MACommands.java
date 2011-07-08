@@ -101,6 +101,7 @@ public class MACommands implements CommandExecutor
         String base = args[0].toLowerCase();
         String arg1 = (args.length > 1) ? args[1].toLowerCase() : "";
         String arg2 = (args.length > 2) ? args[2].toLowerCase() : "";
+        String arg3 = (args.length > 3) ? args[3].toLowerCase() : "";
 
         
         
@@ -1047,6 +1048,55 @@ public class MACommands implements CommandExecutor
             
             if (MAUtils.undoItHippieMonster(arg1, plugin, true))
                 MAUtils.tellPlayer(sender, "Arena with name '" + arg1 + "' degenerated.");
+            else
+                MAUtils.tellPlayer(sender, "Could not degenerate arena.");
+            return true;
+        }
+        
+        if (base.equals("dooooo") && arg1.equals("it") && arg2.equals("hippie") && arg3.equals("monster"))
+        {
+            if (!(player && MobArena.has(p, "mobarena.setup.autogenerate")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            String name = "a0";
+            do name = name.substring(0,1) + (Integer.parseInt(name.substring(1,2)) + 1);
+            while (am.getArenaWithName(name) != null);
+            
+            if (MAUtils.doooooItHippieMonster(p.getLocation(), 13, name, plugin))
+                MAUtils.tellPlayer(sender, "Arena with name '" + name + "' generated.");
+            else
+                MAUtils.tellPlayer(sender, "Could not auto-generate arena.");
+            return true;
+        }
+        
+        if (base.equals("undo") && arg1.equals("it") && arg2.equals("hippie") && arg3.equals("monster"))
+        {
+            if (!(player && MobArena.has(p, "mobarena.setup.autodegenerate")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (am.arenas.size() < 2)
+            {
+                MAUtils.tellPlayer(sender, "At least one arena must exist!");
+                return true;
+            }
+            if (am.getArenaWithName("a1") == null)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                return true;
+            }
+            
+            String name = "a1";
+            while (am.getArenaWithName(name) != null)
+                name = name.substring(0,1) + (Integer.parseInt(name.substring(1,2)) + 1);
+            name = name.substring(0,1) + (Integer.parseInt(name.substring(1,2)) - 1);
+            
+            if (MAUtils.undoItHippieMonster(name, plugin, true))
+                MAUtils.tellPlayer(sender, "Arena with name '" + name + "' degenerated.");
             else
                 MAUtils.tellPlayer(sender, "Could not degenerate arena.");
             return true;

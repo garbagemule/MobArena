@@ -1043,7 +1043,7 @@ public class MAUtils
      */
     public static void checkForUpdates(MobArena plugin, final Player p, boolean response)
     {
-        String site = "http://forums.bukkit.org/threads/818.19144/";
+        String site = "http://forums.bukkit.org/threads/19144/";
         try
         {
             // Make a URI of the site address
