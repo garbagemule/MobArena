@@ -905,7 +905,15 @@ public class MAUtils
          * time a squared distance smaller than current is found. */
         for (Player p : arena.livePlayers)
         {
-            double dist = p.getLocation().distanceSquared(e.getLocation()); //distance(p.getLocation(), e.getLocation());
+            if (!arena.world.equals(p.getWorld()))
+            {
+                System.out.println("[MobArena] MAUtils:908: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                arena.playerLeave(p);
+                tellPlayer(p, "You warped out of the arena world.");
+                continue;
+            }
+            
+            double dist = p.getLocation().distanceSquared(e.getLocation());
             if (dist < current && dist < 256)
             {
                 current = dist;
@@ -915,14 +923,14 @@ public class MAUtils
         return result;
     }
     
-    public static double distance(Location loc1, Location loc2)
+    /*public static double distance(Location loc1, Location loc2)
     {
         double x = loc1.getX() - loc2.getX();
         double y = loc1.getY() - loc2.getY();
         double z = loc1.getZ() - loc2.getZ();
         
         return x*x + y*y + z*z;
-    }
+    }*/
     
     /**
      * Convert a proper arena name to a config-file name.

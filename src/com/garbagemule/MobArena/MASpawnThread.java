@@ -296,6 +296,14 @@ public class MASpawnThread implements Runnable
         {
             for (Player p : arena.livePlayers)
             {
+                if (!arena.world.equals(p.getWorld()))
+                {
+                    System.out.println("[MobArena] MASpawnThread:291: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                    arena.playerLeave(p);
+                    MAUtils.tellPlayer(p, "You warped out of the arena world.");
+                    continue;
+                }
+                
                 if (s.distanceSquared(p.getLocation()) > MIN_DISTANCE)
                     continue;
                 
@@ -326,9 +334,16 @@ public class MASpawnThread implements Runnable
          * time a squared distance smaller than current is found. */
         for (Player p : arena.livePlayers)
         {
-            dist = p.getLocation().distance(e.getLocation());
+            if (!arena.world.equals(p.getWorld()))
+            {
+                System.out.println("[MobArena] MASpawnThread:326: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                arena.playerLeave(p);
+                MAUtils.tellPlayer(p, "You warped out of the arena world.");
+                continue;
+            }
+            dist = p.getLocation().distanceSquared(e.getLocation());
             //double dist = MAUtils.distance(p.getLocation(), e.getLocation());
-            if (dist < current && dist < 256)
+            if (dist < current && dist < MIN_DISTANCE)
             {
                 current = dist;
                 result = p;
