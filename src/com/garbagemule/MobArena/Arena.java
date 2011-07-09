@@ -264,6 +264,15 @@ public class Arena
         if (!locations.containsKey(p))
             locations.put(p,loc);
         
+        if (livePlayers.isEmpty())
+        {
+            Chunk chunk = world.getChunkAt(lobbyLoc);
+            if (!world.isChunkLoaded(chunk))
+                world.loadChunk(chunk);
+            else
+                world.refreshChunk(chunk.getX(), chunk.getZ());
+        }
+
         MAUtils.sitPets(p);
         livePlayers.add(p);
         p.teleport(lobbyLoc);
@@ -861,9 +870,7 @@ public class Arena
     }
     
     public void onEntityDeath(EntityDeathEvent event)
-    {
-        if (!running) return;
-        
+    {        
         if (event.getEntity() instanceof Player)
         {
             Player p = (Player) event.getEntity();

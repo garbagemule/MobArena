@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -110,6 +111,18 @@ public class MACommands implements CommandExecutor
         //      Basics
         //
         ////////////////////////////////////////////////////////////////*/
+        
+        if (base.equals("unchunk"))
+        {
+            Arena arena = am.getArenaWithName(arg1);
+            Chunk chunk = arena.world.getChunkAt(arena.lobbyLoc);
+            //arena.world.unloadChunk(chunk.getX(), chunk.getZ(), false, false);
+            arena.world.unloadChunk(arena.lobbyLoc.getBlockX(), arena.lobbyLoc.getBlockZ());
+            arena.world.unloadChunk(chunk.getX(), chunk.getZ());
+            System.out.println("Chunk: " + chunk.getX() + "," + chunk.getZ());
+            System.out.println("Lobby: " + arena.lobbyLoc.getBlockX() + "," + arena.lobbyLoc.getBlockZ());
+            return true;
+        }
         
         /*
          * Player join
