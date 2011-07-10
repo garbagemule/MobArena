@@ -97,6 +97,7 @@ public class MAUtils
         HELMETS_TYPE.add(Material.CHAINMAIL_HELMET);
         HELMETS_TYPE.add(Material.IRON_HELMET);
         HELMETS_TYPE.add(Material.DIAMOND_HELMET);
+        HELMETS_TYPE.add(Material.PUMPKIN);
         
         CHESTPLATES_TYPE.add(Material.LEATHER_CHESTPLATE);
         CHESTPLATES_TYPE.add(Material.GOLD_CHESTPLATE);
@@ -247,33 +248,27 @@ public class MAUtils
      */
     public static Map<String,Integer> getArenaDistributions(Configuration config, String arena, String wave)
     {
-        //config.load();
         String arenaPath = "arenas." + arena + ".waves." + wave;
         Map<String,Integer> result = new HashMap<String,Integer>();
         List<String> dists = config.getKeys(arenaPath);
         
-        // If there are no distributions yet, add them.
-        if (dists == null)
+        boolean update = false;
+        String[] monsters = (wave.equals("default")) ? new String[]{"zombies", "skeletons", "spiders", "creepers", "wolves"}
+                                                     : new String[]{"powered-creepers", "zombie-pigmen", "slimes", "humans", "angry-wolves", "giants", "ghasts"};
+
+        for (String monster : monsters)
         {
-            if (wave.equals("default"))
-            {
-                config.setProperty(arenaPath + ".zombies",   10);
-                config.setProperty(arenaPath + ".skeletons", 10);
-                config.setProperty(arenaPath + ".spiders",   10);
-                config.setProperty(arenaPath + ".creepers",  10);
-                config.setProperty(arenaPath + ".wolves",    10);
-            }
-            else if (wave.equals("special"))
-            {
-                config.setProperty(arenaPath + ".powered-creepers", 10);
-                config.setProperty(arenaPath + ".zombie-pigmen",    10);
-                config.setProperty(arenaPath + ".slimes",           10);
-                config.setProperty(arenaPath + ".humans",           10);
-                config.setProperty(arenaPath + ".angry-wolves",     10);
-                config.setProperty(arenaPath + ".giants",            0);
-                config.setProperty(arenaPath + ".ghasts",            0);
-            }
-            //config.save();
+            if (dists.contains(monster))
+                continue;
+            
+            //if (config.getInt(arenaPath + "." + m, -1) == -1)
+            config.setProperty(arenaPath + "." + monster, (monster.equals("giants") || monster.equals("ghasts")) ? 0 : 10);
+            update = true;
+        }
+        
+        if (update)
+        {
+            config.save();
             dists = config.getKeys(arenaPath);
         }
         
@@ -289,8 +284,8 @@ public class MAUtils
                     value = 0;
                 
                 config.setProperty(arenaPath + "." + monster, value);
-                //config.save();
             }
+            config.save();  
             
             result.put(monster, value);
         }
@@ -1268,7 +1263,7 @@ public class MAUtils
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "p1", new Location(world, x1, ly1, z1));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "p2", new Location(world, x2, y2+1, z2));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, y1-3, z1+2));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, ly1+1, z1+2));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3));

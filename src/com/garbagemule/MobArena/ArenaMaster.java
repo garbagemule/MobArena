@@ -28,6 +28,7 @@ public class ArenaMaster
     // Classes
     protected List<String> classes;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
+    protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,Arena> arenaMap;
     
     // Location map
@@ -206,9 +207,9 @@ public class ArenaMaster
             config.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             config.setProperty("classes.Chef.armor",   "314,315,316,317");
         }
-        classes    = config.getKeys("classes");
-        classItems = MAUtils.getClassItems(config, "items");
-        classArmor = MAUtils.getClassItems(config, "armor");
+        classes      = config.getKeys("classes");
+        classItems   = MAUtils.getClassItems(config, "items");
+        classArmor   = MAUtils.getClassItems(config, "armor");
     }
     
     /**
@@ -236,7 +237,7 @@ public class ArenaMaster
                 world = Bukkit.getServer().getWorld(worldName);
             }
             
-            Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world, this);
+            Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
             arena.load(config);
             arenas.add(arena);
         }
@@ -281,7 +282,7 @@ public class ArenaMaster
         config.save();
         config.load();
 
-        Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world, this);
+        Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
         arena.load(config);
         return arena;
     }

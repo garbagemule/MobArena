@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -56,6 +57,7 @@ public class MASpawnThread implements Runnable
         random = new Random();
         
         // Set up the distribution variables for the random spawner.
+        // Note: Updating these means MAUtils.getArenaDistributions() must also be updated!
         dZombies   = arena.distDefault.get("zombies");
         dSkeletons = dZombies   + arena.distDefault.get("skeletons");
         dSpiders   = dSkeletons + arena.distDefault.get("spiders");
@@ -72,16 +74,18 @@ public class MASpawnThread implements Runnable
     }
     
     public void run()
-    {        
+    {
         // Check if wave needs to be cleared first. If so, return!
         if (arena.waveClear && wave > 1)
         {
+            List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
+            for (Entity e : tmp)
+                if (e.isDead())
+                    arena.monsters.remove(e);
+            
             if (!arena.monsters.isEmpty())
                 return;
         }
-        
-        // If maxIdleTime is defined, reset the timer.
-        //if (arena.maxIdleTime > 0) arena.resetIdleTimer();
 
         // Check if we need to grant more rewards with the recurrent waves.
         for (Map.Entry<Integer,List<ItemStack>> entry : arena.everyWaveMap.entrySet())

@@ -74,6 +74,7 @@ public class Arena
     protected Map<String,Integer> distDefault, distSpecial;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
+    protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,List<ItemStack>> rewardMap;
     
     // Arena sets/maps
@@ -99,6 +100,9 @@ public class Arena
      */
     public Arena(String name, World world)
     {
+        if (world == null)
+            throw new NullPointerException("[MobArena] ERROR! World for arena '" + name + "' does not exist!");
+        
         this.name = name;
         this.world = world;
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
@@ -122,11 +126,6 @@ public class Arena
         allowMonsters = world.getAllowMonsters();
         allowAnimals  = world.getAllowAnimals();
         spawnMonsters = ((net.minecraft.server.World) ((CraftWorld) world).getHandle()).spawnMonsters;
-    }
-    
-    public Arena(String name, World world, ArenaMaster am)
-    {
-        this(name, world);
     }
     
     public void startArena()
@@ -154,7 +153,10 @@ public class Arena
         // Spawn pets.
         for (Map.Entry<Player,Integer> entry : petMap.entrySet())
         {
+            // Remove the bones from the inventory.
             Player p = entry.getKey();
+            p.getInventory().removeItem(new ItemStack(Material.BONE, entry.getValue()));
+            
             for (int i = 0; i < entry.getValue(); i++)
             {
                 Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
@@ -303,7 +305,14 @@ public class Arena
     {
         boolean clear = false;
         
-        p.teleport(locations.get(p));
+        Location old = locations.get(p);
+        Chunk chunk = old.getWorld().getChunkAt(old);
+        if (!old.getWorld().isChunkLoaded(chunk))
+            old.getWorld().loadChunk(chunk);
+        else
+            old.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
+        
+        p.teleport(old);
         locations.remove(p); // get, then remove, because of Teleport Event
         
         // Only clear the inventory if the player has class items.
@@ -349,6 +358,8 @@ public class Arena
                             endArena();
                         }
                     }, 10);
+        
+        MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
@@ -431,8 +442,9 @@ public class Arena
     private void removePets(Player p)
     {
         for (Wolf w : pets)
-            if (w.getOwner().equals(p))
+            if (((Player) w.getOwner()).getName().equals(p.getName()))
                 w.remove();
+        petMap.remove(p);
     }
     
     private void removeEntities()
@@ -1207,8 +1219,14 @@ public class Arena
                     // Make sure to remove any dead/removed entities first.
                     List<Entity> tmp = new LinkedList<Entity>(monsters);
                     for (Entity e : tmp)
+                    {
+                        out(e.getClass().getSimpleName());
                         if (e.isDead())
+                        {
+                            out("Removing monster");
                             monsters.remove(e);
+                        }
+                    }
                     
                     // Compare the current size with the previous size.
                     if (monsters.size() < spawnThread.previousSize || spawnThread.previousSize == 0)
@@ -1248,5 +1266,10 @@ public class Arena
     public String toString()
     {
         return ((enabled && setup) ? ChatColor.GREEN : ChatColor.GRAY) + configName();
+    }
+    
+    private void out(String s)
+    {
+        System.out.println(s);
     }
 }
