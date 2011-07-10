@@ -250,12 +250,11 @@ public class MAUtils
     {
         String arenaPath = "arenas." + arena + ".waves." + wave;
         Map<String,Integer> result = new HashMap<String,Integer>();
-        List<String> dists = config.getKeys(arenaPath);
+        List<String> dists = (config.getKeys(arenaPath) != null) ? config.getKeys(arenaPath) : new LinkedList<String>();
         
-        boolean update = false;
         String[] monsters = (wave.equals("default")) ? new String[]{"zombies", "skeletons", "spiders", "creepers", "wolves"}
                                                      : new String[]{"powered-creepers", "zombie-pigmen", "slimes", "humans", "angry-wolves", "giants", "ghasts"};
-
+        boolean update = false;
         for (String monster : monsters)
         {
             if (dists.contains(monster))
