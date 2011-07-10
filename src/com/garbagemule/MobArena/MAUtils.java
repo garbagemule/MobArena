@@ -536,10 +536,11 @@ public class MAUtils
                 offset = 15;
                 
             DyeColor dye = (data.matches("[0-9]+")) ?
-                DyeColor.getByData(Byte.parseByte(data)) :
+                DyeColor.getByData((byte) Math.abs(offset - Integer.parseInt(data))) :
                 DyeColor.valueOf(data.toUpperCase());
                 
-            return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
+            //return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
+            return new ItemStack(material, amount, (byte) Math.abs(offset - dye.getData()));
         }
         catch (Exception e)
         {
