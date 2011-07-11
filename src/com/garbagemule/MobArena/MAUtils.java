@@ -336,7 +336,7 @@ public class MAUtils
         
         try
         {
-            if (backupFile.exists())
+            if (backupFile.exists() && !restoreInventory(p))
                 return false;
 
             backupFile.createNewFile();

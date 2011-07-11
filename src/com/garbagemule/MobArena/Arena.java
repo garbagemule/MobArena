@@ -170,8 +170,8 @@ public class Arena
         }
         
         // Start the spawnThread.
-        spawnThread = new MASpawnThread(plugin, this);
-        spawnTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, waveInterval);
+        spawnThread  = new MASpawnThread(plugin, this);
+        spawnTaskId  = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, (!waveClear) ? waveInterval : 60);
         
         readyPlayers.clear();
         MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
@@ -1219,14 +1219,8 @@ public class Arena
                     // Make sure to remove any dead/removed entities first.
                     List<Entity> tmp = new LinkedList<Entity>(monsters);
                     for (Entity e : tmp)
-                    {
-                        out(e.getClass().getSimpleName());
                         if (e.isDead())
-                        {
-                            out("Removing monster");
                             monsters.remove(e);
-                        }
-                    }
                     
                     // Compare the current size with the previous size.
                     if (monsters.size() < spawnThread.previousSize || spawnThread.previousSize == 0)
@@ -1266,10 +1260,5 @@ public class Arena
     public String toString()
     {
         return ((enabled && setup) ? ChatColor.GREEN : ChatColor.GRAY) + configName();
-    }
-    
-    private void out(String s)
-    {
-        System.out.println(s);
     }
 }
