@@ -918,15 +918,6 @@ public class MAUtils
         return result;
     }
     
-    /*public static double distance(Location loc1, Location loc2)
-    {
-        double x = loc1.getX() - loc2.getX();
-        double y = loc1.getY() - loc2.getY();
-        double z = loc1.getZ() - loc2.getZ();
-        
-        return x*x + y*y + z*z;
-    }*/
-    
     /**
      * Convert a proper arena name to a config-file name.
      * All spaces are replaced by underscores, and the whole String is
@@ -972,25 +963,51 @@ public class MAUtils
     
     /**
      * Turn a list into a space-separated string-representation of the list.
-     */
-    public static <E> String listToString(List<E> list)
-    {
-        return listToString(list, true);
-    }
-    
+     */    
     public static <E> String listToString(List<E> list, boolean none)
     {
-        if (none && list.isEmpty())
-            return MAMessages.get(Msg.MISC_NONE);
+        if (list.isEmpty())
+        {
+            if (none)
+                return MAMessages.get(Msg.MISC_NONE);
+            else
+                return "";
+        }
         
         StringBuffer buffy = new StringBuffer();
-        for (E e : list)
+        
+        E type = list.get(0);
+        if (type instanceof Player)
         {
-            buffy.append((e instanceof Player) ? ((Player) e).getName() : e.toString());
-            buffy.append(" ");
+            for (E e : list)
+            {
+                buffy.append(((Player) e).getName());
+                buffy.append(" ");
+            }
+        }
+        else if (type instanceof ItemStack)
+        {
+            ItemStack stack;
+            for (E e : list)
+            {
+                stack = (ItemStack) e;
+                buffy.append(stack.getType().toString().toLowerCase());
+                buffy.append(":");
+                buffy.append(stack.getAmount());
+                buffy.append(", ");
+            }
+        }
+        else
+        {
+            for (E e : list)
+            {
+                buffy.append(e.toString());
+                buffy.append(" ");
+            }
         }
         return buffy.toString();
     }
+    public static <E> String listToString(List<E> list) { return listToString(list, true); }
     
     /**
      * Returns a String-list version of a comma-separated list.
@@ -1099,6 +1116,36 @@ public class MAUtils
         ws.allowAnimals  = allowAnimals;
     }
     
+    public static String getDuration(long duration)
+    {
+        long seconds = duration / 1000;
+        long secs = seconds % 60;
+        long mins = (seconds - secs) / 60 % 60;
+        long hrs  = ((seconds - secs) - (mins * 60)) / 60 / 60;
+        return hrs + ":" + ((mins < 10) ? "0" + mins : mins) + ":" + ((secs < 10) ? "0" + secs : secs);
+    }
+
+    public static String padRight(String s, int length) { return padRight(s, length, ' '); }
+    public static String padRight(String s, int length, char pad)
+    {
+        StringBuffer buffy = new StringBuffer();
+        buffy.append(s);
+        for (int i = s.length(); i < length; i++)
+            buffy.append(pad);
+        return buffy.toString();
+    }
+
+    public static String padLeft(String s, int length) { return padLeft(s, length, ' '); }
+    public static String padLeft(String s, int length, char pad)
+    {
+        StringBuffer buffy = new StringBuffer();
+        for (int i = 0; i < length - s.length(); i++)
+            buffy.append(pad);
+        buffy.append(s);
+        return buffy.toString();
+    }
+    
+    
     /**
      * Stand back, I'm going to try science!
      */
@@ -1158,7 +1205,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("Couldn't create backup file. Aborting auto-generate...");
+            System.out.println("[MobArena] ERROR! Couldn't create backup file. Aborting auto-generate...");
             return false;
         }
         
@@ -1291,7 +1338,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            if (error) System.out.println("Couldn't find backup file for arena '" + name + "'");
+            if (error) System.out.println("[MobArena] ERROR! Couldn't find backup file for arena '" + name + "'");
             return false;
         }
         

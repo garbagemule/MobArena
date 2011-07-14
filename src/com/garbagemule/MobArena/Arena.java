@@ -5,11 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -62,7 +64,7 @@ public class Arena
     // Setup fields
     protected String name;
     protected World world;
-    protected boolean enabled, running, setup, lobbySetup, protect, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
+    protected boolean enabled, protect, logging, running, setup, lobbySetup, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
     protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds;
     protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
     protected Map<String,Location> spawnpoints;
@@ -73,6 +75,7 @@ public class Arena
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<String,Integer> distDefault, distSpecial;
     protected Map<Player,String> classMap;
+    protected Set<Player> randoms;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
     protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,List<ItemStack>> rewardMap;
@@ -83,7 +86,6 @@ public class Arena
     protected Set<Block>          blocks;
     protected Set<Wolf>           pets;
     protected Map<Player,Integer> petMap;
-    protected Map<Player,Integer> kills;
     protected List<int[]>         repairList;
     
     // Spawn overriding
@@ -91,9 +93,18 @@ public class Arena
     protected boolean allowMonsters, allowAnimals;
     
     // Other settings
-    protected int repairDelay, playerLimit;
+    protected int repairDelay, playerLimit, joinDistance;
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
+    
+    // Logging
+    protected ArenaLog log;
+    //protected List<String> log = new LinkedList<String>();
+    protected List<String> classDistribution = new LinkedList<String>();
+    protected Map<Player,Integer> waveMap = new HashMap<Player,Integer>();
+    protected Map<Player,Integer> killMap = new HashMap<Player,Integer>();
+    protected Timestamp startTime;
+    protected Timestamp endTime;
     
     /**
      * Primary constructor. Requires a name and a world.
@@ -106,6 +117,7 @@ public class Arena
         this.name = name;
         this.world = world;
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
+        log = new ArenaLog(plugin, this);
         
         livePlayers   = new HashSet<Player>();
         deadPlayers   = new HashSet<Player>();
@@ -116,8 +128,8 @@ public class Arena
         pets          = new HashSet<Wolf>();
         petMap        = new HashMap<Player,Integer>();
         classMap      = new HashMap<Player,String>();
+        randoms       = new HashSet<Player>();
         rewardMap     = new HashMap<Player,List<ItemStack>>();
-        kills         = new HashMap<Player,Integer>();
         repairList    = new LinkedList<int[]>();
         
         running       = false;
@@ -136,6 +148,11 @@ public class Arena
         if (!softRestore && forceRestore && !serializeRegion())
             return;
         
+        // Assign random classes, and if all get kicked, return.
+        for (Player p : randoms)
+            assignRandomClass(p);
+        if (livePlayers.isEmpty()) return;
+        
         // Set the spawn flags to enable monster spawning.
         //MAUtils.setSpawnFlags(plugin, world, 1, true, true);
         MAUtils.setSpawnFlags(plugin, world, 1, allowMonsters, allowAnimals);
@@ -146,6 +163,8 @@ public class Arena
             p.teleport(arenaLoc);
             p.setHealth(20);
             rewardMap.put(p, new LinkedList<ItemStack>());
+            waveMap.put(p, 0);
+            killMap.put(p, 0);
         }
 
         running = true;
@@ -174,6 +193,11 @@ public class Arena
         spawnTaskId  = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, (!waveClear) ? waveInterval : 60);
         
         readyPlayers.clear();
+        
+        // Logging info.
+        if (logging)
+            log.start();
+        
         MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
         
         // Notify listeners.
@@ -187,6 +211,14 @@ public class Arena
     public void endArena()
     {        
         running = false;
+        
+        // Logging stuff
+        if (logging)
+        {
+            log.end();
+            log.serialize();
+            log.clear();
+        }
         
         // If the arena was actually ever started, cancel the spawnthread.
         if (spawnThread != null)
@@ -322,8 +354,16 @@ public class Arena
         specPlayers.remove(p);
         removePets(p);
         
-        if (clear)         MAUtils.clearInventory(p);
-        if (!emptyInvJoin) MAUtils.restoreInventory(p);
+        // Clear inventory and record current wave
+        if (clear)
+        {
+            if (running) waveMap.put(p, spawnThread.wave - 1);
+            MAUtils.clearInventory(p);
+        }
+        
+        // Try to restore inventory.
+        if (!emptyInvJoin)
+            MAUtils.restoreInventory(p);
         
         if (running && livePlayers.isEmpty())
             endArena();
@@ -376,9 +416,9 @@ public class Arena
         p.teleport(spectatorLoc);
     }
     
-    public void playerKill(Player p, LivingEntity e)
+    public void playerKill(Player p)
     {
-        kills.put(p, kills.get(p) + 1);
+        killMap.put(p, killMap.get(p) + 1);
     }
     
     
@@ -393,7 +433,16 @@ public class Arena
     {
         petMap.remove(p);
         classMap.put(p, className);
+        
         MAUtils.clearInventory(p);
+        
+        // If random, don't give any items yet.
+        if (className.equalsIgnoreCase("random"))
+        {
+            randoms.add(p);
+            return;
+        }
+        
         MAUtils.giveItems(p, classItems.get(className), autoEquip);
         MAUtils.giveItems(p, classArmor.get(className), autoEquip);
         
@@ -401,8 +450,29 @@ public class Arena
         if (pets > 0) petMap.put(p, pets);
     }
     
-    private void giveRewards()
+    public void assignRandomClass(Player p)
     {
+        Random r = new Random();
+        List<String> classes = new LinkedList<String>(plugin.getAM().classes);
+
+        String className = classes.remove(r.nextInt(classes.size()));
+        while (!MobArena.has(p, "mobarena.classes." + className))
+        {
+            if (classes.isEmpty())
+            {
+                System.out.println("[MobArena] ERROR! Player '" + p.getName() + "' has no class permissions!");
+                playerLeave(p);
+                return;
+            }
+            className = classes.remove(r.nextInt(classes.size()));
+        }
+        
+        assignClass(p, className);
+        MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+    }
+    
+    private void giveRewards()
+    {        
         for (Map.Entry<Player,List<ItemStack>> entry : rewardMap.entrySet())
         {
             MAUtils.tellPlayer(entry.getKey(), MAMessages.get(Msg.REWARDS_GIVE));
@@ -476,6 +546,7 @@ public class Arena
         
         enabled          = config.getBoolean(arenaPath + "enabled", true);
         protect          = config.getBoolean(arenaPath + "protect", true);
+        logging          = config.getBoolean(arenaPath + "logging", false);
         autoEquip        = config.getBoolean(arenaPath + "auto-equip-armor", true);
         waveClear        = config.getBoolean(arenaPath + "clear-wave-before-next", false);
         detCreepers      = config.getBoolean(arenaPath + "detonate-creepers", false);
@@ -490,6 +561,7 @@ public class Arena
         pvp              = config.getBoolean(arenaPath + "pvp-enabled", false);
         monsterInfight   = config.getBoolean(arenaPath + "monster-infight", false);
         allowWarp        = config.getBoolean(arenaPath + "allow-teleporting", false);
+        joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
         playerLimit      = config.getInt(arenaPath + "player-limit", 0);
         repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
@@ -689,7 +761,7 @@ public class Arena
     // Block Listener
     public void onBlockBreak(BlockBreakEvent event)
     {
-        if (!inRegion(event.getBlock().getLocation()) || edit)
+        if (!inRegion(event.getBlock().getLocation()) || edit || (!protect && running))
             return;
         
         Block b = event.getBlock();
@@ -833,7 +905,8 @@ public class Arena
     
     public void onEntityTarget(EntityTargetEvent event)
     {
-        if (!running) return;
+        if (!running || event.isCancelled())
+            return;
         
         if (pets.contains(event.getEntity()))
         {
@@ -891,6 +964,7 @@ public class Arena
                 return;
             
             event.getDrops().clear();
+            waveMap.put(p, spawnThread.wave - 1);
             playerDeath(p);
             p.getInventory().clear(); // For TombStone
             return;
@@ -898,6 +972,13 @@ public class Arena
         
         if (monsters.remove(event.getEntity()))
         {
+            EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
+            EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
+            Entity damager = (e2 != null) ? e2.getDamager() : null;
+            
+            if (e2 != null && damager instanceof Player)
+                playerKill((Player) damager);
+                
             event.getDrops().clear();
             resetIdleTimer();
             return;
@@ -1050,10 +1131,10 @@ public class Arena
             
             // Check if the first line of the sign is a class name.
             String className = sign.getLine(0);
-            if (!classes.contains(className))
+            if (!classes.contains(className) && !className.equalsIgnoreCase("random"))
                 return;
             
-            if (!MobArena.hasDefTrue(p, "mobarena.classes." + className))
+            if (!MobArena.hasDefTrue(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
             {
                 MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PERMISSION));
                 return;
@@ -1061,7 +1142,11 @@ public class Arena
 
             // Set the player's class.
             assignClass(p, className);
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+            if (!className.equalsIgnoreCase("random"))
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+            else
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_RANDOM));
+                
             return;
         }
     }

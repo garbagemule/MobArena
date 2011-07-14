@@ -34,6 +34,8 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("arenas");            // List of arenas
         COMMANDS.add("list");              // List of players
         COMMANDS.add("players");           // List of players
+        COMMANDS.add("info");              // Info/help
+        COMMANDS.add("help");              // Info/help
         COMMANDS.add("restore");           // Restore inventory
         COMMANDS.add("enable");            // Enabling
         COMMANDS.add("disable");           // Disabling
@@ -152,12 +154,16 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
             else if (arena.livePlayers.contains(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+            else if (!MobArena.has(p, "mobarena.arenas." + arena.configName()))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
             else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
             else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
             else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
+            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
             else error = false;
             
             // If there was an error, don't join.
@@ -243,9 +249,11 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
             else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
+            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
             else error = false;
             
-            // If there was an error, don't join.
+            // If there was an error, don't spec.
             if (error)
                 return true;
             
@@ -369,36 +377,6 @@ public class MACommands implements CommandExecutor
                 am.serializeSettings();
                 MAUtils.tellPlayer(sender, "All arenas " + ((am.enabled) ? ChatColor.GREEN : ChatColor.RED) + base + "d");
             }
-            return true;
-        }
-        
-        /*
-         * Enable or disable protection
-         */
-        if (base.equals("protect"))
-        {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.protect")) && !op)
-            {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
-                return true;
-            }
-            if (arg1.isEmpty() || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || !(arg2.equals("true") || arg2.equals("false")))
-            {
-                MAUtils.tellPlayer(sender, "Usage: /ma protect <arena name> [true|false]");
-                return true;
-            }
-            
-            Arena arena = am.getArenaWithName(arg1);
-            if (arena == null)
-            {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                return true;
-            }
-            
-            arena.protect = arg2.equals("true");
-            arena.serializeConfig();
-            arena.load(plugin.getConfig());
-            MAUtils.tellPlayer(sender, "Protection for arena '" + arg1 + "' set to " + arg2);
             return true;
         }
         
@@ -647,6 +625,75 @@ public class MACommands implements CommandExecutor
             am.selectedArena = (am.selectedArena.equals(arena)) ? am.arenas.get(0) : am.selectedArena;
             
             MAUtils.tellPlayer(sender, "Arena '" + arena.configName() + "' deleted.");
+            return true;
+        }
+        
+        /*
+         * Enable or disable protection
+         */
+        if (base.equals("protect"))
+        {
+            if (!console && !(player && MobArena.has(p, "mobarena.setup.protect")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            Arena arena;
+            
+            // No arguments
+            if (arg1.isEmpty())
+            {
+                arena = am.selectedArena;
+                arena.protect = !arena.protect;
+            }
+            
+            // One argument
+            else if (arg2.isEmpty())
+            {
+                // true/false
+                if (arg1.equals("true") || arg1.equals("false"))
+                {
+                    arena = am.selectedArena;
+                    arena.protect = arg1.equals("true");
+                }
+                // Arena name
+                else
+                {
+                    arena = am.getArenaWithName(arg1);
+                    if (arena == null)
+                    {
+                        MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                        MAUtils.tellPlayer(sender, "Usage: /ma protect ([true|false])");
+                        MAUtils.tellPlayer(sender, "    or /ma protect <arena name> ([true|false])");
+                        return true;
+                    }
+                    arena.protect = !arena.protect;
+                }
+            }
+            
+            // Two arguments
+            else
+            {
+                if (!(arg2.equals("true") || arg2.equals("false")))
+                {
+                    MAUtils.tellPlayer(sender, "Usage: /ma protect ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma protect <arena name> ([true|false])");
+                    return true;
+                }
+                arena = am.getArenaWithName(arg1);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                    MAUtils.tellPlayer(sender, "Usage: /ma protect ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma protect <arena name> ([true|false])");
+                    return true;
+                }
+                arena.protect = arg2.equals("true");
+            }
+            
+            arena.serializeConfig();
+            MAUtils.tellPlayer(sender, "Protection for arena '" + arena.configName() + "': " + ((arena.protect) ? ChatColor.GREEN + "on" : ChatColor.RED + "off")); 
             return true;
         }
         

@@ -75,14 +75,14 @@ public class MASpawnThread implements Runnable
     
     public void run()
     {
+        List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
+        for (Entity e : tmp)
+            if (e.isDead())
+                arena.monsters.remove(e);
+        
         // Check if wave needs to be cleared first. If so, return!
         if (arena.waveClear && wave > 1)
-        {
-            List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
-            for (Entity e : tmp)
-                if (e.isDead())
-                    arena.monsters.remove(e);
-            
+        {            
             if (!arena.monsters.isEmpty())
                 return;
         }
@@ -119,7 +119,7 @@ public class MASpawnThread implements Runnable
         }
 
         wave++;
-        if (arena.maxIdleTime > 0) arena.resetIdleTimer();
+        if (arena.maxIdleTime > 0 && arena.monsters.isEmpty()) arena.resetIdleTimer();
     }
     
     /**

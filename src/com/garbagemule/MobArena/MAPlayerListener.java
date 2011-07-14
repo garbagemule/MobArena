@@ -75,7 +75,7 @@ public class MAPlayerListener extends PlayerListener
         if (!am.updateNotify || !event.getPlayer().isOp()) return;
 
         final Player p = event.getPlayer();
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+        Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()

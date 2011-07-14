@@ -23,7 +23,7 @@ public class ArenaMaster
     //protected Lobby masterLobby;
     
     // Settings
-    protected boolean enabled, updateNotify, autoEquip, emptyInvs, hellhounds;
+    protected boolean enabled, updateNotify;
     
     // Classes
     protected List<String> classes;
@@ -257,6 +257,7 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.protect", true);
         config.save();
         config.load();
+        config.setProperty("arenas." + configName + ".settings.logging", false);
         config.setProperty("arenas." + configName + ".settings.clear-wave-before-next", false);
         config.setProperty("arenas." + configName + ".settings.detonate-creepers", false);
         config.setProperty("arenas." + configName + ".settings.detonate-damage", false);
@@ -271,7 +272,10 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
         config.setProperty("arenas." + configName + ".settings.monster-infight", false);
         config.setProperty("arenas." + configName + ".settings.allow-teleporting", false);
+        config.save();
+        config.load();
         config.setProperty("arenas." + configName + ".settings.player-limit", 0);
+        config.setProperty("arenas." + configName + ".settings.max-join-distance", 0);
         config.save();
         config.load();
         config.setProperty("arenas." + configName + ".settings.repair-delay", 5);

@@ -3,8 +3,9 @@ package com.garbagemule.MobArena;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,11 +23,13 @@ public class MAMessages
         JOIN_IN_OTHER_ARENA,
         JOIN_ARENA_NOT_ENABLED,
         JOIN_ARENA_NOT_SETUP,
+        JOIN_ARENA_PERMISSION,
         JOIN_ARENA_IS_RUNNING,
         JOIN_ALREADY_PLAYING,
         JOIN_ARG_NEEDED,
-        JOIN_PLAYER_LIMIT_REACHED,
+        JOIN_TOO_FAR,
         JOIN_EMPTY_INV,
+        JOIN_PLAYER_LIMIT_REACHED,
         JOIN_STORE_INV_FAIL,
         LEAVE_PLAYER_LEFT,
         LEAVE_NOT_PLAYING,
@@ -45,6 +48,7 @@ public class MAMessages
         FORCE_END_IDLE,
         REWARDS_GIVE,
         LOBBY_CLASS_PICKED,
+        LOBBY_CLASS_RANDOM,
         LOBBY_CLASS_PERMISSION,
         LOBBY_PLAYER_READY,
         LOBBY_DROP_ITEM,
@@ -55,7 +59,6 @@ public class MAMessages
         WAVE_DEFAULT,
         WAVE_SPECIAL,
         WAVE_REWARD,
-        // Misc
         MISC_LIST_ARENAS,
         MISC_LIST_PLAYERS,
         MISC_COMMAND_NOT_ALLOWED,
@@ -73,9 +76,11 @@ public class MAMessages
         defaults.put(Msg.JOIN_IN_OTHER_ARENA, "You are already in an arena! Leave that one first.");
         defaults.put(Msg.JOIN_ARENA_NOT_ENABLED, "This arena is not enabled.");
         defaults.put(Msg.JOIN_ARENA_NOT_SETUP, "This arena has not been set up yet.");
+        defaults.put(Msg.JOIN_ARENA_PERMISSION, "You don't have permission to join this arena.");
         defaults.put(Msg.JOIN_ARENA_IS_RUNNING, "This arena is in already progress.");
         defaults.put(Msg.JOIN_ALREADY_PLAYING, "You are already playing!");
         defaults.put(Msg.JOIN_ARG_NEEDED, "You must specify an arena. Type /ma arenas for a list.");
+        defaults.put(Msg.JOIN_TOO_FAR, "You are too far away from the arena to join/spectate.");
         defaults.put(Msg.JOIN_EMPTY_INV, "You must empty your inventory to join the arena.");
         defaults.put(Msg.JOIN_PLAYER_LIMIT_REACHED, "The player limit of this arena has been reached.");
         defaults.put(Msg.JOIN_STORE_INV_FAIL, "Failed to store inventory. Try again.");
@@ -101,6 +106,7 @@ public class MAMessages
         defaults.put(Msg.LOBBY_PICK_CLASS, "You must first pick a class!");
         defaults.put(Msg.LOBBY_RIGHT_CLICK, "Punch the sign. Don't right-click.");
         defaults.put(Msg.LOBBY_CLASS_PICKED, "You have chosen % as your class!");
+        defaults.put(Msg.LOBBY_CLASS_RANDOM, "You will get a random class on arena start.");
         defaults.put(Msg.LOBBY_CLASS_PERMISSION, "You don't have permission to use this class!");
         defaults.put(Msg.WARP_TO_ARENA, "Can't warp to the arena during battle!");
         defaults.put(Msg.WARP_FROM_ARENA, "Warping not allowed in the arena!");
@@ -134,10 +140,7 @@ public class MAMessages
                 System.out.println("[MobArena] Announcements-file not found. Creating one...");
                 msgFile.createNewFile();
                 
-                FileWriter     fw = new FileWriter(msgFile);
-                BufferedWriter bw = new BufferedWriter(fw);
-                
-                // Write default announcements to the file.
+                BufferedWriter bw = new BufferedWriter(new FileWriter(msgFile));
                 for (Msg m : Msg.values())
                 {
                     bw.write(m.toString() + "=" + defaults.get(m));
@@ -150,26 +153,29 @@ public class MAMessages
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR: Couldn't initialize announcements-file. Using defaults.");
+            System.out.println("[MobArena] ERROR! Couldn't initialize announcements-file. Using defaults.");
             return;
         }
 
         // If the file was found, populate the msgMap.
         try
         {
-            FileReader     fr = new FileReader(msgFile);
-            BufferedReader br = new BufferedReader(fr);
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(msgFile), "UTF-8"));
         
+            // Check for BOM character.
+            br.mark(1); int bom = br.read();
+            if (bom != 65279) br.reset();
+            
             String s;
             while ((s = br.readLine()) != null)
-            {
                 process(s);
-            }
+            
             br.close();
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR: Problem with announcements-file. Using defaults.");
+            e.printStackTrace();
+            System.out.println("[MobArena] ERROR! Problem with announcements-file. Using defaults.");
             return;
         }
     }
@@ -211,7 +217,7 @@ public class MAMessages
         String[] split = s.split("=");
         if (split.length != 2)
         {
-            System.out.println("[MobArena] ERROR: Couldn't parse \"" + s + "\". Check announcements-file.");
+            System.out.println("[MobArena] ERROR! Couldn't parse \"" + s + "\". Check announcements-file.");
             return;
         }
         
@@ -227,7 +233,7 @@ public class MAMessages
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR: " + key + " is not a valid key. Check announcements-file.");
+            System.out.println("[MobArena] ERROR! " + key + " is not a valid key. Check announcements-file.");
             return;
         }
     }
