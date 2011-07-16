@@ -608,7 +608,7 @@ public class MAUtils
     
     /**
      * Removes all the pets belonging to this player.
-     */
+     *//*
     public static void clearPets(Arena arena, Player p)
     {
         for (Wolf w : arena.pets)
@@ -616,7 +616,7 @@ public class MAUtils
             if (w.getOwner().equals(p))
                 w.remove();
         }
-    }
+    }*/
     
     
     

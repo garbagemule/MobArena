@@ -171,7 +171,8 @@ public class MACommands implements CommandExecutor
             // If there was an error, don't join.
             if (error)
             {
-                arena.refund(p);
+                if (arena != null)
+                    arena.refund(p);
                 return true;
             }
             

@@ -408,7 +408,7 @@ public class Arena
             spawnThread.updateTargets();
 
         // Has to be delayed for TombStone not to fuck shit up.
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
                 new Runnable()
                 {
                     public void run()
