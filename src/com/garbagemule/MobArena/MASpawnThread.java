@@ -128,6 +128,9 @@ public class MASpawnThread implements Runnable
     {
         for (Player p : arena.livePlayers)
         {
+            if (arena.rewardMap.get(p) == null)
+                continue;
+            
             ItemStack reward = MAUtils.getRandomReward(rewards);
             arena.rewardMap.get(p).add(reward);
             
