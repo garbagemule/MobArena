@@ -373,12 +373,17 @@ public class MASpawnThread implements Runnable
      */
     public void updateTargets()
     {
+        Creature c;
+        LivingEntity target;
         for (Entity e : arena.monsters)
         {
-            if (arena.livePlayers.contains(((Creature) e).getTarget()))
+            c = (Creature) e;
+            target = c.getTarget();
+            
+            if (target instanceof Player && arena.livePlayers.contains(target))
                 continue;
             
-            ((Creature) e).setTarget(getClosestPlayer(e));
+            c.setTarget(getClosestPlayer(e));
         }
     }
 }
