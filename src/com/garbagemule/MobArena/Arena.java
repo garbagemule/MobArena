@@ -885,6 +885,9 @@ public class Arena
         {
             Material mat = b.getType();
             
+            if (mat == Material.LAVA)       b.setType(Material.STATIONARY_LAVA);
+            else if (mat == Material.WATER) b.setType(Material.STATIONARY_WATER);
+            
             if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || mat == Material.FIRE || mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
             {
                 blocks.remove(b);
@@ -1111,28 +1114,21 @@ public class Arena
     }
 
     public void onPlayerInteract(PlayerInteractEvent event)
-    {
-        /*if (running && livePlayers.contains(event.getPlayer()))
+    {        
+        if (!livePlayers.contains(event.getPlayer()))
+            return;
+        
+        if (running)
         {
-            Player p = event.getPlayer();
-            Action a = event.getAction();
-            if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
-            {
-                if (p.getItemInHand().getType() == Material.BOW)
-                    p.shootArrow();
-                event.setUseItemInHand(Result.DENY);
-                event.setCancelled(true);
-            }
+            if (event.hasBlock() && event.getClickedBlock().getType() == Material.SAPLING)
+                addTrunkAndLeaves(event.getClickedBlock());
             return;
-        }*/
+        }
         
-        if (running || !livePlayers.contains(event.getPlayer()))
-            return;
-        
-        Player p = event.getPlayer();
         Action a = event.getAction();
-        if ((a == Action.RIGHT_CLICK_AIR) || (a == Action.RIGHT_CLICK_BLOCK))
-        {
+        Player p = event.getPlayer();
+        if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
+        {            
             event.setUseItemInHand(Result.DENY);
             event.setCancelled(true);
         }
@@ -1363,16 +1359,39 @@ public class Arena
     public void delayRestoreInventory(final Player p, final String method)
     {
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-                new Runnable()
+            new Runnable()
+            {
+                public void run()
                 {
-                    public void run()
-                    {
-                        if (method.equals("restoreInventory"))
-                            MAUtils.restoreInventory(p);
-                        else if (method.equals("giveRewards"))
-                            MAUtils.giveRewards(p, rewardMap.get(p), plugin);
-                    }
-                }, 10);
+                    if (method.equals("restoreInventory"))
+                        MAUtils.restoreInventory(p);
+                    else if (method.equals("giveRewards"))
+                        MAUtils.giveRewards(p, rewardMap.get(p), plugin);
+                }
+            }, 10);
+    }
+    
+    public void addTrunkAndLeaves(Block b)
+    {
+        final int x = b.getX();
+        final int y = b.getY();
+        final int z = b.getZ();
+        
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    List<Block> result = new LinkedList<Block>();
+                    for (int i = x-2; i <= x+2; i++)
+                        for (int j = y; j <= y+10; j++)
+                            for (int k = z-2; k <= z+2; k++)
+                                if (world.getBlockAt(i,j,k).getType() == Material.LOG || world.getBlockAt(i,j,k).getType() == Material.LEAVES)
+                                    result.add(world.getBlockAt(i,j,k));
+                    
+                    if (running) blocks.addAll(result);
+                }
+            }, 10);
     }
     
     public boolean canAfford(Player p)

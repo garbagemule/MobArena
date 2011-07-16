@@ -173,7 +173,7 @@ public class MAUtils
     public static List<ItemStack> makeItemStackList(String string)
     {
         List<ItemStack> result = new LinkedList<ItemStack>();
-        if (string == null) return result;
+        if (string == null || string.isEmpty()) return result;
         
         // Trim commas and whitespace, and split items by commas
         string = string.trim();

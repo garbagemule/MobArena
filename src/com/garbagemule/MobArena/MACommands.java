@@ -397,6 +397,40 @@ public class MACommands implements CommandExecutor
         }
         
         /*
+         * Kick player from whichever arena they are in.
+         */
+        if (base.equals("kick"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.admin.kick")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (arg1.isEmpty())
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma kick <player>");
+                return true;
+            }
+            
+            Arena arena = am.getArenaWithPlayer(arg1);
+            if (arena == null)
+            {
+                MAUtils.tellPlayer(sender, "That player is not in an arena.");
+                return true;
+            }
+            else
+            {
+                Player pl = server.getPlayer(arg1);
+                am.arenaMap.remove(pl);
+                arena.playerLeave(pl);
+                MAUtils.tellPlayer(sender, "Player '" + arg1 + "' was kicked from arena '" + arena.configName() + "'.");
+                MAUtils.tellPlayer(pl, "You were kicked by " + ((player) ? p.getName() : "the server."));
+                return true;
+            }
+        }
+        
+        /*
          * Restore a player's inventory.
          */
         if (base.equals("restore"))

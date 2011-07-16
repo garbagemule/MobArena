@@ -180,6 +180,9 @@ public class MASpawnThread implements Runnable
             LivingEntity e = arena.world.spawnCreature(loc,mob);
             arena.monsters.add(e);
             
+            if (mob == CreatureType.WOLF)
+                ((Wolf)e).setOwner(null); 
+            
             // Grab a random target.
             Creature c = (Creature) e;
             c.setTarget(getClosestPlayer(e));
@@ -253,7 +256,7 @@ public class MASpawnThread implements Runnable
             arena.monsters.add(e);
             
             if (slime)   ((Slime)e).setSize(2);
-            if (wolf)    ((Wolf)e).setAngry(true);
+            if (wolf)    { ((Wolf)e).setAngry(true); ((Wolf)e).setOwner(null); }
             if (ghast)   ((Ghast)e).setHealth(Math.min(noOfPlayers*25, 200));
             if (creeper) ((Creeper)e).setPowered(true);
             
@@ -358,7 +361,6 @@ public class MASpawnThread implements Runnable
                 continue;
             }
             dist = p.getLocation().distanceSquared(e.getLocation());
-            //double dist = MAUtils.distance(p.getLocation(), e.getLocation());
             if (dist < current && dist < MobArena.MIN_PLAYER_DISTANCE)
             {
                 current = dist;
@@ -377,6 +379,9 @@ public class MASpawnThread implements Runnable
         LivingEntity target;
         for (Entity e : arena.monsters)
         {
+            if (!(e instanceof Creature))
+                continue; 
+            
             c = (Creature) e;
             target = c.getTarget();
             
