@@ -41,7 +41,6 @@ public class MASpawnThread implements Runnable
     private Random random;
     private MobArena plugin;
     private Arena arena;
-    private final double MIN_DISTANCE = 256;
     
     public MASpawnThread(MobArena plugin, Arena arena)
     {
@@ -132,7 +131,21 @@ public class MASpawnThread implements Runnable
             ItemStack reward = MAUtils.getRandomReward(rewards);
             arena.rewardMap.get(p).add(reward);
             
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount()));
+            if (reward == null)
+            {
+                MAUtils.tellPlayer(p, "ERROR! Problem with economy rewards. Notify server host!");
+                System.out.println("[MobArena] ERROR! Could not add null reward. Please check the config-file!");
+            }
+            else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+            {
+                if (plugin.Methods.hasMethod())
+                    MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, plugin.Method.format(reward.getAmount())));
+                else System.out.println("[MobArena] ERROR! No economy plugin detected!");
+            }
+            else
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount()));
+            }
         }
     }
     
@@ -199,7 +212,6 @@ public class MASpawnThread implements Runnable
         else if (ran < dGhasts)          mob = CreatureType.GHAST;
         else return;
         
-        // 5 on purpose - Ghasts act weird in Overworld.
         switch(mob)
         {
             case CREEPER:
@@ -308,7 +320,7 @@ public class MASpawnThread implements Runnable
                     continue;
                 }
                 
-                if (s.distanceSquared(p.getLocation()) > MIN_DISTANCE)
+                if (s.distanceSquared(p.getLocation()) > MobArena.MIN_PLAYER_DISTANCE)
                     continue;
                 
                 result.add(s);
@@ -340,19 +352,33 @@ public class MASpawnThread implements Runnable
         {
             if (!arena.world.equals(p.getWorld()))
             {
-                System.out.println("[MobArena] MASpawnThread:326: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                System.out.println("[MobArena] MASpawnThread:329: Player '" + p.getName() + "' is not in the right world. Force leaving...");
                 arena.playerLeave(p);
                 MAUtils.tellPlayer(p, "You warped out of the arena world.");
                 continue;
             }
             dist = p.getLocation().distanceSquared(e.getLocation());
             //double dist = MAUtils.distance(p.getLocation(), e.getLocation());
-            if (dist < current && dist < MIN_DISTANCE)
+            if (dist < current && dist < MobArena.MIN_PLAYER_DISTANCE)
             {
                 current = dist;
                 result = p;
             }
         }
         return result;
+    }
+    
+    /**
+     * Update the targets of all monsters, if their targets aren't alive.
+     */
+    public void updateTargets()
+    {
+        for (Entity e : arena.monsters)
+        {
+            if (arena.livePlayers.contains(((Creature) e).getTarget()))
+                continue;
+            
+            ((Creature) e).setTarget(getClosestPlayer(e));
+        }
     }
 }

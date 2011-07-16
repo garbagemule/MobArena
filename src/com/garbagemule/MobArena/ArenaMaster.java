@@ -257,6 +257,9 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.protect", true);
         config.save();
         config.load();
+        config.setProperty("arenas." + configName + ".settings.entry-fee", "");
+        config.save();
+        config.load();
         config.setProperty("arenas." + configName + ".settings.logging", false);
         config.setProperty("arenas." + configName + ".settings.clear-wave-before-next", false);
         config.setProperty("arenas." + configName + ".settings.detonate-creepers", false);
@@ -272,6 +275,8 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
         config.setProperty("arenas." + configName + ".settings.monster-infight", false);
         config.setProperty("arenas." + configName + ".settings.allow-teleporting", false);
+        config.setProperty("arenas." + configName + ".settings.spectate-on-death", true);
+        config.setProperty("arenas." + configName + ".settings.share-items-in-arena", true);
         config.save();
         config.load();
         config.setProperty("arenas." + configName + ".settings.player-limit", 0);

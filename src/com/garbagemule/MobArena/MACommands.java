@@ -118,7 +118,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("join") || base.equals("j"))
         {            
-            if (!player || !MobArena.has(p, "mobarena.use.join"))
+            if (!player || !plugin.has(p, "mobarena.use.join"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -150,12 +150,14 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
             else if (!arena.setup || arena.edit)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-            else if (arena.running)
+            else if (arena.running && arena.waitPlayers.add(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
             else if (arena.livePlayers.contains(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-            else if (!MobArena.has(p, "mobarena.arenas." + arena.configName()))
+            else if (!plugin.has(p, "mobarena.arenas." + arena.configName()))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
+            else if (!arena.canAfford(p) || !arena.takeFee(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(arena.entryFee, plugin)));
             else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
             else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
@@ -168,12 +170,22 @@ public class MACommands implements CommandExecutor
             
             // If there was an error, don't join.
             if (error)
+            {
+                arena.refund(p);
                 return true;
+            }
+            
+            // If player is in a boat/minecart, eject!
+            if (p.isInsideVehicle())
+                p.leaveVehicle();
             
             am.arenaMap.put(p,arena);
             arena.playerJoin(p, p.getLocation());
             
             MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
+            if (!arena.entryFee.isEmpty())
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_PAID, MAUtils.listToString(arena.entryFee, plugin)));
+            
             return true;
         }
         
@@ -182,7 +194,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("leave") || base.equals("l"))
         {
-            if (!player || !MobArena.has(p, "mobarena.use.leave"))
+            if (!player || !plugin.has(p, "mobarena.use.leave"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -213,7 +225,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("spectate") || base.equals("spec"))
         {            
-            if (!player || !MobArena.has(p, "mobarena.use.spectate"))
+            if (!player || !plugin.has(p, "mobarena.use.spectate"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -257,6 +269,10 @@ public class MACommands implements CommandExecutor
             if (error)
                 return true;
             
+            // If player is in a boat/minecart, eject!
+            if (p.isInsideVehicle())
+                p.leaveVehicle();
+            
             am.arenaMap.put(p,arena);
             arena.playerSpec(p, p.getLocation());
             
@@ -269,7 +285,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("arenas"))
         {            
-            String list = MAUtils.listToString(am.arenas);
+            String list = MAUtils.listToString(am.arenas, plugin);
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_ARENAS, list));
             return true;
         }
@@ -288,7 +304,7 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                String list = MAUtils.listToString(arena.getLivingPlayers());
+                String list = MAUtils.listToString(arena.getLivingPlayers(), plugin);
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             }
             else
@@ -297,7 +313,7 @@ public class MACommands implements CommandExecutor
                 List<Player> players = new LinkedList<Player>();
                 for (Arena arena : am.arenas)
                     players.addAll(arena.getLivingPlayers());
-                buffy.append(MAUtils.listToString(players));
+                buffy.append(MAUtils.listToString(players, plugin));
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
             }
             return true;
@@ -333,7 +349,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            String list = MAUtils.listToString(arena.getNonreadyPlayers());
+            String list = MAUtils.listToString(arena.getNonreadyPlayers(), plugin);
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             return true;
         }
@@ -351,7 +367,7 @@ public class MACommands implements CommandExecutor
          */
         if ((base.equals("enable") || base.equals("disable")))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.enable")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.enable")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -385,7 +401,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("restore"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.restore")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.restore")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -412,7 +428,7 @@ public class MACommands implements CommandExecutor
         {            
             if (arg1.equals("end"))
             {
-                if (!console && !(player && MobArena.has(p, "mobarena.admin.force.end")) && !op)
+                if (!console && !(player && plugin.has(p, "mobarena.admin.force.end")) && !op)
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                     return true;
@@ -446,7 +462,7 @@ public class MACommands implements CommandExecutor
             }
             else if (arg1.equals("start"))
             {
-                if (!console && !(player && MobArena.has(p, "mobarena.admin.force.start")) && !op)
+                if (!console && !(player && plugin.has(p, "mobarena.admin.force.start")) && !op)
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                     return true;
@@ -492,7 +508,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("config"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.config.reload")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.config.reload")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -514,7 +530,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("arena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.arena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.arena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -540,7 +556,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setarena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.setarena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.setarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -569,7 +585,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("addarena"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.addarena")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.addarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -597,7 +613,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("delarena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.delarena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.delarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -633,7 +649,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("protect"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.protect")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.protect")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -699,7 +715,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("editarena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.editarena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.editarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -768,7 +784,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setregion"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.setregion")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.setregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -790,7 +806,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("expandregion"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.expandregion")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.expandregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -835,7 +851,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("showregion"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.showregion")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.showregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -887,7 +903,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("setlobbyregion"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.setlobbyregion")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.setlobbyregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -906,7 +922,7 @@ public class MACommands implements CommandExecutor
 
         if (base.equals("expandlobbyregion"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.expandlobbyregion")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.expandlobbyregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -954,7 +970,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setwarp"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.setwarp")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.setwarp")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -975,7 +991,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("spawnpoints"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.spawnpoints")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.spawnpoints")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -1006,7 +1022,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("addspawn"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.addspawn")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.addspawn")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -1027,7 +1043,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("delspawn"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.delspawn")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.delspawn")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -1047,7 +1063,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("auto-generate"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.autogenerate")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -1072,7 +1088,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("auto-degenerate"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.autodegenerate")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.autodegenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -1102,7 +1118,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("dooooo") && arg1.equals("it") && arg2.equals("hippie") && arg3.equals("monster"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.autogenerate")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -1121,7 +1137,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("undo") && arg1.equals("it") && arg2.equals("hippie") && arg3.equals("monster"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.autodegenerate")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.autodegenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;

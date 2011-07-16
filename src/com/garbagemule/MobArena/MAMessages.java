@@ -24,6 +24,8 @@ public class MAMessages
         JOIN_ARENA_NOT_ENABLED,
         JOIN_ARENA_NOT_SETUP,
         JOIN_ARENA_PERMISSION,
+        JOIN_FEE_REQUIRED,
+        JOIN_FEE_PAID,
         JOIN_ARENA_IS_RUNNING,
         JOIN_ALREADY_PLAYING,
         JOIN_ARG_NEEDED,
@@ -77,6 +79,8 @@ public class MAMessages
         defaults.put(Msg.JOIN_ARENA_NOT_ENABLED, "This arena is not enabled.");
         defaults.put(Msg.JOIN_ARENA_NOT_SETUP, "This arena has not been set up yet.");
         defaults.put(Msg.JOIN_ARENA_PERMISSION, "You don't have permission to join this arena.");
+        defaults.put(Msg.JOIN_FEE_REQUIRED, "Insufficient funds. Price: %");
+        defaults.put(Msg.JOIN_FEE_PAID, "Price to join was: %");
         defaults.put(Msg.JOIN_ARENA_IS_RUNNING, "This arena is in already progress.");
         defaults.put(Msg.JOIN_ALREADY_PLAYING, "You are already playing!");
         defaults.put(Msg.JOIN_ARG_NEEDED, "You must specify an arena. Type /ma arenas for a list.");
@@ -101,7 +105,7 @@ public class MAMessages
         defaults.put(Msg.FORCE_END_ENDED, "Forced arena end.");
         defaults.put(Msg.FORCE_END_IDLE, "You weren't quick enough!");
         defaults.put(Msg.REWARDS_GIVE, "Here are all of your rewards!");
-        defaults.put(Msg.LOBBY_DROP_ITEM, "No sharing before the arena starts!");
+        defaults.put(Msg.LOBBY_DROP_ITEM, "No sharing allowed at this time!");
         defaults.put(Msg.LOBBY_PLAYER_READY, "You have been flagged as ready!");
         defaults.put(Msg.LOBBY_PICK_CLASS, "You must first pick a class!");
         defaults.put(Msg.LOBBY_RIGHT_CLICK, "Punch the sign. Don't right-click.");

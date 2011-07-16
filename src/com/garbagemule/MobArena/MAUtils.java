@@ -161,6 +161,11 @@ public class MAUtils
         return result;
     }
     
+    public static List<ItemStack> getEntryFee(Configuration config, String arena)
+    {
+        return makeItemStackList(config.getString("arenas." + arena + ".settings.entry-fee", null));
+    }
+    
     /**
      * Takes a comma-separated list of items in the <type>:<amount> format and
      * returns a list of ItemStacks created from that data.
@@ -176,7 +181,6 @@ public class MAUtils
             string = string.substring(0, string.length()-1);
         String[] items = string.split(",");
         
-        
         for (String item : items)
         {
             // Trim whitespace and split by colons.
@@ -185,17 +189,21 @@ public class MAUtils
             
             // Grab the amount.
             int amount = 1;
-            if (parts.length == 2 && parts[1].matches("(-)?[0-9]+"))
+            if (parts.length == 1 && parts[0].matches("\\$[0-9]+"))
+                amount = Integer.parseInt(parts[0].substring(1, parts[0].length()));
+            else if (parts.length == 2 && parts[1].matches("(-)?[0-9]+"))
                 amount = Integer.parseInt(parts[1]);
             else if (parts.length == 3 && parts[2].matches("(-)?[0-9]+"))
                 amount = Integer.parseInt(parts[2]);
+            
             
             // Make the ItemStack.
             ItemStack stack = (parts.length == 3) ?
                     makeItemStack(parts[0], amount, parts[1]) :
                     makeItemStack(parts[0], amount);
             
-            result.add(stack);
+            if (stack != null)
+                result.add(stack);
         }
         return result;
     }
@@ -443,14 +451,25 @@ public class MAUtils
     /**
      * Gives the player all of the items in the list of ItemStacks.
      */
-    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, boolean rewards)
+    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, boolean rewards, MobArena plugin)
     {
-        PlayerInventory inv = p.getInventory();
+        if (stacks == null)
+            return;
         
+        PlayerInventory inv = p.getInventory();
         for (ItemStack stack : stacks)
         {
             if (stack == null)
                 continue;
+            
+            // If this is money, don't add to inventory.
+            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+            {
+                if (plugin != null && plugin.Methods.hasMethod())
+                    plugin.Method.getAccount(p.getName()).add(stack.getAmount());
+
+                continue;
+            }
             
             // If these are rewards, don't tamper with them.
             if (rewards)
@@ -459,36 +478,28 @@ public class MAUtils
                 continue;
             }
 
-            // If this is an armor piece, equip it and continue.
+            // If this is an armor piece, equip it.
             if (autoEquip && ARMORS_TYPE.contains(stack.getType()))
             {
                 equipArmorPiece(stack, inv);
                 continue;
             }
             
-            // If this is a sword, set its durability to "unlimited".
-            //if (SWORDS_TYPE.contains(stack.getType()))
+            // If this is a weapon, set its durability to "unlimited".
             if (WEAPONS_TYPE.contains(stack.getType()))
                 stack.setDurability((short) -32768);
 
-            /*if (stack.getAmount() < 0)
-            {
-                stack = new ItemStack(stack.getType(), 32768);
-                inv.setItem(inv.firstEmpty(), stack);
-                continue;
-            }*/
             inv.addItem(stack);
         }
     }
-    
-    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip)
+    public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
     {
-        giveItems(p, stacks, autoEquip, false);
+        giveItems(p, stacks, false, true, plugin);
     }
     
-    public static void giveRewards(Player p, List<ItemStack> stacks)
+    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, MobArena plugin)
     {
-        giveItems(p, stacks, false, true);
+        giveItems(p, stacks, autoEquip, false, plugin);
     }
     
     public static int getPetAmount(Player p)
@@ -522,8 +533,12 @@ public class MAUtils
     }
     
     /* Helper methods for making ItemStacks out of strings and ints */
-    private static ItemStack makeItemStack(String name, int amount, String data)
+    public static ItemStack makeItemStack(String name, int amount, String data)
     {
+        // If this is economy money, create a dummy ItemStack.
+        if (name.matches("\\$[0-9]+"))
+            return new ItemStack(MobArena.ECONOMY_MONEY_ID, amount);
+        
         try
         {
             byte offset = 0;
@@ -548,7 +563,10 @@ public class MAUtils
             return null;
         }
     }
-    private static ItemStack makeItemStack(String name, int amount) { return makeItemStack(name, amount, "0"); }
+    public static ItemStack makeItemStack(String name, int amount)
+    {
+        return makeItemStack(name, amount, "0");
+    }
     
     /* Helper method for grabbing a random reward */
     public static ItemStack getRandomReward(List<ItemStack> rewards)
@@ -879,13 +897,15 @@ public class MAUtils
     /**
      * Sends a message to all players in and around the arena.
      */
-    public static void tellAll(Arena arena, String msg)
+    public static void tellAll(Arena arena, String msg) { tellAll(arena, msg, false); }
+    public static void tellAll(Arena arena, String msg, boolean waitPlayers)
     {
         Set<Player> tmp = new HashSet<Player>();
         tmp.addAll(arena.livePlayers);
         tmp.addAll(arena.deadPlayers);
         tmp.addAll(arena.specPlayers);
         tmp.addAll(arena.readyPlayers);
+        if (waitPlayers) tmp.addAll(arena.waitPlayers);
         for (Player p : tmp)
             tellPlayer(p, msg);
     }
@@ -964,7 +984,7 @@ public class MAUtils
     /**
      * Turn a list into a space-separated string-representation of the list.
      */    
-    public static <E> String listToString(List<E> list, boolean none)
+    public static <E> String listToString(List<E> list, boolean none, MobArena plugin)
     {
         if (list.isEmpty())
         {
@@ -975,6 +995,7 @@ public class MAUtils
         }
         
         StringBuffer buffy = new StringBuffer();
+        int trimLength = 0;
         
         E type = list.get(0);
         if (type instanceof Player)
@@ -987,10 +1008,21 @@ public class MAUtils
         }
         else if (type instanceof ItemStack)
         {
+            trimLength = 2;
             ItemStack stack;
             for (E e : list)
             {
                 stack = (ItemStack) e;
+                if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+                {
+                    if (plugin.Methods.hasMethod())
+                    {
+                        buffy.append(plugin.Method.format(stack.getAmount()));
+                        buffy.append(", ");
+                    }
+                    continue;
+                }
+                
                 buffy.append(stack.getType().toString().toLowerCase());
                 buffy.append(":");
                 buffy.append(stack.getAmount());
@@ -1005,9 +1037,9 @@ public class MAUtils
                 buffy.append(" ");
             }
         }
-        return buffy.toString();
+        return buffy.toString().substring(0, buffy.length() - trimLength);
     }
-    public static <E> String listToString(List<E> list) { return listToString(list, true); }
+    public static <E> String listToString(List<E> list, MobArena plugin) { return listToString(list, true, plugin); }
     
     /**
      * Returns a String-list version of a comma-separated list.

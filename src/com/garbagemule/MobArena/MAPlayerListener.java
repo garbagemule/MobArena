@@ -24,7 +24,7 @@ public class MAPlayerListener extends PlayerListener
     }
     
     public void onPlayerInteract(PlayerInteractEvent event)
-    {
+    {        
         if (!am.enabled) return;
         for (Arena arena : am.arenas)
             arena.onPlayerInteract(event);

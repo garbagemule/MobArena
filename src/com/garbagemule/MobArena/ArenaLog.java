@@ -97,7 +97,7 @@ public class ArenaLog
             // Kills
             buffy.append(MAUtils.padLeft(arena.killMap.remove(p).toString(), KILLS, ' ') + "  ");
             // Rewards
-            buffy.append(MAUtils.listToString(arena.rewardMap.get(p)));
+            buffy.append(MAUtils.listToString(arena.rewardMap.get(p), plugin));
             log.add(buffy.toString());
         }
         
