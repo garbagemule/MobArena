@@ -16,12 +16,12 @@ public class MABlockListener extends BlockListener
     public void onBlockBreak(BlockBreakEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onBlockBreak(event);
+            arena.eventListener.onBlockBreak(event);
     }
 
     public void onBlockPlace(BlockPlaceEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onBlockPlace(event);
+            arena.eventListener.onBlockPlace(event);
     }
 }

@@ -21,7 +21,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
@@ -30,28 +29,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
-import org.bukkit.event.Event.Result;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
@@ -106,6 +83,8 @@ public class Arena
     protected Timestamp startTime;
     protected Timestamp endTime;
     
+    protected MAListener eventListener;
+    
     /**
      * Primary constructor. Requires a name and a world.
      */
@@ -143,6 +122,8 @@ public class Arena
         allowMonsters = world.getAllowMonsters();
         allowAnimals  = world.getAllowAnimals();
         spawnMonsters = ((net.minecraft.server.World) ((CraftWorld) world).getHandle()).spawnMonsters;
+        
+        eventListener = new MAListener(this, plugin);
     }
     
     public boolean startArena()
@@ -195,71 +176,6 @@ public class Arena
         return true;
     }
     
-    /*public void startArena()
-    {        
-        if (running)
-            return;
-        
-        if (!softRestore && forceRestore && !serializeRegion())
-            return;
-        
-        // Assign random classes, and if all get kicked, return.
-        for (Player p : randoms)
-            assignRandomClass(p);
-        if (livePlayers.isEmpty())
-            return;
-        
-        // Set the spawn flags to enable monster spawning.
-        MAUtils.setSpawnFlags(plugin, world, 1, allowMonsters, allowAnimals);
-        
-        // Teleport players.
-        for (Player p : livePlayers)
-        {
-            p.teleport(arenaLoc);
-            p.setHealth(20);
-            rewardMap.put(p, new LinkedList<ItemStack>());
-            waveMap.put(p, 0);
-            killMap.put(p, 0);
-        }
-
-        running = true;
-        
-        // Spawn pets.
-        for (Map.Entry<Player,Integer> entry : petMap.entrySet())
-        {
-            // Remove the bones from the inventory.
-            Player p = entry.getKey();
-            p.getInventory().removeItem(new ItemStack(Material.BONE, entry.getValue()));
-            
-            for (int i = 0; i < entry.getValue(); i++)
-            {
-                Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
-                wolf.setTamed(true);
-                wolf.setOwner(p);
-                wolf.setHealth(20);
-                if (hellhounds)
-                    wolf.setFireTicks(32768);
-                pets.add(wolf);
-            }
-        }
-        
-        // Start the spawnThread.
-        spawnThread  = new MASpawnThread(plugin, this);
-        spawnTaskId  = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, (!waveClear) ? waveInterval : 60);
-        
-        readyPlayers.clear();
-        
-        // Logging info.
-        if (logging)
-            log.start();
-        
-        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
-        
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onArenaStart();
-    }*/
-    
     public boolean endArena()
     {
         // Sanity-checks.
@@ -279,7 +195,7 @@ public class Arena
             log.serialize();
             log.clear();
         }
-        
+
         // Clean arena floor.
         cleanup();
         
@@ -296,6 +212,8 @@ public class Arena
         notifyPlayers.clear();
         classMap.clear();
         rewardMap.clear();
+        waveMap.clear();
+        killMap.clear();
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
@@ -304,64 +222,6 @@ public class Arena
         return true;
     }
     
-    /**
-     * End this arena's session.
-     */
-    /*public void endArena()
-    {        
-        running = false;
-        
-        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_END), true);
-        
-        // Logging stuff
-        if (logging)
-        {
-            log.end();
-            log.serialize();
-            log.clear();
-        }
-        
-        // If the arena was actually ever started, cancel the spawnthread.
-        if (spawnThread != null)
-        {
-            Bukkit.getServer().getScheduler().cancelTask(spawnThread.taskId);
-            Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
-        }
-        
-        if (!emptyInvJoin)
-            for (Player p : deadPlayers)
-                MAUtils.restoreInventory(p);
-        
-        // Clean up the arena floor and give rewards
-        cleanup();
-        giveRewards();
-        
-        // Clear all the sets and maps.
-        livePlayers.clear();
-        deadPlayers.clear();
-        waitPlayers.clear();
-        pets.clear();
-        classMap.clear();
-        rewardMap.clear();
-        
-        if (softRestore)
-            for (int[] buffer : repairList)
-                world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) buffer[4], false);
-        else if (forceRestore)
-            deserializeRegion();
-        
-        // Set the spawn flags to restore monster spawning.
-        MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
-        
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onArenaEnd();
-    }*/
-    
-    /**
-     * Force an arena start by forcing all not-ready players to leave.
-     * @precondition - The arena musn't be running, and readyPlayers must not be empty.
-     */
     public void forceStart()
     {
         // Set operations.
@@ -377,20 +237,6 @@ public class Arena
         }
     }
     
-    /**
-     * Force an arena end by forcing all players to leave.
-     * @precondition - livePlayers must not be empty.
-     */
-    /*public void forceEnd()
-    {        
-        // Force leave.
-        for (Player p : getAllPlayers())
-        {
-            plugin.getAM().arenaMap.remove(p);
-            playerLeave(p);
-        }
-    }*/
-    
     public void forceEnd()
     {
         for (Player p : getAllPlayers())
@@ -398,6 +244,20 @@ public class Arena
             plugin.getAM().arenaMap.remove(p);
             playerLeave(p);
         }
+        
+        for (Entity e : monsters)
+            e.remove();
+        
+        arenaPlayers.clear();
+        lobbyPlayers.clear();
+        readyPlayers.clear();
+        
+        rewardMap.clear();
+        waveMap.clear();
+        killMap.clear();
+        monsters.clear();
+        
+        spawnTaskId = -1;
     }
     
     public void playerJoin(Player p, Location loc)
@@ -417,55 +277,12 @@ public class Arena
             listener.onPlayerJoin(p);
     }
     
-    /**
-     * Warp the player to the arena lobby and add to the set of live players.
-     */
-    /*public void playerJoin(Player p, Location loc)
-    {
-        if (!locations.containsKey(p))
-            locations.put(p,loc);
-        
-        if (livePlayers.isEmpty())
-        {
-            Chunk chunk = world.getChunkAt(lobbyLoc);
-            if (!world.isChunkLoaded(chunk))
-                world.loadChunk(chunk);
-            else
-                world.refreshChunk(chunk.getX(), chunk.getZ());
-        }
-
-        MAUtils.sitPets(p);
-        livePlayers.add(p);
-        p.teleport(lobbyLoc);
-        
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onPlayerJoin(p);
-    }*/
-    
-    /**
-     * Add the player to the set of ready players.
-     * If every is ready, the arena starts.
-     */
     public void playerReady(Player p)
     {
         readyPlayers.add(p);
         startArena();
     }
     
-    /*public void playerReady(Player p)
-    {
-        readyPlayers.add(p);
-        
-        if (readyPlayers.equals(livePlayers))
-            startArena();
-    }*/
-    
-    /**
-     * Remove the player from all the player sets, and clear his inventory if necessary.
-     * If the set of live players becomes empty, end the arena.
-     * If the set of ready players becomes equal to the set of live players, start the arena.
-     */
     public void playerLeave(Player p)
     {
         // Clear class inventory, restore old inventory and fork over rewards.
@@ -497,7 +314,7 @@ public class Arena
             playerLeave(p);
             return;
         }
-        
+
         // Clear class inventory, restore old inventory and fork over rewards.
         restoreInvAndGiveRewards(p, true);
 
@@ -506,7 +323,7 @@ public class Arena
         p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)  
         p.teleport(spectatorLoc);
         specPlayers.add(p);
-        
+
         // Update the monster targets.
         if (running && spawnThread != null)
             spawnThread.updateTargets();
@@ -515,104 +332,10 @@ public class Arena
         MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onPlayerDeath(p);
-        
+
         // End the arena if conditions are met.
         endArena();
     }
-    
-    /*public void playerLeave(Player p)
-    {
-        boolean clear = false;
-        
-        Location old = locations.get(p);
-        if (old != null)
-        {
-            Chunk chunk = old.getWorld().getChunkAt(old);
-            if (!old.getWorld().isChunkLoaded(chunk))
-                old.getWorld().loadChunk(chunk);
-            else
-                old.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
-            
-            p.teleport(old);
-        }
-        locations.remove(p); // get, then remove, because of Teleport Event
-        
-        // Only clear the inventory if the player has class items.
-        if (readyPlayers.remove(p)) clear = true; 
-        if (livePlayers.remove(p))  clear = true;
-        deadPlayers.remove(p);
-        specPlayers.remove(p);
-        hasPaid.remove(p);
-        removePets(p);
-        
-        // Update the monster targets.
-        if (running && spawnThread != null)
-            spawnThread.updateTargets();
-        
-        // Clear inventory and record current wave
-        if (clear)
-        {
-            if (running) waveMap.put(p, spawnThread.wave - 1);
-            MAUtils.clearInventory(p);
-        }
-        
-        // Try to restore inventory.
-        if (!emptyInvJoin)
-            MAUtils.restoreInventory(p);
-        
-        // Grant rewards.
-        MAUtils.giveRewards(p, rewardMap.get(p), plugin);
-        
-        if (running && livePlayers.isEmpty())
-            endArena();
-        else if (!readyPlayers.isEmpty() && readyPlayers.equals(livePlayers))
-            startArena();
-        
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onPlayerLeave(p);
-    }*/
-    
-    /*public void playerDeath(final Player p)
-    {
-        p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)        
-        p.teleport(spectatorLoc);
-        p.setFireTicks(0);
-        p.setHealth(20);
-        
-        // Add to the list of dead players.
-        livePlayers.remove(p);
-        deadPlayers.add(p);
-        removePets(p);
-        
-        // Update the monster targets.
-        if (running && spawnThread != null)
-            spawnThread.updateTargets();
-
-        // Has to be delayed for TombStone not to fuck shit up.
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-                new Runnable()
-                {
-                    public void run()
-                    {
-                        if (!specOnDeath)
-                        {
-                            plugin.getAM().arenaMap.remove(p);
-                            playerLeave(p);
-                        }
-                        else MAUtils.restoreInventory(p);
-                        
-                        if (livePlayers.isEmpty())
-                            endArena();
-                    }
-                }, 8);
-        
-        MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
-        
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onPlayerDeath(p);
-    }*/
     
     public void playerSpec(Player p, Location loc)
     {
@@ -645,8 +368,8 @@ public class Arena
         if (lobbyPlayers.remove(p))
             startArena2();*/
     }
-    
-    public void spawnPets()
+
+    private void spawnPets()
     {
         for (Map.Entry<Player,Integer> entry : petMap.entrySet())
         {
@@ -668,7 +391,7 @@ public class Arena
         }
     }
     
-    public void startSpawning()
+    private void startSpawning()
     {
         // Set the spawn flags to enable monster spawning.
         MAUtils.setSpawnFlags(plugin, world, 1, allowMonsters, allowAnimals);
@@ -678,25 +401,26 @@ public class Arena
         spawnTaskId  = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, (!waveClear) ? waveInterval : 60);
     }
     
-    public void stopSpawning()
+    private void stopSpawning()
     {
         // Stop the spawn thread.
         if (spawnThread != null)
         {
             Bukkit.getServer().getScheduler().cancelTask(spawnThread.taskId);
             Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
+            spawnTaskId = -1;
         }
         
         // Restore spawn flags.
         MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
     }
     
-    public void updateChunk(Location loc)
+    private void updateChunk(Location loc)
     {
-        if (!arenaPlayers.isEmpty())
+        if (!arenaPlayers.isEmpty() || !world.getName().equals(loc.getWorld().getName()))
             return;
         
-        Chunk chunk = world.getChunkAt(lobbyLoc);
+        Chunk chunk = world.getChunkAt(loc);
         if (!world.isChunkLoaded(chunk))
             world.loadChunk(chunk);
         else
@@ -705,6 +429,9 @@ public class Arena
     
     public void playerKill(Player p)
     {
+    	if (p == null || killMap.get(p) == null)
+    		return;
+    	
         killMap.put(p, killMap.get(p) + 1);
     }
     
@@ -775,15 +502,6 @@ public class Arena
         
         assignClass(p, className);
         MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
-    }
-    
-    private void giveRewards()
-    {        
-        for (Map.Entry<Player,List<ItemStack>> entry : rewardMap.entrySet())
-        {
-            MAUtils.tellPlayer(entry.getKey(), MAMessages.get(Msg.REWARDS_GIVE));
-            MAUtils.giveRewards(entry.getKey(), entry.getValue(), plugin);
-        }
     }
     
     private void cleanup()
@@ -1071,502 +789,6 @@ public class Arena
     
     /*////////////////////////////////////////////////////////////////////
     //
-    //      EventListener methods
-    //
-    ////////////////////////////////////////////////////////////////////*/
-    
-    // Block Listener
-    public void onBlockBreak(BlockBreakEvent event)
-    {
-        if (!inRegion(event.getBlock().getLocation()) || edit || (!protect && running))
-            return;
-        
-        Block b = event.getBlock();
-        if (blocks.remove(b) || b.getType() == Material.TNT)
-            return;
-        
-        if (softRestore && running)
-        {
-            int[] buffer = new int[5];
-            buffer[0] = b.getX();
-            buffer[1] = b.getY();
-            buffer[2] = b.getZ();
-            buffer[3] = b.getTypeId();
-            buffer[4] = (int) b.getData();
-            repairList.add(buffer);
-            if (!softRestoreDrops) event.getBlock().setTypeId(0);
-            return;
-        }
-        
-        event.setCancelled(true);
-    }
-    
-    public void onBlockPlace(BlockPlaceEvent event)
-    {
-        if (!inRegion(event.getBlock().getLocation()) || edit)
-            return;
-        
-        Block b = event.getBlock();
-        //if (running && livePlayers.contains(event.getPlayer()))
-        if (running && arenaPlayers.contains(event.getPlayer()))
-        {
-            blocks.add(b);
-            Material mat = b.getType();
-            
-            if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK)
-                blocks.add(b.getRelative(0,1,0));
-            return;
-        }
-
-        // If the arena isn't running, or if the player isn't in the arena, cancel.
-        event.setCancelled(true);
-    }
-    
-    // Monster Listener
-    public void onCreatureSpawn(CreatureSpawnEvent event)
-    {
-        if (!inRegion(event.getLocation()))
-            return;
-        
-        // If running == true, setCancelled(false), and vice versa.
-        event.setCancelled(!running);
-    }
-    
-    public void onEntityExplode(EntityExplodeEvent event)
-    {
-        if (!monsters.contains(event.getEntity()) && !inRegionRadius(event.getLocation(), 10))
-            return;
-        
-        event.setYield(0);
-        monsters.remove(event.getEntity());
-        
-        // If the arena isn't running
-        if (!running || repairDelay == 0)
-        {
-            event.setCancelled(true);
-            return;
-        }
-        
-        // If there is a sign in the blocklist, cancel
-        for (Block b : event.blockList())
-        {
-            if (!(b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN))
-                continue;
-            
-            event.setCancelled(true);
-            return;
-        }
-
-        // Uncancel, just in case.
-        event.setCancelled(false);
-
-        int[] buffer;
-        final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
-        for (Block b : event.blockList())
-        {
-            Material mat = b.getType();
-            
-            if (mat == Material.LAVA)       b.setType(Material.STATIONARY_LAVA);
-            else if (mat == Material.WATER) b.setType(Material.STATIONARY_WATER);
-            
-            if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || mat == Material.FIRE || mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
-            {
-                blocks.remove(b);
-            }
-            else if (blocks.remove(b))
-            {
-                world.dropItemNaturally(b.getLocation(), new ItemStack(b.getTypeId(), 1));
-            }
-            else if (softRestore)
-            {
-                buffer = new int[5];
-                buffer[0] = b.getX();
-                buffer[1] = b.getY();
-                buffer[2] = b.getZ();
-                buffer[3] = b.getTypeId();
-                buffer[4] = (int) b.getData();
-                repairList.add(buffer);
-                blockMap.put(b, b.getTypeId() + (b.getData() * 1000));
-            }
-            else
-            {
-                blockMap.put(b, b.getTypeId() + (b.getData() * 1000));
-            }
-        }
-        
-        if (!protect || softRestore)
-            return;
-        
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable()
-            {
-                public void run()
-                {
-                    for (Map.Entry<Block,Integer> entry : blockMap.entrySet())
-                    {
-                        Block b = entry.getKey();
-                        int type = entry.getValue();
-                        
-                        b.getLocation().getBlock().setTypeId(type % 1000);
-                        
-                        if (type > 1000)
-                            b.getLocation().getBlock().setData((byte) (type / 1000));
-                    }
-                }
-            }, repairDelay);
-    }
-    
-    public void onEntityCombust(EntityCombustEvent event)
-    {
-        if (monsters.contains(event.getEntity()))
-            event.setCancelled(true);
-    }
-    
-    public void onEntityTarget(EntityTargetEvent event)
-    {
-        if (!running || event.isCancelled())
-            return;
-        
-        if (pets.contains(event.getEntity()))
-        {
-            if (event.getReason() != TargetReason.TARGET_ATTACKED_OWNER && event.getReason() != TargetReason.OWNER_ATTACKED_TARGET)
-                return;
-            
-            if (!(event.getTarget() instanceof Player))
-                return;
-            
-            // If the target is a player, cancel.
-            event.setCancelled(true);
-            return;
-        }
-        
-        if (monsters.contains(event.getEntity()))
-        {
-            if (event.getReason() == TargetReason.FORGOT_TARGET)
-            {
-                event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), this));
-                return;
-            }
-                
-            if (event.getReason() == TargetReason.TARGET_DIED)
-            {
-                event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), this));
-                return;
-            }
-            
-            if (event.getReason() == TargetReason.CLOSEST_PLAYER)
-                //if (!livePlayers.contains(event.getTarget()))
-                if (!arenaPlayers.contains(event.getTarget()))
-                    event.setCancelled(true);
-            return;
-        }
-    }
-    
-    // Death Listener
-    public void onEntityRegainHealth(EntityRegainHealthEvent event)
-    {
-        if (!running) return;
-        
-        //if (!(event.getEntity() instanceof Player) || !livePlayers.contains((Player)event.getEntity()))
-        if (!(event.getEntity() instanceof Player) || !arenaPlayers.contains((Player)event.getEntity()))
-            return;
-        
-        if (event.getRegainReason() == RegainReason.REGEN)
-            event.setCancelled(true);
-    }
-    
-    public void onEntityDeath(EntityDeathEvent event)
-    {        
-        if (event.getEntity() instanceof Player)
-        {
-            Player p = (Player) event.getEntity();
-            
-            //if (!livePlayers.contains(p))
-            if (!arenaPlayers.contains(p))
-                return;
-            
-            event.getDrops().clear();
-            waveMap.put(p, spawnThread.wave - 1);
-            playerDeath(p);
-            //p.getInventory().clear(); // For TombStone
-            return;
-        }
-        
-        if (monsters.remove(event.getEntity()))
-        {
-            EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
-            EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
-            Entity damager = (e2 != null) ? e2.getDamager() : null;
-            
-            if (e2 != null && damager instanceof Player)
-                playerKill((Player) damager);
-                
-            event.getDrops().clear();
-            resetIdleTimer();
-            return;
-        }
-    }
-    
-    public void onEntityDamage(EntityDamageEvent event)
-    {
-        if (!running) return;
-        
-        EntityDamageByEntityEvent e = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
-        Entity damager = (e != null) ? e.getDamager() : null;
-        Entity damagee = event.getEntity();
-        
-        // Damagee - Pet Wolf - cancel all damage.
-        if (damagee instanceof Wolf && pets.contains(damagee))
-        {
-            if (event.getCause() == DamageCause.FIRE_TICK)
-            {
-                damagee.setFireTicks(32768); // For mcMMO
-                event.setCancelled(true);
-            }
-            if (e != null && damager instanceof Player)
-                event.setCancelled(true);
-            
-            event.setDamage(0);
-            return;
-        }
-
-        // Damager - Pet Wolf - lower damage
-        if (e != null && damager instanceof Wolf && pets.contains(damager))
-        {
-            event.setDamage(1);
-            return;
-        }
-        
-        // Damagee & Damager - Player - cancel if pvp disabled
-        if (damagee instanceof Player && damager instanceof Player)
-        {
-            //if (livePlayers.contains(damagee) && !pvp)
-            if (arenaPlayers.contains(damagee) && !pvp)
-                event.setCancelled(true);
-            
-            return;
-        }
-        
-        // Damagee & Damager - Monsters - cancel if no monsterInfight
-        if (e != null && monsters.contains(damagee) && monsters.contains(damager))
-        {
-            if (!monsterInfight)
-                event.setCancelled(true);
-            
-            return;
-        }
-        
-        // Creeper detonations
-        if (inRegion(damagee.getLocation()))
-        {
-            //if (!detDamage || !(damagee instanceof Player) || !livePlayers.contains((Player) damagee))
-            if (!detDamage || !(damagee instanceof Player) || !arenaPlayers.contains((Player) damagee))
-                return;
-            
-            if (event.getCause() == DamageCause.BLOCK_EXPLOSION)
-                event.setCancelled(true);
-            
-            return;
-        }
-    }
-    
-    // Lobby Listener
-    public void onPlayerDropItem(PlayerDropItemEvent event)
-    {
-        if (running && shareInArena) return;
-        
-        Player p = event.getPlayer();
-        //if (!livePlayers.contains(p))
-        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
-            return;
-        
-        MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_DROP_ITEM));
-        event.setCancelled(true);
-    }
-
-    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
-    {
-        //if (!readyPlayers.contains(event.getPlayer()) && !livePlayers.contains(event.getPlayer()))
-        if (!readyPlayers.contains(event.getPlayer()) && !arenaPlayers.contains(event.getPlayer()))
-            return;
-        
-        if (!running)
-        {
-            event.getBlockClicked().getFace(event.getBlockFace()).setTypeId(0);
-            event.setCancelled(true);
-            return;
-        }
-
-        Block liquid = event.getBlockClicked().getFace(event.getBlockFace());
-        blocks.add(liquid);
-    }
-
-    public void onPlayerInteract(PlayerInteractEvent event)
-    {        
-        //if (!livePlayers.contains(event.getPlayer()))
-        if (!arenaPlayers.contains(event.getPlayer()) && !lobbyPlayers.contains(event.getPlayer()))
-            return;
-        
-        if (running)
-        {
-            if (event.hasBlock() && event.getClickedBlock().getType() == Material.SAPLING)
-                addTrunkAndLeaves(event.getClickedBlock());
-            return;
-        }
-        
-        Action a = event.getAction();
-        Player p = event.getPlayer();
-        if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
-        {            
-            event.setUseItemInHand(Result.DENY);
-            event.setCancelled(true);
-        }
-        
-        // Iron block
-        if (event.hasBlock() && event.getClickedBlock().getTypeId() == 42)
-        {
-            if (classMap.containsKey(p))
-            {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_PLAYER_READY));
-                playerReady(p);
-            }
-            else
-            {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_PICK_CLASS));
-            }
-            return;
-        }
-        
-        // Sign
-        if (event.hasBlock() && event.getClickedBlock().getState() instanceof Sign)
-        {
-            if (a == Action.RIGHT_CLICK_BLOCK)
-            {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_RIGHT_CLICK));
-                return;
-            }
-            
-            // Cast the block to a sign to get the text on it.
-            Sign sign = (Sign) event.getClickedBlock().getState();
-            
-            // Check if the first line of the sign is a class name.
-            String className = sign.getLine(0);
-            if (!classes.contains(className) && !className.equalsIgnoreCase("random"))
-                return;
-            
-            if (!plugin.hasDefTrue(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
-            {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PERMISSION));
-                return;
-            }
-
-            // Set the player's class.
-            assignClass(p, className);
-            if (!className.equalsIgnoreCase("random"))
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
-            else
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_RANDOM));
-                
-            return;
-        }
-    }
-    
-    // Disconnect Listener
-    public void onPlayerQuit(PlayerQuitEvent event)
-    {
-        Player p = event.getPlayer();
-        //if (!enabled || !livePlayers.contains(p))
-        if (!enabled || (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p)))
-            return;
-        
-        //MAUtils.clearInventory(p);
-        plugin.getAM().arenaMap.remove(p);
-        playerLeave(p);
-    }
-    
-    public void onPlayerKick(PlayerKickEvent event)
-    {
-        Player p = event.getPlayer();
-        //if (!enabled || !livePlayers.contains(p))
-        if (!enabled || (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p)))
-            return;
-        
-        //MAUtils.clearInventory(p);
-        plugin.getAM().arenaMap.remove(p);
-        playerLeave(p);
-    }
-
-    // Teleport Listener
-    public void onPlayerTeleport(PlayerTeleportEvent event)
-    {
-        if (edit || !enabled || !setup || allowWarp)
-            return;
-        
-        if (!inRegion(event.getTo()) && !inRegion(event.getFrom()))
-            return;
-
-        Player   p    = event.getPlayer();
-        Location old  = locations.get(p);
-        Location to   = event.getTo();
-        Location from = event.getFrom();
-        
-        //if (livePlayers.contains(p) || specPlayers.contains(p))
-        if (arenaPlayers.contains(p) || lobbyPlayers.contains(p) || specPlayers.contains(p))
-        {
-            if (inRegion(from))
-            {
-                if (to.equals(arenaLoc) || to.equals(lobbyLoc) || to.equals(spectatorLoc) || to.equals(old))
-                    return;
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_FROM_ARENA));
-                event.setCancelled(true);
-                return;
-            }
-            
-            if (inRegion(to))
-            {
-                if (to.equals(arenaLoc) || to.equals(lobbyLoc) || to.equals(spectatorLoc) || to.equals(old))
-                    return;
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_TO_ARENA));
-                event.setCancelled(true);
-                return;
-            }
-            
-            return;
-        }
-        
-        if (running && inRegion(to))
-        {
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_TO_ARENA));
-            event.setCancelled(true);
-            return;
-        }
-    }
-
-    // Command Listener
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
-    {
-        Player p = event.getPlayer();
-        
-        //if (!livePlayers.contains(p))
-        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
-            return;
-        
-        String[] args = event.getMessage().split(" ");
-        
-        if ((args.length > 1 && MACommands.COMMANDS.contains(args[1].trim())) ||
-            MACommands.ALLOWED_COMMANDS.contains(event.getMessage().substring(1).trim()) ||
-            MACommands.ALLOWED_COMMANDS.contains(args[0]))
-            return;
-        
-        event.setCancelled(true);
-        MAUtils.tellPlayer(p, MAMessages.get(Msg.MISC_COMMAND_NOT_ALLOWED));
-    }
-    
-    
-    /*////////////////////////////////////////////////////////////////////
-    //
     //      Getters & Misc
     //
     ////////////////////////////////////////////////////////////////////*/
@@ -1581,15 +803,6 @@ public class Arena
         return name;
     }
     
-    /*public List<Player> getAllPlayers()
-    {
-        List<Player> result = new LinkedList<Player>();
-        result.addAll(livePlayers);
-        result.addAll(deadPlayers);
-        result.addAll(specPlayers);
-        return result;
-    }*/
-    
     public List<Player> getAllPlayers()
     {
         List<Player> result = new LinkedList<Player>();
@@ -1602,7 +815,6 @@ public class Arena
     public List<Player> getLivingPlayers()
     {
         List<Player> result = new LinkedList<Player>();
-        //result.addAll(livePlayers);
         result.addAll(arenaPlayers);
         return result;
     }
@@ -1610,7 +822,6 @@ public class Arena
     public List<Player> getNonreadyPlayers()
     {
         List<Player> result = new LinkedList<Player>();
-        //result.addAll(livePlayers);
         result.addAll(lobbyPlayers);
         result.removeAll(readyPlayers);
         return result;
@@ -1625,7 +836,7 @@ public class Arena
     
     public void resetIdleTimer()
     {
-        if (maxIdleTime <= 0)
+        if (maxIdleTime <= 0 || !running)
             return;
         
         // Reset the previousSize, cancel the previous timer, and start the new timer.
@@ -1650,7 +861,6 @@ public class Arena
                     }
                     
                     // Clear all player inventories, and "kill" all players.
-                    //for (Player p : livePlayers)
                     for (Player p : arenaPlayers)
                     {
                         MAUtils.clearInventory(p);
@@ -1659,21 +869,6 @@ public class Arena
                     }
                 }
             }, maxIdleTime);
-    }
-    
-    public void delayRestoreInventory(final Player p, final String method)
-    {
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable()
-            {
-                public void run()
-                {
-                    if (method.equals("restoreInventory"))
-                        MAUtils.restoreInventory(p);
-                    else if (method.equals("giveRewards"))
-                        MAUtils.giveRewards(p, rewardMap.get(p), plugin);
-                }
-            }, 10);
     }
     
     public void addTrunkAndLeaves(Block b)

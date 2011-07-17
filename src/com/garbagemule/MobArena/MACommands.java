@@ -57,6 +57,8 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("addspawn");          // Add a spawnpoint
         COMMANDS.add("delspawn");          // Delete a spawnpoint 
         COMMANDS.add("reset");             // Reset arena coordinates
+        COMMANDS.add("addclass");          // Add a new class
+        COMMANDS.add("delclass");          // Delete a class
         COMMANDS.add("auto-generate");     // Auto-generate arena
         COMMANDS.add("auto-degenerate");   // Restore cuboid
     }
@@ -144,7 +146,6 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
             else if (arena == null)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-            //else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
             else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
             else if (!arena.enabled)
@@ -153,22 +154,20 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
             else if (arena.running && arena.waitPlayers.add(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
-            //else if (arena.livePlayers.contains(p))
             else if (arena.arenaPlayers.contains(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
             else if (!plugin.has(p, "mobarena.arenas." + arena.configName()))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
-            else if (!arena.canAfford(p) || !arena.takeFee(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(arena.entryFee, plugin)));
-            //else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
             else if (arena.playerLimit > 0 && arena.lobbyPlayers.size() >= arena.playerLimit)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
+            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
+            else if (!arena.canAfford(p) || !arena.takeFee(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(arena.entryFee, plugin)));
             else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
             else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
-            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
             else error = false;
             
             // If there was an error, don't join.

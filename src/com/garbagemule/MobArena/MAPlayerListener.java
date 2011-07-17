@@ -24,50 +24,50 @@ public class MAPlayerListener extends PlayerListener
     }
     
     public void onPlayerInteract(PlayerInteractEvent event)
-    {        
-        if (!am.enabled) return;
-        for (Arena arena : am.arenas)
-            arena.onPlayerInteract(event);
+    {
+    	if (!am.enabled) return;
+    	for (Arena arena : am.arenas)
+    		arena.eventListener.onPlayerInteract(event);
     }
     
     public void onPlayerDropItem(PlayerDropItemEvent event)
     {
         if (!am.enabled) return;
         for (Arena arena : am.arenas)
-            arena.onPlayerDropItem(event);
+            arena.eventListener.onPlayerDropItem(event);
     }
     
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
     {
         if (!am.enabled) return;
         for (Arena arena : am.arenas)
-            arena.onPlayerBucketEmpty(event);
+            arena.eventListener.onPlayerBucketEmpty(event);
     }
     
     public void onPlayerTeleport(PlayerTeleportEvent event)
     {
         if (!am.enabled) return;
         for (Arena arena : am.arenas)
-            arena.onPlayerTeleport(event);
+            arena.eventListener.onPlayerTeleport(event);
     }
     
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
     {
         if (!am.enabled) return;
         for (Arena arena : am.arenas)
-            arena.onPlayerCommandPreprocess(event);
+            arena.eventListener.onPlayerCommandPreprocess(event);
     }
     
     public void onPlayerQuit(PlayerQuitEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onPlayerQuit(event);
+            arena.eventListener.onPlayerQuit(event);
     }
     
     public void onPlayerKick(PlayerKickEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onPlayerKick(event);
+            arena.eventListener.onPlayerKick(event);
     }
     
     public void onPlayerJoin(PlayerJoinEvent event)

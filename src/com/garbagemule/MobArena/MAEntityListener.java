@@ -24,42 +24,42 @@ public class MAEntityListener extends EntityListener
     public void onEntityRegainHealth(EntityRegainHealthEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onEntityRegainHealth(event);
+            arena.eventListener.onEntityRegainHealth(event);
     }
     
     public void onEntityDeath(EntityDeathEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onEntityDeath(event);
+            arena.eventListener.onEntityDeath(event);
     }
     
     public void onEntityDamage(EntityDamageEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onEntityDamage(event);
+            arena.eventListener.onEntityDamage(event);
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onCreatureSpawn(event);
+            arena.eventListener.onCreatureSpawn(event);
     }
 
     public void onEntityExplode(EntityExplodeEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onEntityExplode(event);
+            arena.eventListener.onEntityExplode(event);
     }
 
     public void onEntityCombust(EntityCombustEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onEntityCombust(event);
+            arena.eventListener.onEntityCombust(event);
     }
     
     public void onEntityTarget(EntityTargetEvent event)
     {
         for (Arena arena : am.arenas)
-            arena.onEntityTarget(event);
+            arena.eventListener.onEntityTarget(event);
     }
 }

@@ -75,6 +75,9 @@ public class MASpawnThread implements Runnable
     
     public void run()
     {
+        if (arena.arenaPlayers.isEmpty())
+            return;
+        
         List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
         for (Entity e : tmp)
             if (e.isDead())
