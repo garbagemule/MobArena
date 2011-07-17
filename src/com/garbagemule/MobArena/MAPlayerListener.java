@@ -24,7 +24,7 @@ public class MAPlayerListener extends PlayerListener
     }
     
     public void onPlayerInteract(PlayerInteractEvent event)
-    {
+    {        
         if (!am.enabled) return;
         for (Arena arena : am.arenas)
             arena.onPlayerInteract(event);
@@ -75,7 +75,7 @@ public class MAPlayerListener extends PlayerListener
         if (!am.updateNotify || !event.getPlayer().isOp()) return;
 
         final Player p = event.getPlayer();
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+        Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()

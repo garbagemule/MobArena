@@ -16,6 +16,8 @@ import org.bukkit.util.config.Configuration;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import com.garbagemule.register.payment.Method;
+import com.garbagemule.register.payment.Methods;
 
 /**
  * MobArena
@@ -27,11 +29,15 @@ public class MobArena extends JavaPlugin
     private ArenaMaster am;
     
     // Permissions stuff
-    protected static PermissionHandler permissionHandler;
+    private PermissionHandler permissionHandler;
     
-    public MobArena()
-    {
-    }
+    // Economy stuff
+    protected Methods Methods;
+    protected Method  Method;
+    
+    // Global variables
+    protected static final double MIN_PLAYER_DISTANCE = 256.0;
+    protected static final int ECONOMY_MONEY_ID = -29;
 
     public void onEnable()
     {
@@ -45,6 +51,14 @@ public class MobArena extends JavaPlugin
         
         // Permissions
         setupPermissions();
+        
+        // Economy
+        Methods = new Methods();
+        if (!Methods.hasMethod() && Methods.setMethod(this))
+        {
+            Method = Methods.getMethod();
+            System.out.println("[MobArena] Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
+        }
         
         // Bind the /ma, /marena, and /mobarena commands to MACommands.
         MACommands commandExecutor = new MACommands(this, am);
@@ -68,7 +82,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_JOIN,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGE,             entityListener,   Priority.Highest, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGE,             entityListener,   Priority.High,    this); // mcMMO is "Highest"
         pm.registerEvent(Event.Type.ENTITY_DEATH,              entityListener,   Priority.Lowest,  this); // Lowest because of Tombstone
         pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH,      entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,            entityListener,   Priority.Highest, this);
@@ -81,10 +95,19 @@ public class MobArena extends JavaPlugin
     }
     
     public void onDisable()
-    {        
+    {
+        // Force all arenas to end.
         for (Arena arena : am.arenas)
             arena.forceEnd();
         am.arenaMap.clear();
+        
+        // Permissions & Economy
+        permissionHandler = null;
+        if (Methods != null && Methods.hasMethod())
+        {
+            Methods = null;
+            System.out.println("[MobArena] Payment method was disabled. No longer accepting payments.");
+        }
         
         System.out.println("[MobArena] disabled.");
     }
@@ -143,13 +166,13 @@ public class MobArena extends JavaPlugin
     }
     
     // Permissions stuff
-    public static boolean has(Player p, String s)
+    public boolean has(Player p, String s)
     {
         //return (permissionHandler != null && permissionHandler.has(p, s));
         return (permissionHandler == null || permissionHandler.has(p, s));
     }
     
-    public static boolean hasDefTrue(Player p, String s)
+    public boolean hasDefTrue(Player p, String s)
     {
         return (permissionHandler == null || permissionHandler.has(p, s));
     }

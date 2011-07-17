@@ -5,11 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -51,6 +53,7 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
@@ -62,58 +65,76 @@ public class Arena
     // Setup fields
     protected String name;
     protected World world;
-    protected boolean enabled, running, setup, protect, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
-    protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds;
-    protected Location p1, p2, arenaLoc, lobbyLoc, spectatorLoc;
+    protected boolean enabled, protect, logging, running, setup, lobbySetup, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
+    protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena;
+    protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
     protected Map<String,Location> spawnpoints;
 
-    // Wave/reward fields
+    // Wave/reward/entryfee fields
     protected int spawnTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
     protected MASpawnThread spawnThread;
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<String,Integer> distDefault, distSpecial;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
+    protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,List<ItemStack>> rewardMap;
+    protected List<ItemStack> entryFee;
     
     // Arena sets/maps
-    protected Set<Player>         livePlayers, deadPlayers, readyPlayers, specPlayers;
+    protected Set<Player>         /*livePlayers, */deadPlayers, readyPlayers, specPlayers, waitPlayers, hasPaid, arenaPlayers, lobbyPlayers, notifyPlayers, randoms;
     protected Set<LivingEntity>   monsters;
     protected Set<Block>          blocks;
     protected Set<Wolf>           pets;
     protected Map<Player,Integer> petMap;
-    protected Map<Player,Integer> kills;
     protected List<int[]>         repairList;
     
     // Spawn overriding
     protected int spawnMonsters;
     protected boolean allowMonsters, allowAnimals;
     
-    // Global settings
-    protected int repairDelay;
+    // Other settings
+    protected int repairDelay, playerLimit, joinDistance;
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
+    
+    // Logging
+    protected ArenaLog log;
+    protected List<String> classDistribution = new LinkedList<String>();
+    protected Map<Player,Integer> waveMap = new HashMap<Player,Integer>();
+    protected Map<Player,Integer> killMap = new HashMap<Player,Integer>();
+    protected Timestamp startTime;
+    protected Timestamp endTime;
     
     /**
      * Primary constructor. Requires a name and a world.
      */
     public Arena(String name, World world)
     {
+        if (world == null)
+            throw new NullPointerException("[MobArena] ERROR! World for arena '" + name + "' does not exist!");
+        
         this.name = name;
         this.world = world;
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
+        log = new ArenaLog(plugin, this);
         
-        livePlayers   = new HashSet<Player>();
+        arenaPlayers  = new HashSet<Player>();
+        lobbyPlayers  = new HashSet<Player>();
+        notifyPlayers = new HashSet<Player>();
+        //livePlayers   = new HashSet<Player>();
         deadPlayers   = new HashSet<Player>();
         readyPlayers  = new HashSet<Player>();
         specPlayers   = new HashSet<Player>();
+        waitPlayers   = new HashSet<Player>();
+        hasPaid       = new HashSet<Player>();
         monsters      = new HashSet<LivingEntity>();
         blocks        = new HashSet<Block>();
         pets          = new HashSet<Wolf>();
         petMap        = new HashMap<Player,Integer>();
         classMap      = new HashMap<Player,String>();
+        randoms       = new HashSet<Player>();
         rewardMap     = new HashMap<Player,List<ItemStack>>();
-        kills         = new HashMap<Player,Integer>();
         repairList    = new LinkedList<int[]>();
         
         running       = false;
@@ -124,23 +145,71 @@ public class Arena
         spawnMonsters = ((net.minecraft.server.World) ((CraftWorld) world).getHandle()).spawnMonsters;
     }
     
-    public Arena(String name, World world, ArenaMaster am)
+    public boolean startArena()
     {
-        this(name, world);
-        //classItems  = am.classItems;
-        //classArmor  = am.classArmor;
+        // Sanity-checks
+        if (running || lobbyPlayers.isEmpty() || !lobbyPlayers.equals(readyPlayers))
+            return false;
+        if (!softRestore && forceRestore && !serializeRegion())
+            return false;
+        
+        // Populate arenaPlayers and clear the lobby.
+        arenaPlayers.addAll(lobbyPlayers);
+        lobbyPlayers.clear();
+        readyPlayers.clear();
+        
+        // Assign random classes.
+        for (Player p : randoms)
+            assignRandomClass(p);
+        if (arenaPlayers.isEmpty())
+            return false;
+        
+        // Teleport players, give full health, initialize maps
+        for (Player p : arenaPlayers)
+        {
+            p.teleport(arenaLoc);
+            p.setHealth(20);
+            rewardMap.put(p, new LinkedList<ItemStack>());
+            waveMap.put(p, 0);
+            killMap.put(p, 0);
+        }
+        
+        // Spawn pets.
+        spawnPets();
+        
+        // Start spawning monsters.
+        startSpawning();
+        
+        // Start logging
+        if (logging)
+            log.start();
+        
+        // Set the boolean.
+        running = true;
+        
+        // Announce and notify.
+        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onArenaStart();
+        
+        return true;
     }
     
-    public void startArena()
-    {
+    /*public void startArena()
+    {        
         if (running)
             return;
         
         if (!softRestore && forceRestore && !serializeRegion())
             return;
         
+        // Assign random classes, and if all get kicked, return.
+        for (Player p : randoms)
+            assignRandomClass(p);
+        if (livePlayers.isEmpty())
+            return;
+        
         // Set the spawn flags to enable monster spawning.
-        //MAUtils.setSpawnFlags(plugin, world, 1, true, true);
         MAUtils.setSpawnFlags(plugin, world, 1, allowMonsters, allowAnimals);
         
         // Teleport players.
@@ -149,6 +218,8 @@ public class Arena
             p.teleport(arenaLoc);
             p.setHealth(20);
             rewardMap.put(p, new LinkedList<ItemStack>());
+            waveMap.put(p, 0);
+            killMap.put(p, 0);
         }
 
         running = true;
@@ -156,7 +227,10 @@ public class Arena
         // Spawn pets.
         for (Map.Entry<Player,Integer> entry : petMap.entrySet())
         {
+            // Remove the bones from the inventory.
             Player p = entry.getKey();
+            p.getInventory().removeItem(new ItemStack(Material.BONE, entry.getValue()));
+            
             for (int i = 0; i < entry.getValue(); i++)
             {
                 Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
@@ -170,23 +244,82 @@ public class Arena
         }
         
         // Start the spawnThread.
-        spawnThread = new MASpawnThread(plugin, this);
-        spawnTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, waveInterval);
+        spawnThread  = new MASpawnThread(plugin, this);
+        spawnTaskId  = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, (!waveClear) ? waveInterval : 60);
         
         readyPlayers.clear();
+        
+        // Logging info.
+        if (logging)
+            log.start();
+        
         MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onArenaStart();
+    }*/
+    
+    public boolean endArena()
+    {
+        // Sanity-checks.
+        if (!running || !arenaPlayers.isEmpty())
+            return false;
+        
+        // Stop spawning.
+        stopSpawning();
+        
+        // Set the boolean.
+        running = false;
+        
+        // Stop logging.
+        if (logging)
+        {
+            log.end();
+            log.serialize();
+            log.clear();
+        }
+        
+        // Clean arena floor.
+        cleanup();
+        
+        // Restore region.
+        if (softRestore)
+            for (int[] buffer : repairList)
+                world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) buffer[4], false);
+        else if (forceRestore)
+            deserializeRegion();
+
+        // Announce and clear sets.
+        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_END), true);
+        arenaPlayers.clear();
+        notifyPlayers.clear();
+        classMap.clear();
+        rewardMap.clear();
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onArenaEnd();
+        
+        return true;
     }
     
     /**
      * End this arena's session.
      */
-    public void endArena()
+    /*public void endArena()
     {        
         running = false;
+        
+        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_END), true);
+        
+        // Logging stuff
+        if (logging)
+        {
+            log.end();
+            log.serialize();
+            log.clear();
+        }
         
         // If the arena was actually ever started, cancel the spawnthread.
         if (spawnThread != null)
@@ -206,6 +339,7 @@ public class Arena
         // Clear all the sets and maps.
         livePlayers.clear();
         deadPlayers.clear();
+        waitPlayers.clear();
         pets.clear();
         classMap.clear();
         rewardMap.clear();
@@ -218,12 +352,11 @@ public class Arena
         
         // Set the spawn flags to restore monster spawning.
         MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
-        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_END));
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onArenaEnd();
-    }
+    }*/
     
     /**
      * Force an arena start by forcing all not-ready players to leave.
@@ -233,33 +366,74 @@ public class Arena
     {
         // Set operations.
         Set<Player> tmp = new HashSet<Player>();
-        tmp.addAll(livePlayers);
+        //tmp.addAll(livePlayers);
         tmp.removeAll(readyPlayers);
         
         // Force leave.
         for (Player p : tmp)
+        {
+            plugin.getAM().arenaMap.remove(p);
             playerLeave(p);
+        }
     }
     
     /**
      * Force an arena end by forcing all players to leave.
      * @precondition - livePlayers must not be empty.
      */
-    public void forceEnd()
+    /*public void forceEnd()
     {        
         // Force leave.
         for (Player p : getAllPlayers())
+        {
+            plugin.getAM().arenaMap.remove(p);
             playerLeave(p);
+        }
+    }*/
+    
+    public void forceEnd()
+    {
+        for (Player p : getAllPlayers())
+        {
+            plugin.getAM().arenaMap.remove(p);
+            playerLeave(p);
+        }
     }
     
-    /**
-     * Warp the player to the arena lobby and add to the set of live players.
-     */
     public void playerJoin(Player p, Location loc)
     {
         if (!locations.containsKey(p))
             locations.put(p,loc);
         
+        // Update chunk.
+        updateChunk(lobbyLoc);
+        
+        MAUtils.sitPets(p);
+        lobbyPlayers.add(p);
+        p.teleport(lobbyLoc);
+
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerJoin(p);
+    }
+    
+    /**
+     * Warp the player to the arena lobby and add to the set of live players.
+     */
+    /*public void playerJoin(Player p, Location loc)
+    {
+        if (!locations.containsKey(p))
+            locations.put(p,loc);
+        
+        if (livePlayers.isEmpty())
+        {
+            Chunk chunk = world.getChunkAt(lobbyLoc);
+            if (!world.isChunkLoaded(chunk))
+                world.loadChunk(chunk);
+            else
+                world.refreshChunk(chunk.getX(), chunk.getZ());
+        }
+
         MAUtils.sitPets(p);
         livePlayers.add(p);
         p.teleport(lobbyLoc);
@@ -267,7 +441,7 @@ public class Arena
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onPlayerJoin(p);
-    }
+    }*/
     
     /**
      * Add the player to the set of ready players.
@@ -276,10 +450,16 @@ public class Arena
     public void playerReady(Player p)
     {
         readyPlayers.add(p);
+        startArena();
+    }
+    
+    /*public void playerReady(Player p)
+    {
+        readyPlayers.add(p);
         
         if (readyPlayers.equals(livePlayers))
             startArena();
-    }
+    }*/
     
     /**
      * Remove the player from all the player sets, and clear his inventory if necessary.
@@ -288,20 +468,100 @@ public class Arena
      */
     public void playerLeave(Player p)
     {
+        // Clear class inventory, restore old inventory and fork over rewards.
+        restoreInvAndGiveRewards(p, !specPlayers.contains(p));
+        
+        // Grab the player's entry location, and warp them there.
+        Location entry = locations.get(p);
+        if (entry != null)
+        {
+            updateChunk(entry);
+            p.teleport(entry);
+        }
+        locations.remove(p);
+        
+        // Remove from the arenaMap and all the sets.
+        plugin.getAM().arenaMap.remove(p);
+        removePlayer(p);
+        
+        // End the arena if conditions are met.
+        endArena();
+    }
+    
+    public void playerDeath(final Player p)
+    {
+        // If spectate-on-death: false, pass on to playerLeave.
+        if (!specOnDeath)
+        {
+            p.teleport(arenaLoc);
+            playerLeave(p);
+            return;
+        }
+        
+        // Clear class inventory, restore old inventory and fork over rewards.
+        restoreInvAndGiveRewards(p, true);
+
+        // Remove player from sets, warp to spectator area, then add to specPlayers.
+        removePlayer(p);   
+        p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)  
+        p.teleport(spectatorLoc);
+        specPlayers.add(p);
+        
+        // Update the monster targets.
+        if (running && spawnThread != null)
+            spawnThread.updateTargets();
+        
+        // Announce and notify
+        MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerDeath(p);
+        
+        // End the arena if conditions are met.
+        endArena();
+    }
+    
+    /*public void playerLeave(Player p)
+    {
         boolean clear = false;
         
-        p.teleport(locations.get(p));
+        Location old = locations.get(p);
+        if (old != null)
+        {
+            Chunk chunk = old.getWorld().getChunkAt(old);
+            if (!old.getWorld().isChunkLoaded(chunk))
+                old.getWorld().loadChunk(chunk);
+            else
+                old.getWorld().refreshChunk(chunk.getX(), chunk.getZ());
+            
+            p.teleport(old);
+        }
         locations.remove(p); // get, then remove, because of Teleport Event
         
         // Only clear the inventory if the player has class items.
         if (readyPlayers.remove(p)) clear = true; 
         if (livePlayers.remove(p))  clear = true;
-        if (deadPlayers.remove(p))  clear = false;
-        if (specPlayers.remove(p))  clear = false;
+        deadPlayers.remove(p);
+        specPlayers.remove(p);
+        hasPaid.remove(p);
         removePets(p);
         
-        if (clear)         MAUtils.clearInventory(p);
-        if (!emptyInvJoin) MAUtils.restoreInventory(p);
+        // Update the monster targets.
+        if (running && spawnThread != null)
+            spawnThread.updateTargets();
+        
+        // Clear inventory and record current wave
+        if (clear)
+        {
+            if (running) waveMap.put(p, spawnThread.wave - 1);
+            MAUtils.clearInventory(p);
+        }
+        
+        // Try to restore inventory.
+        if (!emptyInvJoin)
+            MAUtils.restoreInventory(p);
+        
+        // Grant rewards.
+        MAUtils.giveRewards(p, rewardMap.get(p), plugin);
         
         if (running && livePlayers.isEmpty())
             endArena();
@@ -311,25 +571,11 @@ public class Arena
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onPlayerLeave(p);
-    }
+    }*/
     
-    public void playerQuit(Player p)
+    /*public void playerDeath(final Player p)
     {
-        p.teleport(locations.get(p));
-        readyPlayers.remove(p);
-        livePlayers.remove(p);
-        deadPlayers.remove(p);
-        specPlayers.remove(p);
-        removePets(p);
-        
-        if (running && livePlayers.isEmpty())
-            endArena();
-        else if (!readyPlayers.isEmpty() && readyPlayers.equals(livePlayers))
-            startArena();
-    }
-    
-    public void playerDeath(final Player p)
-    {
+        p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)        
         p.teleport(spectatorLoc);
         p.setFireTicks(0);
         p.setHealth(20);
@@ -338,23 +584,35 @@ public class Arena
         livePlayers.remove(p);
         deadPlayers.add(p);
         removePets(p);
+        
+        // Update the monster targets.
+        if (running && spawnThread != null)
+            spawnThread.updateTargets();
 
         // Has to be delayed for TombStone not to fuck shit up.
-        if (running && livePlayers.isEmpty())
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-                    new Runnable()
+                new Runnable()
+                {
+                    public void run()
                     {
-                        public void run()
+                        if (!specOnDeath)
                         {
-                            MAUtils.restoreInventory(p);
-                            endArena();
+                            plugin.getAM().arenaMap.remove(p);
+                            playerLeave(p);
                         }
-                    }, 10);
+                        else MAUtils.restoreInventory(p);
+                        
+                        if (livePlayers.isEmpty())
+                            endArena();
+                    }
+                }, 8);
+        
+        MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onPlayerDeath(p);
-    }
+    }*/
     
     public void playerSpec(Player p, Location loc)
     {
@@ -366,9 +624,107 @@ public class Arena
         p.teleport(spectatorLoc);
     }
     
-    public void playerKill(Player p, LivingEntity e)
+    public void removePlayer(Player p)
     {
-        kills.put(p, kills.get(p) + 1);
+        // Heal and put out fire.
+        p.setFireTicks(0);
+        p.setHealth(20);
+        
+        // Remove pets.
+        removePets(p);
+        
+        // readyPlayers before lobbyPlayers because of startArena sanity-checks
+        readyPlayers.remove(p);
+        specPlayers.remove(p);
+        arenaPlayers.remove(p);
+        lobbyPlayers.remove(p);
+
+        // arenaPlayers is empty if lobbyPlayers isn’t, and vice versa
+        /*if (arenaPlayers.remove(p))
+            endArena2();
+        if (lobbyPlayers.remove(p))
+            startArena2();*/
+    }
+    
+    public void spawnPets()
+    {
+        for (Map.Entry<Player,Integer> entry : petMap.entrySet())
+        {
+            // Remove the bones from the inventory.
+            Player p = entry.getKey();
+            p.getInventory().removeItem(new ItemStack(Material.BONE, entry.getValue()));
+            
+            // Spawn wolves, set owner and health, and add to pet set.
+            for (int i = 0; i < entry.getValue(); i++)
+            {
+                Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
+                wolf.setTamed(true);
+                wolf.setOwner(p);
+                wolf.setHealth(20);
+                if (hellhounds)
+                    wolf.setFireTicks(32768);
+                pets.add(wolf);
+            }
+        }
+    }
+    
+    public void startSpawning()
+    {
+        // Set the spawn flags to enable monster spawning.
+        MAUtils.setSpawnFlags(plugin, world, 1, allowMonsters, allowAnimals);
+        
+        // Start the spawnThread.
+        spawnThread  = new MASpawnThread(plugin, this);
+        spawnTaskId  = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, spawnThread, waveDelay, (!waveClear) ? waveInterval : 60);
+    }
+    
+    public void stopSpawning()
+    {
+        // Stop the spawn thread.
+        if (spawnThread != null)
+        {
+            Bukkit.getServer().getScheduler().cancelTask(spawnThread.taskId);
+            Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
+        }
+        
+        // Restore spawn flags.
+        MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
+    }
+    
+    public void updateChunk(Location loc)
+    {
+        if (!arenaPlayers.isEmpty())
+            return;
+        
+        Chunk chunk = world.getChunkAt(lobbyLoc);
+        if (!world.isChunkLoaded(chunk))
+            world.loadChunk(chunk);
+        else
+            world.refreshChunk(chunk.getX(), chunk.getZ());
+    }
+    
+    public void playerKill(Player p)
+    {
+        killMap.put(p, killMap.get(p) + 1);
+    }
+    
+    public void restoreInvAndGiveRewards(final Player p, final boolean clear)
+    {
+        final List<ItemStack> rewards = rewardMap.get(p);
+        
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                { 
+                    if (clear)
+                        MAUtils.clearInventory(p);
+                    
+                    if (!emptyInvJoin)
+                        MAUtils.restoreInventory(p);
+                    MAUtils.giveRewards(p, rewards, plugin);
+                }
+            });
     }
     
     
@@ -383,20 +739,50 @@ public class Arena
     {
         petMap.remove(p);
         classMap.put(p, className);
+        
         MAUtils.clearInventory(p);
-        MAUtils.giveItems(p, classItems.get(className), autoEquip);
-        MAUtils.giveItems(p, classArmor.get(className), autoEquip);
+        
+        // If random, don't give any items yet.
+        if (className.equalsIgnoreCase("random"))
+        {
+            randoms.add(p);
+            return;
+        }
+        
+        MAUtils.giveItems(p, classItems.get(className), autoEquip, plugin);
+        MAUtils.giveItems(p, classArmor.get(className), autoEquip, plugin);
         
         int pets = MAUtils.getPetAmount(p);
         if (pets > 0) petMap.put(p, pets);
     }
     
-    private void giveRewards()
+    public void assignRandomClass(Player p)
     {
+        Random r = new Random();
+        List<String> classes = new LinkedList<String>(plugin.getAM().classes);
+
+        String className = classes.remove(r.nextInt(classes.size()));
+        while (!plugin.has(p, "mobarena.classes." + className))
+        {
+            if (classes.isEmpty())
+            {
+                System.out.println("[MobArena] ERROR! Player '" + p.getName() + "' has no class permissions!");
+                playerLeave(p);
+                return;
+            }
+            className = classes.remove(r.nextInt(classes.size()));
+        }
+        
+        assignClass(p, className);
+        MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+    }
+    
+    private void giveRewards()
+    {        
         for (Map.Entry<Player,List<ItemStack>> entry : rewardMap.entrySet())
         {
             MAUtils.tellPlayer(entry.getKey(), MAMessages.get(Msg.REWARDS_GIVE));
-            MAUtils.giveRewards(entry.getKey(), entry.getValue());
+            MAUtils.giveRewards(entry.getKey(), entry.getValue(), plugin);
         }
     }
     
@@ -426,14 +812,23 @@ public class Arena
     private void removePets()
     {
         for (Wolf w : pets)
+        {
+            w.setOwner(null);
             w.remove();
+        }
     }
     
     private void removePets(Player p)
     {
         for (Wolf w : pets)
-            if (w.getOwner().equals(p))
-                w.remove();
+        {
+            if (!((Player) w.getOwner()).getName().equals(p.getName()))
+                continue;
+            
+            w.setOwner(null);
+            w.remove();
+        }
+        petMap.remove(p);
     }
     
     private void removeEntities()
@@ -465,6 +860,7 @@ public class Arena
         
         enabled          = config.getBoolean(arenaPath + "enabled", true);
         protect          = config.getBoolean(arenaPath + "protect", true);
+        logging          = config.getBoolean(arenaPath + "logging", false);
         autoEquip        = config.getBoolean(arenaPath + "auto-equip-armor", true);
         waveClear        = config.getBoolean(arenaPath + "clear-wave-before-next", false);
         detCreepers      = config.getBoolean(arenaPath + "detonate-creepers", false);
@@ -473,12 +869,16 @@ public class Arena
         forceRestore     = config.getBoolean(arenaPath + "force-restore", false);
         softRestore      = config.getBoolean(arenaPath + "soft-restore", false);
         softRestoreDrops = config.getBoolean(arenaPath + "soft-restore-drops", false);
-        emptyInvJoin     = config.getBoolean(arenaPath + "require-empty-inv-join", false);
-        emptyInvSpec     = config.getBoolean(arenaPath + "require-empty-inv-spec", false);
+        emptyInvJoin     = config.getBoolean(arenaPath + "require-empty-inv-join", true);
+        emptyInvSpec     = config.getBoolean(arenaPath + "require-empty-inv-spec", true);
         hellhounds       = config.getBoolean(arenaPath + "hellhounds", false);
         pvp              = config.getBoolean(arenaPath + "pvp-enabled", false);
         monsterInfight   = config.getBoolean(arenaPath + "monster-infight", false);
         allowWarp        = config.getBoolean(arenaPath + "allow-teleporting", false);
+        specOnDeath      = config.getBoolean(arenaPath + "spectate-on-death", true);
+        shareInArena     = config.getBoolean(arenaPath + "share-items-in-arena", true);
+        joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
+        playerLimit      = config.getInt(arenaPath + "player-limit", 0);
         repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
@@ -489,9 +889,12 @@ public class Arena
         distSpecial      = MAUtils.getArenaDistributions(config, configName, "special");
         everyWaveMap     = MAUtils.getArenaRewardMap(config, configName, "every");
         afterWaveMap     = MAUtils.getArenaRewardMap(config, configName, "after");
+        entryFee         = MAUtils.getEntryFee(config, configName);
         
         p1               = MAUtils.getArenaCoord(config, world, configName, "p1");
         p2               = MAUtils.getArenaCoord(config, world, configName, "p2");
+        l1               = MAUtils.getArenaCoord(config, world, configName, "l1");
+        l2               = MAUtils.getArenaCoord(config, world, configName, "l2");
         arenaLoc         = MAUtils.getArenaCoord(config, world, configName, "arena");
         lobbyLoc         = MAUtils.getArenaCoord(config, world, configName, "lobby");
         spectatorLoc     = MAUtils.getArenaCoord(config, world, configName, "spectator");
@@ -503,17 +906,20 @@ public class Arena
         
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
+        lobbySetup       = MAUtils.verifyLobby(this);
     }
     
     public void serializeConfig()
     {
-        String coords   = "arenas." + configName() + ".coords.";
+        String coords = "arenas." + configName() + ".coords.";
         Configuration config = plugin.getConfig();
         
         config.setProperty("arenas." + configName() + ".settings.enabled", enabled);
         config.setProperty("arenas." + configName() + ".settings.protect", protect);
         if (p1 != null)           config.setProperty(coords + "p1",        MAUtils.makeCoord(p1));
         if (p2 != null)           config.setProperty(coords + "p2",        MAUtils.makeCoord(p2));
+        if (l1 != null)           config.setProperty(coords + "l1",        MAUtils.makeCoord(l1));
+        if (l2 != null)           config.setProperty(coords + "l2",        MAUtils.makeCoord(l2));
         if (arenaLoc != null)     config.setProperty(coords + "arena",     MAUtils.makeCoord(arenaLoc));
         if (lobbyLoc != null)     config.setProperty(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
         if (spectatorLoc != null) config.setProperty(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
@@ -612,16 +1018,26 @@ public class Arena
      */
     public boolean inRegion(Location loc)
     {
-        if (!loc.getWorld().getName().equals(world.getName()))
+        if (!loc.getWorld().getName().equals(world.getName()) || !setup)
             return false;
         
-        if (!setup)
-            return false;
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+        
+        // Check the lobby first.
+        if (lobbySetup)
+        {
+            if ((x >= l1.getBlockX() && x <= l2.getBlockX()) &&            
+                (z >= l1.getBlockZ() && z <= l2.getBlockZ()) &&           
+                (y >= l1.getBlockY() && y <= l2.getBlockY()))
+                return true;
+        }
         
         // Returns false if the location is outside of the region.
-        return ((loc.getX() >= p1.getX() && loc.getX() <= p2.getX()) &&            
-                (loc.getZ() >= p1.getZ() && loc.getZ() <= p2.getZ()) &&           
-                (loc.getY() >= p1.getY() && loc.getY() <= p2.getY()));
+        return ((x >= p1.getBlockX() && x <= p2.getBlockX()) &&            
+                (z >= p1.getBlockZ() && z <= p2.getBlockZ()) &&           
+                (y >= p1.getBlockY() && y <= p2.getBlockY()));
     }
     
     /**
@@ -633,9 +1049,22 @@ public class Arena
         if (!loc.getWorld().getName().equals(world.getName()) || !setup)
             return false;
         
-        return ((loc.getX() + radius >= p1.getX() && loc.getX() - radius <= p2.getX()) &&
-                (loc.getZ() + radius >= p1.getZ() && loc.getZ() - radius <= p2.getZ()) &&
-                (loc.getY() + radius >= p1.getY() && loc.getY() - radius <= p2.getY()));
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+        
+        // Check the lobby first.
+        if (lobbySetup)
+        {
+            if ((x + radius >= l1.getBlockX() && x - radius <= l2.getBlockX()) &&            
+                (z + radius >= l1.getBlockZ() && z - radius <= l2.getBlockZ()) &&           
+                (y + radius >= l1.getBlockY() && y - radius <= l2.getBlockY()))
+                return true;
+        }
+        
+        return ((x + radius >= p1.getBlockX() && x - radius <= p2.getBlockX()) &&
+                (z + radius >= p1.getBlockZ() && z - radius <= p2.getBlockZ()) &&
+                (y + radius >= p1.getBlockY() && y - radius <= p2.getBlockY()));
     }
     
     
@@ -649,14 +1078,14 @@ public class Arena
     // Block Listener
     public void onBlockBreak(BlockBreakEvent event)
     {
-        if (edit || !inRegion(event.getBlock().getLocation()))
+        if (!inRegion(event.getBlock().getLocation()) || edit || (!protect && running))
             return;
         
         Block b = event.getBlock();
         if (blocks.remove(b) || b.getType() == Material.TNT)
             return;
         
-        if (softRestore)
+        if (softRestore && running)
         {
             int[] buffer = new int[5];
             buffer[0] = b.getX();
@@ -674,12 +1103,12 @@ public class Arena
     
     public void onBlockPlace(BlockPlaceEvent event)
     {
-        // If in edit mode or the event didn't happen in this region, return.
-        if (edit || !inRegion(event.getBlock().getLocation()))
+        if (!inRegion(event.getBlock().getLocation()) || edit)
             return;
         
         Block b = event.getBlock();
-        if (running && livePlayers.contains(event.getPlayer()))
+        //if (running && livePlayers.contains(event.getPlayer()))
+        if (running && arenaPlayers.contains(event.getPlayer()))
         {
             blocks.add(b);
             Material mat = b.getType();
@@ -708,23 +1137,37 @@ public class Arena
         if (!monsters.contains(event.getEntity()) && !inRegionRadius(event.getLocation(), 10))
             return;
         
+        event.setYield(0);
+        monsters.remove(event.getEntity());
+        
         // If the arena isn't running
         if (!running || repairDelay == 0)
         {
             event.setCancelled(true);
             return;
         }
+        
+        // If there is a sign in the blocklist, cancel
+        for (Block b : event.blockList())
+        {
+            if (!(b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN))
+                continue;
+            
+            event.setCancelled(true);
+            return;
+        }
 
         // Uncancel, just in case.
         event.setCancelled(false);
-        event.setYield(0);
-        monsters.remove(event.getEntity());
 
         int[] buffer;
         final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
         for (Block b : event.blockList())
         {
             Material mat = b.getType();
+            
+            if (mat == Material.LAVA)       b.setType(Material.STATIONARY_LAVA);
+            else if (mat == Material.WATER) b.setType(Material.STATIONARY_WATER);
             
             if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || mat == Material.FIRE || mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
             {
@@ -781,10 +1224,11 @@ public class Arena
     
     public void onEntityTarget(EntityTargetEvent event)
     {
-        if (!running) return;
+        if (!running || event.isCancelled())
+            return;
         
         if (pets.contains(event.getEntity()))
-        {      
+        {
             if (event.getReason() != TargetReason.TARGET_ATTACKED_OWNER && event.getReason() != TargetReason.OWNER_ATTACKED_TARGET)
                 return;
             
@@ -811,7 +1255,8 @@ public class Arena
             }
             
             if (event.getReason() == TargetReason.CLOSEST_PLAYER)
-                if (!livePlayers.contains(event.getTarget()))
+                //if (!livePlayers.contains(event.getTarget()))
+                if (!arenaPlayers.contains(event.getTarget()))
                     event.setCancelled(true);
             return;
         }
@@ -822,7 +1267,8 @@ public class Arena
     {
         if (!running) return;
         
-        if (!(event.getEntity() instanceof Player) || !livePlayers.contains((Player)event.getEntity()))
+        //if (!(event.getEntity() instanceof Player) || !livePlayers.contains((Player)event.getEntity()))
+        if (!(event.getEntity() instanceof Player) || !arenaPlayers.contains((Player)event.getEntity()))
             return;
         
         if (event.getRegainReason() == RegainReason.REGEN)
@@ -830,24 +1276,31 @@ public class Arena
     }
     
     public void onEntityDeath(EntityDeathEvent event)
-    {
-        if (!running) return;
-        
+    {        
         if (event.getEntity() instanceof Player)
         {
             Player p = (Player) event.getEntity();
             
-            if (!livePlayers.contains(p))
+            //if (!livePlayers.contains(p))
+            if (!arenaPlayers.contains(p))
                 return;
             
             event.getDrops().clear();
+            waveMap.put(p, spawnThread.wave - 1);
             playerDeath(p);
-            p.getInventory().clear(); // For TombStone
+            //p.getInventory().clear(); // For TombStone
             return;
         }
         
         if (monsters.remove(event.getEntity()))
         {
+            EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
+            EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
+            Entity damager = (e2 != null) ? e2.getDamager() : null;
+            
+            if (e2 != null && damager instanceof Player)
+                playerKill((Player) damager);
+                
             event.getDrops().clear();
             resetIdleTimer();
             return;
@@ -870,6 +1323,8 @@ public class Arena
                 damagee.setFireTicks(32768); // For mcMMO
                 event.setCancelled(true);
             }
+            if (e != null && damager instanceof Player)
+                event.setCancelled(true);
             
             event.setDamage(0);
             return;
@@ -885,7 +1340,8 @@ public class Arena
         // Damagee & Damager - Player - cancel if pvp disabled
         if (damagee instanceof Player && damager instanceof Player)
         {
-            if (livePlayers.contains(damagee) && !pvp)
+            //if (livePlayers.contains(damagee) && !pvp)
+            if (arenaPlayers.contains(damagee) && !pvp)
                 event.setCancelled(true);
             
             return;
@@ -903,7 +1359,8 @@ public class Arena
         // Creeper detonations
         if (inRegion(damagee.getLocation()))
         {
-            if (!detDamage || !(damagee instanceof Player) || !livePlayers.contains((Player) damagee))
+            //if (!detDamage || !(damagee instanceof Player) || !livePlayers.contains((Player) damagee))
+            if (!detDamage || !(damagee instanceof Player) || !arenaPlayers.contains((Player) damagee))
                 return;
             
             if (event.getCause() == DamageCause.BLOCK_EXPLOSION)
@@ -916,10 +1373,11 @@ public class Arena
     // Lobby Listener
     public void onPlayerDropItem(PlayerDropItemEvent event)
     {
-        if (running) return;
+        if (running && shareInArena) return;
         
         Player p = event.getPlayer();
-        if (!inRegion(p.getLocation()) || !livePlayers.contains(p))
+        //if (!livePlayers.contains(p))
+        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
             return;
         
         MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_DROP_ITEM));
@@ -928,7 +1386,8 @@ public class Arena
 
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
     {
-        if (!readyPlayers.contains(event.getPlayer()) && !livePlayers.contains(event.getPlayer()))
+        //if (!readyPlayers.contains(event.getPlayer()) && !livePlayers.contains(event.getPlayer()))
+        if (!readyPlayers.contains(event.getPlayer()) && !arenaPlayers.contains(event.getPlayer()))
             return;
         
         if (!running)
@@ -943,14 +1402,22 @@ public class Arena
     }
 
     public void onPlayerInteract(PlayerInteractEvent event)
-    {
-        if (running || !livePlayers.contains(event.getPlayer()))
+    {        
+        //if (!livePlayers.contains(event.getPlayer()))
+        if (!arenaPlayers.contains(event.getPlayer()) && !lobbyPlayers.contains(event.getPlayer()))
             return;
         
-        Player p = event.getPlayer();
-        Action a = event.getAction();
-        if ((a == Action.RIGHT_CLICK_AIR) || (a == Action.RIGHT_CLICK_BLOCK))
+        if (running)
         {
+            if (event.hasBlock() && event.getClickedBlock().getType() == Material.SAPLING)
+                addTrunkAndLeaves(event.getClickedBlock());
+            return;
+        }
+        
+        Action a = event.getAction();
+        Player p = event.getPlayer();
+        if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
+        {            
             event.setUseItemInHand(Result.DENY);
             event.setCancelled(true);
         }
@@ -984,10 +1451,10 @@ public class Arena
             
             // Check if the first line of the sign is a class name.
             String className = sign.getLine(0);
-            if (!classes.contains(className))
+            if (!classes.contains(className) && !className.equalsIgnoreCase("random"))
                 return;
             
-            if (!MobArena.hasDefTrue(p, "mobarena.classes." + className))
+            if (!plugin.hasDefTrue(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
             {
                 MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PERMISSION));
                 return;
@@ -995,7 +1462,11 @@ public class Arena
 
             // Set the player's class.
             assignClass(p, className);
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+            if (!className.equalsIgnoreCase("random"))
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+            else
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_RANDOM));
+                
             return;
         }
     }
@@ -1004,21 +1475,25 @@ public class Arena
     public void onPlayerQuit(PlayerQuitEvent event)
     {
         Player p = event.getPlayer();
-        if (!enabled || !getAllPlayers().contains(p))
+        //if (!enabled || !livePlayers.contains(p))
+        if (!enabled || (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p)))
             return;
         
-        MAUtils.clearInventory(p);
-        playerQuit(p);
+        //MAUtils.clearInventory(p);
+        plugin.getAM().arenaMap.remove(p);
+        playerLeave(p);
     }
     
     public void onPlayerKick(PlayerKickEvent event)
     {
         Player p = event.getPlayer();
-        if (!enabled || !getAllPlayers().contains(p))
+        //if (!enabled || !livePlayers.contains(p))
+        if (!enabled || (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p)))
             return;
         
-        MAUtils.clearInventory(p);
-        playerQuit(p);
+        //MAUtils.clearInventory(p);
+        plugin.getAM().arenaMap.remove(p);
+        playerLeave(p);
     }
 
     // Teleport Listener
@@ -1035,7 +1510,8 @@ public class Arena
         Location to   = event.getTo();
         Location from = event.getFrom();
         
-        if (livePlayers.contains(p))
+        //if (livePlayers.contains(p) || specPlayers.contains(p))
+        if (arenaPlayers.contains(p) || lobbyPlayers.contains(p) || specPlayers.contains(p))
         {
             if (inRegion(from))
             {
@@ -1073,7 +1549,8 @@ public class Arena
     {
         Player p = event.getPlayer();
         
-        if (!livePlayers.contains(p))
+        //if (!livePlayers.contains(p))
+        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
             return;
         
         String[] args = event.getMessage().split(" ");
@@ -1104,11 +1581,20 @@ public class Arena
         return name;
     }
     
-    public List<Player> getAllPlayers()
+    /*public List<Player> getAllPlayers()
     {
         List<Player> result = new LinkedList<Player>();
         result.addAll(livePlayers);
         result.addAll(deadPlayers);
+        result.addAll(specPlayers);
+        return result;
+    }*/
+    
+    public List<Player> getAllPlayers()
+    {
+        List<Player> result = new LinkedList<Player>();
+        result.addAll(arenaPlayers);
+        result.addAll(lobbyPlayers);
         result.addAll(specPlayers);
         return result;
     }
@@ -1116,14 +1602,16 @@ public class Arena
     public List<Player> getLivingPlayers()
     {
         List<Player> result = new LinkedList<Player>();
-        result.addAll(livePlayers);
+        //result.addAll(livePlayers);
+        result.addAll(arenaPlayers);
         return result;
     }
     
     public List<Player> getNonreadyPlayers()
     {
         List<Player> result = new LinkedList<Player>();
-        result.addAll(livePlayers);
+        //result.addAll(livePlayers);
+        result.addAll(lobbyPlayers);
         result.removeAll(readyPlayers);
         return result;
     }
@@ -1156,17 +1644,137 @@ public class Arena
                     
                     // Compare the current size with the previous size.
                     if (monsters.size() < spawnThread.previousSize || spawnThread.previousSize == 0)
+                    {
+                        resetIdleTimer();
                         return;
+                    }
                     
                     // Clear all player inventories, and "kill" all players.
-                    for (Player p : livePlayers)
+                    //for (Player p : livePlayers)
+                    for (Player p : arenaPlayers)
                     {
                         MAUtils.clearInventory(p);
-                        playerDeath(p);
                         MAUtils.tellPlayer(p, MAMessages.get(Msg.FORCE_END_IDLE));
+                        playerDeath(p);
                     }
                 }
-            }, maxIdleTime*20);
+            }, maxIdleTime);
+    }
+    
+    public void delayRestoreInventory(final Player p, final String method)
+    {
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    if (method.equals("restoreInventory"))
+                        MAUtils.restoreInventory(p);
+                    else if (method.equals("giveRewards"))
+                        MAUtils.giveRewards(p, rewardMap.get(p), plugin);
+                }
+            }, 10);
+    }
+    
+    public void addTrunkAndLeaves(Block b)
+    {
+        final int x = b.getX();
+        final int y = b.getY();
+        final int z = b.getZ();
+        
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    List<Block> result = new LinkedList<Block>();
+                    for (int i = x-2; i <= x+2; i++)
+                        for (int j = y; j <= y+10; j++)
+                            for (int k = z-2; k <= z+2; k++)
+                                if (world.getBlockAt(i,j,k).getType() == Material.LOG || world.getBlockAt(i,j,k).getType() == Material.LEAVES)
+                                    result.add(world.getBlockAt(i,j,k));
+                    
+                    if (running) blocks.addAll(result);
+                }
+            }, 10);
+    }
+    
+    public boolean canAfford(Player p)
+    {
+        if (entryFee.isEmpty())
+            return true;
+        
+        PlayerInventory inv = p.getInventory();
+        for (ItemStack stack : entryFee)
+        {
+            // Economy money
+            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+            {
+                if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).hasEnough(stack.getAmount()))                
+                    return false;
+            }
+            // Normal stack
+            else
+            {
+                if (!inv.contains(stack.getTypeId(), stack.getAmount()))
+                    return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean takeFee(Player p)
+    {
+        if (entryFee.isEmpty())
+            return true;
+        
+        PlayerInventory inv = p.getInventory();
+        for (ItemStack stack : entryFee)
+        {
+            // Economy money
+            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+            {
+                if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).subtract(stack.getAmount()))                
+                    return false;
+            }
+
+            // Normal stack
+            else
+            {
+                int id = stack.getTypeId();
+                int amount = stack.getAmount();
+                
+                while (amount > 0)
+                {
+                    int pos = inv.first(id);
+                    if (pos == -1) return false;
+                    
+                    ItemStack is = inv.getItem(pos);
+                    if (is.getAmount() > amount)
+                    {
+                        is.setAmount(is.getAmount() - amount);
+                        amount = 0;
+                    }
+                    else
+                    {
+                        amount -= is.getAmount();
+                        inv.setItem(pos, null);
+                    }
+                }
+            }
+        }
+        
+        hasPaid.add(p);
+        return true;
+    }
+    
+    public void refund(Player p)
+    {
+        if (!hasPaid.contains(p))
+            return;
+        
+        MAUtils.giveItems(p, entryFee, false, plugin);
     }
     
     /**

@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -40,7 +41,6 @@ public class MASpawnThread implements Runnable
     private Random random;
     private MobArena plugin;
     private Arena arena;
-    private final double MIN_DISTANCE = 256;
     
     public MASpawnThread(MobArena plugin, Arena arena)
     {
@@ -51,11 +51,13 @@ public class MASpawnThread implements Runnable
         
         taskId = -32768;
         
-        noOfPlayers = arena.livePlayers.size();
+        //noOfPlayers = arena.livePlayers.size();
+        noOfPlayers = arena.arenaPlayers.size();
         wave = 1;
         random = new Random();
         
         // Set up the distribution variables for the random spawner.
+        // Note: Updating these means MAUtils.getArenaDistributions() must also be updated!
         dZombies   = arena.distDefault.get("zombies");
         dSkeletons = dZombies   + arena.distDefault.get("skeletons");
         dSpiders   = dSkeletons + arena.distDefault.get("spiders");
@@ -72,16 +74,18 @@ public class MASpawnThread implements Runnable
     }
     
     public void run()
-    {        
+    {
+        List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
+        for (Entity e : tmp)
+            if (e.isDead())
+                arena.monsters.remove(e);
+        
         // Check if wave needs to be cleared first. If so, return!
         if (arena.waveClear && wave > 1)
-        {
+        {            
             if (!arena.monsters.isEmpty())
                 return;
         }
-        
-        // If maxIdleTime is defined, reset the timer.
-        //if (arena.maxIdleTime > 0) arena.resetIdleTimer();
 
         // Check if we need to grant more rewards with the recurrent waves.
         for (Map.Entry<Integer,List<ItemStack>> entry : arena.everyWaveMap.entrySet())
@@ -115,7 +119,7 @@ public class MASpawnThread implements Runnable
         }
 
         wave++;
-        if (arena.maxIdleTime > 0) arena.resetIdleTimer();
+        if (arena.maxIdleTime > 0 && arena.monsters.isEmpty()) arena.resetIdleTimer();
     }
     
     /**
@@ -123,12 +127,30 @@ public class MASpawnThread implements Runnable
      */
     private void addReward(List<ItemStack> rewards)
     {
-        for (Player p : arena.livePlayers)
+        //for (Player p : arena.livePlayers)
+        for (Player p : arena.arenaPlayers)
         {
+            if (arena.rewardMap.get(p) == null)
+                continue;
+            
             ItemStack reward = MAUtils.getRandomReward(rewards);
             arena.rewardMap.get(p).add(reward);
             
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount()));
+            if (reward == null)
+            {
+                MAUtils.tellPlayer(p, "ERROR! Problem with economy rewards. Notify server host!");
+                System.out.println("[MobArena] ERROR! Could not add null reward. Please check the config-file!");
+            }
+            else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+            {
+                if (plugin.Methods.hasMethod())
+                    MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, plugin.Method.format(reward.getAmount())));
+                else System.out.println("[MobArena] ERROR! No economy plugin detected!");
+            }
+            else
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount()));
+            }
         }
     }
     
@@ -163,6 +185,9 @@ public class MASpawnThread implements Runnable
             LivingEntity e = arena.world.spawnCreature(loc,mob);
             arena.monsters.add(e);
             
+            if (mob == CreatureType.WOLF)
+                ((Wolf)e).setOwner(null); 
+            
             // Grab a random target.
             Creature c = (Creature) e;
             c.setTarget(getClosestPlayer(e));
@@ -195,7 +220,6 @@ public class MASpawnThread implements Runnable
         else if (ran < dGhasts)          mob = CreatureType.GHAST;
         else return;
         
-        // 5 on purpose - Ghasts act weird in Overworld.
         switch(mob)
         {
             case CREEPER:
@@ -237,7 +261,7 @@ public class MASpawnThread implements Runnable
             arena.monsters.add(e);
             
             if (slime)   ((Slime)e).setSize(2);
-            if (wolf)    ((Wolf)e).setAngry(true);
+            if (wolf)    { ((Wolf)e).setAngry(true); ((Wolf)e).setOwner(null); }
             if (ghast)   ((Ghast)e).setHealth(Math.min(noOfPlayers*25, 200));
             if (creeper) ((Creeper)e).setPowered(true);
             
@@ -294,9 +318,18 @@ public class MASpawnThread implements Runnable
         
         for (Location s : arena.spawnpoints.values())
         {
-            for (Player p : arena.livePlayers)
+            //for (Player p : arena.livePlayers)
+            for (Player p : arena.arenaPlayers)
             {
-                if (s.distanceSquared(p.getLocation()) > MIN_DISTANCE)
+                if (!arena.world.equals(p.getWorld()))
+                {
+                    System.out.println("[MobArena] MASpawnThread:291: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                    arena.playerLeave(p);
+                    MAUtils.tellPlayer(p, "You warped out of the arena world.");
+                    continue;
+                }
+                
+                if (s.distanceSquared(p.getLocation()) > MobArena.MIN_PLAYER_DISTANCE)
                     continue;
                 
                 result.add(s);
@@ -324,16 +357,46 @@ public class MASpawnThread implements Runnable
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        for (Player p : arena.livePlayers)
+        //for (Player p : arena.livePlayers)
+        for (Player p : arena.arenaPlayers)
         {
-            dist = p.getLocation().distance(e.getLocation());
-            //double dist = MAUtils.distance(p.getLocation(), e.getLocation());
-            if (dist < current && dist < 256)
+            if (!arena.world.equals(p.getWorld()))
+            {
+                System.out.println("[MobArena] MASpawnThread:329: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                arena.playerLeave(p);
+                MAUtils.tellPlayer(p, "You warped out of the arena world.");
+                continue;
+            }
+            dist = p.getLocation().distanceSquared(e.getLocation());
+            if (dist < current && dist < MobArena.MIN_PLAYER_DISTANCE)
             {
                 current = dist;
                 result = p;
             }
         }
         return result;
+    }
+    
+    /**
+     * Update the targets of all monsters, if their targets aren't alive.
+     */
+    public void updateTargets()
+    {
+        Creature c;
+        Entity target;
+        for (Entity e : arena.monsters)
+        {
+            if (!(e instanceof Creature))
+                continue; 
+            
+            c = (Creature) e;
+            target = c.getTarget();
+            
+            //if (target instanceof Player && arena.livePlayers.contains(target))
+            if (target instanceof Player && arena.arenaPlayers.contains(target))
+                continue;
+            
+            c.setTarget(getClosestPlayer(e));
+        }
     }
 }

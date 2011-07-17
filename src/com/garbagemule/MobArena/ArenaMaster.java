@@ -20,14 +20,15 @@ public class ArenaMaster
     private MobArena plugin;
     private Configuration config;
     protected Arena selectedArena;
-    protected Lobby masterLobby;
+    //protected Lobby masterLobby;
     
     // Settings
-    protected boolean enabled, updateNotify, autoEquip, emptyInvs, hellhounds;
+    protected boolean enabled, updateNotify;
     
     // Classes
     protected List<String> classes;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
+    protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,Arena> arenaMap;
     
     // Location map
@@ -58,7 +59,16 @@ public class ArenaMaster
     //
     /////////////////////////////////////////////////////////////////////////*/
     
-    public Arena getArenaInLocation(Location loc)
+    public List<Arena> getEnabledArenas()
+    {
+        List<Arena> result = new LinkedList<Arena>();
+        for (Arena arena : arenas)
+            if (arena.enabled)
+                result.add(arena);
+        return result;
+    }
+    
+    public Arena getArenaAtLocation(Location loc)
     {
         for (Arena arena : arenas)
             if (arena.inRegion(loc))
@@ -197,9 +207,9 @@ public class ArenaMaster
             config.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             config.setProperty("classes.Chef.armor",   "314,315,316,317");
         }
-        classes    = config.getKeys("classes");
-        classItems = MAUtils.getClassItems(config, "items");
-        classArmor = MAUtils.getClassItems(config, "armor");
+        classes      = config.getKeys("classes");
+        classItems   = MAUtils.getClassItems(config, "items");
+        classArmor   = MAUtils.getClassItems(config, "armor");
     }
     
     /**
@@ -227,7 +237,7 @@ public class ArenaMaster
                 world = Bukkit.getServer().getWorld(worldName);
             }
             
-            Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world, this);
+            Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
             arena.load(config);
             arenas.add(arena);
         }
@@ -247,6 +257,10 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.protect", true);
         config.save();
         config.load();
+        config.setProperty("arenas." + configName + ".settings.entry-fee", "");
+        config.save();
+        config.load();
+        config.setProperty("arenas." + configName + ".settings.logging", false);
         config.setProperty("arenas." + configName + ".settings.clear-wave-before-next", false);
         config.setProperty("arenas." + configName + ".settings.detonate-creepers", false);
         config.setProperty("arenas." + configName + ".settings.detonate-damage", false);
@@ -255,12 +269,18 @@ public class ArenaMaster
         config.setProperty("arenas." + configName + ".settings.force-restore", false);
         config.setProperty("arenas." + configName + ".settings.soft-restore", false);
         config.setProperty("arenas." + configName + ".settings.soft-restore-drops", false);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inv-join", false);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inv-spec", false);
+        config.setProperty("arenas." + configName + ".settings.require-empty-inv-join", true);
+        config.setProperty("arenas." + configName + ".settings.require-empty-inv-spec", true);
         config.setProperty("arenas." + configName + ".settings.hellhounds", false);
         config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
         config.setProperty("arenas." + configName + ".settings.monster-infight", false);
         config.setProperty("arenas." + configName + ".settings.allow-teleporting", false);
+        config.setProperty("arenas." + configName + ".settings.spectate-on-death", true);
+        config.setProperty("arenas." + configName + ".settings.share-items-in-arena", true);
+        config.save();
+        config.load();
+        config.setProperty("arenas." + configName + ".settings.player-limit", 0);
+        config.setProperty("arenas." + configName + ".settings.max-join-distance", 0);
         config.save();
         config.load();
         config.setProperty("arenas." + configName + ".settings.repair-delay", 5);
@@ -271,7 +291,7 @@ public class ArenaMaster
         config.save();
         config.load();
 
-        Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world, this);
+        Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
         arena.load(config);
         return arena;
     }

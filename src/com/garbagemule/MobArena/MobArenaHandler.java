@@ -1,105 +1,126 @@
 package com.garbagemule.MobArena;
 
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class MobArenaHandler
 {
     MobArena plugin;
+    boolean ma = false;
     
+    /**
+     * Primary constructor.
+     * The boolean 'ma' is flagged true, and the field 'plugin' is initalized, if the server is running MobArena.
+     */
     public MobArenaHandler()
     {
-        plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
-    }
+        Plugin maPlugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
+        
+        if (maPlugin == null)
+            return;
 
-    // Check if there is an active arena session running.
-    public boolean isRunning(String arenaName)
-    {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
-        
-        return arena.running;
+        ma = true;
+        plugin = (MobArena) maPlugin;
     }
     
-    // Check if the specified player is in an arena.
-    public boolean isPlaying(Player p)               { return (plugin.getAM().getArenaWithPlayer(p) != null); }
-    
-    // Arena getters
-    public Arena getArenaWithName(String arenaName)  { return plugin.getAM().getArenaWithName(arenaName); }
-    public Arena getArenaWithPlayer(Player p)        { return plugin.getAM().getArenaWithPlayer(p); }
-    public Arena getArenaWithPet(Entity wolf)        { return plugin.getAM().getArenaWithPet(wolf); }
-    public Arena getArenaWithMonster(Entity monster) { return plugin.getAM().getArenaWithMonster(monster); }
-    public Arena getArenaInLocation(Location l)      { return plugin.getAM().getArenaInLocation(l); }
-    
-    // Player lists
-    public List<Player> getAllPlayers()                              { return plugin.getAM().getAllPlayers(); }
-    public List<Player> getAllLivingPlayers()                        { return plugin.getAM().getAllLivingPlayers(); }
-    public List<Player> getAllPlayersInArena(String arenaName)       { return plugin.getAM().getAllPlayersInArena(arenaName); }
-    public List<Player> getLivingPlayersInArena(String arenaName) { return plugin.getAM().getLivingPlayersInArena(arenaName); }
-    
-    // Warp locations.
-    public Location getArenaLocation(String arenaName)
+    /**
+     * Check if a Location is inside of an arena region.
+     * @param loc A location.
+     * @return true, if the Location is inside of any arena region.
+     */
+    public boolean inRegion(Location loc)
     {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
+        // If the plugin doesn't exist, always return false.
+        if (!ma || plugin.getAM() == null) return false;
         
-        return arena.arenaLoc;
-    }
-    public Location getLobbyLocation(String arenaName)
-    {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
-        
-        return arena.lobbyLoc;
-    }
-    public Location getSpectatorLocation(String arenaName)
-    {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
-        
-        return arena.spectatorLoc;
-    }
-    
-    // Get the current wave number.
-    public int getWave(Arena arena) { return arena.spawnThread.wave; }
-    
-    public int getWave(String arenaName)
-    {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
-        
-        if (arena.spawnThread == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' has not started!");
-        
-        return arena.spawnThread.wave;
-    }
-    
-    // Check if a location is within any arena regions.
-
-    public boolean inRegion(Location l, Arena arena) { return arena.inRegion(l); }
-    
-    public boolean inRegion(Location l, String arenaName)
-    {
-        Arena arena = plugin.getAM().getArenaWithName(arenaName);
-        if (arena == null)
-            throw new NullPointerException("Arena with name '" + arenaName + "' does not exist!");
-        
-        return arena.inRegion(l);
-    }
-    public boolean inRegion(Location l)
-    {
+        // Return true if location is within just one arena's region.
         for (Arena arena : plugin.getAM().arenas)
-            if (arena.inRegion(l))
+            if (arena.inRegion(loc))
                 return true;
+        
         return false;
+    }
+    
+    /**
+     * Check if a Location is inside of a specific arena region.
+     * @param arena An Arena object
+     * @param loc A location
+     * @return true, if the Location is inside of the arena region.
+     */
+    public boolean inRegion(Arena arena, Location loc) { return (ma && arena != null && arena.inRegion(loc)); }
+    
+    /**
+     * Check if a Location is inside of the region of an arena that is currently running.
+     * @param loc A location.
+     * @return true, if the Location is inside of the region of an arena that is currently running.
+     */
+    public boolean inRunningRegion(Location loc) { return inRegion(loc, false, true); }
+    
+    /**
+     * Check if a Location is inside of the region of an arena that is currently enabled.
+     * @param loc A location.
+     * @return true, if the Location is inside of the region of an arena that is currently enabled.
+     */
+    public boolean inEnabledRegion(Location loc) { return inRegion(loc, true, false); }
+    
+    /**
+     * Private helper method for inRunningRegion and inEnabledRegion
+     * @param loc A location
+     * @param enabled if true, the method will check if the arena is enabled
+     * @param running if true, the method will check if the arena is running, overrides enabled
+     * @return true, if the location is inside of the region of an arena that is currently enabled/running, depending on the parameters.
+     */
+    private boolean inRegion(Location loc, boolean enabled, boolean running)
+    {
+        // If the plugin doesn't exist, always return false.
+        if (!ma || plugin.getAM() == null) return false;
+        
+        // Return true if location is within just one arena's region.
+        for (Arena arena : plugin.getAM().arenas)
+            if (arena.inRegion(loc))
+                if ((running && arena.running) || (enabled && arena.enabled))
+                    return true;
+        
+        return false;
+    }
+    
+    /**
+     * Get an Arena object at the given location.
+     * @param loc A location
+     * @return an Arena object, or null
+     */
+    public Arena getArenaAtLocation(Location loc) { return (ma) ? plugin.getAM().getArenaAtLocation(loc) : null; }
+    
+    /**
+     * Get the Arena object that the given player is currently in.
+     * @param p A player
+     * @return an Arena object, or null
+     */
+    public Arena getArenaWithPlayer(Player p) { return (ma) ? plugin.getAM().getArenaWithPlayer(p) : null; }
+    
+    /**
+     * Get the Arena object that the given pet is currently in.
+     * @param wolf A pet wolf
+     * @return an Arena object, or null
+     */
+    public Arena getArenaWithPet(Entity wolf) { return (ma) ? plugin.getAM().getArenaWithPet(wolf) : null; }
+    
+    /**
+     * Get the Arena object that the given monster is currently in.
+     * @param monster A monster
+     * @return an Arena object, or null
+     */
+    public Arena getArenaWithMonster(Entity monster) { return (ma) ? plugin.getAM().getArenaWithMonster(monster) : null; }
+    
+    /**
+     * Check if the server is running MobArena.
+     * @return true, if MobArena exists on the server.
+     */
+    public boolean hasMA()
+    {
+        return ma;
     }
 }

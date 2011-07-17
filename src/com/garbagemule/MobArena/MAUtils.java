@@ -23,6 +23,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
@@ -96,6 +97,7 @@ public class MAUtils
         HELMETS_TYPE.add(Material.CHAINMAIL_HELMET);
         HELMETS_TYPE.add(Material.IRON_HELMET);
         HELMETS_TYPE.add(Material.DIAMOND_HELMET);
+        HELMETS_TYPE.add(Material.PUMPKIN);
         
         CHESTPLATES_TYPE.add(Material.LEATHER_CHESTPLATE);
         CHESTPLATES_TYPE.add(Material.GOLD_CHESTPLATE);
@@ -159,6 +161,11 @@ public class MAUtils
         return result;
     }
     
+    public static List<ItemStack> getEntryFee(Configuration config, String arena)
+    {
+        return makeItemStackList(config.getString("arenas." + arena + ".settings.entry-fee", null));
+    }
+    
     /**
      * Takes a comma-separated list of items in the <type>:<amount> format and
      * returns a list of ItemStacks created from that data.
@@ -166,8 +173,9 @@ public class MAUtils
     public static List<ItemStack> makeItemStackList(String string)
     {
         List<ItemStack> result = new LinkedList<ItemStack>();
-        if (string == null) return result;
+        if (string == null || string.isEmpty()) return result;
         
+        // Trim commas and whitespace, and split items by commas
         string = string.trim();
         if (string.endsWith(","))
             string = string.substring(0, string.length()-1);
@@ -175,20 +183,27 @@ public class MAUtils
         
         for (String item : items)
         {
+            // Trim whitespace and split by colons.
             item = item.trim();
             String[] parts = item.split(":");
             
             // Grab the amount.
-            int amount = (parts.length == 2 && parts[1].matches("[0-9]+")) ?
-                    Integer.parseInt(parts[1]) :
-                    1;
+            int amount = 1;
+            if (parts.length == 1 && parts[0].matches("\\$[0-9]+"))
+                amount = Integer.parseInt(parts[0].substring(1, parts[0].length()));
+            else if (parts.length == 2 && parts[1].matches("(-)?[0-9]+"))
+                amount = Integer.parseInt(parts[1]);
+            else if (parts.length == 3 && parts[2].matches("(-)?[0-9]+"))
+                amount = Integer.parseInt(parts[2]);
+            
             
             // Make the ItemStack.
-            ItemStack stack = (parts[0].matches("[0-9]+")) ?
-                    makeItemStack(Integer.parseInt(parts[0]), amount) :
+            ItemStack stack = (parts.length == 3) ?
+                    makeItemStack(parts[0], amount, parts[1]) :
                     makeItemStack(parts[0], amount);
             
-            result.add(stack);
+            if (stack != null)
+                result.add(stack);
         }
         return result;
     }
@@ -241,33 +256,26 @@ public class MAUtils
      */
     public static Map<String,Integer> getArenaDistributions(Configuration config, String arena, String wave)
     {
-        //config.load();
         String arenaPath = "arenas." + arena + ".waves." + wave;
         Map<String,Integer> result = new HashMap<String,Integer>();
-        List<String> dists = config.getKeys(arenaPath);
+        List<String> dists = (config.getKeys(arenaPath) != null) ? config.getKeys(arenaPath) : new LinkedList<String>();
         
-        // If there are no distributions yet, add them.
-        if (dists == null)
+        String[] monsters = (wave.equals("default")) ? new String[]{"zombies", "skeletons", "spiders", "creepers", "wolves"}
+                                                     : new String[]{"powered-creepers", "zombie-pigmen", "slimes", "humans", "angry-wolves", "giants", "ghasts"};
+        boolean update = false;
+        for (String monster : monsters)
         {
-            if (wave.equals("default"))
-            {
-                config.setProperty(arenaPath + ".zombies",   10);
-                config.setProperty(arenaPath + ".skeletons", 10);
-                config.setProperty(arenaPath + ".spiders",   10);
-                config.setProperty(arenaPath + ".creepers",  10);
-                config.setProperty(arenaPath + ".wolves",    10);
-            }
-            else if (wave.equals("special"))
-            {
-                config.setProperty(arenaPath + ".powered-creepers", 10);
-                config.setProperty(arenaPath + ".zombie-pigmen",    10);
-                config.setProperty(arenaPath + ".slimes",          10);
-                config.setProperty(arenaPath + ".humans",          10);
-                config.setProperty(arenaPath + ".angry-wolves",     10);
-                config.setProperty(arenaPath + ".giants",           0);
-                config.setProperty(arenaPath + ".ghasts",           0);
-            }
-            //config.save();
+            if (dists.contains(monster))
+                continue;
+            
+            //if (config.getInt(arenaPath + "." + m, -1) == -1)
+            config.setProperty(arenaPath + "." + monster, (monster.equals("giants") || monster.equals("ghasts")) ? 0 : 10);
+            update = true;
+        }
+        
+        if (update)
+        {
+            config.save();
             dists = config.getKeys(arenaPath);
         }
         
@@ -283,8 +291,8 @@ public class MAUtils
                     value = 0;
                 
                 config.setProperty(arenaPath + "." + monster, value);
-                //config.save();
             }
+            config.save();  
             
             result.put(monster, value);
         }
@@ -329,14 +337,14 @@ public class MAUtils
         // Grab the contents.
         ItemStack[] armor = p.getInventory().getArmorContents();
         ItemStack[] items = p.getInventory().getContents();
-
+        
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         new File(invPath).mkdir();
         File backupFile = new File(invPath + sep + p.getName() + ".inv");
         
         try
         {
-            if (backupFile.exists())
+            if (backupFile.exists() && !restoreInventory(p))
                 return false;
 
             backupFile.createNewFile();
@@ -443,12 +451,26 @@ public class MAUtils
     /**
      * Gives the player all of the items in the list of ItemStacks.
      */
-    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, boolean rewards)
+    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, boolean rewards, MobArena plugin)
     {
-        PlayerInventory inv = p.getInventory();
+        if (stacks == null)
+            return;
         
+        PlayerInventory inv = p.getInventory();
         for (ItemStack stack : stacks)
         {
+            if (stack == null)
+                continue;
+            
+            // If this is money, don't add to inventory.
+            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+            {
+                if (plugin != null && plugin.Methods.hasMethod())
+                    plugin.Method.getAccount(p.getName()).add(stack.getAmount());
+
+                continue;
+            }
+            
             // If these are rewards, don't tamper with them.
             if (rewards)
             {
@@ -456,30 +478,28 @@ public class MAUtils
                 continue;
             }
 
-            // If this is an armor piece, equip it and continue.
+            // If this is an armor piece, equip it.
             if (autoEquip && ARMORS_TYPE.contains(stack.getType()))
             {
                 equipArmorPiece(stack, inv);
                 continue;
             }
             
-            // If this is a sword, set its durability to "unlimited".
-            //if (SWORDS_TYPE.contains(stack.getType()))
+            // If this is a weapon, set its durability to "unlimited".
             if (WEAPONS_TYPE.contains(stack.getType()))
                 stack.setDurability((short) -32768);
-            
+
             inv.addItem(stack);
         }
     }
-    
-    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip)
+    public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
     {
-        giveItems(p, stacks, autoEquip, false);
+        giveItems(p, stacks, false, true, plugin);
     }
     
-    public static void giveRewards(Player p, List<ItemStack> stacks)
+    public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, MobArena plugin)
     {
-        giveItems(p, stacks, false, true);
+        giveItems(p, stacks, autoEquip, false, plugin);
     }
     
     public static int getPetAmount(Player p)
@@ -513,12 +533,29 @@ public class MAUtils
     }
     
     /* Helper methods for making ItemStacks out of strings and ints */
-    private static ItemStack makeItemStack(String name, int amount)
+    public static ItemStack makeItemStack(String name, int amount, String data)
     {
+        // If this is economy money, create a dummy ItemStack.
+        if (name.matches("\\$[0-9]+"))
+            return new ItemStack(MobArena.ECONOMY_MONEY_ID, amount);
+        
         try
         {
-            Material material = Material.valueOf(name.toUpperCase());
-            return new ItemStack(material, amount);
+            byte offset = 0;
+            
+            Material material = (name.matches("[0-9]+")) ?
+                Material.getMaterial(Integer.parseInt(name)) :
+                Material.valueOf(name.toUpperCase());
+            
+            if (material == Material.INK_SACK)
+                offset = 15;
+                
+            DyeColor dye = (data.matches("[0-9]+")) ?
+                DyeColor.getByData((byte) Math.abs(offset - Integer.parseInt(data))) :
+                DyeColor.valueOf(data.toUpperCase());
+                
+            //return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
+            return new ItemStack(material, amount, (byte) Math.abs(offset - dye.getData()));
         }
         catch (Exception e)
         {
@@ -526,24 +563,17 @@ public class MAUtils
             return null;
         }
     }
-    
-    private static ItemStack makeItemStack(int id, int amount)
+    public static ItemStack makeItemStack(String name, int amount)
     {
-        try
-        {
-            Material material = Material.getMaterial(id);
-            return new ItemStack(material, amount);
-        }
-        catch (Exception e)
-        {
-            System.out.println("[MobArena] ERROR! Could not create item with id " + id + ". Check config.yml");
-            return null;
-        }
+        return makeItemStack(name, amount, "0");
     }
     
     /* Helper method for grabbing a random reward */
     public static ItemStack getRandomReward(List<ItemStack> rewards)
     {
+        if (rewards.isEmpty())
+            return null;
+        
         Random ran = new Random();
         return rewards.get(ran.nextInt(rewards.size()));
     }
@@ -561,21 +591,27 @@ public class MAUtils
      */
     public static void sitPets(Player p)
     {
+        if (p == null)
+        {
+            System.out.println("Player is null!");
+            return;
+        }
+        
         List<Entity> entities = p.getNearbyEntities(80, 40, 80);
         for (Entity e : entities)
         {
             if (!(e instanceof Wolf))
                 continue;
             
-            Wolf w = (Wolf) e;
-            if (w.getOwner().equals(p))
+            Wolf w = (Wolf) e;            
+            if (w.isTamed() && w.getOwner() != null && w.getOwner().equals(p))
                 w.setSitting(true);
         }
     }
     
     /**
      * Removes all the pets belonging to this player.
-     */
+     *//*
     public static void clearPets(Arena arena, Player p)
     {
         for (Wolf w : arena.pets)
@@ -583,7 +619,7 @@ public class MAUtils
             if (w.getOwner().equals(p))
                 w.remove();
         }
-    }
+    }*/
     
     
     
@@ -592,6 +628,91 @@ public class MAUtils
             REGION METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
+    
+    /**
+     * Create a frame spanned by the two input coordinates.
+     * @return An int arry holding x,y,z and the original type IDs of each block.
+     */
+    public static Set<int[]> showRegion(World world, Location p1, Location p2, int id, byte color)
+    {
+        Set<int[]> result = new HashSet<int[]>();
+
+        int x1 = p1.getBlockX(); int y1 = p1.getBlockY(); int z1 = p1.getBlockZ();
+        int x2 = p2.getBlockX(); int y2 = p2.getBlockY(); int z2 = p2.getBlockZ();
+
+        int[] buffer;
+        
+        for (int i = x1; i <= x2; i++)
+        {
+            buffer = new int[] {i, y1, z1, world.getBlockTypeIdAt(i, y1, z1)};
+            result.add(buffer);
+            world.getBlockAt(i, y1, z1).setTypeIdAndData(id, color, false);
+            
+            buffer = new int[] {i, y2, z1, world.getBlockTypeIdAt(i, y2, z1)};
+            result.add(buffer);
+            world.getBlockAt(i, y2, z1).setTypeIdAndData(id, color, false);
+            
+            buffer = new int[] {i, y1, z2, world.getBlockTypeIdAt(i, y1, z2)};
+            result.add(buffer);
+            world.getBlockAt(i, y1, z2).setTypeIdAndData(id, color, false);
+            
+            buffer = new int[] {i, y2, z2, world.getBlockTypeIdAt(i, y2, z2)};
+            result.add(buffer);
+            world.getBlockAt(i, y2, z2).setTypeIdAndData(id, color, false);
+        }
+        for (int j = y1+1; j <= y2-1; j++)
+        {
+            buffer = new int[] {x1, j, z1, world.getBlockTypeIdAt(x1, j, z1)};
+            result.add(buffer);
+            world.getBlockAt(x1, j, z1).setTypeIdAndData(id, color, false);
+
+            buffer = new int[] {x2, j, z1, world.getBlockTypeIdAt(x2, j, z1)};
+            result.add(buffer);
+            world.getBlockAt(x2, j, z1).setTypeIdAndData(id, color, false);
+            
+            buffer = new int[] {x1, j, z2, world.getBlockTypeIdAt(x1, j, z2)};
+            result.add(buffer);
+            world.getBlockAt(x1, j, z2).setTypeIdAndData(id, color, false);
+
+            buffer = new int[] {x2, j, z2, world.getBlockTypeIdAt(x2, j, z2)};
+            result.add(buffer);
+            world.getBlockAt(x2, j, z2).setTypeIdAndData(id, color, false);
+        }
+        for (int k = z1+1; k <= z2-1; k++)
+        {
+            buffer = new int[] {x1, y1, k, world.getBlockTypeIdAt(x1, y1, k)};
+            result.add(buffer);
+            world.getBlockAt(x1, y1, k).setTypeIdAndData(id, color, false);
+
+            buffer = new int[] {x2, y1, k, world.getBlockTypeIdAt(x2, y1, k)};
+            result.add(buffer);
+            world.getBlockAt(x2, y1, k).setTypeIdAndData(id, color, false);
+            
+            buffer = new int[] {x1, y2, k, world.getBlockTypeIdAt(x1, y2, k)};
+            result.add(buffer);
+            world.getBlockAt(x1, y2, k).setTypeIdAndData(id, color, false);
+
+            buffer = new int[] {x2, y2, k, world.getBlockTypeIdAt(x2, y2, k)};
+            result.add(buffer);
+            world.getBlockAt(x2, y2, k).setTypeIdAndData(id, color, false);
+        }
+        
+        return result;
+    }
+    
+    public static Set<int[]> showRegion(World world, Location p1, Location p2, int id)
+    {
+        return showRegion(world, p1, p2, id, (byte) 0);
+    }
+    
+    /**
+     * Take all the blocks with coordinates (buffer[0], buffer[1], buffer[2]) and set
+     * their type ID to buffer[3]. Used to hide regions shown by showRegion.
+     */
+    public static void hideRegion(int[] buffer)
+    {
+        
+    }
     
     /**
      * Create a Location object from the config-file.
@@ -610,12 +731,17 @@ public class MAUtils
      */    
     public static void setArenaCoord(Configuration config, Arena arena, String coord, Location loc)
     {
+        if (coord.equals("arena") || coord.equals("lobby") || coord.equals("spectator"))
+            loc.setY(loc.getY() + 1);
+        
         config.setProperty("arenas." + arena.configName() + ".coords." + coord, makeCoord(loc));
         config.save();
         arena.load(config);
         
         if (coord.equals("p1") || coord.equals("p2"))
             fixRegion(config, loc.getWorld(), arena);
+        if (coord.equals("l1") || coord.equals("l2"))
+            fixLobby(config, loc.getWorld(), arena);
     }
     
     public static boolean delArenaCoord(Configuration config, Arena arena, String coord)
@@ -658,6 +784,35 @@ public class MAUtils
         arena.load(config);
     }
     
+    private static void fixLobby(Configuration config, World world, Arena arena)
+    {
+        if (arena.l1 == null || arena.l2 == null)
+            return;
+        
+        if (arena.l1.getX() > arena.l2.getX())
+        {
+            double tmp = arena.l1.getX();
+            arena.l1.setX(arena.l2.getX());
+            arena.l2.setX(tmp);
+        }
+        
+        if (arena.l1.getZ() > arena.l2.getZ())
+        {
+            double tmp = arena.l1.getZ();
+            arena.l1.setZ(arena.l2.getZ());
+            arena.l2.setZ(tmp);
+        }
+        
+        if (arena.l1.getY() > arena.l2.getY())
+        {
+            double tmp = arena.l1.getY();
+            arena.l1.setY(arena.l2.getY());
+            arena.l2.setY(tmp);
+        }
+        arena.serializeConfig();
+        arena.load(config);
+    }
+    
     /**
      * Create a Location from the input String in the input World.
      */
@@ -665,14 +820,14 @@ public class MAUtils
     {
         String[] parts = str.split(",");
         
-        double x     = Double.parseDouble(parts[0]);
-        double y     = Double.parseDouble(parts[1]);
-        double z     = Double.parseDouble(parts[2]);
+        double x     = Double.parseDouble(parts[0].trim());
+        double y     = Double.parseDouble(parts[1].trim());
+        double z     = Double.parseDouble(parts[2].trim());
         
-        if (extras && parts.length == 5)
+        if (extras && parts.length > 3)
         {
-            float yaw   = Float.parseFloat(parts[3]);
-            float pitch = Float.parseFloat(parts[4]);
+            float yaw   = Float.parseFloat(parts[3].trim());
+            float pitch = Float.parseFloat(parts[4].trim());
             return new Location(world, x, y, z, yaw, pitch);
         }
 
@@ -745,13 +900,17 @@ public class MAUtils
     /**
      * Sends a message to all players in and around the arena.
      */
-    public static void tellAll(Arena arena, String msg)
+    public static void tellAll(Arena arena, String msg) { tellAll(arena, msg, false); }
+    public static void tellAll(Arena arena, String msg, boolean waitPlayers)
     {
         Set<Player> tmp = new HashSet<Player>();
-        tmp.addAll(arena.livePlayers);
+        //tmp.addAll(arena.livePlayers);
+        tmp.addAll(arena.arenaPlayers);
+        tmp.addAll(arena.lobbyPlayers);
         tmp.addAll(arena.deadPlayers);
         tmp.addAll(arena.specPlayers);
         tmp.addAll(arena.readyPlayers);
+        if (waitPlayers) tmp.addAll(arena.waitPlayers);
         for (Player p : tmp)
             tellPlayer(p, msg);
     }
@@ -764,9 +923,18 @@ public class MAUtils
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        for (Player p : arena.livePlayers)
+        //for (Player p : arena.livePlayers)
+        for (Player p : arena.arenaPlayers)
         {
-            double dist = p.getLocation().distanceSquared(e.getLocation()); //distance(p.getLocation(), e.getLocation());
+            if (!arena.world.equals(p.getWorld()))
+            {
+                System.out.println("[MobArena] MAUtils:908: Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                arena.playerLeave(p);
+                tellPlayer(p, "You warped out of the arena world.");
+                continue;
+            }
+            
+            double dist = p.getLocation().distanceSquared(e.getLocation());
             if (dist < current && dist < 256)
             {
                 current = dist;
@@ -774,15 +942,6 @@ public class MAUtils
             }
         }
         return result;
-    }
-    
-    public static double distance(Location loc1, Location loc2)
-    {
-        double x = loc1.getX() - loc2.getX();
-        double y = loc1.getY() - loc2.getY();
-        double z = loc1.getZ() - loc2.getZ();
-        
-        return x*x + y*y + z*z;
     }
     
     /**
@@ -830,25 +989,63 @@ public class MAUtils
     
     /**
      * Turn a list into a space-separated string-representation of the list.
-     */
-    public static <E> String listToString(List<E> list)
-    {        
-        return listToString(list, true);
-    }
-    
-    public static <E> String listToString(List<E> list, boolean none)
+     */    
+    public static <E> String listToString(List<E> list, boolean none, MobArena plugin)
     {
-        if (none && list.isEmpty())
-            return MAMessages.get(Msg.MISC_NONE);
+        if (list == null || list.isEmpty())
+        {
+            if (none)
+                return MAMessages.get(Msg.MISC_NONE);
+            else
+                return "";
+        }
         
         StringBuffer buffy = new StringBuffer();
-        for (E e : list)
+        int trimLength = 0;
+        
+        E type = list.get(0);
+        if (type instanceof Player)
         {
-            buffy.append(e.toString());
-            buffy.append(" ");
+            for (E e : list)
+            {
+                buffy.append(((Player) e).getName());
+                buffy.append(" ");
+            }
         }
-        return buffy.toString();
+        else if (type instanceof ItemStack)
+        {
+            trimLength = 2;
+            ItemStack stack;
+            for (E e : list)
+            {
+                stack = (ItemStack) e;
+                if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+                {
+                    if (plugin.Methods.hasMethod())
+                    {
+                        buffy.append(plugin.Method.format(stack.getAmount()));
+                        buffy.append(", ");
+                    }
+                    continue;
+                }
+                
+                buffy.append(stack.getType().toString().toLowerCase());
+                buffy.append(":");
+                buffy.append(stack.getAmount());
+                buffy.append(", ");
+            }
+        }
+        else
+        {
+            for (E e : list)
+            {
+                buffy.append(e.toString());
+                buffy.append(" ");
+            }
+        }
+        return buffy.toString().substring(0, buffy.length() - trimLength);
     }
+    public static <E> String listToString(List<E> list, MobArena plugin) { return listToString(list, true, plugin); }
     
     /**
      * Returns a String-list version of a comma-separated list.
@@ -873,7 +1070,8 @@ public class MAUtils
     public static Player getRandomPlayer(Arena arena)
     {
         Random random = new Random();
-        Player[] array = (Player[]) arena.livePlayers.toArray();
+        //Player[] array = (Player[]) arena.livePlayers.toArray();
+        Player[] array = (Player[]) arena.arenaPlayers.toArray();
         return array[random.nextInt(array.length)];
     }
     
@@ -891,6 +1089,12 @@ public class MAUtils
                 (arena.p2             != null) &&
                 (arena.spawnpoints.size() > 0));
     }
+    
+    public static boolean verifyLobby(Arena arena)
+    {
+        return ((arena.l1 != null) &&
+                (arena.l2 != null));
+    }
 
     /**
      * Checks if there is a new update of MobArena and notifies the
@@ -898,7 +1102,7 @@ public class MAUtils
      */
     public static void checkForUpdates(MobArena plugin, final Player p, boolean response)
     {
-        String site = "http://forums.bukkit.org/threads/818.19144/";
+        String site = "http://forums.bukkit.org/threads/19144/";
         try
         {
             // Make a URI of the site address
@@ -950,6 +1154,36 @@ public class MAUtils
         ws.allowMonsters = allowMonsters;
         ws.allowAnimals  = allowAnimals;
     }
+    
+    public static String getDuration(long duration)
+    {
+        long seconds = duration / 1000;
+        long secs = seconds % 60;
+        long mins = (seconds - secs) / 60 % 60;
+        long hrs  = ((seconds - secs) - (mins * 60)) / 60 / 60;
+        return hrs + ":" + ((mins < 10) ? "0" + mins : mins) + ":" + ((secs < 10) ? "0" + secs : secs);
+    }
+
+    public static String padRight(String s, int length) { return padRight(s, length, ' '); }
+    public static String padRight(String s, int length, char pad)
+    {
+        StringBuffer buffy = new StringBuffer();
+        buffy.append(s);
+        for (int i = s.length(); i < length; i++)
+            buffy.append(pad);
+        return buffy.toString();
+    }
+
+    public static String padLeft(String s, int length) { return padLeft(s, length, ' '); }
+    public static String padLeft(String s, int length, char pad)
+    {
+        StringBuffer buffy = new StringBuffer();
+        for (int i = 0; i < length - s.length(); i++)
+            buffy.append(pad);
+        buffy.append(s);
+        return buffy.toString();
+    }
+    
     
     /**
      * Stand back, I'm going to try science!
@@ -1010,7 +1244,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("Couldn't create backup file. Aborting auto-generate...");
+            System.out.println("[MobArena] ERROR! Couldn't create backup file. Aborting auto-generate...");
             return false;
         }
         
@@ -1115,7 +1349,7 @@ public class MAUtils
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "p1", new Location(world, x1, ly1, z1));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "p2", new Location(world, x2, y2+1, z2));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, y1-3, z1+2));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, ly1+1, z1+2));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3));
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3));
@@ -1143,7 +1377,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            if (error) System.out.println("Couldn't find backup file for arena '" + name + "'");
+            if (error) System.out.println("[MobArena] ERROR! Couldn't find backup file for arena '" + name + "'");
             return false;
         }
         

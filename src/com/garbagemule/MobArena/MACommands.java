@@ -2,10 +2,14 @@ package com.garbagemule.MobArena;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,38 +24,43 @@ public class MACommands implements CommandExecutor
     public static final List<String> COMMANDS = new LinkedList<String>();
     static
     {
-        COMMANDS.add("j");               // Join
-        COMMANDS.add("join");            // Join
-        COMMANDS.add("l");               // Leave
-        COMMANDS.add("leave");           // Leave
-        COMMANDS.add("notready");        // List of players who aren't ready
-        COMMANDS.add("spec");            // Watch arena
-        COMMANDS.add("spectate");        // Watch arena
-        COMMANDS.add("arenas");          // List of arenas
-        COMMANDS.add("list");            // List of players
-        COMMANDS.add("players");         // List of players
-        COMMANDS.add("restore");         // Restore inventory
-        COMMANDS.add("enable");          // Enabling
-        COMMANDS.add("disable");         // Disabling
-        COMMANDS.add("protect");         // Protection on/off
-        COMMANDS.add("force");           // Force start/end
-        COMMANDS.add("config");          // Reload config
-        COMMANDS.add("arena");           // Current arena
-        COMMANDS.add("setarena");        // Set current arena
-        COMMANDS.add("addarena");        // Add a new arena
-        COMMANDS.add("delarena");        // Delete current aren
-        COMMANDS.add("editarena");       // Editing
-        COMMANDS.add("setregion");       // Set a region point
-        COMMANDS.add("setwarp");         // Set arena/lobby/spec
-        COMMANDS.add("spawnpoints");     // List spawnpoints
-        COMMANDS.add("addspawn");        // Add a spawnpoint
-        COMMANDS.add("delspawn");        // Delete a spawnpoint 
-        COMMANDS.add("expandregion");    // Expand the region
-        COMMANDS.add("reset");           // Reset arena coordinates
-        COMMANDS.add("auto-generate");   // Auto-generate arena
-        COMMANDS.add("auto-degenerate"); // Restore cuboid
+        COMMANDS.add("j");                 // Join
+        COMMANDS.add("join");              // Join
+        COMMANDS.add("l");                 // Leave
+        COMMANDS.add("leave");             // Leave
+        COMMANDS.add("notready");          // List of players who aren't ready
+        COMMANDS.add("spec");              // Watch arena
+        COMMANDS.add("spectate");          // Watch arena
+        COMMANDS.add("arenas");            // List of arenas
+        COMMANDS.add("list");              // List of players
+        COMMANDS.add("players");           // List of players
+        COMMANDS.add("info");              // Info/help
+        COMMANDS.add("help");              // Info/help
+        COMMANDS.add("restore");           // Restore inventory
+        COMMANDS.add("enable");            // Enabling
+        COMMANDS.add("disable");           // Disabling
+        COMMANDS.add("protect");           // Protection on/off
+        COMMANDS.add("force");             // Force start/end
+        COMMANDS.add("config");            // Reload config
+        COMMANDS.add("arena");             // Current arena
+        COMMANDS.add("setarena");          // Set current arena
+        COMMANDS.add("addarena");          // Add a new arena
+        COMMANDS.add("delarena");          // Delete current aren
+        COMMANDS.add("editarena");         // Editing
+        COMMANDS.add("setregion");         // Set a region point
+        COMMANDS.add("expandregion");      // Expand the region
+        COMMANDS.add("showregion");        // Show the region
+        COMMANDS.add("setlobbyregion");    // Set a region point
+        COMMANDS.add("expandlobbyregion"); // Expand the region
+        COMMANDS.add("setwarp");           // Set arena/lobby/spec
+        COMMANDS.add("spawnpoints");       // List spawnpoints
+        COMMANDS.add("addspawn");          // Add a spawnpoint
+        COMMANDS.add("delspawn");          // Delete a spawnpoint 
+        COMMANDS.add("reset");             // Reset arena coordinates
+        COMMANDS.add("auto-generate");     // Auto-generate arena
+        COMMANDS.add("auto-degenerate");   // Restore cuboid
     }
-    private boolean player, op, console, meanAdmins;
+    private boolean meanAdmins, showingRegion;
     private Server server;
     private MobArena plugin;
     private ArenaMaster am;
@@ -80,9 +89,9 @@ public class MACommands implements CommandExecutor
         }
         
         // Determine if the sender is a player (and an op), or the console.
-        player  = (sender instanceof Player);
-        op      = player && ((Player) sender).isOp();
-        console = (sender instanceof ConsoleCommandSender);
+        boolean player  = (sender instanceof Player);
+        boolean op      = player && ((Player) sender).isOp();
+        boolean console = (sender instanceof ConsoleCommandSender);
         
         // Cast the sender to Player if possible.
         Player p = (player) ? (Player)sender : null;
@@ -94,6 +103,7 @@ public class MACommands implements CommandExecutor
         String base = args[0].toLowerCase();
         String arg1 = (args.length > 1) ? args[1].toLowerCase() : "";
         String arg2 = (args.length > 2) ? args[2].toLowerCase() : "";
+        String arg3 = (args.length > 3) ? args[3].toLowerCase() : "";
 
         
         
@@ -108,91 +118,79 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("join") || base.equals("j"))
         {            
-            if (!player || !MobArena.has(p, "mobarena.use.join"))
+            if (!player || !plugin.has(p, "mobarena.use.join"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
+            List<Arena> arenas = am.getEnabledArenas();
+            if (!am.enabled || arenas.size() < 1)
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                return true;
+            }
 
             boolean error;
+            Arena arena;
             
             if (!arg1.isEmpty())
-            {
-                Arena arena = am.getArenaWithName(arg1);
-                
-                // Crap-load of sanity-checks.
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
-                else if (!arena.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
-                else if (!arena.setup)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-                else if (arena.running)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
-                else if (arena.livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-                else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-                else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
-                else error = false;
-                
-                // If there was an error, don't join.
-                if (error)
-                    return true;
-                
-                am.arenaMap.put(p,arena);
-                arena.playerJoin(p, p.getLocation());
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
-                return true;
-            }
+                arena = am.getArenaWithName(arg1);
+            else if (arenas.size() == 1)
+                arena = arenas.get(0);
             else
+                arena = null;
+            
+            if (arenas.size() > 1 && arg1.isEmpty())
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
+            else if (arena == null)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+            //else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
+            else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
+            else if (!arena.enabled)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
+            else if (!arena.setup || arena.edit)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
+            else if (arena.running && arena.waitPlayers.add(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
+            //else if (arena.livePlayers.contains(p))
+            else if (arena.arenaPlayers.contains(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
+            else if (!plugin.has(p, "mobarena.arenas." + arena.configName()))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
+            else if (!arena.canAfford(p) || !arena.takeFee(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(arena.entryFee, plugin)));
+            //else if (arena.playerLimit > 0 && arena.livePlayers.size() >= arena.playerLimit)
+            else if (arena.playerLimit > 0 && arena.lobbyPlayers.size() >= arena.playerLimit)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
+            else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
+            else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
+            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
+            else error = false;
+            
+            // If there was an error, don't join.
+            if (error)
             {
-                if (am.arenas.size() < 1)
-                {
-                    MAUtils.tellPlayer(sender, "There are no arenas loaded. Check your config-file.");
-                    return true;
-                }
-                
-                Arena arena = am.arenas.get(0);
-                
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (am.arenas.size() > 1)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
-                else if (!arena.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
-                else if (!arena.setup)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-                else if (arena.running)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
-                else if (arena.livePlayers.contains(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-                else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-                else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
-                else error = false;
-                
-                // If there was an error, don't join.
-                if (error)
-                    return true;
-                
-                am.arenaMap.put(p,arena);
-                arena.playerJoin(p, p.getLocation());
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
+                if (arena != null)
+                    arena.refund(p);
                 return true;
             }
+            
+            // If player is in a boat/minecart, eject!
+            if (p.isInsideVehicle())
+                p.leaveVehicle();
+            
+            am.arenaMap.put(p,arena);
+            arena.playerJoin(p, p.getLocation());
+            
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
+            if (!arena.entryFee.isEmpty())
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_PAID, MAUtils.listToString(arena.entryFee, plugin)));
+            
+            return true;
         }
         
         /*
@@ -200,7 +198,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("leave") || base.equals("l"))
         {
-            if (!player || !MobArena.has(p, "mobarena.use.leave"))
+            if (!player || !plugin.has(p, "mobarena.use.leave"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -230,54 +228,60 @@ public class MACommands implements CommandExecutor
          * Player spectate
          */
         if (base.equals("spectate") || base.equals("spec"))
-        {
-            if (!player || !MobArena.has(p, "mobarena.use.spectate"))
+        {            
+            if (!player || !plugin.has(p, "mobarena.use.spectate"))
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
+            List<Arena> arenas = am.getEnabledArenas();
+            if (!am.enabled || arenas.size() < 1)
+            {
+                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                return true;
+            }
 
             boolean error;
-            Arena arena = null;
+            Arena arena;
             
             if (!arg1.isEmpty())
-            {
                 arena = am.getArenaWithName(arg1);
-
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (am.arenaMap.containsKey(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
-                else error = false;
-                
-                if (error)
-                    return true;
-            }
+            else if (arenas.size() == 1)
+                arena = arenas.get(0);
             else
-            {
-                arena = am.arenas.get(0);
-                
-                if (!am.enabled)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                else if (am.arenaMap.containsKey(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
-                else if (am.arenas.size() > 1)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
-                else if (arena == null)
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-                else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
-                    error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
-                else error = false;
-                
-                if (error)
-                    return true;
-            }
-
+                arena = null;
+            
+            if (arenas.size() > 1 && arg1.isEmpty())
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
+            else if (arena == null)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+            //else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
+            else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
+            else if (!arena.enabled)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
+            else if (!arena.setup || arena.edit)
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
+            //else if (arena.livePlayers.contains(p))
+            else if (arena.arenaPlayers.contains(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
+            else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
+            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
+                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
+            else error = false;
+            
+            // If there was an error, don't spec.
+            if (error)
+                return true;
+            
+            // If player is in a boat/minecart, eject!
+            if (p.isInsideVehicle())
+                p.leaveVehicle();
+            
+            am.arenaMap.put(p,arena);
             arena.playerSpec(p, p.getLocation());
+            
             MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_PLAYER_SPECTATE));
             return true;
         }
@@ -287,7 +291,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("arenas"))
         {            
-            String list = MAUtils.listToString(am.arenas);
+            String list = MAUtils.listToString(am.arenas, plugin);
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_ARENAS, list));
             return true;
         }
@@ -306,14 +310,16 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                String list = MAUtils.listToString(arena.getLivingPlayers());
+                String list = MAUtils.listToString(arena.getLivingPlayers(), plugin);
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             }
             else
             {
                 StringBuffer buffy = new StringBuffer();
+                List<Player> players = new LinkedList<Player>();
                 for (Arena arena : am.arenas)
-                    buffy.append(MAUtils.listToString(arena.getLivingPlayers(), false));
+                    players.addAll(arena.getLivingPlayers());
+                buffy.append(MAUtils.listToString(players, plugin));
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
             }
             return true;
@@ -349,7 +355,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            String list = MAUtils.listToString(arena.getNonreadyPlayers());
+            String list = MAUtils.listToString(arena.getNonreadyPlayers(), plugin);
             MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
             return true;
         }
@@ -367,7 +373,7 @@ public class MACommands implements CommandExecutor
          */
         if ((base.equals("enable") || base.equals("disable")))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.enable")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.enable")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -397,33 +403,37 @@ public class MACommands implements CommandExecutor
         }
         
         /*
-         * Enable or disable protection
+         * Kick player from whichever arena they are in.
          */
-        if (base.equals("protect"))
+        if (base.equals("kick"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.protect")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.kick")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1.isEmpty() || !arg1.matches("^[a-zA-Z][a-zA-Z0-9_]*$") || !(arg2.equals("true") || arg2.equals("false")))
+            
+            if (arg1.isEmpty())
             {
-                MAUtils.tellPlayer(sender, "Usage: /ma protect <arena name> [true|false]");
+                MAUtils.tellPlayer(sender, "Usage: /ma kick <player>");
                 return true;
             }
             
-            Arena arena = am.getArenaWithName(arg1);
+            Arena arena = am.getArenaWithPlayer(arg1);
             if (arena == null)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                MAUtils.tellPlayer(sender, "That player is not in an arena.");
                 return true;
             }
-            
-            arena.protect = arg2.equals("true");
-            arena.serializeConfig();
-            arena.load(plugin.getConfig());
-            MAUtils.tellPlayer(sender, "Protection for arena '" + arg1 + "' set to " + arg2);
-            return true;
+            else
+            {
+                Player pl = server.getPlayer(arg1);
+                am.arenaMap.remove(pl);
+                arena.playerLeave(pl);
+                MAUtils.tellPlayer(sender, "Player '" + arg1 + "' was kicked from arena '" + arena.configName() + "'.");
+                MAUtils.tellPlayer(pl, "You were kicked by " + ((player) ? p.getName() : "the server."));
+                return true;
+            }
         }
         
         /*
@@ -431,7 +441,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("restore"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.restore")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.restore")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -454,11 +464,11 @@ public class MACommands implements CommandExecutor
         /*
          * Force start/end arenas.
          */
-        if (base.equals("force") && arg1.equals("end"))
+        if (base.equals("force"))
         {            
             if (arg1.equals("end"))
             {
-                if (!console && !(player && MobArena.has(p, "mobarena.admin.force.end")) && !op)
+                if (!console && !(player && plugin.has(p, "mobarena.admin.force.end")) && !op)
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                     return true;
@@ -480,7 +490,8 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                if (arena.livePlayers.isEmpty())
+                //if (arena.livePlayers.isEmpty())
+                if (arena.arenaPlayers.isEmpty())
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_EMPTY));
                     return true;
@@ -492,7 +503,7 @@ public class MACommands implements CommandExecutor
             }
             else if (arg1.equals("start"))
             {
-                if (!console && !(player && MobArena.has(p, "mobarena.admin.force.start")) && !op)
+                if (!console && !(player && plugin.has(p, "mobarena.admin.force.start")) && !op)
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                     return true;
@@ -538,7 +549,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("config"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.admin.config.reload")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.admin.config.reload")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -560,7 +571,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("arena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.arena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.arena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -586,7 +597,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setarena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.setarena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.setarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -615,7 +626,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("addarena"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.addarena")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.addarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -643,7 +654,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("delarena"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.delarena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.delarena")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -674,28 +685,137 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
-        if (base.equals("editarena"))
+        /*
+         * Enable or disable protection
+         */
+        if (base.equals("protect"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.editarena")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.protect")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (arg1.isEmpty() || !(arg2.equals("true") || arg2.equals("false")))
+            
+            Arena arena;
+            
+            // No arguments
+            if (arg1.isEmpty())
             {
-                MAUtils.tellPlayer(sender, "Usage: /ma editarena <arena name> [true|false]");
+                arena = am.selectedArena;
+                arena.protect = !arena.protect;
+            }
+            
+            // One argument
+            else if (arg2.isEmpty())
+            {
+                // true/false
+                if (arg1.equals("true") || arg1.equals("false"))
+                {
+                    arena = am.selectedArena;
+                    arena.protect = arg1.equals("true");
+                }
+                // Arena name
+                else
+                {
+                    arena = am.getArenaWithName(arg1);
+                    if (arena == null)
+                    {
+                        MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                        MAUtils.tellPlayer(sender, "Usage: /ma protect ([true|false])");
+                        MAUtils.tellPlayer(sender, "    or /ma protect <arena name> ([true|false])");
+                        return true;
+                    }
+                    arena.protect = !arena.protect;
+                }
+            }
+            
+            // Two arguments
+            else
+            {
+                if (!(arg2.equals("true") || arg2.equals("false")))
+                {
+                    MAUtils.tellPlayer(sender, "Usage: /ma protect ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma protect <arena name> ([true|false])");
+                    return true;
+                }
+                arena = am.getArenaWithName(arg1);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                    MAUtils.tellPlayer(sender, "Usage: /ma protect ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma protect <arena name> ([true|false])");
+                    return true;
+                }
+                arena.protect = arg2.equals("true");
+            }
+            
+            arena.serializeConfig();
+            MAUtils.tellPlayer(sender, "Protection for arena '" + arena.configName() + "': " + ((arena.protect) ? ChatColor.GREEN + "on" : ChatColor.RED + "off")); 
+            return true;
+        }
+        
+        if (base.equals("editarena"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.setup.editarena")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
             
-            Arena arena = am.getArenaWithName(arg1);
-            if (arena == null)
+            Arena arena;
+            
+            // No arguments.
+            if (arg1.isEmpty())
             {
-                MAUtils.tellPlayer(sender, "There is no arena with that name.");
-                return true;
+                arena = am.selectedArena;
+                arena.edit = !arena.edit;
             }
             
-            arena.edit = arg2.equals("true");
-            MAUtils.tellPlayer(sender, "Edit mode for arena '" + arg1 + "': " + ((arena.edit) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
+            // One argument.
+            else if (arg2.isEmpty())
+            {
+                // Argument is [true|false]
+                if (arg1.equals("true") || arg1.equals("false"))
+                {
+                    arena = am.selectedArena;
+                    arena.edit = arg1.equals("true");
+                }
+                // Argument is <arena name>
+                else
+                {
+                    arena = am.getArenaWithName(arg1);
+                    if (arena == null)
+                    {
+                        MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                        MAUtils.tellPlayer(sender, "Usage: /ma editarena ([true|false])");
+                        MAUtils.tellPlayer(sender, "    or /ma editarena <arena name> ([true|false])");
+                        return true;
+                    }
+                    arena.edit = !arena.edit;
+                }
+            }
+            
+            // Two arguments
+            else
+            {
+                if (!(arg2.equals("true") || arg2.equals("false")))
+                {
+                    MAUtils.tellPlayer(sender, "Usage: /ma editarena ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma editarena <arena name> ([true|false])");
+                    return true;
+                }
+                arena = am.getArenaWithName(arg1);
+                if (arena == null)
+                {
+                    MAUtils.tellPlayer(sender, "There is no arena with that name.");
+                    MAUtils.tellPlayer(sender, "Usage: /ma editarena ([true|false])");
+                    MAUtils.tellPlayer(sender, "    or /ma editarena <arena name> ([true|false])");
+                    return true;
+                }
+                arena.edit = arg2.equals("true");
+            }
+            
+            MAUtils.tellPlayer(sender, "Edit mode for arena '" + arena.configName() + "': " + ((arena.edit) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
             if (arena.edit) MAUtils.tellPlayer(sender, "Remember to turn it back off after editing!"); 
             return true;
         }
@@ -705,7 +825,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("setregion"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.setregion")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.setregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -727,7 +847,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("expandregion"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.expandregion")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.expandregion")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -735,6 +855,11 @@ public class MACommands implements CommandExecutor
             if (args.length != 3 || !arg1.matches("[0-9]+"))
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma expandregion <amount> [up|down|out]");
+                return true;
+            }
+            if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
+            {
+                MAUtils.tellPlayer(sender, "You must first define p1 and p2");
                 return true;
             }
             
@@ -765,12 +890,128 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
+        if (base.equals("showregion"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.showregion")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
+            {
+                MAUtils.tellPlayer(sender, "The region is not defined for the selected arena.");
+                return true;
+            }
+            if (showingRegion || !am.selectedArena.edit)
+            {
+                MAUtils.tellPlayer(sender, "Must be in edit mode.");
+                return true;
+            }
+
+            Material mat = Material.WOOL;
+            byte color = (byte)0;
+            
+            if (arg1.equals("glowstone"))
+                mat = Material.GLOWSTONE;
+            else if (arg1.equals("white") || arg1.equals("red") || arg1.equals("blue"))
+                color = DyeColor.valueOf(arg1.toUpperCase()).getData();
+            else if (arg1.equals("green")) // Dark green sucks
+                color = 0x5;
+            else
+                mat = Material.GLASS;
+            
+            // Set the variable so we don't overwrite the region.
+            showingRegion = true;
+            
+            // Show the frame.
+            final World world = am.selectedArena.world;
+            final Set<int[]> blocks = MAUtils.showRegion(world, am.selectedArena.p1, am.selectedArena.p2, mat.getId(), color);
+            
+            // And hide the frame.
+            plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+                new Runnable()
+                {
+                    public void run()
+                    {
+                        for (int[] buffer : blocks)
+                            world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) 0, false);
+                        showingRegion = false;
+                    }
+                }, 2*20);
+            
+            return true;
+        }
+        
+        if (base.equals("setlobbyregion"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.setlobbyregion")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            if (!(arg1.equals("l1") || arg1.equals("l2")))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma setlobbyregion [l1|l2]");
+                return true;
+            }
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation());
+            MAUtils.tellPlayer(sender, "Set lobby point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+
+        if (base.equals("expandlobbyregion"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.setup.expandlobbyregion")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (args.length != 3 || !arg1.matches("[0-9]+"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma expandlobbyregion <amount> [up|down|out]");
+                return true;
+            }
+            if (am.selectedArena.l1 == null || am.selectedArena.l2 == null)
+            {
+                MAUtils.tellPlayer(sender, "You must first define l1 and l2");
+                return true;
+            }
+            
+            if (arg2.equals("up"))
+            {
+                am.selectedArena.l2.setY(Math.min(127, am.selectedArena.l2.getY() + Integer.parseInt(arg1)));
+            }
+            else if (arg2.equals("down"))
+            {
+                am.selectedArena.l1.setY(Math.max(0, am.selectedArena.l1.getY() - Integer.parseInt(arg1)));
+            }
+            else if (arg2.equals("out"))
+            {
+                am.selectedArena.l1.setX(am.selectedArena.l1.getX() - Integer.parseInt(arg1));
+                am.selectedArena.l1.setZ(am.selectedArena.l1.getZ() - Integer.parseInt(arg1));
+                am.selectedArena.l2.setX(am.selectedArena.l2.getX() + Integer.parseInt(arg1));
+                am.selectedArena.l2.setZ(am.selectedArena.l2.getZ() + Integer.parseInt(arg1));
+            }
+            else
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma expandlobbyregion <amount> [up|down|out]");
+                return true;
+            }
+            
+            MAUtils.tellPlayer(sender, "Lobby region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
+            am.selectedArena.serializeConfig();
+            am.selectedArena.load(plugin.getConfig());
+            return true;
+        }
+        
         /*
          * Set warp points [arena|lobby|spectator] for the current arena. 
          */
         if (base.equals("setwarp"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.setwarp")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.setwarp")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -780,8 +1021,8 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, "Usage: /ma setwarp [arena|lobby|spectator]");
                 return true;
             }
-
-            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation().getBlock().getRelative(0,1,0).getLocation());
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation());
             MAUtils.tellPlayer(sender, "Set warp point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
             return true;
         }
@@ -791,7 +1032,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("spawnpoints"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.spawnpoints")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.spawnpoints")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -822,7 +1063,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("addspawn"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.addspawn")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.addspawn")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -843,7 +1084,7 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("delspawn"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.delspawn")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.delspawn")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -863,7 +1104,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("auto-generate"))
         {
-            if (!(player && MobArena.has(p, "mobarena.setup.autogenerate")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -888,7 +1129,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("auto-degenerate"))
         {
-            if (!console && !(player && MobArena.has(p, "mobarena.setup.autodegenerate")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.autodegenerate")) && !op)
             {
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
@@ -911,6 +1152,55 @@ public class MACommands implements CommandExecutor
             
             if (MAUtils.undoItHippieMonster(arg1, plugin, true))
                 MAUtils.tellPlayer(sender, "Arena with name '" + arg1 + "' degenerated.");
+            else
+                MAUtils.tellPlayer(sender, "Could not degenerate arena.");
+            return true;
+        }
+        
+        if (base.equals("dooooo") && arg1.equals("it") && arg2.equals("hippie") && arg3.equals("monster"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            
+            String name = "a0";
+            do name = name.substring(0,1) + (Integer.parseInt(name.substring(1,2)) + 1);
+            while (am.getArenaWithName(name) != null);
+            
+            if (MAUtils.doooooItHippieMonster(p.getLocation(), 13, name, plugin))
+                MAUtils.tellPlayer(sender, "Arena with name '" + name + "' generated.");
+            else
+                MAUtils.tellPlayer(sender, "Could not auto-generate arena.");
+            return true;
+        }
+        
+        if (base.equals("undo") && arg1.equals("it") && arg2.equals("hippie") && arg3.equals("monster"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.autodegenerate")) && !op)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                return true;
+            }
+            if (am.arenas.size() < 2)
+            {
+                MAUtils.tellPlayer(sender, "At least one arena must exist!");
+                return true;
+            }
+            if (am.getArenaWithName("a1") == null)
+            {
+                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                return true;
+            }
+            
+            String name = "a1";
+            while (am.getArenaWithName(name) != null)
+                name = name.substring(0,1) + (Integer.parseInt(name.substring(1,2)) + 1);
+            name = name.substring(0,1) + (Integer.parseInt(name.substring(1,2)) - 1);
+            
+            if (MAUtils.undoItHippieMonster(name, plugin, true))
+                MAUtils.tellPlayer(sender, "Arena with name '" + name + "' degenerated.");
             else
                 MAUtils.tellPlayer(sender, "Could not degenerate arena.");
             return true;
