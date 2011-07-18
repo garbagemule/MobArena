@@ -73,10 +73,7 @@ public class ArenaLog
         log.add(" ");
 
         // Player data
-        int NAME = 12;
-        int CLASS = 0;
-        int WAVE = 4;
-        int KILLS = 5;
+        int NAME = 12; int CLASS = 0; int WAVE = 4; int KILLS = 5;
         for (String c : plugin.getAM().classes)
             if (c.length() > CLASS)
                 CLASS = c.length();
