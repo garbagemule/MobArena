@@ -1,10 +1,6 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-<<<<<<< HEAD
 version: 0.93.2
-=======
-version: 0.93.1
->>>>>>> da8c77082ed69d7d4ebc00cdfd480fa7df67c2ad
 softdepend: [MultiVerse,XcraftGate]
 commands:
   ma:
