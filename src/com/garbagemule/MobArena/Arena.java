@@ -129,7 +129,7 @@ public class Arena
     public boolean startArena()
     {
         // Sanity-checks
-        if (running || lobbyPlayers.isEmpty() || !lobbyPlayers.equals(readyPlayers))
+        if (running || lobbyPlayers.isEmpty() || !lobbyPlayers.containsAll(readyPlayers))
             return false;
         if (!softRestore && forceRestore && !serializeRegion())
             return false;
