@@ -181,9 +181,6 @@ public class Arena
         if (!running || !arenaPlayers.isEmpty())
             return false;
         
-        // Stop spawning.
-        stopSpawning();
-        
         // Set the boolean.
         running = false;
         
@@ -194,6 +191,9 @@ public class Arena
             log.serialize();
             log.clear();
         }
+
+        // Stop spawning.
+        stopSpawning();
 
         // Clean arena floor.
         cleanup();
@@ -286,7 +286,7 @@ public class Arena
     public void playerLeave(Player p)
     {
         // Clear class inventory, restore old inventory and fork over rewards.
-        restoreInvAndGiveRewards(p, arenaPlayers.contains(p));
+        restoreInvAndGiveRewards(p, (arenaPlayers.contains(p) || lobbyPlayers.contains(p)));
         
         // Grab the player's entry location, and warp them there.
         Location entry = locations.get(p);
@@ -362,7 +362,7 @@ public class Arena
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
 
-        // arenaPlayers is empty if lobbyPlayers isn’t, and vice versa
+        // arenaPlayers is empty if lobbyPlayers isnï¿½t, and vice versa
         /*if (arenaPlayers.remove(p))
             endArena2();
         if (lobbyPlayers.remove(p))
