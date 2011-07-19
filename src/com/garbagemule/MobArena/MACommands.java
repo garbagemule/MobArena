@@ -152,7 +152,7 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
             else if (!arena.setup || arena.edit)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-            else if (arena.running && arena.waitPlayers.add(p))
+            else if (arena.running && (arena.notifyPlayers.contains(p) || arena.notifyPlayers.add(p)))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
             else if (arena.arenaPlayers.contains(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
@@ -851,7 +851,7 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
                 return true;
             }
-            if (args.length != 3 || !arg1.matches("[0-9]+"))
+            if (args.length != 3 || !arg1.matches("(-)?[0-9]+"))
             {
                 MAUtils.tellPlayer(sender, "Usage: /ma expandregion <amount> [up|down|out]");
                 return true;
@@ -882,6 +882,9 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, "Usage: /ma expandregion <amount> [up|down|out]");
                 return true;
             }
+            
+            // In case of a "negative" region, fix it!
+            MAUtils.fixRegion(plugin.getConfig(), am.selectedArena.world, am.selectedArena);
             
             MAUtils.tellPlayer(sender, "Region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
             am.selectedArena.serializeConfig();

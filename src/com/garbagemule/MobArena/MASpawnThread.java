@@ -391,11 +391,11 @@ public class MASpawnThread implements Runnable
         {
             if (!(e instanceof Creature))
                 continue; 
-            
+
+            // TODO: Remove the try-catch when Bukkit API is fixed.
             c = (Creature) e;
-            target = c.getTarget();
+            try { target = c.getTarget(); } catch (ClassCastException cce) { continue; }
             
-            //if (target instanceof Player && arena.livePlayers.contains(target))
             if (target instanceof Player && arena.arenaPlayers.contains(target))
                 continue;
             

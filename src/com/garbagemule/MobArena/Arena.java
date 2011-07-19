@@ -59,7 +59,7 @@ public class Arena
     protected List<ItemStack> entryFee;
     
     // Arena sets/maps
-    protected Set<Player>         arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, waitPlayers, hasPaid, rewardedPlayers, notifyPlayers, randoms;
+    protected Set<Player>         arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, hasPaid, rewardedPlayers, notifyPlayers, randoms;
     protected Set<LivingEntity>   monsters;
     protected Set<Block>          blocks;
     protected Set<Wolf>           pets;
@@ -103,7 +103,6 @@ public class Arena
         notifyPlayers   = new HashSet<Player>();
         readyPlayers    = new HashSet<Player>();
         specPlayers     = new HashSet<Player>();
-        waitPlayers     = new HashSet<Player>();
         rewardedPlayers = new HashSet<Player>();
         hasPaid         = new HashSet<Player>();
         monsters        = new HashSet<LivingEntity>();
@@ -181,9 +180,6 @@ public class Arena
         if (!running || !arenaPlayers.isEmpty())
             return false;
         
-        // Stop spawning.
-        stopSpawning();
-        
         // Set the boolean.
         running = false;
         
@@ -194,6 +190,9 @@ public class Arena
             log.serialize();
             log.clear();
         }
+        
+        // Stop spawning.
+        stopSpawning();
 
         // Clean arena floor.
         cleanup();
@@ -214,6 +213,7 @@ public class Arena
         rewardMap.clear();
         waveMap.clear();
         killMap.clear();
+        spawnThread = null;
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
@@ -286,7 +286,7 @@ public class Arena
     public void playerLeave(Player p)
     {
         // Clear class inventory, restore old inventory and fork over rewards.
-        restoreInvAndGiveRewards(p, arenaPlayers.contains(p));
+        restoreInvAndGiveRewards(p, (arenaPlayers.contains(p) || lobbyPlayers.contains(p)));
         
         // Grab the player's entry location, and warp them there.
         Location entry = locations.get(p);
@@ -361,12 +361,6 @@ public class Arena
         specPlayers.remove(p);
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
-
-        // arenaPlayers is empty if lobbyPlayers isn’t, and vice versa
-        /*if (arenaPlayers.remove(p))
-            endArena2();
-        if (lobbyPlayers.remove(p))
-            startArena2();*/
     }
 
     private void spawnPets()
@@ -408,8 +402,8 @@ public class Arena
         {
             Bukkit.getServer().getScheduler().cancelTask(spawnThread.taskId);
             Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
-            spawnThread = null;
             spawnTaskId = -1;
+            spawnThread = null;
         }
         
         // Restore spawn flags.
@@ -441,13 +435,15 @@ public class Arena
         final List<ItemStack> rewards = rewardMap.get(p);
         final boolean hadRewards = rewardedPlayers.contains(p);
         
+        if (clear) MAUtils.clearInventory(p);
+        
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()
                 { 
-                    if (clear)
-                        MAUtils.clearInventory(p);
+                    //if (clear)
+                    //    MAUtils.clearInventory(p);
                     
                     if (!emptyInvJoin)
                         MAUtils.restoreInventory(p);
@@ -474,6 +470,7 @@ public class Arena
     public void assignClass(Player p, String className)
     {
         petMap.remove(p);
+        randoms.remove(p);
         classMap.put(p, className);
         
         MAUtils.clearInventory(p);
