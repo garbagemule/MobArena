@@ -152,7 +152,7 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
             else if (!arena.setup || arena.edit)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-            else if (arena.running && arena.waitPlayers.add(p))
+            else if (arena.running && arena.notifyPlayers.add(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
             else if (arena.arenaPlayers.contains(p))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));

@@ -901,7 +901,7 @@ public class MAUtils
      * Sends a message to all players in and around the arena.
      */
     public static void tellAll(Arena arena, String msg) { tellAll(arena, msg, false); }
-    public static void tellAll(Arena arena, String msg, boolean waitPlayers)
+    public static void tellAll(Arena arena, String msg, boolean notifyPlayers)
     {
         Set<Player> tmp = new HashSet<Player>();
         tmp.addAll(arena.arenaPlayers);
@@ -909,7 +909,7 @@ public class MAUtils
         tmp.addAll(arena.readyPlayers);
         tmp.addAll(arena.notifyPlayers);
         tmp.addAll(arena.specPlayers);
-        if (waitPlayers) tmp.addAll(arena.waitPlayers);
+        if (notifyPlayers) tmp.addAll(arena.notifyPlayers);
         for (Player p : tmp)
             tellPlayer(p, msg);
     }

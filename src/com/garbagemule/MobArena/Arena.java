@@ -59,7 +59,7 @@ public class Arena
     protected List<ItemStack> entryFee;
     
     // Arena sets/maps
-    protected Set<Player>         arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, waitPlayers, hasPaid, rewardedPlayers, notifyPlayers, randoms;
+    protected Set<Player>         arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, hasPaid, rewardedPlayers, notifyPlayers, randoms;
     protected Set<LivingEntity>   monsters;
     protected Set<Block>          blocks;
     protected Set<Wolf>           pets;
@@ -103,7 +103,6 @@ public class Arena
         notifyPlayers   = new HashSet<Player>();
         readyPlayers    = new HashSet<Player>();
         specPlayers     = new HashSet<Player>();
-        waitPlayers     = new HashSet<Player>();
         rewardedPlayers = new HashSet<Player>();
         hasPaid         = new HashSet<Player>();
         monsters        = new HashSet<LivingEntity>();

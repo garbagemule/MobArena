@@ -80,7 +80,6 @@ public class MAListener implements ArenaListener
             return;
         
         Block b = event.getBlock();
-        //if (running && livePlayers.contains(event.getPlayer()))
         if (arena.running && arena.arenaPlayers.contains(event.getPlayer()))
         {
             arena.blocks.add(b);
@@ -227,7 +226,6 @@ public class MAListener implements ArenaListener
             }
             
             if (event.getReason() == TargetReason.CLOSEST_PLAYER)
-                //if (!livePlayers.contains(event.getTarget()))
                 if (!arena.arenaPlayers.contains(event.getTarget()))
                     event.setCancelled(true);
             return;
@@ -238,7 +236,6 @@ public class MAListener implements ArenaListener
 	{
         if (!arena.running) return;
         
-        //if (!(event.getEntity() instanceof Player) || !livePlayers.contains((Player)event.getEntity()))
         if (!(event.getEntity() instanceof Player) || !arena.arenaPlayers.contains((Player)event.getEntity()))
             return;
         
@@ -252,7 +249,6 @@ public class MAListener implements ArenaListener
         {
             Player p = (Player) event.getEntity();
             
-            //if (!livePlayers.contains(p))
             if (!arena.arenaPlayers.contains(p))
                 return;
             
@@ -310,7 +306,6 @@ public class MAListener implements ArenaListener
         // Damagee & Damager - Player - cancel if pvp disabled
         if (damagee instanceof Player && damager instanceof Player)
         {
-            //if (livePlayers.contains(damagee) && !pvp)
             if (arena.arenaPlayers.contains(damagee) && !arena.pvp)
                 event.setCancelled(true);
             
@@ -329,7 +324,6 @@ public class MAListener implements ArenaListener
         // Creeper detonations
         if (arena.inRegion(damagee.getLocation()))
         {
-            //if (!detDamage || !(damagee instanceof Player) || !livePlayers.contains((Player) damagee))
             if (!arena.detDamage || !(damagee instanceof Player) || !arena.arenaPlayers.contains((Player) damagee))
                 return;
             
@@ -345,7 +339,6 @@ public class MAListener implements ArenaListener
         if (arena.running && arena.shareInArena) return;
         
         Player p = event.getPlayer();
-        //if (!livePlayers.contains(p))
         if (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p))
             return;
         
