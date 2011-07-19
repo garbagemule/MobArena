@@ -286,7 +286,7 @@ public class Arena
     public void playerLeave(Player p)
     {
         // Clear class inventory, restore old inventory and fork over rewards.
-        restoreInvAndGiveRewards(p, arenaPlayers.contains(p));
+        restoreInvAndGiveRewards(p, (arenaPlayers.contains(p) || lobbyPlayers.contains(p)));
         
         // Grab the player's entry location, and warp them there.
         Location entry = locations.get(p);
