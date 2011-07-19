@@ -16,6 +16,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -96,7 +97,7 @@ public class MAListener implements ArenaListener
 
 	public void onCreatureSpawn(CreatureSpawnEvent event)
 	{
-        if (!arena.inRegion(event.getLocation()))
+        if (!arena.inRegion(event.getLocation()) || event.getSpawnReason() == SpawnReason.CUSTOM)
             return;
         
         // If running == true, setCancelled(false), and vice versa.

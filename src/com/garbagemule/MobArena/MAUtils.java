@@ -755,7 +755,7 @@ public class MAUtils
         return true;
     }
     
-    private static void fixRegion(Configuration config, World world, Arena arena)
+    public static void fixRegion(Configuration config, World world, Arena arena)
     {
         if (arena.p1 == null || arena.p2 == null)
             return;
@@ -904,12 +904,11 @@ public class MAUtils
     public static void tellAll(Arena arena, String msg, boolean waitPlayers)
     {
         Set<Player> tmp = new HashSet<Player>();
-        //tmp.addAll(arena.livePlayers);
         tmp.addAll(arena.arenaPlayers);
         tmp.addAll(arena.lobbyPlayers);
-        tmp.addAll(arena.deadPlayers);
-        tmp.addAll(arena.specPlayers);
         tmp.addAll(arena.readyPlayers);
+        tmp.addAll(arena.notifyPlayers);
+        tmp.addAll(arena.specPlayers);
         if (waitPlayers) tmp.addAll(arena.waitPlayers);
         for (Player p : tmp)
             tellPlayer(p, msg);
