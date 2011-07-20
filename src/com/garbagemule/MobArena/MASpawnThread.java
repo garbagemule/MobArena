@@ -51,7 +51,6 @@ public class MASpawnThread implements Runnable
         
         taskId = -32768;
         
-        //noOfPlayers = arena.livePlayers.size();
         noOfPlayers = arena.arenaPlayers.size();
         wave = 1;
         random = new Random();
@@ -63,6 +62,7 @@ public class MASpawnThread implements Runnable
         dSpiders   = dSkeletons + arena.distDefault.get("spiders");
         dCreepers  = dSpiders   + arena.distDefault.get("creepers");
         dWolves    = dCreepers  + arena.distDefault.get("wolves");
+        if (dWolves < 1) { dZombies = 1; dSkeletons = 2; dSpiders = 3; dCreepers = 4; dWolves = 5; }
         
         dPoweredCreepers = arena.distSpecial.get("powered-creepers");
         dPigZombies      = dPoweredCreepers + arena.distSpecial.get("zombie-pigmen");
@@ -71,6 +71,7 @@ public class MASpawnThread implements Runnable
         dAngryWolves     = dMonsters        + arena.distSpecial.get("angry-wolves");
         dGiants          = dAngryWolves     + arena.distSpecial.get("giants");
         dGhasts          = dGiants          + arena.distSpecial.get("ghasts");
+        if (dGhasts < 1) { dPoweredCreepers = 1; dPigZombies = 2; dSlimes = 3; dMonsters = 4; dAngryWolves = 5; dGiants = 5; dGhasts = 5; }
     }
     
     public void run()
@@ -130,7 +131,6 @@ public class MASpawnThread implements Runnable
      */
     private void addReward(List<ItemStack> rewards)
     {
-        //for (Player p : arena.livePlayers)
         for (Player p : arena.arenaPlayers)
         {
             if (arena.rewardMap.get(p) == null)

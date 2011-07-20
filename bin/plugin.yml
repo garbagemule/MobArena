@@ -1,6 +1,6 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.93.3
+version: 0.93.4
 softdepend: [MultiVerse,XcraftGate,Towny]
 commands:
   ma:

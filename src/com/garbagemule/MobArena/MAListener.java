@@ -348,7 +348,6 @@ public class MAListener implements ArenaListener
 
 	public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
 	{
-        //if (!readyPlayers.contains(event.getPlayer()) && !livePlayers.contains(event.getPlayer()))
         if (!arena.readyPlayers.contains(event.getPlayer()) && !arena.arenaPlayers.contains(event.getPlayer()))
             return;
         
@@ -492,7 +491,6 @@ public class MAListener implements ArenaListener
         
         if (arena.running && arena.inRegion(to))
         {
-            //MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_TO_ARENA));
             event.setCancelled(true);
             return;
         }
@@ -502,7 +500,6 @@ public class MAListener implements ArenaListener
 	{
         Player p = event.getPlayer();
         
-        //if (!livePlayers.contains(p))
         if (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p))
             return;
         

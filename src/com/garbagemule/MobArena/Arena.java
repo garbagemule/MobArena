@@ -71,9 +71,10 @@ public class Arena
     protected boolean allowMonsters, allowAnimals;
     
     // Other settings
-    protected int repairDelay, playerLimit, joinDistance;
+    protected int repairDelay, minPlayers, maxPlayers, joinDistance;
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
+    protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
     
     // Logging
     protected ArenaLog log;
@@ -224,9 +225,12 @@ public class Arena
     
     public void forceStart()
     {
+        if (running)
+            return;
+        
         // Set operations.
         Set<Player> tmp = new HashSet<Player>();
-        //tmp.addAll(livePlayers);
+        tmp.addAll(lobbyPlayers);
         tmp.removeAll(readyPlayers);
         
         // Force leave.
@@ -239,6 +243,9 @@ public class Arena
     
     public void forceEnd()
     {
+        if (!running)
+            return;
+        
         for (Player p : getAllPlayers())
         {
             plugin.getAM().arenaMap.remove(p);
@@ -262,8 +269,12 @@ public class Arena
     
     public void playerJoin(Player p, Location loc)
     {
+        // Store location and health.
         if (!locations.containsKey(p))
             locations.put(p,loc);
+        if (!healthMap.containsKey(p))
+            healthMap.put(p,p.getHealth());
+        p.setHealth(20);
         
         // Update chunk.
         updateChunk(lobbyLoc);
@@ -280,6 +291,13 @@ public class Arena
     public void playerReady(Player p)
     {
         readyPlayers.add(p);
+        
+        if (minPlayers > 0 && lobbyPlayers.size() < minPlayers)
+        {
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_NOT_ENOUGH_PLAYERS, "" + minPlayers));
+            return;
+        }
+        
         startArena();
     }
     
@@ -296,6 +314,7 @@ public class Arena
             p.teleport(entry);
         }
         locations.remove(p);
+        if (healthMap.containsKey(p)) p.setHealth(healthMap.remove(p));
         
         // Remove from the arenaMap and all the sets.
         plugin.getAM().arenaMap.remove(p);
@@ -310,7 +329,6 @@ public class Arena
         // If spectate-on-death: false, pass on to playerLeave.
         if (!specOnDeath)
         {
-            p.teleport(arenaLoc);
             playerLeave(p);
             return;
         }
@@ -318,10 +336,10 @@ public class Arena
         // Clear class inventory, restore old inventory and fork over rewards.
         restoreInvAndGiveRewards(p, true);
 
-        // Remove player from sets, warp to spectator area, then add to specPlayers.
-        removePlayer(p);   
-        p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)  
+        // Remove player from sets, warp to spectator area, then add to specPlayers.  
         p.teleport(spectatorLoc);
+        if (healthMap.containsKey(p)) p.setHealth(healthMap.remove(p));
+        removePlayer(p);
         specPlayers.add(p);
 
         // Update the monster targets.
@@ -341,6 +359,8 @@ public class Arena
     {
         if (!locations.containsKey(p))
             locations.put(p,loc);
+        if (!healthMap.containsKey(p))
+            healthMap.put(p,p.getHealth());
         
         MAUtils.sitPets(p);
         specPlayers.add(p);
@@ -441,14 +461,10 @@ public class Arena
             new Runnable()
             {
                 public void run()
-                { 
-                    //if (clear)
-                    //    MAUtils.clearInventory(p);
-                    
+                {
                     if (!emptyInvJoin)
                         MAUtils.restoreInventory(p);
                     
-                    //if (rewardedPlayers.contains(p))
                     if (hadRewards)
                         return;
                     
@@ -602,7 +618,8 @@ public class Arena
         specOnDeath      = config.getBoolean(arenaPath + "spectate-on-death", true);
         shareInArena     = config.getBoolean(arenaPath + "share-items-in-arena", true);
         joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
-        playerLimit      = config.getInt(arenaPath + "player-limit", 0);
+        minPlayers       = config.getInt(arenaPath + "min-players", 0);
+        maxPlayers       = config.getInt(arenaPath + "max-players", 0);
         repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
@@ -969,6 +986,7 @@ public class Arena
             return;
         
         MAUtils.giveItems(p, entryFee, false, plugin);
+        hasPaid.remove(p);
     }
     
     /**

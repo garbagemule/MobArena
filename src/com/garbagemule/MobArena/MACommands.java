@@ -158,7 +158,7 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
             else if (!plugin.has(p, "mobarena.arenas." + arena.configName()))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
-            else if (arena.playerLimit > 0 && arena.lobbyPlayers.size() >= arena.playerLimit)
+            else if (arena.maxPlayers > 0 && arena.lobbyPlayers.size() >= arena.maxPlayers)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
             else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
@@ -181,6 +181,13 @@ public class MACommands implements CommandExecutor
             // If player is in a boat/minecart, eject!
             if (p.isInsideVehicle())
                 p.leaveVehicle();
+            
+            // If player is in a bed, unbed!
+            if (p.isSleeping())
+            {
+                p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
+                return true;
+            }
             
             am.arenaMap.put(p,arena);
             arena.playerJoin(p, p.getLocation());
