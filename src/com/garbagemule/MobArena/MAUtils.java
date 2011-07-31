@@ -885,12 +885,17 @@ public class MAUtils
     
     // ///////////////////////////////////////////////////////////////////// */
     
+    public static void error(String msg)
+    {
+        System.out.println("[MobArena] ERROR! " + msg);
+    }
+    
     /**
      * Sends a message to a player.
      */
     public static boolean tellPlayer(CommandSender p, String msg)
     {
-        if (p == null)
+        if (p == null || msg.equals(" "))
             return false;
         
         p.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.WHITE + msg);
@@ -1045,6 +1050,7 @@ public class MAUtils
         return buffy.toString().substring(0, buffy.length() - trimLength);
     }
     public static <E> String listToString(List<E> list, MobArena plugin) { return listToString(list, true, plugin); }
+    public static <E> String listToString(List<E> list) { return listToString(list, true, (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena")); }
     
     /**
      * Returns a String-list version of a comma-separated list.
@@ -1162,27 +1168,16 @@ public class MAUtils
         long hrs  = ((seconds - secs) - (mins * 60)) / 60 / 60;
         return hrs + ":" + ((mins < 10) ? "0" + mins : mins) + ":" + ((secs < 10) ? "0" + secs : secs);
     }
-
-    public static String padRight(String s, int length) { return padRight(s, length, ' '); }
-    public static String padRight(String s, int length, char pad)
-    {
-        StringBuffer buffy = new StringBuffer();
-        buffy.append(s);
-        for (int i = s.length(); i < length; i++)
-            buffy.append(pad);
-        return buffy.toString();
-    }
-
-    public static String padLeft(String s, int length) { return padLeft(s, length, ' '); }
-    public static String padLeft(String s, int length, char pad)
-    {
-        StringBuffer buffy = new StringBuffer();
-        for (int i = 0; i < length - s.length(); i++)
-            buffy.append(pad);
-        buffy.append(s);
-        return buffy.toString();
-    }
     
+    public static long parseDuration(String duration)
+    {
+        String[] elements = duration.split(":");
+        long hrs  = Long.parseLong(elements[0]) * 60 * 60;
+        long mins = Long.parseLong(elements[1]) * 60;
+        long secs = Long.parseLong(elements[2]);
+        
+        return (hrs + mins + secs) * 1000;
+    }
     
     /**
      * Stand back, I'm going to try science!

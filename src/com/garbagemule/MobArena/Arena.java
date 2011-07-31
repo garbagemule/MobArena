@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -34,6 +34,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.util.WaveUtils;
+import com.garbagemule.MobArena.waves.Wave;
+import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 
 public class Arena
 {
@@ -55,11 +58,24 @@ public class Arena
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
     protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
-    protected Map<Player,List<ItemStack>> rewardMap;
     protected List<ItemStack> entryFee;
+
+    // NEW IMPLEMENTATION
+    //
+    //
+    // Player sets
+    protected Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers;
+    // Wave stuff
+    //protected TreeSet<SingleWave>    singleWaves;
+    //protected TreeSet<RecurrentWave> recurrentWaves;
+    protected TreeSet<Wave> singleWaves;
+    protected TreeSet<Wave> recurrentWaves;
+    //
+    //
+    // NEW IMPLEMENTATION
     
     // Arena sets/maps
-    protected Set<Player>         arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, hasPaid, rewardedPlayers, notifyPlayers, randoms;
+    protected Set<Player>         hasPaid, rewardedPlayers, notifyPlayers, randoms;
     protected Set<LivingEntity>   monsters;
     protected Set<Block>          blocks;
     protected Set<Wolf>           pets;
@@ -71,17 +87,13 @@ public class Arena
     protected boolean allowMonsters, allowAnimals;
     
     // Other settings
-    protected int repairDelay, playerLimit, joinDistance;
+    protected int repairDelay, minPlayers, maxPlayers, joinDistance;
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
+    protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
     
     // Logging
     protected ArenaLog log;
-    protected List<String> classDistribution = new LinkedList<String>();
-    protected Map<Player,Integer> waveMap = new HashMap<Player,Integer>();
-    protected Map<Player,Integer> killMap = new HashMap<Player,Integer>();
-    protected Timestamp startTime;
-    protected Timestamp endTime;
     
     protected MAListener eventListener;
     
@@ -96,7 +108,6 @@ public class Arena
         this.name = name;
         this.world = world;
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
-        log = new ArenaLog(plugin, this);
         
         arenaPlayers    = new HashSet<Player>();
         lobbyPlayers    = new HashSet<Player>();
@@ -111,7 +122,6 @@ public class Arena
         petMap          = new HashMap<Player,Integer>();
         classMap        = new HashMap<Player,String>();
         randoms         = new HashSet<Player>();
-        rewardMap       = new HashMap<Player,List<ItemStack>>();
         repairList      = new LinkedList<int[]>();
         
         running         = false;
@@ -148,9 +158,7 @@ public class Arena
         {
             p.teleport(arenaLoc);
             p.setHealth(20);
-            rewardMap.put(p, new LinkedList<ItemStack>());
-            waveMap.put(p, 0);
-            killMap.put(p, 0);
+            //rewardMap.put(p, new LinkedList<ItemStack>());
         }
         
         // Spawn pets.
@@ -160,8 +168,8 @@ public class Arena
         startSpawning();
         
         // Start logging
-        if (logging)
-            log.start();
+        log = new ArenaLog(plugin, this);
+        log.start();
         
         // Set the boolean.
         running = true;
@@ -183,13 +191,9 @@ public class Arena
         // Set the boolean.
         running = false;
         
-        // Stop logging.
-        if (logging)
-        {
-            log.end();
-            log.serialize();
-            log.clear();
-        }
+        log.end();
+        log.saveSessionData();
+        log.updateArenaTotals();
         
         // Stop spawning.
         stopSpawning();
@@ -210,9 +214,7 @@ public class Arena
         notifyPlayers.clear();
         rewardedPlayers.clear();
         classMap.clear();
-        rewardMap.clear();
-        waveMap.clear();
-        killMap.clear();
+        //rewardMap.clear();
         spawnThread = null;
         
         // Notify listeners.
@@ -224,9 +226,12 @@ public class Arena
     
     public void forceStart()
     {
+        if (running)
+            return;
+        
         // Set operations.
         Set<Player> tmp = new HashSet<Player>();
-        //tmp.addAll(livePlayers);
+        tmp.addAll(lobbyPlayers);
         tmp.removeAll(readyPlayers);
         
         // Force leave.
@@ -239,12 +244,14 @@ public class Arena
     
     public void forceEnd()
     {
-        for (Player p : getAllPlayers())
-        {
-            plugin.getAM().arenaMap.remove(p);
-            playerLeave(p);
-        }
+        if (!running)
+            return;
         
+        Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
+        
+        for (Player p : getAllPlayers())
+            playerLeave(p);
+                
         for (Entity e : monsters)
             e.remove();
         
@@ -252,9 +259,7 @@ public class Arena
         lobbyPlayers.clear();
         readyPlayers.clear();
         
-        rewardMap.clear();
-        waveMap.clear();
-        killMap.clear();
+        //rewardMap.clear();
         monsters.clear();
         
         spawnTaskId = -1;
@@ -262,105 +267,68 @@ public class Arena
     
     public void playerJoin(Player p, Location loc)
     {
-        if (!locations.containsKey(p))
-            locations.put(p,loc);
-        
-        // Update chunk.
-        updateChunk(lobbyLoc);
-        
+        storePlayerData(p, loc);
+        p.setHealth(20);
         MAUtils.sitPets(p);
-        lobbyPlayers.add(p);
-        p.teleport(lobbyLoc);
-
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onPlayerJoin(p);
+        movePlayerToLobby(p);
     }
     
     public void playerReady(Player p)
     {
         readyPlayers.add(p);
+        
+        if (minPlayers > 0 && lobbyPlayers.size() < minPlayers)
+        {
+            MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_NOT_ENOUGH_PLAYERS, "" + minPlayers));
+            return;
+        }
+        
         startArena();
     }
     
     public void playerLeave(Player p)
     {
-        // Clear class inventory, restore old inventory and fork over rewards.
-        restoreInvAndGiveRewards(p, (arenaPlayers.contains(p) || lobbyPlayers.contains(p)));
+        if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
+            MAUtils.clearInventory(p);
         
-        // Grab the player's entry location, and warp them there.
-        Location entry = locations.get(p);
-        if (entry != null)
-        {
-            updateChunk(entry);
-            p.teleport(entry);
-        }
-        locations.remove(p);
-        
-        // Remove from the arenaMap and all the sets.
-        plugin.getAM().arenaMap.remove(p);
-        removePlayer(p);
-        
-        // End the arena if conditions are met.
+        restoreInvAndGiveRewards(p);
+        if (log.players.get(p) != null) log.players.get(p).lastWave = spawnThread.wave - 1;
+        movePlayerToEntry(p);
+        finishWithPlayer(p);
         endArena();
     }
     
     public void playerDeath(Player p)
     {
-        // If spectate-on-death: false, pass on to playerLeave.
-        if (!specOnDeath)
+        MAUtils.clearInventory(p);
+        restoreInvAndGiveRewards(p);
+        log.players.get(p).lastWave = spawnThread.wave - 1;
+        
+        if (specOnDeath)
         {
-            p.teleport(arenaLoc);
-            playerLeave(p);
-            return;
+            resetPlayer(p);
+            movePlayerToSpec(p);
         }
-
-        // Clear class inventory, restore old inventory and fork over rewards.
-        restoreInvAndGiveRewards(p, true);
-
-        // Remove player from sets, warp to spectator area, then add to specPlayers.
-        removePlayer(p);   
-        p.teleport(arenaLoc); // This will sometimes force players to drop any items held (not confirmed)  
-        p.teleport(spectatorLoc);
-        specPlayers.add(p);
-
-        // Update the monster targets.
+        else
+        {
+            movePlayerToEntry(p);
+            finishWithPlayer(p);
+        }
+        
         if (running && spawnThread != null)
             spawnThread.updateTargets();
         
-        // Announce and notify
         MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onPlayerDeath(p);
-
-        // End the arena if conditions are met.
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() { public void run() {
         endArena();
+        }});
     }
     
     public void playerSpec(Player p, Location loc)
     {
-        if (!locations.containsKey(p))
-            locations.put(p,loc);
-        
+        storePlayerData(p, loc);
         MAUtils.sitPets(p);
-        specPlayers.add(p);
-        p.teleport(spectatorLoc);
-    }
-    
-    public void removePlayer(Player p)
-    {
-        // Heal and put out fire.
-        p.setFireTicks(0);
-        p.setHealth(20);
-        
-        // Remove pets.
-        removePets(p);
-        
-        // readyPlayers before lobbyPlayers because of startArena sanity-checks
-        readyPlayers.remove(p);
-        specPlayers.remove(p);
-        arenaPlayers.remove(p);
-        lobbyPlayers.remove(p);
+        movePlayerToSpec(p);
     }
 
     private void spawnPets()
@@ -424,31 +392,26 @@ public class Arena
     
     public void playerKill(Player p)
     {
-    	if (p == null || killMap.get(p) == null)
+    	if (p == null || log.players.get(p) == null)
     		return;
     	
-        killMap.put(p, killMap.get(p) + 1);
+        log.players.get(p).kills++;
     }
     
-    public void restoreInvAndGiveRewards(final Player p, final boolean clear)
+    public void restoreInvAndGiveRewards(final Player p)
     {
-        final List<ItemStack> rewards = rewardMap.get(p);
+        final List<ItemStack> rewards = log.players.get(p).rewards;
+        //final List<ItemStack> rewards = rewardMap.get(p);
         final boolean hadRewards = rewardedPlayers.contains(p);
-        
-        if (clear) MAUtils.clearInventory(p);
         
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()
-                { 
-                    //if (clear)
-                    //    MAUtils.clearInventory(p);
-                    
+                {
                     if (!emptyInvJoin)
                         MAUtils.restoreInventory(p);
                     
-                    //if (rewardedPlayers.contains(p))
                     if (hadRewards)
                         return;
                     
@@ -457,6 +420,70 @@ public class Arena
                         rewardedPlayers.add(p);
                 }
             });
+    }
+    
+    public void storePlayerData(Player p, Location loc)
+    {
+        plugin.getAM().arenaMap.put(p, this);
+        
+        if (!locations.containsKey(p))
+            locations.put(p, loc);
+
+        if (!healthMap.containsKey(p))
+            healthMap.put(p, p.getHealth());
+    }
+    
+    public void movePlayerToLobby(Player p)
+    {
+        updateChunk(lobbyLoc);
+        lobbyPlayers.add(p);
+        p.teleport(lobbyLoc);
+    }
+    
+    public void movePlayerToSpec(Player p)
+    {
+        updateChunk(spectatorLoc);
+        specPlayers.add(p);
+        p.teleport(spectatorLoc);
+    }
+    
+    public void movePlayerToEntry(Player p)
+    {
+        Location entry = locations.get(p);
+        if (entry == null) return;
+        
+        updateChunk(entry);
+        p.teleport(entry);
+    }
+    
+    private void resetPlayer(Player p)
+    {
+        if (healthMap.containsKey(p))
+            p.setHealth(healthMap.remove(p));
+        
+        removePlayer(p);
+    }
+    
+    public void removePlayer(Player p)
+    {
+        // Put out fire.
+        p.setFireTicks(0);
+        
+        // Remove pets.
+        removePets(p);
+        
+        // readyPlayers before lobbyPlayers because of startArena sanity-checks
+        readyPlayers.remove(p);
+        specPlayers.remove(p);
+        arenaPlayers.remove(p);
+        lobbyPlayers.remove(p);
+    }
+    
+    private void finishWithPlayer(Player p)
+    {
+        locations.remove(p);
+        plugin.getAM().arenaMap.remove(p);
+        resetPlayer(p);
     }
     
     
@@ -602,7 +629,8 @@ public class Arena
         specOnDeath      = config.getBoolean(arenaPath + "spectate-on-death", true);
         shareInArena     = config.getBoolean(arenaPath + "share-items-in-arena", true);
         joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
-        playerLimit      = config.getInt(arenaPath + "player-limit", 0);
+        minPlayers       = config.getInt(arenaPath + "min-players", 0);
+        maxPlayers       = config.getInt(arenaPath + "max-players", 0);
         repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
@@ -623,6 +651,23 @@ public class Arena
         lobbyLoc         = MAUtils.getArenaCoord(config, world, configName, "lobby");
         spectatorLoc     = MAUtils.getArenaCoord(config, world, configName, "spectator");
         spawnpoints      = MAUtils.getArenaSpawnpoints(config, world, configName);
+        
+        // NEW WAVES
+        singleWaves      = WaveUtils.getWaves(config, configName, WaveBranch.SINGLE);
+        recurrentWaves   = WaveUtils.getWaves(config, configName, WaveBranch.RECURRENT);
+
+        
+        System.out.println();
+        System.out.println("ARENA: " + configName);
+        System.out.println("Single waves");
+        int si = singleWaves.size();
+        for (int i = 0; i < si; i++)
+            System.out.println("- " + singleWaves.pollFirst());
+        System.out.println("Reccurent waves");
+        for (Wave w : recurrentWaves)
+            System.out.println("- " + w);
+        System.out.println();
+        
         
         classes          = plugin.getAM().classes;
         classItems       = plugin.getAM().classItems;
@@ -847,8 +892,8 @@ public class Arena
                 public void run()
                 {
                     // Make sure to remove any dead/removed entities first.
-                    List<Entity> tmp = new LinkedList<Entity>(monsters);
-                    for (Entity e : tmp)
+                    List<Entity> ms = new LinkedList<Entity>(monsters);
+                    for (Entity e : ms)
                         if (e.isDead())
                             monsters.remove(e);
                     
@@ -860,7 +905,8 @@ public class Arena
                     }
                     
                     // Clear all player inventories, and "kill" all players.
-                    for (Player p : arenaPlayers)
+                    List<Player> ps = new LinkedList<Player>(arenaPlayers);
+                    for (Player p : ps)
                     {
                         MAUtils.clearInventory(p);
                         MAUtils.tellPlayer(p, MAMessages.get(Msg.FORCE_END_IDLE));
@@ -969,6 +1015,12 @@ public class Arena
             return;
         
         MAUtils.giveItems(p, entryFee, false, plugin);
+        hasPaid.remove(p);
+    }
+    
+    public List<String> getClasses()
+    {
+        return classes;
     }
     
     /**

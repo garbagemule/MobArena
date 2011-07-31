@@ -52,6 +52,7 @@ public class MAMessages
         LOBBY_CLASS_PICKED,
         LOBBY_CLASS_RANDOM,
         LOBBY_CLASS_PERMISSION,
+        LOBBY_NOT_ENOUGH_PLAYERS,
         LOBBY_PLAYER_READY,
         LOBBY_DROP_ITEM,
         LOBBY_PICK_CLASS,
@@ -108,6 +109,7 @@ public class MAMessages
         defaults.put(Msg.LOBBY_DROP_ITEM, "No sharing allowed at this time!");
         defaults.put(Msg.LOBBY_PLAYER_READY, "You have been flagged as ready!");
         defaults.put(Msg.LOBBY_PICK_CLASS, "You must first pick a class!");
+        defaults.put(Msg.LOBBY_NOT_ENOUGH_PLAYERS, "Not enough players to start. Need at least % players.");
         defaults.put(Msg.LOBBY_RIGHT_CLICK, "Punch the sign. Don't right-click.");
         defaults.put(Msg.LOBBY_CLASS_PICKED, "You have chosen % as your class!");
         defaults.put(Msg.LOBBY_CLASS_RANDOM, "You will get a random class on arena start.");
@@ -127,7 +129,7 @@ public class MAMessages
     /**
      * Initializes the msgMap by reading from the announcements-file.
      */
-    public static void init(MobArena plugin, boolean update)
+    public static void init(MobArena plugin)
     {
         // Use defaults in case of any errors.
         msgMap = defaults;
@@ -184,11 +186,6 @@ public class MAMessages
         }
     }
     
-    public static void init(MobArena plugin)
-    {
-        init(plugin, false);
-    }
-    
     /**
      * Grabs the announcement from the msgMap, and in case of
      * s not being null, replaces the % with s.
@@ -217,6 +214,8 @@ public class MAMessages
      */
     private static void process(String s)
     {
+        if (s.endsWith("="))
+            s += " ";
         // Split the string by the equals-sign.
         String[] split = s.split("=");
         if (split.length != 2)

@@ -49,6 +49,7 @@ public class ArenaMaster
     {
         plugin = instance;
         config = plugin.getConfig();
+        arenas = new LinkedList<Arena>();
     }
     
     
@@ -225,17 +226,14 @@ public class ArenaMaster
         for (String configName : config.getKeys("arenas"))
         {
             String arenaPath = "arenas." + configName + ".";
-            String worldName = config.getString(arenaPath + "settings.world");
+            String worldName = config.getString(arenaPath + "settings.world", null);
             World  world;
-            if (worldName == null)
+            if (worldName == null || worldName.equals(""))
             {
                 System.out.println("[MobArena] ERROR! Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
                 world = Bukkit.getServer().getWorlds().get(0);
             }
-            else
-            {
-                world = Bukkit.getServer().getWorld(worldName);
-            }
+            else world = Bukkit.getServer().getWorld(worldName);
             
             Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
             arena.load(config);

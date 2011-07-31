@@ -61,6 +61,7 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("delclass");          // Delete a class
         COMMANDS.add("auto-generate");     // Auto-generate arena
         COMMANDS.add("auto-degenerate");   // Restore cuboid
+        COMMANDS.add("lol");
     }
     private boolean meanAdmins, showingRegion;
     private Server server;
@@ -115,6 +116,11 @@ public class MACommands implements CommandExecutor
         //
         ////////////////////////////////////////////////////////////////*/
         
+        if (base.equals("spawn"))
+        {
+            p.getWorld().setSpawnLocation(p.getLocation().getBlockX(), p.getLocation().getBlockY() + 1, p.getLocation().getBlockZ());
+        }
+        
         /*
          * Player join
          */
@@ -158,7 +164,7 @@ public class MACommands implements CommandExecutor
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
             else if (!plugin.has(p, "mobarena.arenas." + arena.configName()))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
-            else if (arena.playerLimit > 0 && arena.lobbyPlayers.size() >= arena.playerLimit)
+            else if (arena.maxPlayers > 0 && arena.lobbyPlayers.size() >= arena.maxPlayers)
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
             else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
                 error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
@@ -182,12 +188,21 @@ public class MACommands implements CommandExecutor
             if (p.isInsideVehicle())
                 p.leaveVehicle();
             
-            am.arenaMap.put(p,arena);
+            // If player is in a bed, unbed!
+            if (p.isSleeping())
+            {
+                p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
+                return true;
+            }
+            
+            //am.arenaMap.put(p,arena);
             arena.playerJoin(p, p.getLocation());
             
             MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
             if (!arena.entryFee.isEmpty())
                 MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_PAID, MAUtils.listToString(arena.entryFee, plugin)));
+            if (arena.hasPaid.contains(p))
+                arena.hasPaid.remove(p);
             
             return true;
         }
@@ -217,7 +232,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            Arena arena = am.arenaMap.remove(p);            
+            Arena arena = am.arenaMap.get(p);            
             arena.playerLeave(p);
             MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_PLAYER_LEFT));
             return true;
@@ -489,7 +504,6 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                //if (arena.livePlayers.isEmpty())
                 if (arena.arenaPlayers.isEmpty())
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_EMPTY));

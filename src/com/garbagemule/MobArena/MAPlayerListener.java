@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -21,6 +22,13 @@ public class MAPlayerListener extends PlayerListener
     {
         this.plugin = plugin;
         this.am = am;
+    }
+    
+    public void onPlayerAnimation(PlayerAnimationEvent event)
+    {
+        if (!am.enabled) return;
+        for (Arena arena : am.arenas)
+            arena.eventListener.onPlayerAnimation(event);
     }
     
     public void onPlayerInteract(PlayerInteractEvent event)

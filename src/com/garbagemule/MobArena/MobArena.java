@@ -16,6 +16,7 @@ import org.bukkit.util.config.Configuration;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
 
@@ -36,36 +37,84 @@ public class MobArena extends JavaPlugin
     protected Method  Method;
     
     // Global variables
-    protected static final double MIN_PLAYER_DISTANCE = 256.0;
-    protected static final int ECONOMY_MONEY_ID = -29;
+    public static PluginDescriptionFile desc;
+    public static File dir, arenaDir;
+    public static final double MIN_PLAYER_DISTANCE = 256.0;
+    public static final int ECONOMY_MONEY_ID = -29;
 
     public void onEnable()
-    {
-        PluginDescriptionFile pdfFile = this.getDescription();
+    {        
+        // Description file and data folder
+        desc     = getDescription();
+        dir      = getDataFolder();
+        arenaDir = new File(dir, "arenas"); 
+        if (!dir.exists()) dir.mkdir();
+        //if (!arenaDir.exists()) arenaDir.mkdir();
         
-        // Config, messages and ArenaMaster initialization
+        // Create default files and initialize config-file
+        FileUtils.extractDefaults("config.yml", "announcements.properties");
         loadConfig();
-        MAMessages.init(this);
+        
+        // Download external libraries if needed.
+        FileUtils.fetchLibs(config);
+        
+        // Set up permissions and economy
+        setupPermissions();
+        setupRegister();
+        
+        // Set up the ArenaMaster and the announcements
         am = new ArenaMaster(this);
         am.initialize();
+        MAMessages.init(this);
         
-        // Permissions
-        setupPermissions();
+        // Register event listeners
+        registerListeners();
         
-        // Economy
-        Methods = new Methods();
-        if (!Methods.hasMethod() && Methods.setMethod(this))
+        // Announce enable!
+        System.out.println("[MobArena] v" + desc.getVersion() + " enabled.");
+    }
+    
+    public void onDisable()
+    {
+        // TODO: Re-implement this!
+        /*
+        // Force all arenas to end.
+        for (Arena arena : am.arenas)
+            arena.forceEnd();
+        am.arenaMap.clear();
+        
+        // Permissions & Economy
+        permissionHandler = null;
+        if (Methods != null && Methods.hasMethod())
         {
-            Method = Methods.getMethod();
-            System.out.println("[MobArena] Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
+            Methods = null;
+            System.out.println("[MobArena] Payment method was disabled. No longer accepting payments.");
+        }
+        */
+        System.out.println("[MobArena] disabled.");
+    }
+    
+    private void loadConfig()
+    {
+        File file = new File(dir, "config.yml");
+        if (!file.exists())
+        {
+            System.out.println("[MobArena] ERROR! Config-file could not be created!");
+            return;
         }
         
+        config = new Configuration(file);
+        config.load();
+    }
+    
+    private void registerListeners()
+    {
         // Bind the /ma, /marena, and /mobarena commands to MACommands.
         MACommands commandExecutor = new MACommands(this, am);
-    	getCommand("ma").setExecutor(commandExecutor);
-    	getCommand("marena").setExecutor(commandExecutor);
-    	getCommand("mobarena").setExecutor(commandExecutor);
-    	
+        getCommand("ma").setExecutor(commandExecutor);
+        getCommand("marena").setExecutor(commandExecutor);
+        getCommand("mobarena").setExecutor(commandExecutor);
+        
         // Create event listeners.
         PluginManager pm = getServer().getPluginManager();
         PlayerListener playerListener = new MAPlayerListener(this, am);
@@ -80,6 +129,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_QUIT,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_KICK,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_JOIN,               playerListener,   Priority.Normal,  this);
+        pm.registerEvent(Event.Type.PLAYER_ANIMATION,          playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE,             entityListener,   Priority.High,    this); // mcMMO is "Highest"
@@ -90,79 +140,6 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.ENTITY_TARGET,             entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN,            entityListener,   Priority.Highest, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener,   Priority.Monitor, this);
-        
-        System.out.println("[MobArena] v" + pdfFile.getVersion() + " enabled." );
-    }
-    
-    public void onDisable()
-    {
-        // Force all arenas to end.
-        for (Arena arena : am.arenas)
-            arena.forceEnd();
-        am.arenaMap.clear();
-        
-        // Permissions & Economy
-        permissionHandler = null;
-        if (Methods != null && Methods.hasMethod())
-        {
-            Methods = null;
-            System.out.println("[MobArena] Payment method was disabled. No longer accepting payments.");
-        }
-        
-        System.out.println("[MobArena] disabled.");
-    }
-    
-    /**
-     * Load the config-file and initialize the Configuration object.
-     */
-    private void loadConfig()
-    {        
-        File file = new File(this.getDataFolder(), "config.yml");
-        if (!file.exists())
-        {
-            try
-            {
-                this.getDataFolder().mkdir();
-                file.createNewFile();
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                return;
-            }
-        }
-        // TODO: Remove in v1.0
-        else
-        {
-            Configuration tmp = new Configuration(file);
-            tmp.load();
-            if (tmp.getKeys("global-settings") == null)
-            {
-                file.renameTo(new File(this.getDataFolder(), "config_OLD.yml"));
-                file = new File(this.getDataFolder(), "config.yml");
-                try
-                {
-                    this.getDataFolder().mkdir();
-                    file.createNewFile();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                    return;
-                }
-                
-                config = new Configuration(file);
-                config.load();
-                fixConfig();
-                config.setHeader("# MobArena Configuration-file\r\n# Please go to https://github.com/garbagemule/MobArena/wiki/Installing-MobArena for more details.");
-                config.save();
-            }
-        }
-        
-        config = new Configuration(file);
-        config.load();
-        config.setHeader("# MobArena Configuration-file\r\n# Please go to https://github.com/garbagemule/MobArena/wiki/Installing-MobArena for more details.");
-        config.save();
     }
     
     // Permissions stuff
@@ -188,89 +165,17 @@ public class MobArena extends JavaPlugin
         permissionHandler = ((Permissions) permissionsPlugin).getHandler();
     }
     
+    private void setupRegister()
+    {
+        Methods = new Methods();
+        if (!Methods.hasMethod() && Methods.setMethod(this))
+        {
+            Method = Methods.getMethod();
+            System.out.println("[MobArena] Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
+        }
+    }
+    
     public Configuration getConfig()      { return config; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
-    
-    // TODO: Remove in v1.0
-    private void fixConfig()
-    {
-        // If global-settings is sorted, don't do anything.
-        if (config.getKeys("global-settings") != null)
-            return;
-        
-        File oldFile = new File(this.getDataFolder(), "config_OLD.yml");
-        if (!oldFile.exists())
-            return;
-        
-        System.out.println("[MobArena] Config-file appears to be old. Trying to fix it...");
-        
-        Configuration oldConfig = new Configuration(oldFile);
-        oldConfig.load();
-
-        config.setProperty("global-settings.enabled", true);
-        config.save();
-        config.load();
-        config.setProperty("global-settings.update-notification", true);
-        config.save();
-        config.load();
-        
-        // Copy classes
-        for (String s : oldConfig.getKeys("classes"))
-        {
-            config.setProperty("classes." + s + ".items", oldConfig.getString("classes." + s + ".items"));
-            config.setProperty("classes." + s + ".armor", oldConfig.getString("classes." + s + ".armor"));
-        }
-        config.save();
-        
-        // Make the default arena node.
-        config.setProperty("arenas.default.settings.enabled", true);
-        config.save();
-        config.load();
-        config.setProperty("arenas.default.settings.world", oldConfig.getString("settings.world"));
-        config.save();
-        config.load();
-        
-        // Copy the coords.
-        for (String s : oldConfig.getKeys("coords"))
-        {
-            if (s.equals("spawnpoints"))
-                continue;
-            
-            StringBuffer buffy = new StringBuffer();
-            buffy.append(oldConfig.getString("coords." + s + ".x"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords." + s + ".y"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords." + s + ".z"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords." + s + ".yaw"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords." + s + ".pitch"));
-            
-            config.setProperty("arenas.default.coords." + s, buffy.toString());
-        }
-        config.save();
-        config.load();
-        
-        for (String s : oldConfig.getKeys("coords.spawnpoints"))
-        {
-            StringBuffer buffy = new StringBuffer();
-            buffy.append(oldConfig.getString("coords.spawnpoints." + s + ".x"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords.spawnpoints." + s + ".y"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords.spawnpoints." + s + ".z"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords.spawnpoints." + s + ".yaw"));
-            buffy.append(",");
-            buffy.append(oldConfig.getString("coords.spawnpoints." + s + ".pitch"));
-            
-            config.setProperty("arenas.default.coords.spawnpoints." + s, buffy.toString());
-        }
-        config.save();
-        config.load();
-        
-        System.out.println("[MobArena] Updated the config-file!");
-    }
 }

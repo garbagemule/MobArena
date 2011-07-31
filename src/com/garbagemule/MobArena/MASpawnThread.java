@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Wolf;
@@ -21,6 +23,10 @@ import org.bukkit.entity.CreatureType;
 import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.util.WaveUtils;
+import com.garbagemule.MobArena.waves.RecurrentWave;
+import com.garbagemule.MobArena.waves.SingleWave;
+import com.garbagemule.MobArena.waves.Wave;
 
 /**
  * Core class for handling wave spawning.
@@ -30,8 +36,6 @@ import com.garbagemule.MobArena.MAMessages.Msg;
  * host chooses. It is possible to create default waves that consist of
  * only one type of monster, or ones that have no creepers, for example.
  */
-// TODO: Allow custom special wave monsters.
-// TODO: Allow additional "default" waves.
 public class MASpawnThread implements Runnable
 {
     protected int wave, previousSize, taskId;
@@ -42,6 +46,14 @@ public class MASpawnThread implements Runnable
     private MobArena plugin;
     private Arena arena;
     
+    // NEW WAVES
+    /* Single waves are waves with a frequency of 0, and they only
+     * spawn once. Their priority is infinity, meaning they will always
+     * spawn instead of recurrent waves, if the wave numbers clash. */
+    private Wave defaultWave;
+    private TreeSet<SingleWave>    singleWaves;
+    private TreeSet<RecurrentWave> recurrentWaves;
+    
     public MASpawnThread(MobArena plugin, Arena arena)
     {
         this.plugin = plugin;
@@ -51,7 +63,6 @@ public class MASpawnThread implements Runnable
         
         taskId = -32768;
         
-        //noOfPlayers = arena.livePlayers.size();
         noOfPlayers = arena.arenaPlayers.size();
         wave = 1;
         random = new Random();
@@ -63,6 +74,7 @@ public class MASpawnThread implements Runnable
         dSpiders   = dSkeletons + arena.distDefault.get("spiders");
         dCreepers  = dSpiders   + arena.distDefault.get("creepers");
         dWolves    = dCreepers  + arena.distDefault.get("wolves");
+        if (dWolves < 1) { dZombies = 1; dSkeletons = 2; dSpiders = 3; dCreepers = 4; dWolves = 5; }
         
         dPoweredCreepers = arena.distSpecial.get("powered-creepers");
         dPigZombies      = dPoweredCreepers + arena.distSpecial.get("zombie-pigmen");
@@ -71,6 +83,98 @@ public class MASpawnThread implements Runnable
         dAngryWolves     = dMonsters        + arena.distSpecial.get("angry-wolves");
         dGiants          = dAngryWolves     + arena.distSpecial.get("giants");
         dGhasts          = dGiants          + arena.distSpecial.get("ghasts");
+        if (dGhasts < 1) { dPoweredCreepers = 1; dPigZombies = 2; dSlimes = 3; dMonsters = 4; dAngryWolves = 5; dGiants = 5; dGhasts = 5; }
+    }
+    
+    public void run2()
+    {
+        // Clear out all dead monsters in the monster set.
+        removeDeadMonsters();
+        
+        // If there are no players in the arena, return.
+        if (arena.arenaPlayers.isEmpty())
+            return;
+
+        // Check if wave needs to be cleared first. If so, return!
+        if (arena.waveClear && wave > 1 && !arena.monsters.isEmpty())
+            return;
+        
+        // Grant rewards (if any) for this wave
+        grantRewards(wave);
+        
+        // Detonate creepers if needed
+        detonateCreepers(arena.detCreepers);
+        
+        // Find the wave to spawn
+        spawnWave(wave);
+        
+        wave++;
+        if (arena.monsters.isEmpty())
+            arena.resetIdleTimer();
+    }
+    
+    private void removeDeadMonsters()
+    {
+        List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
+        for (Entity e : tmp)
+            if (e.isDead())
+                arena.monsters.remove(e);
+    }
+    
+    private void grantRewards(int wave)
+    {
+        for (Map.Entry<Integer,List<ItemStack>> entry : arena.everyWaveMap.entrySet())
+            if (wave % entry.getKey() == 0)
+                addReward(entry.getValue());
+
+        if (arena.afterWaveMap.containsKey(wave))
+            addReward(arena.afterWaveMap.get(wave));
+    }
+    
+    private void spawnWave(int wave)
+    {
+        Wave w = null;
+        
+        // Check the first element of the single waves.
+        if (!singleWaves.isEmpty() && singleWaves.first().matches(wave))
+        {
+            w = singleWaves.pollFirst();
+            //singleWaves.pollFirst().spawn(wave, arena.spawnpoints.values());
+            //return;
+        }
+        else
+        {
+            SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
+            
+            if (matches.isEmpty())
+                w = defaultWave;
+            else
+                w = matches.last();
+        }
+        
+        w.spawn(wave, arena.spawnpoints.values());
+        /*
+        // Otherwise, check the recurrent waves.
+        SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
+        
+        if (matches.isEmpty())
+            defaultWave.spawn(wave, arena.spawnpoints.values());
+        else
+            matches.last().spawn(wave, arena.spawnpoints.values());
+        */
+    }
+    
+    private SortedSet<Wave> getMatchingRecurrentWaves(int wave)
+    {
+        TreeSet<Wave> result = new TreeSet<Wave>(WaveUtils.getRecurrentComparator());
+        
+        for (Wave w : recurrentWaves)
+        {
+            if (w.matches(wave))
+                result.add(w);
+        }
+        
+        return result;
     }
     
     public void run()
@@ -130,14 +234,16 @@ public class MASpawnThread implements Runnable
      */
     private void addReward(List<ItemStack> rewards)
     {
-        //for (Player p : arena.livePlayers)
         for (Player p : arena.arenaPlayers)
         {
-            if (arena.rewardMap.get(p) == null)
+            if (arena.log.players.get(p) == null)
                 continue;
+            /*if (arena.rewardMap.get(p) == null)
+                continue;*/
             
             ItemStack reward = MAUtils.getRandomReward(rewards);
-            arena.rewardMap.get(p).add(reward);
+            arena.log.players.get(p).rewards.add(reward);
+            //arena.rewardMap.get(p).add(reward);
             
             if (reward == null)
             {
