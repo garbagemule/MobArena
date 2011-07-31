@@ -1,0 +1,26 @@
+name: MobArena
+main: com.garbagemule.MobArena.MobArena
+version: 0.93.4
+softdepend: [MultiVerse,XcraftGate,Towny]
+commands:
+  ma:
+    description: Base command for MobArena
+    usage: |
+           /ma join      - Join the arena.
+           /ma leave     - Leave the arena.
+           /ma notready  - List of players who aren't ready.
+           /ma spectate  - Warp to the spectator area.
+  marena:
+    description: Base command for MobArena
+    usage: |
+           /marena join      - Join the arena.
+           /marena leave     - Leave the arena.
+           /marena notready  - List of players who aren't ready.
+           /marena spectate  - Warp to the spectator area.
+  mobarena:
+    description: Base command for MobArena
+    usage: |
+           /mobarena join      - Join the arena.
+           /mobarena leave     - Leave the arena.
+           /mobarena notready  - List of players who aren't ready.
+           /mobarena spectate  - Warp to the spectator area.
