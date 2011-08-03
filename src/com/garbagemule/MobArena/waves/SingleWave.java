@@ -9,6 +9,7 @@ public class SingleWave extends AbstractWave
     public SingleWave(String name, int wave)
     {
         super(name, wave, 0, 0);
+        setBranch(WaveBranch.SINGLE);
     }
 
     public void spawn(int wave, Collection<Location> spawnpoints)
@@ -26,6 +27,7 @@ public class SingleWave extends AbstractWave
      * If the wave numbers are equal, the waves are equal. This is to
      * DISALLOW "duplicates" in the SINGLE WAVES collection.
      */
+    /*
     public int compareTo(Wave w)
     {
         if (this.getWave() < w.getWave())
@@ -34,4 +36,5 @@ public class SingleWave extends AbstractWave
             return 1;
         else return 0;
     }
+    */
 }

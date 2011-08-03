@@ -5,27 +5,19 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.Slime;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.CreatureType;
 import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
-import com.garbagemule.MobArena.waves.RecurrentWave;
-import com.garbagemule.MobArena.waves.SingleWave;
 import com.garbagemule.MobArena.waves.Wave;
 
 /**
@@ -38,26 +30,28 @@ import com.garbagemule.MobArena.waves.Wave;
  */
 public class MASpawnThread implements Runnable
 {
-    protected int wave, previousSize, taskId;
-    private int ran, noOfPlayers, modulo;
-    private int dZombies, dSkeletons, dSpiders, dCreepers, dWolves;
-    private int dPoweredCreepers, dPigZombies, dSlimes, dMonsters, dAngryWolves, dGiants, dGhasts;
-    private Random random;
     private MobArena plugin;
     private Arena arena;
+    private int wave, taskId, previousSize, playerCount;
     
     // NEW WAVES
-    /* Single waves are waves with a frequency of 0, and they only
-     * spawn once. Their priority is infinity, meaning they will always
-     * spawn instead of recurrent waves, if the wave numbers clash. */
     private Wave defaultWave;
-    private TreeSet<SingleWave>    singleWaves;
-    private TreeSet<RecurrentWave> recurrentWaves;
+    private TreeSet<Wave> recurrentWaves;
+    private TreeSet<Wave> singleWaves;
     
     public MASpawnThread(MobArena plugin, Arena arena)
     {
-        this.plugin = plugin;
-        this.arena = arena;
+    	// WAVES
+        defaultWave    = arena.recurrentWaves.first();
+    	recurrentWaves = arena.recurrentWaves;
+    	singleWaves    = arena.singleWaves;
+    	
+        this.plugin  = plugin;
+        this.arena   = arena;
+        wave         = 1;
+        playerCount  = arena.arenaPlayers.size();
+        
+        /*
         modulo = arena.specialModulo;
         if (modulo <= 0) modulo = -32768;
         
@@ -84,9 +78,10 @@ public class MASpawnThread implements Runnable
         dGiants          = dAngryWolves     + arena.distSpecial.get("giants");
         dGhasts          = dGiants          + arena.distSpecial.get("ghasts");
         if (dGhasts < 1) { dPoweredCreepers = 1; dPigZombies = 2; dSlimes = 3; dMonsters = 4; dAngryWolves = 5; dGiants = 5; dGhasts = 5; }
+        */
     }
     
-    public void run2()
+    public void run()
     {
         // Clear out all dead monsters in the monster set.
         removeDeadMonsters();
@@ -132,7 +127,7 @@ public class MASpawnThread implements Runnable
     }
     
     private void spawnWave(int wave)
-    {
+    {    	
         Wave w = null;
         
         // Check the first element of the single waves.
@@ -145,23 +140,10 @@ public class MASpawnThread implements Runnable
         else
         {
             SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
-            
-            if (matches.isEmpty())
-                w = defaultWave;
-            else
-                w = matches.last();
+            w = matches.isEmpty() ? defaultWave : matches.last();
         }
         
-        w.spawn(wave, arena.spawnpoints.values());
-        /*
-        // Otherwise, check the recurrent waves.
-        SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
-        
-        if (matches.isEmpty())
-            defaultWave.spawn(wave, arena.spawnpoints.values());
-        else
-            matches.last().spawn(wave, arena.spawnpoints.values());
-        */
+        w.spawn(wave);
     }
     
     private SortedSet<Wave> getMatchingRecurrentWaves(int wave)
@@ -177,7 +159,46 @@ public class MASpawnThread implements Runnable
         return result;
     }
     
-    public void run()
+
+    
+    /*////////////////////////////////////////////////////////////////////
+    //
+    //      Getters/setters
+    //
+    ////////////////////////////////////////////////////////////////////*/
+    
+    public int getWave()
+    {
+        return wave;
+    }
+    
+    public int getTaskId()
+    {
+        return taskId;
+    }
+    
+    public int getPreviousSize()
+    {
+        return previousSize;
+    }
+    
+    public int getPlayerCount()
+    {
+        return playerCount;
+    }
+    
+    public void setTaskId(int taskId)
+    {
+        this.taskId = taskId;
+    }
+    
+    public void setPreviousSize(int previousSize)
+    {
+        this.previousSize = previousSize;
+    }
+    
+    /*
+    public void run1()
     {
         if (arena.arenaPlayers.isEmpty())
             return;
@@ -228,6 +249,7 @@ public class MASpawnThread implements Runnable
         wave++;
         if (arena.maxIdleTime > 0 && arena.monsters.isEmpty()) arena.resetIdleTimer();
     }
+    */
     
     /**
      * Rewards all players with an item from the input String.
@@ -238,12 +260,9 @@ public class MASpawnThread implements Runnable
         {
             if (arena.log.players.get(p) == null)
                 continue;
-            /*if (arena.rewardMap.get(p) == null)
-                continue;*/
             
             ItemStack reward = MAUtils.getRandomReward(rewards);
             arena.log.players.get(p).rewards.add(reward);
-            //arena.rewardMap.get(p).add(reward);
             
             if (reward == null)
             {
@@ -266,7 +285,7 @@ public class MASpawnThread implements Runnable
     /**
      * Spawns a default wave of monsters.
      */
-    private void defaultWave()
+    /*private void defaultWave()
     {
         Location loc;
         List<Location> spawnpoints = getValidSpawnpoints();
@@ -283,7 +302,7 @@ public class MASpawnThread implements Runnable
              * we're able to evaluate the random number in this way.
              * If dSpiders = 0, then dSpiders = dSkeletons, which
              * means if the random number is below that value, we will
-             * spawn a skeleton and break out of the statement. */
+             * spawn a skeleton and break out of the statement. */ /*
             if      (ran < dZombies)   mob = CreatureType.ZOMBIE;
             else if (ran < dSkeletons) mob = CreatureType.SKELETON;
             else if (ran < dSpiders)   mob = CreatureType.SPIDER;
@@ -301,12 +320,12 @@ public class MASpawnThread implements Runnable
             Creature c = (Creature) e;
             c.setTarget(getClosestPlayer(e));
         }
-    }
+    }*/
     
     /**
      * Spawns a special wave of monsters.
      */
-    private void specialWave()
+    /*private void specialWave()
     {
         Location loc;
         List<Location> spawnpoints = getValidSpawnpoints();
@@ -389,7 +408,7 @@ public class MASpawnThread implements Runnable
         // Lightning, just for effect ;)
         for (Location spawn : arena.spawnpoints.values())
             arena.world.strikeLightningEffect(spawn);
-    }
+    }*/
     
     /**
      * "Detonates" all the Creepers in the monsterSet.

@@ -1,10 +1,16 @@
 package com.garbagemule.register.payment.methods;
 
 import com.garbagemule.register.payment.Method;
-
 import cosine.boseconomy.BOSEconomy;
 import org.bukkit.plugin.Plugin;
 
+/**
+ * BOSEconomy 6 Implementation of Method
+ *
+ * @author Nijikokun <nijikokun@shortmail.com> (@nijikokun)
+ * @copyright (c) 2011
+ * @license AOL license <http://aol.nexua.org>
+ */
 public class BOSE6 implements Method {
     private BOSEconomy BOSEconomy;
 
@@ -61,8 +67,8 @@ public class BOSE6 implements Method {
     }
 
     public class BOSEAccount implements MethodAccount {
-        private String name;
-        private BOSEconomy BOSEconomy;
+        private final String name;
+        private final BOSEconomy BOSEconomy;
 
         public BOSEAccount(String name, BOSEconomy bOSEconomy) {
             this.name = name;
@@ -70,7 +76,7 @@ public class BOSE6 implements Method {
         }
 
         public double balance() {
-            return Double.valueOf(this.BOSEconomy.getPlayerMoney(this.name));
+            return (double) this.BOSEconomy.getPlayerMoney(this.name);
         }
 
         public boolean set(double amount) {
@@ -123,8 +129,8 @@ public class BOSE6 implements Method {
     }
 
     public class BOSEBankAccount implements MethodBankAccount {
-        private String bank;
-        private BOSEconomy BOSEconomy;
+        private final String bank;
+        private final BOSEconomy BOSEconomy;
 
         public BOSEBankAccount(String bank, BOSEconomy bOSEconomy) {
             this.bank = bank;
@@ -140,7 +146,7 @@ public class BOSE6 implements Method {
         }
 
         public double balance() {
-            return Double.valueOf(this.BOSEconomy.getBankMoney(bank));
+            return (double) this.BOSEconomy.getBankMoney(bank);
         }
 
         public boolean set(double amount) {

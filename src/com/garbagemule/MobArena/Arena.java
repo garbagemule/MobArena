@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -76,7 +77,7 @@ public class Arena
     
     // Arena sets/maps
     protected Set<Player>         hasPaid, rewardedPlayers, notifyPlayers, randoms;
-    protected Set<LivingEntity>   monsters;
+    protected Set<LivingEntity>   monsters, explodingSheep, plaguedPigs, madCows;
     protected Set<Block>          blocks;
     protected Set<Wolf>           pets;
     protected Map<Player,Integer> petMap;
@@ -117,6 +118,9 @@ public class Arena
         rewardedPlayers = new HashSet<Player>();
         hasPaid         = new HashSet<Player>();
         monsters        = new HashSet<LivingEntity>();
+        explodingSheep  = new HashSet<LivingEntity>();
+        plaguedPigs     = new HashSet<LivingEntity>();
+        madCows         = new HashSet<LivingEntity>();
         blocks          = new HashSet<Block>();
         pets            = new HashSet<Wolf>();
         petMap          = new HashMap<Player,Integer>();
@@ -259,7 +263,6 @@ public class Arena
         lobbyPlayers.clear();
         readyPlayers.clear();
         
-        //rewardMap.clear();
         monsters.clear();
         
         spawnTaskId = -1;
@@ -292,7 +295,7 @@ public class Arena
             MAUtils.clearInventory(p);
         
         restoreInvAndGiveRewards(p);
-        if (log.players.get(p) != null) log.players.get(p).lastWave = spawnThread.wave - 1;
+        if (log.players.get(p) != null) log.players.get(p).lastWave = spawnThread.getWave() - 1;
         movePlayerToEntry(p);
         finishWithPlayer(p);
         endArena();
@@ -302,7 +305,7 @@ public class Arena
     {
         MAUtils.clearInventory(p);
         restoreInvAndGiveRewards(p);
-        log.players.get(p).lastWave = spawnThread.wave - 1;
+        log.players.get(p).lastWave = spawnThread.getWave() - 1;
         
         if (specOnDeath)
         {
@@ -368,7 +371,7 @@ public class Arena
         // Stop the spawn thread.
         if (spawnThread != null)
         {
-            Bukkit.getServer().getScheduler().cancelTask(spawnThread.taskId);
+            Bukkit.getServer().getScheduler().cancelTask(spawnThread.getTaskId());
             Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
             spawnTaskId = -1;
             spawnThread = null;
@@ -544,6 +547,9 @@ public class Arena
         removePets();
         removeEntities();
         monsters.clear();
+        explodingSheep.clear();
+        plaguedPigs.clear();
+        madCows.clear();
         blocks.clear();
         pets.clear();
     }
@@ -551,6 +557,12 @@ public class Arena
     private void removeMonsters()
     {
         for (LivingEntity e : monsters)
+            e.remove();
+        for (LivingEntity e : explodingSheep)
+            e.remove();
+        for (LivingEntity e : plaguedPigs)
+            e.remove();
+        for (LivingEntity e : madCows)
             e.remove();
     }
     
@@ -653,16 +665,15 @@ public class Arena
         spawnpoints      = MAUtils.getArenaSpawnpoints(config, world, configName);
         
         // NEW WAVES
-        singleWaves      = WaveUtils.getWaves(config, configName, WaveBranch.SINGLE);
-        recurrentWaves   = WaveUtils.getWaves(config, configName, WaveBranch.RECURRENT);
+        singleWaves      = WaveUtils.getWaves(this, config, WaveBranch.SINGLE);
+        recurrentWaves   = WaveUtils.getWaves(this, config, WaveBranch.RECURRENT);
 
         
         System.out.println();
         System.out.println("ARENA: " + configName);
         System.out.println("Single waves");
-        int si = singleWaves.size();
-        for (int i = 0; i < si; i++)
-            System.out.println("- " + singleWaves.pollFirst());
+        for (Wave w : singleWaves)
+            System.out.println("- " + w);
         System.out.println("Reccurent waves");
         for (Wave w : recurrentWaves)
             System.out.println("- " + w);
@@ -854,6 +865,31 @@ public class Arena
         return name;
     }
     
+    public World getWorld()
+    {
+        return world;
+    }
+    
+    public List<String> getClasses()
+    {
+        return classes;
+    }
+    
+    public Collection<Location> getSpawnpoints()
+    {
+        return spawnpoints.values();
+    }
+    
+    public int getPlayerCount()
+    {
+        return spawnThread.getPlayerCount();
+    }
+    
+    public void addMonster(LivingEntity e)
+    {
+        monsters.add(e);
+    }
+    
     public List<Player> getAllPlayers()
     {
         List<Player> result = new LinkedList<Player>();
@@ -884,9 +920,9 @@ public class Arena
             return;
         
         // Reset the previousSize, cancel the previous timer, and start the new timer.
-        spawnThread.previousSize = monsters.size();
-        Bukkit.getServer().getScheduler().cancelTask(spawnThread.taskId);
-        spawnThread.taskId = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+        spawnThread.setPreviousSize(monsters.size());
+        Bukkit.getServer().getScheduler().cancelTask(spawnThread.getTaskId());
+        int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()
@@ -898,7 +934,7 @@ public class Arena
                             monsters.remove(e);
                     
                     // Compare the current size with the previous size.
-                    if (monsters.size() < spawnThread.previousSize || spawnThread.previousSize == 0)
+                    if (monsters.size() < spawnThread.getPreviousSize() || spawnThread.getPreviousSize() == 0)
                     {
                         resetIdleTimer();
                         return;
@@ -914,6 +950,7 @@ public class Arena
                     }
                 }
             }, maxIdleTime);
+        spawnThread.setTaskId(id);
     }
     
     public void addTrunkAndLeaves(Block b)
@@ -1017,12 +1054,7 @@ public class Arena
         MAUtils.giveItems(p, entryFee, false, plugin);
         hasPaid.remove(p);
     }
-    
-    public List<String> getClasses()
-    {
-        return classes;
-    }
-    
+        
     /**
      * The "perfect equals method" cf. "Object-Oriented Design and Patterns"
      * by Cay S. Horstmann.

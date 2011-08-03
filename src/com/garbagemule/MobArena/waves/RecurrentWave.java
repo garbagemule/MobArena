@@ -13,7 +13,7 @@ public class RecurrentWave extends AbstractWave
     
     public RecurrentWave(String name, int wave, int frequency, int priority, WaveType type, WaveGrowth growth)
     {
-        super(name, wave, frequency, priority, type, growth);
+        super(name, wave, frequency, priority, WaveBranch.RECURRENT, type, growth);
     }
 
     public void spawn(int wave, Collection<Location> spawnpoints)
@@ -28,7 +28,10 @@ public class RecurrentWave extends AbstractWave
     
     public boolean matches(int wave)
     {
-        return wave % getWave() + getFrequency() == 0;
+        if (wave < getWave())
+            return false;
+        
+        return (wave - getWave()) % getFrequency() == 0;
     }
 
     /**
@@ -36,6 +39,7 @@ public class RecurrentWave extends AbstractWave
      * If the priorities are equal, the names are compared. This is to
      * ALLOW "duplicates" in the RECURRENT WAVES collection.
      */
+    /*
     public int compareTo(Wave w)
     {
         if (getPriority() < w.getPriority())
@@ -44,4 +48,5 @@ public class RecurrentWave extends AbstractWave
             return 1;
         else return getName().compareTo(w.getName());
     }
+    */
 }

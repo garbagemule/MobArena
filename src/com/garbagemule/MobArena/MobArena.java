@@ -105,6 +105,7 @@ public class MobArena extends JavaPlugin
         
         config = new Configuration(file);
         config.load();
+        config.setHeader(header());
     }
     
     private void registerListeners()
@@ -178,4 +179,12 @@ public class MobArena extends JavaPlugin
     public Configuration getConfig()      { return config; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
+    
+    private String header()
+    {
+        String sep = System.getProperty("line.separator");
+        return "# MobArena v" + desc.getVersion() + " - Config-file" + sep + 
+               "# Read the Wiki for details on how to set up this file: http://goo.gl/F5TTc" + sep +
+               "# Note: You -must- use spaces instead of tabs!";
+    }
 }

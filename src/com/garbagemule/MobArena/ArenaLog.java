@@ -40,7 +40,7 @@ public class ArenaLog
     
     public void end()
     {
-        lastWave = arena.spawnThread.wave - 1;
+        lastWave = arena.spawnThread.getWave() - 1;
         endTime = new Timestamp((new Date()).getTime());
     }
     

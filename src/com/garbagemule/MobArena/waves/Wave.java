@@ -1,12 +1,8 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.Collection;
-
-import org.bukkit.Location;
-
 import com.garbagemule.MobArena.util.WaveUtils;
 
-public interface Wave extends Comparable<Wave>
+public interface Wave
 {
     public enum WaveBranch
     {
@@ -25,11 +21,28 @@ public interface Wave extends Comparable<Wave>
     
     public enum WaveGrowth
     {
-        SLOW, MEDIUM, FAST;
-
+        OLD(0), SLOW(0.5), MEDIUM(0.65), FAST(0.8), PSYCHO(1.1);
+        private double exp;
+        
+        private WaveGrowth(double exp)
+        {
+            this.exp = exp;
+        }
+        
         public static WaveGrowth fromString(String string)
         {
-            return WaveUtils.getEnumFromString(WaveGrowth.class, string, MEDIUM); 
+            return WaveUtils.getEnumFromString(WaveGrowth.class, string, OLD); 
+        }
+        
+        public int getAmount(int wave, int playerCount)
+        {
+            if (this == OLD) return wave + playerCount;
+            
+            double pc = (double) playerCount;
+            double w  = (double) wave;
+            
+            double base = Math.min(Math.ceil(pc/2) + 1, 13);
+            return (int) ( base * Math.pow(w, exp) );
         }
     }
     
@@ -69,7 +82,7 @@ public interface Wave extends Comparable<Wave>
      * be modified by the wave parameter.
      * @param wave Wave number
      */
-    public void spawn(int wave, Collection<Location> spawnpoints);
+    public void spawn(int wave);
     
     /**
      * Get the type of wave.
@@ -106,6 +119,12 @@ public interface Wave extends Comparable<Wave>
      * @return The name
      */
     public String getName();
+
+    /**
+     * Set the wave's growth
+     * @param growth How fast the wave will grow
+     */
+    public void setGrowth(WaveGrowth growth);
     
     /**
      * Check if this wave matches the wave number.

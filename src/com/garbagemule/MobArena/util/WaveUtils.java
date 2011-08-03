@@ -8,20 +8,15 @@ import java.util.TreeSet;
 
 import org.bukkit.Location;
 import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 
+import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.waves.RecurrentWave;
-import com.garbagemule.MobArena.waves.SingleWave;
-import com.garbagemule.MobArena.waves.Wave;
-import com.garbagemule.MobArena.waves.Wave.BossAbility;
-import com.garbagemule.MobArena.waves.Wave.BossHealth;
-import com.garbagemule.MobArena.waves.Wave.SwarmAmount;
-import com.garbagemule.MobArena.waves.Wave.WaveBranch;
-import com.garbagemule.MobArena.waves.Wave.WaveGrowth;
-import com.garbagemule.MobArena.waves.Wave.WaveType;
+import com.garbagemule.MobArena.waves.*;
+import com.garbagemule.MobArena.waves.Wave.*;
 
 public class WaveUtils
 {
@@ -59,18 +54,49 @@ public class WaveUtils
         // Else, return the valid spawnpoints.
         return result;
     }
+    
+
+    public static Player getClosestPlayer(Arena arena, Entity e)
+    {
+        // Set up the comparison variable and the result.
+        double dist    = 0;
+        double current = Double.POSITIVE_INFINITY;
+        Player result = null;
+        
+        /* Iterate through the ArrayList, and update current and result every
+         * time a squared distance smaller than current is found. */
+        //for (Player p : arena.livePlayers)
+        for (Player p : arena.getLivingPlayers())
+        {
+            if (!arena.getWorld().equals(p.getWorld()))
+            {
+                System.out.println("[MobArena] Player '" + p.getName() + "' is not in the right world. Force leaving...");
+                arena.playerLeave(p);
+                MAUtils.tellPlayer(p, "You warped out of the arena world.");
+                continue;
+            }
+            
+            dist = p.getLocation().distanceSquared(e.getLocation());
+            if (dist < current && dist < MobArena.MIN_PLAYER_DISTANCE)
+            {
+                current = dist;
+                result = p;
+            }
+        }
+        return result;
+    }
 
     /**
      * Grab and process all the waves in the config-file for the arena.
      */
-    public static TreeSet<Wave> getWaves(Configuration config, String arena, WaveBranch branch)
+    public static TreeSet<Wave> getWaves(Arena arena, Configuration config, WaveBranch branch)
     {
         // Determine the branch type of the wave, and grab the appropriate comparator
         String b = branch.toString().toLowerCase();
         TreeSet<Wave> result = new TreeSet<Wave>(getComparator(branch));
         
         // Grab the waves from the config-file
-        String path = "arenas." + arena + ".waves." + b;
+        String path = "arenas." + arena.configName() + ".waves." + b; // waves.yml, change to either "waves." + b, or simply b
         List<String> waves = config.getKeys(path);
         
         // If there are any waves, process them
@@ -80,7 +106,7 @@ public class WaveUtils
             for (String w : waves)
             {
                 // path argument becomes: "arenas.<arena>.waves.<branch>.<wave>."
-                wave = getWave(config, path + "." + w + ".", w, branch);
+                wave = getWave(arena, config, path + "." + w + ".", w, branch);
                 if (wave != null) result.add(wave);
             }
         }
@@ -88,12 +114,12 @@ public class WaveUtils
         // If there are no waves and the type is 'recurrent', add a default wave.
         if (branch == WaveBranch.RECURRENT && (result.isEmpty() || waves == null))
         {
-            RecurrentWave def = new RecurrentWave("DEF_WAVE_AUTO", 1, 1, 1);
+            /*
+            DefaultWave def = new DefaultWave(arena, "DEF_WAVE_AUTO", 1, 1, 1, null, null);
             def.setType(WaveType.DEFAULT);
             def.setGrowth(WaveGrowth.MEDIUM);
-            def.setDefault(true);
-            
             result.add(def);
+            */
         }
         
         return result;
@@ -103,9 +129,9 @@ public class WaveUtils
      * Get a single wave based on the config-file, the path, and branch
      * @return A Wave object if it is well defined, null otherwise.
      */
-    private static Wave getWave(Configuration config, String path, String name, WaveBranch branch)
+    private static Wave getWave(Arena arena, Configuration config, String path, String name, WaveBranch branch)
     {
-        // Grab the wave type, if null, return null
+        // Grab the wave type, if null or not well defined, return null
         WaveType type = WaveType.fromString(config.getString(path + "type"));
         if (type == null || !isWaveWellDefined(config, path, branch, type))
             return null;
@@ -117,210 +143,26 @@ public class WaveUtils
             int frequency = config.getInt(path + "frequency", 0);
             int priority = config.getInt(path + "priority", 0);
             int wave = config.getInt(path + "wave", frequency);
-            result = new RecurrentWave(name, wave, frequency, priority);
+            
+            //if (type == WaveType.DEFAULT)
+            	result = new DefaultWave(arena, name, wave, frequency, priority, config, path);
+            	result.setGrowth(WaveGrowth.OLD);
+            //else
+            //	result = new SpecialWave(arena, name, wave, frequency, priority, config, path);
         }
         else
         {
             int wave = config.getInt(path + "wave", 0);
-            result = new SingleWave(name, wave);
-        }
-        return result;
-    }
-    /*
-    public static RecurrentWave getRecurrentWave(Configuration config, String arena, String w)
-    {
-        // Grab the path
-        String path = "arenas." + arena + ".waves.recurrent." + w + ".";
-        
-        // Ensure that frequency and priority exist, otherwise return null
-        int frequency = config.getInt(path + "frequency", 0);
-        int priority  = config.getInt(path + "priority", 0);
-        if (frequency == 0 || priority == 0) return null;
-        
-        // Grab other variables
-        int wave          = config.getInt(path + "wave", frequency);
-        WaveType type     = WaveType.fromString(config.getString(path + "type", "default"));
-        WaveGrowth growth = WaveGrowth.fromString(config.getString(path + "growth", "medium"));
-        
-        // Grab monster distribution
-        //Map<CreatureType,Integer> monsters = getWaveMonsters(config, arena, path, type);
-        
-        // Create the wave
-        RecurrentWave result = new RecurrentWave(w, wave, frequency, priority, type, growth);
-        
-        
-        return result;
-    }
-    
-    public static SingleWave getSingleWave(Configuration config, String arena, String w)
-    {
-        // Grab the path
-        String path = "arenas." + arena + ".waves.single." + w + ".";
-        
-        // Ensure that the wave number exists, otherwise return null
-        int wave = config.getInt(path + "wave", 0);
-        if (wave == 0) return null;
-
-        // Grab other variables
-        
-        SingleWave result = new SingleWave(w, wave);
-        
-        return result;
-    }
-    
-    public static Map<CreatureType,Integer> getWaveMonsters(Configuration config, String arena, String path, String type)
-    {
-        Map<CreatureType,Integer> result = new HashMap<CreatureType,Integer>();
-        
-        List<String> monsters = config.getKeys(path + "monsters");
-        
-        // If no monsters specified, make sure to add some
-        if (monsters == null)
-        {
-            if (type.equals("default"))
-            {
-                result.put(CreatureType.ZOMBIE,   10);
-                result.put(CreatureType.SKELETON, 10);
-                result.put(CreatureType.SPIDER,   10);
-                result.put(CreatureType.CREEPER,  10);
-                result.put(CreatureType.WOLF,     10);
-            }
-            else if (type.equals("default"))
-            {
-                
-            }
-        }
-        
-        return result;
-    }
-    */
-    
-    
-    /*////////////////////////////////////////////////////////////////////
-    //
-    //      Comparators
-    //
-    ////////////////////////////////////////////////////////////////////*/
-    
-    /**
-     * Get a comparator based on the WaveBranch parameter.
-     */
-    public static Comparator<Wave> getComparator(WaveBranch branch)
-    {
-        if (branch == WaveBranch.SINGLE)
-            return getSingleComparator();
-        else if (branch == WaveBranch.RECURRENT)
-            return getRecurrentComparator();
-        else
-            return null;
-    }
-    
-    /**
-     * Get a Comparator that compares Wave objects by wave number.
-     * If the wave numbers are equal, the waves are equal. This is to
-     * DISALLOW "duplicates" in the SINGLE WAVES collection.
-     * @return Comparator whose compare()-method compares wave numbers.
-     */
-    public static Comparator<Wave> getSingleComparator()
-    {
-        return new Comparator<Wave>()
-            {
-                public int compare(Wave w1, Wave w2)
-                {
-                    if (w1.getWave() < w2.getWave())
-                        return -1;
-                    else if (w1.getWave() > w2.getWave())
-                        return 1;
-                    else return 0;
-                }
-            };
-    }
-    
-    /**
-     * Get a Comparator that compares Wave objects by priority.
-     * If the priorities are equal, the names are compared. This is to
-     * ALLOW "duplicates" in the RECURRENT WAVES collection.
-     * @return Comparator whose compare()-method compares wave priorities. 
-     */
-    public static Comparator<Wave> getRecurrentComparator()
-    {
-        return new Comparator<Wave>()
-            {
-                public int compare(Wave w1, Wave w2)
-                {
-                    if (w1.getPriority() < w2.getPriority())
-                        return -1;
-                    else if (w1.getPriority() > w2.getPriority())
-                        return 1;
-                    else return w1.getName().compareTo(w2.getName());
-                }
-            };
-    }
-    
-    /**
-     * Get all the single waves for the given arena.
-     */
-    /*public static TreeSet<SingleWave> getSingleWaves(Configuration config, String arena)
-    {
-        TreeSet<SingleWave> result = new TreeSet<SingleWave>();
-        
-        List<String> waves = config.getKeys("arenas." + arena + ".waves.single");
-        if (waves != null)
-        {
-            int wave;
             
-            for (String w : waves)
-            {
-                wave = config.getInt("arenas." + arena + ".waves.single." + w + ".wave", 0);
-                if (wave == 0) continue;
-                result.add(new SingleWave(w, wave));
-            }
+            //if (type == WaveType.DEFAULT)
+            	result = new DefaultWave(arena, name, wave, config, path);
+                result.setGrowth(WaveGrowth.OLD);
+            //else
+            //	result = new SpecialWave(arena, name, wave, config, path);
         }
-        
         return result;
-    }*/
+    }
     
-    /**
-     * Get all the recurrent waves for the given arena.
-     * If no waves are found, a default wave is added. This ensures that
-     * the arena always has monsters spawning, regardless of how badly the
-     * user messes up the config-file.
-     */
-    /*public static TreeSet<RecurrentWave> getRecurrentWaves(Configuration config, String arena)
-    {
-        TreeSet<RecurrentWave> result = new TreeSet<RecurrentWave>();
-        
-        List<String> waves = config.getKeys("arenas." + arena + ".waves.recurrent");
-        if (waves != null)
-        {
-            int wave, frequency, priority;
-            
-            for (String w : waves)
-            {
-                frequency = config.getInt("arenas." + arena + ".waves.recurrent." + w + ".frequency", 0);
-                priority  = config.getInt("arenas." + arena + ".waves.recurrent." + w + ".priority", 0);
-                if (frequency == 0 || priority == 0) continue;
-                
-                wave = config.getInt("arenas." + arena + ".waves.single." + w + ".wave", frequency);
-                result.add(new RecurrentWave(w, wave, frequency, priority));
-            }
-        }
-        else
-        {
-            RecurrentWave def = new RecurrentWave("DEF_WAVE_AUTO", 1, 1, 1);
-            def.setType(WaveType.DEFAULT);
-            def.setGrowth(WaveGrowth.MEDIUM);
-            
-            RecurrentWave spec = new RecurrentWave("SPEC_WAVE_AUTO", 4, 4, 4);
-            spec.setType(WaveType.SPECIAL);
-            
-            result.add(def);
-            result.add(spec);
-        }
-        
-        return result;
-    }*/
-
     
     
     /*////////////////////////////////////////////////////////////////////
@@ -407,7 +249,8 @@ public class WaveUtils
         
         for (String monster : monsters)
         {
-            if (getEnumFromString(CreatureType.class, monster) != null)
+            //if (getEnumFromString(CreatureType.class, monster) != null)
+            if (getEnumFromString(MACreature.class, monster) != null)
                 continue;
             
             MAUtils.error("Invalid monster type '" + monster + "' in " + path);
@@ -491,7 +334,70 @@ public class WaveUtils
         
         return true;
     }
-
+    
+    
+    
+    /*////////////////////////////////////////////////////////////////////
+    //
+    //      Comparators
+    //
+    ////////////////////////////////////////////////////////////////////*/
+    
+    /**
+     * Get a comparator based on the WaveBranch parameter.
+     */
+    public static Comparator<Wave> getComparator(WaveBranch branch)
+    {
+        if (branch == WaveBranch.SINGLE)
+            return getSingleComparator();
+        else if (branch == WaveBranch.RECURRENT)
+            return getRecurrentComparator();
+        else
+            return null;
+    }
+    
+    /**
+     * Get a Comparator that compares Wave objects by wave number.
+     * If the wave numbers are equal, the waves are equal. This is to
+     * DISALLOW "duplicates" in the SINGLE WAVES collection.
+     * @return Comparator whose compare()-method compares wave numbers.
+     */
+    public static Comparator<Wave> getSingleComparator()
+    {
+        return new Comparator<Wave>()
+            {
+                public int compare(Wave w1, Wave w2)
+                {
+                    if (w1.getWave() < w2.getWave())
+                        return -1;
+                    else if (w1.getWave() > w2.getWave())
+                        return 1;
+                    else return 0;
+                }
+            };
+    }
+    
+    /**
+     * Get a Comparator that compares Wave objects by priority.
+     * If the priorities are equal, the names are compared. This is to
+     * ALLOW "duplicates" in the RECURRENT WAVES collection.
+     * @return Comparator whose compare()-method compares wave priorities. 
+     */
+    public static Comparator<Wave> getRecurrentComparator()
+    {
+        return new Comparator<Wave>()
+            {
+                public int compare(Wave w1, Wave w2)
+                {
+                    if (w1.getPriority() < w2.getPriority())
+                        return -1;
+                    else if (w1.getPriority() > w2.getPriority())
+                        return 1;
+                    else return w1.getName().compareTo(w2.getName());
+                }
+            };
+    }
+    
     
     
     /*////////////////////////////////////////////////////////////////////
