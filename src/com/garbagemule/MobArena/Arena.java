@@ -293,12 +293,17 @@ public class Arena
     
     public void playerLeave(Player p)
     {
-        if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
+        //if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
+        //    MAUtils.clearInventory(p);
+        
+        if (arenaPlayers.contains(p))
+            finishArenaPlayer(p);
+        else if (lobbyPlayers.contains(p))
             MAUtils.clearInventory(p);
         
-        restoreInvAndGiveRewards(p);
-        if (log != null && log.players.get(p) != null)
-            log.players.get(p).lastWave = spawnThread.getWave() - 1;
+        //restoreInvAndGiveRewards(p);
+        //if (log != null && log.players.get(p) != null)
+        //    log.players.get(p).lastWave = spawnThread.getWave() - 1;
         movePlayerToEntry(p);
         finishWithPlayer(p);
         endArena();
@@ -306,9 +311,11 @@ public class Arena
     
     public void playerDeath(Player p)
     {
-        MAUtils.clearInventory(p);
-        restoreInvAndGiveRewards(p);
-        log.players.get(p).lastWave = spawnThread.getWave() - 1;
+        //MAUtils.clearInventory(p);
+        //restoreInvAndGiveRewards(p);
+        //log.players.get(p).lastWave = spawnThread.getWave() - 1;
+
+        finishArenaPlayer(p);
         
         if (specOnDeath)
         {
@@ -489,6 +496,13 @@ public class Arena
         locations.remove(p);
         plugin.getAM().arenaMap.remove(p);
         resetPlayer(p);
+    }
+    
+    private void finishArenaPlayer(Player p)
+    {
+        MAUtils.clearInventory(p);
+        restoreInvAndGiveRewards(p);
+        log.players.get(p).lastWave = spawnThread.getWave() - 1;
     }
     
     
