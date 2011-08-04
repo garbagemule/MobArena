@@ -76,8 +76,6 @@ public class MobArena extends JavaPlugin
     
     public void onDisable()
     {
-        // TODO: Re-implement this!
-        /*
         // Force all arenas to end.
         for (Arena arena : am.arenas)
             arena.forceEnd();
@@ -90,7 +88,7 @@ public class MobArena extends JavaPlugin
             Methods = null;
             System.out.println("[MobArena] Payment method was disabled. No longer accepting payments.");
         }
-        */
+        
         System.out.println("[MobArena] disabled.");
     }
     
@@ -137,6 +135,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.ENTITY_DEATH,              entityListener,   Priority.Lowest,  this); // Lowest because of Tombstone
         pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH,      entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,            entityListener,   Priority.Highest, this);
+        pm.registerEvent(Event.Type.EXPLOSION_PRIME,           entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST,            entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,             entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN,            entityListener,   Priority.Highest, this);

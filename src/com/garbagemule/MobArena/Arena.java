@@ -36,6 +36,7 @@ import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
+import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 
@@ -71,6 +72,7 @@ public class Arena
     //protected TreeSet<RecurrentWave> recurrentWaves;
     protected TreeSet<Wave> singleWaves;
     protected TreeSet<Wave> recurrentWaves;
+    protected BossWave bossWave;
     //
     //
     // NEW IMPLEMENTATION
@@ -247,23 +249,23 @@ public class Arena
     }
     
     public void forceEnd()
-    {
-        if (!running)
-            return;
-        
+    {        
         Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
         
         for (Player p : getAllPlayers())
             playerLeave(p);
-                
+        
         for (Entity e : monsters)
             e.remove();
+        
+        if (bossWave != null)
+            bossWave.clear();
         
         arenaPlayers.clear();
         lobbyPlayers.clear();
         readyPlayers.clear();
         
-        monsters.clear();
+        cleanup();
         
         spawnTaskId = -1;
     }
@@ -295,7 +297,8 @@ public class Arena
             MAUtils.clearInventory(p);
         
         restoreInvAndGiveRewards(p);
-        if (log.players.get(p) != null) log.players.get(p).lastWave = spawnThread.getWave() - 1;
+        if (log != null && log.players.get(p) != null)
+            log.players.get(p).lastWave = spawnThread.getWave() - 1;
         movePlayerToEntry(p);
         finishWithPlayer(p);
         endArena();
@@ -403,8 +406,7 @@ public class Arena
     
     public void restoreInvAndGiveRewards(final Player p)
     {
-        final List<ItemStack> rewards = log.players.get(p).rewards;
-        //final List<ItemStack> rewards = rewardMap.get(p);
+        final List<ItemStack> rewards = log != null ? log.players.get(p).rewards : new LinkedList<ItemStack>();
         final boolean hadRewards = rewardedPlayers.contains(p);
         
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
@@ -556,6 +558,8 @@ public class Arena
     
     private void removeMonsters()
     {
+        if (bossWave != null)
+            bossWave.clear();
         for (LivingEntity e : monsters)
             e.remove();
         for (LivingEntity e : explodingSheep)
@@ -865,9 +869,19 @@ public class Arena
         return name;
     }
     
+    public MobArena getPlugin()
+    {
+        return plugin;
+    }
+    
     public World getWorld()
     {
         return world;
+    }
+
+    public void setBossWave(BossWave bossWave)
+    {
+        this.bossWave = bossWave;
     }
     
     public List<String> getClasses()
@@ -878,6 +892,24 @@ public class Arena
     public Collection<Location> getSpawnpoints()
     {
         return spawnpoints.values();
+    }
+    
+    public Location getBossSpawnpoint()
+    {
+        Location result = null;
+        
+        for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
+        {
+            if (!entry.getKey().matches("^*boss*$")) continue;
+            
+            result = entry.getValue();
+            break;
+        }
+        
+        if (result != null)
+            return result;
+        
+        return spawnpoints.values().iterator().next();
     }
     
     public int getPlayerCount()

@@ -504,7 +504,7 @@ public class MACommands implements CommandExecutor
                     return true;
                 }
                 
-                if (arena.arenaPlayers.isEmpty())
+                if (arena.getAllPlayers().isEmpty())
                 {
                     MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_EMPTY));
                     return true;

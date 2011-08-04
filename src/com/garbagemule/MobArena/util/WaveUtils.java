@@ -137,28 +137,34 @@ public class WaveUtils
             return null;
         
         // TODO: Generate waves properly. These are place-holders!
-        Wave result;
+        Wave result = null;
         if (branch == WaveBranch.RECURRENT)
         {
             int frequency = config.getInt(path + "frequency", 0);
             int priority = config.getInt(path + "priority", 0);
             int wave = config.getInt(path + "wave", frequency);
             
-            //if (type == WaveType.DEFAULT)
+            if (type == WaveType.DEFAULT)
             	result = new DefaultWave(arena, name, wave, frequency, priority, config, path);
-            	result.setGrowth(WaveGrowth.OLD);
-            //else
-            //	result = new SpecialWave(arena, name, wave, frequency, priority, config, path);
+            else if (type == WaveType.SPECIAL)
+            	result = new SpecialWave(arena, name, wave, frequency, priority, config, path);
+            else if (type == WaveType.SWARM)
+                result = new SwarmWave(arena, name, wave, frequency, priority, config, path);
+            else if (type == WaveType.BOSS)
+                result = new BossWave(arena, name, wave, frequency, priority, config, path);
         }
         else
         {
             int wave = config.getInt(path + "wave", 0);
             
-            //if (type == WaveType.DEFAULT)
+            if (type == WaveType.DEFAULT)
             	result = new DefaultWave(arena, name, wave, config, path);
-                result.setGrowth(WaveGrowth.OLD);
-            //else
-            //	result = new SpecialWave(arena, name, wave, config, path);
+            else if (type == WaveType.SPECIAL)
+            	result = new SpecialWave(arena, name, wave, config, path);
+            else if (type == WaveType.SWARM)
+                result = new SwarmWave(arena, name, wave, config, path);
+            else if (type == WaveType.BOSS)
+                result = new BossWave(arena, name, wave, config, path);
         }
         return result;
     }
@@ -249,7 +255,6 @@ public class WaveUtils
         
         for (String monster : monsters)
         {
-            //if (getEnumFromString(CreatureType.class, monster) != null)
             if (getEnumFromString(MACreature.class, monster) != null)
                 continue;
             
@@ -275,7 +280,7 @@ public class WaveUtils
             MAUtils.error("Missing monster type in '" + path);
             return false;
         }
-        else if (getEnumFromString(CreatureType.class, monster) == null)
+        else if (getEnumFromString(MACreature.class, monster) == null)
         {
             MAUtils.error("Invalid monster type '" + monster + "' in " + path);
             return false;
@@ -304,7 +309,7 @@ public class WaveUtils
             MAUtils.error("Missing monster type in '" + path);
             return false;
         }
-        else if (getEnumFromString(CreatureType.class, monster) == null)
+        else if (getEnumFromString(MACreature.class, monster) == null)
         {
             MAUtils.error("Invalid monster type '" + monster + "' in " + path);
             return false;
@@ -316,7 +321,7 @@ public class WaveUtils
         {
             for (String ability : abilities.split(","))
             {
-                if (BossAbility.fromString(ability.trim().toUpperCase()) != null)
+                if (BossAbility.fromString(ability.trim().replaceAll("-", "_").toUpperCase()) != null)
                     continue;
 
                 MAUtils.error("Invalid boss ability '" + ability + "' in " + path);

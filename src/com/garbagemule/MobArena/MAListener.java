@@ -42,17 +42,17 @@ import com.garbagemule.MobArena.MAMessages.Msg;
 
 public class MAListener implements ArenaListener
 {
-	private MobArena plugin;
-	private Arena arena;
-	
-	public MAListener(Arena arena, MobArena plugin)
-	{
-		this.arena = arena;
-		this.plugin = plugin;
-	}
-	
-	public void onBlockBreak(BlockBreakEvent event)
-	{
+    private MobArena plugin;
+    private Arena arena;
+    
+    public MAListener(Arena arena, MobArena plugin)
+    {
+        this.arena = arena;
+        this.plugin = plugin;
+    }
+    
+    public void onBlockBreak(BlockBreakEvent event)
+    {
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit || (!arena.protect && arena.running))
             return;
         
@@ -74,10 +74,10 @@ public class MAListener implements ArenaListener
         }
         
         event.setCancelled(true);
-	}
+    }
 
-	public void onBlockPlace(BlockPlaceEvent event)
-	{
+    public void onBlockPlace(BlockPlaceEvent event)
+    {
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit)
             return;
         
@@ -94,19 +94,19 @@ public class MAListener implements ArenaListener
 
         // If the arena isn't running, or if the player isn't in the arena, cancel.
         event.setCancelled(true);
-	}
+    }
 
-	public void onCreatureSpawn(CreatureSpawnEvent event)
-	{
+    public void onCreatureSpawn(CreatureSpawnEvent event)
+    {
         if (!arena.inRegion(event.getLocation()) || event.getSpawnReason() == SpawnReason.CUSTOM)
             return;
         
         // If running == true, setCancelled(false), and vice versa.
         event.setCancelled(!arena.running);
-	}
+    }
 
-	public void onEntityExplode(EntityExplodeEvent event)
-	{
+    public void onEntityExplode(EntityExplodeEvent event)
+    {
         if (!arena.monsters.contains(event.getEntity()) && !arena.inRegionRadius(event.getLocation(), 10))
             return;
         
@@ -187,16 +187,16 @@ public class MAListener implements ArenaListener
                     }
                 }
             }, arena.repairDelay);
-	}
+    }
 
-	public void onEntityCombust(EntityCombustEvent event)
-	{
+    public void onEntityCombust(EntityCombustEvent event)
+    {
         if (arena.monsters.contains(event.getEntity()))
             event.setCancelled(true);
-	}
+    }
 
-	public void onEntityTarget(EntityTargetEvent event)
-	{
+    public void onEntityTarget(EntityTargetEvent event)
+    {
         if (!arena.running || event.isCancelled())
             return;
         
@@ -232,10 +232,10 @@ public class MAListener implements ArenaListener
                     event.setCancelled(true);
             return;
         }
-	}
+    }
 
-	public void onEntityRegainHealth(EntityRegainHealthEvent event)
-	{
+    public void onEntityRegainHealth(EntityRegainHealthEvent event)
+    {
         if (!arena.running) return;
         
         if (!(event.getEntity() instanceof Player) || !arena.arenaPlayers.contains((Player)event.getEntity()))
@@ -243,10 +243,10 @@ public class MAListener implements ArenaListener
         
         if (event.getRegainReason() == RegainReason.REGEN)
             event.setCancelled(true);
-	}
+    }
 
-	public void onEntityDeath(EntityDeathEvent event)
-	{        
+    public void onEntityDeath(EntityDeathEvent event)
+    {        
         if (event.getEntity() instanceof Player)
         {
             Player p = (Player) event.getEntity();
@@ -272,77 +272,95 @@ public class MAListener implements ArenaListener
             arena.resetIdleTimer();
             return;
         }
-	}
+    }
 
-	public void onEntityDamage(EntityDamageEvent event)
-	{
-	    if (!arena.running) return;
-	    
-	    EntityDamageByEntityEvent e = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
-	    Entity damager = (e != null) ? e.getDamager() : null;
-	    Entity damagee = event.getEntity();
-	    
-	    // Pet wolf
-	    if (damagee instanceof Wolf && arena.pets.contains(damagee))
-	    {	        
-	        if (damager == null)
-	        {
-	            damagee.setFireTicks(32768);
-	            event.setCancelled(true);
-	            return;
-	        }
-	        else if (damager instanceof Player)
-	            event.setCancelled(true);
-	        else
-	            event.setDamage(0);
-	        
-	        return;
-	    }
-	    // Arena player
-	    else if (damagee instanceof Player)
-	    {
-	        if (arena.lobbyPlayers.contains(damagee))
-	            event.setCancelled(true);
-	        else if (!arena.arenaPlayers.contains(damagee))
-	            return;
-            else if (!arena.detDamage && event.getCause() == DamageCause.BLOCK_EXPLOSION)
-                event.setCancelled(true);
-	        else if (damager instanceof Player && !arena.pvp)
-	        {
-	            // if 'inLobby' fails, and 'not inArena' fails, 'inArena' is true
+    public void onEntityDamage(EntityDamageEvent event)
+    {
+        if (!arena.running) return;
+        
+        EntityDamageByEntityEvent e = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
+        Entity damager = (e != null) ? e.getDamager() : null;
+        Entity damagee = event.getEntity();
+        
+        // Pet wolf
+        if (damagee instanceof Wolf && arena.pets.contains(damagee))
+        {            
+            if (damager == null)
+            {
+                damagee.setFireTicks(32768);
                 event.setCancelled(true);
                 return;
-	        }
-	        
-	        if (!event.isCancelled())
-	            arena.log.players.get((Player) damagee).dmgTaken += event.getDamage();
-	    }
-	    // Other LivingEntity
-	    else if (arena.monsters.contains(damagee))
-	    {	        
-	        if (damager instanceof Player)
-	        {
-	            if (!arena.arenaPlayers.contains(damager))
-	            {
-	                event.setCancelled(true);
-	                return;
-	            }
-	            
-	            arena.log.players.get((Player) damager).dmgDone += event.getDamage();
-	            arena.log.players.get((Player) damager).hits++;
-	        }
-	        else if (damager instanceof Wolf && arena.pets.contains(damager))
-	        {	            
-	            event.setDamage(1);
-	            arena.log.players.get((Player) ((Wolf) damager).getOwner()).dmgDone += event.getDamage();
-	        }
-	        else if (damager instanceof LivingEntity)
-	        {
-	            if (!arena.monsterInfight)
-	                event.setCancelled(true);
-	        }
-	    }
-	}
+            }
+            else if (damager instanceof Player)
+                event.setCancelled(true);
+            else
+                event.setDamage(0);
+            
+            return;
+        }
+        // Arena player
+        else if (damagee instanceof Player)
+        {
+            if (arena.lobbyPlayers.contains(damagee))
+                event.setCancelled(true);
+            else if (!arena.arenaPlayers.contains(damagee))
+                return;
+            else if (!arena.detDamage && event.getCause() == DamageCause.BLOCK_EXPLOSION)
+                event.setCancelled(true);
+            else if (damager instanceof Player && !arena.pvp)
+            {
+                // if 'inLobby' fails, and 'not inArena' fails, 'inArena' is true
+                event.setCancelled(true);
+                return;
+            }
+            
+            if (!event.isCancelled())
+                arena.log.players.get((Player) damagee).dmgTaken += event.getDamage();
+        }
+        // Other LivingEntity
+        else if (arena.monsters.contains(damagee))
+        {            
+            if (damager instanceof Player)
+            {
+                if (!arena.arenaPlayers.contains(damager))
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                
+                arena.log.players.get((Player) damager).dmgDone += event.getDamage();
+                arena.log.players.get((Player) damager).hits++;
+            }
+            else if (damager instanceof Wolf && arena.pets.contains(damager))
+            {                
+                event.setDamage(1);
+                arena.log.players.get((Player) ((Wolf) damager).getOwner()).dmgDone += event.getDamage();
+            }
+            else if (damager instanceof LivingEntity)
+            {
+                if (!arena.monsterInfight)
+                    event.setCancelled(true);
+            }
+            
+            // Boss
+            if (arena.bossWave != null && damagee.equals(arena.bossWave.getEntity()))
+            {
+                // Subtract boss health, and reset actual entity health
+                arena.bossWave.subtractHealth(event.getDamage());
+                arena.bossWave.getEntity().setHealth(200);
+                
+                // Set damage to 1 for knockback and feedback
+                event.setDamage(1);
+                
+                // If the boss is dead, remove the entity and create an explosion!
+                if (arena.bossWave.getHealth() <= 0)
+                {
+                    arena.bossWave.clear();
+                    arena.bossWave = null;
+                }
+            }
+        }
+    }
     
     public void onPlayerAnimation(PlayerAnimationEvent event)
     {
@@ -352,8 +370,8 @@ public class MAListener implements ArenaListener
         arena.log.players.get(event.getPlayer()).swings++;
     }
 
-	public void onPlayerDropItem(PlayerDropItemEvent event)
-	{
+    public void onPlayerDropItem(PlayerDropItemEvent event)
+    {
         if (arena.running && arena.shareInArena) return;
         
         Player p = event.getPlayer();
@@ -368,26 +386,26 @@ public class MAListener implements ArenaListener
         
         MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_DROP_ITEM));
         event.setCancelled(true);
-	}
+    }
 
-	public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
-	{
+    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
+    {
         if (!arena.readyPlayers.contains(event.getPlayer()) && !arena.arenaPlayers.contains(event.getPlayer()))
             return;
         
         if (!arena.running)
         {
-        	event.getBlockClicked().getRelative(event.getBlockFace()).setTypeId(0);
+            event.getBlockClicked().getRelative(event.getBlockFace()).setTypeId(0);
             event.setCancelled(true);
             return;
         }
 
         Block liquid = event.getBlockClicked().getRelative(event.getBlockFace());
         arena.blocks.add(liquid);
-	}
+    }
 
-	public void onPlayerInteract(PlayerInteractEvent event)
-	{
+    public void onPlayerInteract(PlayerInteractEvent event)
+    {
         if (!arena.arenaPlayers.contains(event.getPlayer()) && !arena.lobbyPlayers.contains(event.getPlayer()))
             return;
         
@@ -453,30 +471,30 @@ public class MAListener implements ArenaListener
                 
             return;
         }
-	}
+    }
 
-	public void onPlayerQuit(PlayerQuitEvent event)
-	{
+    public void onPlayerQuit(PlayerQuitEvent event)
+    {
         Player p = event.getPlayer();
         if (!arena.enabled || (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p)))
             return;
         
         plugin.getAM().arenaMap.remove(p);
         arena.playerLeave(p);
-	}
+    }
 
-	public void onPlayerKick(PlayerKickEvent event)
-	{
+    public void onPlayerKick(PlayerKickEvent event)
+    {
         Player p = event.getPlayer();
         if (!arena.enabled || (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p)))
             return;
         
         plugin.getAM().arenaMap.remove(p);
         arena.playerLeave(p);
-	}
+    }
 
-	public void onPlayerTeleport(PlayerTeleportEvent event)
-	{
+    public void onPlayerTeleport(PlayerTeleportEvent event)
+    {
         if (arena.edit || !arena.enabled || !arena.setup || arena.allowWarp)
             return;
         
@@ -492,7 +510,7 @@ public class MAListener implements ArenaListener
         {
             if (arena.inRegion(from))
             {
-                if (to.equals(arena.arenaLoc) || to.equals(arena.lobbyLoc) || to.equals(arena.spectatorLoc) || to.equals(old))
+                if (arena.inRegion(to) || to.equals(arena.arenaLoc) || to.equals(arena.lobbyLoc) || to.equals(arena.spectatorLoc) || to.equals(old))
                     return;
                 
                 MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_FROM_ARENA));
@@ -518,10 +536,10 @@ public class MAListener implements ArenaListener
             event.setCancelled(true);
             return;
         }
-	}
+    }
 
-	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
-	{
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
+    {
         Player p = event.getPlayer();
         
         if (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p))
@@ -536,5 +554,5 @@ public class MAListener implements ArenaListener
         
         event.setCancelled(true);
         MAUtils.tellPlayer(p, MAMessages.get(Msg.MISC_COMMAND_NOT_ALLOWED));
-	}
+    }
 }

@@ -1,8 +1,16 @@
 package com.garbagemule.MobArena.waves;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.LivingEntity;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.util.WaveUtils;
 
 public abstract class AbstractWave implements Wave
 {
@@ -66,6 +74,52 @@ public abstract class AbstractWave implements Wave
     	return false;    		
     }
     
+    /**
+     * Spawn an MACreature in the given location. The actual LivingEntity
+     * spawned is returned.
+     * @param creature The MACreature to spawn
+     * @param loc The location to spawn the MACreature in
+     * @return The resulting LivingEntity
+     */
+    public LivingEntity spawnMonster(MACreature creature, Location loc)
+    {
+        // Spawn and add to collection
+        LivingEntity e = creature.spawn(getWorld(), loc);
+        getArena().addMonster(e);
+
+        // Grab a random target.
+        if (e instanceof Creature)
+        {
+            Creature c = (Creature) e;
+            c.setTarget(WaveUtils.getClosestPlayer(getArena(), e));
+        }
+
+        return e;
+    }
+    
+    /**
+     * Helper method for spawning a bunch of monsters over a
+     * collection of spawnpoints. Used by wave types DEFAULT,
+     * SPECIAL and SWARM.
+     * @param monsters A collection of monsters to spawn, and how many of each
+     * @param spawnpoints The spawnpoints to spawn the monsters over
+     */
+    public void spawnAll(Map<MACreature,Integer> monsters, List<Location> spawnpoints)
+    {
+        Random random = new Random();
+        int spawnpointCount = spawnpoints.size();
+        int index = random.nextInt(spawnpointCount);
+        
+        for (Map.Entry<MACreature,Integer> entry : monsters.entrySet())
+        {
+            for (int i = 0; i < entry.getValue(); i++)
+            {
+                spawnMonster(entry.getKey(), spawnpoints.get(index % spawnpointCount));
+                index++;
+            }
+        }
+    }
+        
     // GETTERS
     public Arena getArena()
     {
@@ -134,6 +188,7 @@ public abstract class AbstractWave implements Wave
         return "[name=" + waveName +
                 ", wave=" + wave +
                 ", frequency=" + frequency +
-                ", priority=" + priority + "]";
+                ", priority=" + priority +
+                ", type=" + type + "]";
     }
 }

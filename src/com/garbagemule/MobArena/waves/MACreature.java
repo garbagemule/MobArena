@@ -13,20 +13,20 @@ import com.garbagemule.MobArena.util.WaveUtils;
 public enum MACreature
 {
     // Default creatures
-    ZOMBIES(CreatureType.ZOMBIE),
-    SKELETONS(CreatureType.SKELETON),
-    SPIDERS(CreatureType.SPIDER),
-    CREEPERS(CreatureType.CREEPER),
-    WOLVES(CreatureType.WOLF),
+    ZOMBIE(CreatureType.ZOMBIE),            ZOMBIES(CreatureType.ZOMBIE), 
+    SKELETON(CreatureType.SKELETON),        SKELETONS(CreatureType.SKELETON),
+    SPIDER(CreatureType.SPIDER),            SPIDERS(CreatureType.SPIDER),
+    CREEPER(CreatureType.CREEPER),          CREEPERS(CreatureType.CREEPER),
+    WOLF(CreatureType.WOLF),                WOLVES(CreatureType.WOLF),
     
     // Special creatures
-    ZOMBIE_PIGMEN(CreatureType.PIG_ZOMBIE),
-    POWERED_CREEPERS(CreatureType.CREEPER),
-    ANGRY_WOLVES(CreatureType.WOLF),
-    HUMANS(CreatureType.MONSTER),
-    SLIMES(CreatureType.SLIME),
-    GIANTS(CreatureType.GIANT),
-    GHASTS(CreatureType.GHAST);
+    ZOMBIE_PIGMAN(CreatureType.PIG_ZOMBIE), ZOMBIE_PIGMEN(CreatureType.PIG_ZOMBIE),
+    POWERED_CREEPER(CreatureType.CREEPER),  POWERED_CREEPERS(CreatureType.CREEPER),
+    ANGRY_WOLF(CreatureType.WOLF),          ANGRY_WOLVES(CreatureType.WOLF),
+    HUMAN(CreatureType.MONSTER),            HUMANS(CreatureType.MONSTER),
+    SLIME(CreatureType.SLIME),              SLIMES(CreatureType.SLIME),
+    GIANT(CreatureType.GIANT),              GIANTS(CreatureType.GIANT),
+    GHAST(CreatureType.GHAST),              GHASTS(CreatureType.GHAST);
     
     // Misc
     // EXPLODING_SHEEP(CreatureType.SHEEP), // Explode (power: 1) when close enough to players
