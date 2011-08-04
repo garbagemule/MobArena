@@ -1,0 +1,141 @@
+# MobArena Development Build - v0.94 #
+
+**Test phase: Custom waves**
+
+The purpose of this test phase is to test the functionality and stability of custom waves in MobArena. How to set up the waves and different test-cases are described below.
+
+## Modules ##
+The new MobArena waves-system is extremely modular, meaning every time you plug in a new wave, you only have to provide the nodes required by the specific modules you are using. The modules can be broken into _wave branches_ and _wave types_. The structure of the waves-section in config-file is the following:
+
+        waves:
+            recurrent:                   <-- Wave branch
+                <wave name>:
+                    type: <wave type>    <-- Wave type
+                    frequency: #
+                    priority: #
+            single:                      <-- Wave branch
+                <wave name>:
+                    type: <wave type>    <-- Wave type
+                    wave: #
+
+## Wave branches ##
+
+The waves are split into two branches, `recurrent` and `single`. _Recurrent waves_ (may) occur more than once (as in, they repeat), given a frequency (how often they occur) and a priority (how "important" they are, i.e. which wave should spawn if two recurrent waves clash). _Single waves_ occur just once, on the wave given (and always occur over recurrent waves, should they clash). As you can see, the two branches have one thing in common, the type-node. Other than that, their other nodes differ. Here's an overview of what nodes the branches support, if they are required, and what they do:
+
+### Recurrent waves ###
+
+**`type: [default|special|swarm|boss]`** (required) determines the wave type. Read the **Wave types** section further down for more details.
+
+**`frequency: #`** (required) determines how often the wave will/can spawn. With a frequency of 1, the wave can potentially spawn on every single wave number. The implicit default waves in MobArena have a frequency of 1, and the implicit special waves have a frequency of 4, which means the default waves (can) spawn every wave, and the special waves (can) spawn every 4th wave.
+
+**`priority: #`** (required) determines how "important" the wave is. If two recurrent waves clash, the wave with the highest priority will spawn. The implicit default waves in MobArena have a priority of 1, and the implicit special waves have a priority of 2, which means if the default and special waves clash, the special waves will spawn because their priority is higher.
+
+**`wave: #`** (optional) determines the first wave number on which this wave can/will spawn. This is useful for offsetting waves with similar frequencies. Note that if no wave is specified, it will default to the value of the (required) frequency-node. The implicit default waves in MobArena have wave value of 1, and the implicit special waves have a wave value of 4 (same as the frequency), which means the default waves may begin spawning from wave 1, and the special waves may begin spawning from wave 4.
+
+### Single waves ###
+
+**`type: [default|special|swarm|boss]`** (required) determines the wave type. Read the **Wave types** section further down for more details.
+
+**`wave: #`** (required) determines the wave on which this wave _will_ spawn. No matter what priority a recurrent wave have, if it clashes with a single wave, the single wave will always spawn instead of the recurrent waves. Single waves are good for extraordinary waves like "swarm" waves, "boss" waves or even normal waves with specific monster types, for instance.
+
+## Wave types ##
+
+All MobArena waves must specify a _wave type_, which must be either `default`, `special`, `swarm`, or `boss`. These different wave type modules introduce some new required and optional nodes. Note that no matter what the wave type is, any wave _must_ adhere to the requirements of the wave branch (read above).
+
+### Default waves ###
+
+Default waves are waves that spawn an amount of monsters picked semi-randomly from an optional list of monsters. The amount of monsters grow at a configurable (but optional) rate. If no growth or monster-list is specified, default waves will consist of 5 different monster types (zombie, skeleton, spider, creeper, wolf), all equally likely to spawn, spawned at the "old" growth rate (player count + wave number). Nodes:
+
+**`growth: [old|slow|medium|fast|psycho]`** (optional) determines how fast the monster count grows with every wave. ´old´ means (player count + wave number), but the other four use a mathematical function to determine the monster count, also based on player count and wave number.
+
+**`monsters: <list of <monster>: <probability>>`** (optional) determines [[monster types]], and their individual probabilities of spawning on each wave. Note that the probabilities are just that, probabilities. They do not specify exact amounts, but only chance of spawning. The following sample will statistically spawn twice as many zombies as skeletons:
+
+        monsters:
+            zombies: 10
+            skeletons: 5
+
+### Special waves ###
+
+Special waves are waves that spawn _one type_ of monster, and always a fixed amount. Unlike with _default waves_, the (optional) monster list with probabilities determines which monster out of the entire list should spawn. The monsters-node's notation is identical to that of _default waves_.
+
+**`monsters: <list of <monster>: <probability>>`** (optional) determines [[monster types]], and their probabilities of spawning on each wave. The following sample will statistically spawn powered-creepers twice as often as slimes:
+
+        monsters:
+            powered-creepers: 4
+            slimes: 2
+
+### Swarm waves ###
+
+Like _special waves_, swarm waves spawn just _one type_ of monster, but in a configurable (but optional) amount. The swarm wave monsters only have _1 health point_, meaning they will die with just one blow from anything. Their numbers are vast compared to default and special waves, however, so they may be a bit hard on some servers. Use with caution!
+
+**`monster: <monster>`** (required) determines which type of monster this swarm consists of. Note that this is different from special waves, in that only one type is specified, and no probability value.
+
+**`amount: [low|medium|high|psycho]`** (optional) determines how many monsters should spawn. Defaults to low (which is still a lot).
+
+### Boss waves ###
+
+Boss waves consist of _one monster_ with a configurable (but optional) amount of health, and a configurable (but optional) list of special abilities. The health of a boss monster is significantly higher than that of normal monsters, and thus take much longer to kill. The special abilities help increase the difficulty (and fun!) of a boss wave.
+
+**`monster: <monster>`** (required) determines which type of monster this swarm consists of. Note that only one monster will spawn.
+
+**`health: [low|medium|high|psycho]`** (optional) determines how much health the boss has. Defaults to medium.
+
+**`abilities: <comma-separated list of boss abilities>`** (optional) determines which (if any) boss abilities this boss has. The boss can have several abilities; just separate each ability with a comma (e.g. ´arrows, fire-aura, throw-target´). Note that the abilities happen in a cycle every few seconds, so the more abilities, the longer it takes before each ability is used again. Here is an overview of the different abilities bosses can have:
+
+        NAME            DESCRIPTION
+        arrows          Shoots arrows
+        fireballs       Hurls fireballs
+        fire-aura       Burns all nearby (5 blocks radius) players
+        throw-target    Throws the target backwards (if in distance)
+        throw-nearby    Throws all nearby (5 blocks radius) players
+        fetch-target    Warps the target to the boss' location
+        fetch-distant   Warps all distant (8+ blocks) players to the boss' location
+
+## Sample config-file setup ##
+
+If you want to try a sample setup, here's one that you can use. Simply copy this block of text, and paste it into your own config-file, replacing the waves-section.
+
+            waves:
+                recurrent:
+                    def1:
+                        type: default
+                        priority: 1
+                        frequency: 1
+                        monsters:
+                            zombies: 10
+                            skeletons: 4
+                    def2:
+                        type: default
+                        priority: 2
+                        frequency: 1
+                        wave: 5
+                        monsters:
+                            zombies: 10
+                            skeletons: 6
+                            creepers: 4
+                    spec1:
+                        type: special
+                        priority: 5
+                        frequency: 4
+                        monsters:
+                            powered_creepers: 10
+                            angry_wolves: 10
+                            zombie_pigmen: 10
+                single:
+                    swarm1:
+                        type: swarm
+                        wave: 7
+                        monster: slimes
+                        amount: medium
+                    boss1:
+                        type: boss
+                        wave: 9
+                        monster: spider
+                        health: medium
+                        abilities: fire-aura, fireballs, throw-target
+                    boss2:
+                        type: boss
+                        wave: 13
+                        monster: zombie_pigman
+                        health: psycho
+                        abilities: arrows, fireballs, fire-aura, fetch-distant
