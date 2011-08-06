@@ -73,7 +73,7 @@ public class FileUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Problem creating file '" + filename + "'!");
+            MobArena.warning("Problem creating file '" + filename + "'!");
         }
     }
     
@@ -108,7 +108,7 @@ public class FileUtils
                 if (!config.getString("arenas." + a + ".settings.logging", "").equalsIgnoreCase(lib))
                     continue;
                 
-                System.out.println("[MobArena] ERROR! Unrecognized format for arena '" + a + "': " + lib + ". Logging disabled.");
+                MobArena.warning("Unrecognized format for arena '" + a + "': " + lib + ". Logging disabled.");
                 config.setProperty("arenas." + a + ".logging", "false");
             }
         }
@@ -135,7 +135,7 @@ public class FileUtils
             if (file.exists()) return true;
 
             long startTime = System.currentTimeMillis();
-            System.out.println("[MobArena] Downloading library: " + lib.filename + "...");
+            MobArena.info("Downloading library: " + lib.filename + "...");
             
             // Set up the streams
             in  = con.getInputStream();
@@ -149,12 +149,12 @@ public class FileUtils
             while ((length = in.read(buffer)) > 0)
                 out.write(buffer, 0, length);
             
-            System.out.println("[MobArena] " + lib.filename + " downloaded in " + ((System.currentTimeMillis()-startTime)/1000.0) + " seconds.");
+            MobArena.info(lib.filename + " downloaded in " + ((System.currentTimeMillis()-startTime)/1000.0) + " seconds.");
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Couldn't download library: " + lib.filename);
+            MobArena.warning("Couldn't download library: " + lib.filename);
             return false;
         }
         finally

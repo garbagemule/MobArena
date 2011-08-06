@@ -10,7 +10,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.MAMessages;
 import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public class BossWave extends AbstractWave// TODO: implement/extend something?
@@ -54,7 +56,6 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
             for (String a : abilities.split(","))
             {
                 String ability = a.trim().replaceAll("-", "_").toUpperCase();
-                System.out.println(ability);
                 addAbility(BossAbility.fromString(ability));
             }
         }
@@ -62,6 +63,9 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
 
     public void spawn(int wave)
     {
+        // Announce spawning
+        MAUtils.tellAll(getArena(), MAMessages.get(Msg.WAVE_BOSS, ""+wave));
+        
         // Spawn the boss and set the arena
         bossCreature = boss.spawn(getWorld(), getArena().getBossSpawnpoint());
         if (bossCreature instanceof Creature)
@@ -89,6 +93,10 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
                 {
                     public void run()
                     {
+                        // Announce ability
+                        MAUtils.tellAll(getArena(), MAMessages.get(Msg.WAVE_BOSS_ABILITY, MAUtils.toCamelCase(ability.toString())));
+                        
+                        // Activate!
                         ability.activate(getArena(), bossCreature);
                     }
                 }, 50*i, 50*abilityCount);

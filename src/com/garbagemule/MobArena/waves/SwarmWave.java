@@ -7,6 +7,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.MAMessages;
+import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public class SwarmWave extends AbstractWave
@@ -30,6 +33,9 @@ public class SwarmWave extends AbstractWave
     
     private void load(Configuration config, String path)
     {
+        // Set the wave type
+        setType(WaveType.SWARM);
+        
         // Get the monster type
         monster = MACreature.fromString(config.getString(path + "monster"));
         
@@ -39,11 +45,15 @@ public class SwarmWave extends AbstractWave
 
     public void spawn(int wave)
     {
+        // Announce spawning
+        MAUtils.tellAll(getArena(), MAMessages.get(Msg.WAVE_SWARM, ""+wave));
+        
         // Get the valid spawnpoints, and initialize counter
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena().getSpawnpoints(), getArena().getLivingPlayers());
         
         // Spawn the hellians!
         spawnAll(monster, amount.getAmount(getArena().getPlayerCount()), validSpawnpoints);
+        System.out.println("WAVE SPAWN! Wave: " + wave + ", name: " + getName() + ", type: " + getType() + ", amount: " + amount);
     }
     
     public void spawnAll(MACreature monster, int amount, List<Location> spawnpoints)

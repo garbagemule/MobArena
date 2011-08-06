@@ -13,7 +13,7 @@ public class MAMessages
 {
     protected static Map<Msg,String> msgMap;
     private static Map<Msg,String> defaults = new HashMap<Msg,String>();
-    protected static enum Msg
+    public static enum Msg
     {
         ARENA_START,
         ARENA_END,
@@ -23,6 +23,7 @@ public class MAMessages
         JOIN_IN_OTHER_ARENA,
         JOIN_ARENA_NOT_ENABLED,
         JOIN_ARENA_NOT_SETUP,
+        JOIN_ARENA_EDIT_MODE,
         JOIN_ARENA_PERMISSION,
         JOIN_FEE_REQUIRED,
         JOIN_FEE_PAID,
@@ -61,12 +62,15 @@ public class MAMessages
         WARP_FROM_ARENA,
         WAVE_DEFAULT,
         WAVE_SPECIAL,
+        WAVE_SWARM,
+        WAVE_BOSS,
+        WAVE_BOSS_ABILITY,
         WAVE_REWARD,
         MISC_LIST_ARENAS,
         MISC_LIST_PLAYERS,
         MISC_COMMAND_NOT_ALLOWED,
         MISC_NO_ACCESS,
-        MISC_NONE
+        MISC_NONE;
     }
     
     // Populate the defaults map.
@@ -79,6 +83,7 @@ public class MAMessages
         defaults.put(Msg.JOIN_IN_OTHER_ARENA, "You are already in an arena! Leave that one first.");
         defaults.put(Msg.JOIN_ARENA_NOT_ENABLED, "This arena is not enabled.");
         defaults.put(Msg.JOIN_ARENA_NOT_SETUP, "This arena has not been set up yet.");
+        defaults.put(Msg.JOIN_ARENA_EDIT_MODE, "This arena is in edit mode.");
         defaults.put(Msg.JOIN_ARENA_PERMISSION, "You don't have permission to join this arena.");
         defaults.put(Msg.JOIN_FEE_REQUIRED, "Insufficient funds. Price: %");
         defaults.put(Msg.JOIN_FEE_PAID, "Price to join was: %");
@@ -116,8 +121,11 @@ public class MAMessages
         defaults.put(Msg.LOBBY_CLASS_PERMISSION, "You don't have permission to use this class!");
         defaults.put(Msg.WARP_TO_ARENA, "Can't warp to the arena during battle!");
         defaults.put(Msg.WARP_FROM_ARENA, "Warping not allowed in the arena!");
-        defaults.put(Msg.WAVE_DEFAULT, "Get ready for wave #%!");
-        defaults.put(Msg.WAVE_SPECIAL, "Get ready for wave #%! [SPECIAL]");
+        defaults.put(Msg.WAVE_DEFAULT, "Wave #%!");
+        defaults.put(Msg.WAVE_SPECIAL, "Wave #%! [SPECIAL]");
+        defaults.put(Msg.WAVE_SWARM, "Wave #%! [SWARM]");
+        defaults.put(Msg.WAVE_BOSS, "Wave #%! [BOSS]");
+        defaults.put(Msg.WAVE_BOSS_ABILITY, "Boss used ability: %!");
         defaults.put(Msg.WAVE_REWARD, "You just earned a reward: %");
         defaults.put(Msg.MISC_LIST_PLAYERS, "Live players: %");
         defaults.put(Msg.MISC_LIST_ARENAS, "Available arenas: %");
@@ -143,7 +151,7 @@ public class MAMessages
             // If it doesn't exist, create it.
             if (!msgFile.exists())
             {
-                System.out.println("[MobArena] Announcements-file not found. Creating one...");
+                MobArena.info("Announcements-file not found. Creating one...");
                 msgFile.createNewFile();
                 
                 BufferedWriter bw = new BufferedWriter(new FileWriter(msgFile));
@@ -159,7 +167,7 @@ public class MAMessages
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! Couldn't initialize announcements-file. Using defaults.");
+            MobArena.warning("Couldn't initialize announcements-file. Using defaults.");
             return;
         }
 
@@ -181,7 +189,7 @@ public class MAMessages
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Problem with announcements-file. Using defaults.");
+            MobArena.warning("Problem with announcements-file. Using defaults.");
             return;
         }
     }
@@ -220,7 +228,7 @@ public class MAMessages
         String[] split = s.split("=");
         if (split.length != 2)
         {
-            System.out.println("[MobArena] ERROR! Couldn't parse \"" + s + "\". Check announcements-file.");
+            MobArena.warning("Couldn't parse \"" + s + "\". Check announcements-file.");
             return;
         }
         
@@ -236,7 +244,7 @@ public class MAMessages
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! " + key + " is not a valid key. Check announcements-file.");
+            MobArena.warning(key + " is not a valid key. Check announcements-file.");
             return;
         }
     }

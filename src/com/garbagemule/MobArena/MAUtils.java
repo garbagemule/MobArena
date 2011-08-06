@@ -363,7 +363,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Could not create backup file for " + p.getName() + ".");
+            MobArena.warning("Could not create backup file for " + p.getName() + ".");
             return false;
         }
         
@@ -410,7 +410,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Could not restore inventory for " + p.getName());
+            MobArena.warning("Could not restore inventory for " + p.getName());
             return false;
         }
         
@@ -559,7 +559,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! Could not create item \"" + name + "\". Check config.yml");
+            MobArena.warning("Could not create item \"" + name + "\". Check config.yml");
             return null;
         }
     }
@@ -592,10 +592,7 @@ public class MAUtils
     public static void sitPets(Player p)
     {
         if (p == null)
-        {
-            System.out.println("Player is null!");
             return;
-        }
         
         List<Entity> entities = p.getNearbyEntities(80, 40, 80);
         for (Entity e : entities)
@@ -608,18 +605,6 @@ public class MAUtils
                 w.setSitting(true);
         }
     }
-    
-    /**
-     * Removes all the pets belonging to this player.
-     *//*
-    public static void clearPets(Arena arena, Player p)
-    {
-        for (Wolf w : arena.pets)
-        {
-            if (w.getOwner().equals(p))
-                w.remove();
-        }
-    }*/
     
     
     
@@ -885,11 +870,6 @@ public class MAUtils
     
     // ///////////////////////////////////////////////////////////////////// */
     
-    public static void error(String msg)
-    {
-        System.out.println("[MobArena] ERROR! " + msg);
-    }
-    
     /**
      * Sends a message to a player.
      */
@@ -932,8 +912,8 @@ public class MAUtils
         {
             if (!arena.world.equals(p.getWorld()))
             {
-                System.out.println("[MobArena] MAUtils:908: Player '" + p.getName() + "' is not in the right world. Force leaving...");
-                arena.playerLeave(p);
+                MobArena.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 tellPlayer(p, "You warped out of the arena world.");
                 continue;
             }
@@ -1238,7 +1218,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Couldn't create backup file. Aborting auto-generate...");
+            MobArena.warning("Couldn't create backup file. Aborting auto-generate...");
             return false;
         }
         
@@ -1371,7 +1351,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            if (error) System.out.println("[MobArena] ERROR! Couldn't find backup file for arena '" + name + "'");
+            if (error) MobArena.warning("Couldn't find backup file for arena '" + name + "'");
             return false;
         }
         

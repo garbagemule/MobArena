@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.bukkit.Location;
-import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.waves.*;
 import com.garbagemule.MobArena.waves.Wave.*;
@@ -34,7 +32,7 @@ public class WaveUtils
                 // If the player somehow got out of the arena world, kick him.
                 if (!s.getWorld().getName().equals(p.getWorld().getName()))
                 {
-                    System.out.println("[MobArena] Player '" + p.getName() + "' is not in the right world. Kicking...");
+                    MobArena.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                     p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                     continue;
                 }
@@ -55,7 +53,6 @@ public class WaveUtils
         return result;
     }
     
-
     public static Player getClosestPlayer(Arena arena, Entity e)
     {
         // Set up the comparison variable and the result.
@@ -65,14 +62,12 @@ public class WaveUtils
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        //for (Player p : arena.livePlayers)
         for (Player p : arena.getLivingPlayers())
         {
             if (!arena.getWorld().equals(p.getWorld()))
             {
-                System.out.println("[MobArena] Player '" + p.getName() + "' is not in the right world. Force leaving...");
-                arena.playerLeave(p);
-                MAUtils.tellPlayer(p, "You warped out of the arena world.");
+                MobArena.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 continue;
             }
             
@@ -105,21 +100,23 @@ public class WaveUtils
             Wave wave;            
             for (String w : waves)
             {
+                //                         ---------- path -----------  -- w --
                 // path argument becomes: "arenas.<arena>.waves.<branch>.<wave>."
                 wave = getWave(arena, config, path + "." + w + ".", w, branch);
-                if (wave != null) result.add(wave);
+                if (wave != null)
+                    result.add(wave);
+                else MobArena.warning("Wave '" + w + "' in " + path + " was not added!");
             }
         }
         
-        // If there are no waves and the type is 'recurrent', add a default wave.
+        // If there are no waves and the type is 'recurrent', add a couple of auto-generated waves.
         if (branch == WaveBranch.RECURRENT && (result.isEmpty() || waves == null))
         {
-            /*
-            DefaultWave def = new DefaultWave(arena, "DEF_WAVE_AUTO", 1, 1, 1, null, null);
-            def.setType(WaveType.DEFAULT);
-            def.setGrowth(WaveGrowth.MEDIUM);
+            MobArena.info("No valid recurrent waves detected for arena '" + arena.configName() + "'. Using defaults...");
+            DefaultWave def  = new DefaultWave(arena, "DEF_WAVE_AUTO", 1, 1, 1, config, path + ".DEF_WAVE_AUTO.");
+            SpecialWave spec = new SpecialWave(arena, "SPEC_WAVE_AUTO", 4, 4, 2, config, path + ".SPEC_WAVE_AUTO.");
             result.add(def);
-            */
+            result.add(spec);
         }
         
         return result;
@@ -189,31 +186,43 @@ public class WaveUtils
      * @param path The absolute path of the wave
      * @param branch The branch of the wave
      * @param type The wave type
-     * @return true, if the wave is well-defined, false otherwise
+     * @return true, only if the entire wave-node is well-defined.
      */
     private static boolean isWaveWellDefined(Configuration config, String path, WaveBranch branch, WaveType type)
     {
+        // This boolean is used in the "leaf methods" 
+        boolean wellDefined = true;
+        
         if (branch == WaveBranch.RECURRENT)
         {
             // REQUIRED: Priority and frequency
             int priority  = config.getInt(path + "priority",  0);
             int frequency = config.getInt(path + "frequency", 0);
-            if (priority == 0 || frequency == 0)
-                return false;
-            
-            // TODO: OPTIONAL: Wave growth, others?
+            if (priority == 0)
+            {
+                MobArena.warning("Missing 'priority'-node in " + path);
+                wellDefined = false;
+            }
+            if (frequency == 0)
+            {
+                MobArena.warning("Missing 'frequency'-node in " + path);
+                wellDefined = false;
+            }
         }
         else if (branch == WaveBranch.SINGLE)
         {
             // REQUIRED: Wave number
             int wave = config.getInt(path + "wave", 0);
             if (wave == 0)
-                return false;
+            {
+                MobArena.warning("Missing 'wave'-node in " + path);
+                wellDefined = false;
+            }
         }
-        else return false;
+        else wellDefined = false;
 
         // Passed branch-checks; check type
-        return isTypeWellDefined(config, path, type);
+        return isTypeWellDefined(config, path, type, wellDefined);
     }
     
     /**
@@ -223,18 +232,56 @@ public class WaveUtils
      * @param config Config-file Configuration
      * @param path The absolute path of the wave
      * @param type The wave type
-     * @return true, if the wave type is well-defined, false otherwise
+     * @param wellDefined Pass-through boolean for "leaf methods".
+     * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isTypeWellDefined(Configuration config, String path, WaveType type)
+    private static boolean isTypeWellDefined(Configuration config, String path, WaveType type, boolean wellDefined)
     {
-        if (type == WaveType.DEFAULT || type == WaveType.SPECIAL)
-            return isNormalWaveWellDefined(config, path);
+        if (type == WaveType.DEFAULT)
+            return isDefaultWaveWellDefined(config, path, wellDefined);
+        else if (type == WaveType.SPECIAL)
+            return isSpecialWaveWellDefined(config, path, wellDefined);
         else if (type == WaveType.BOSS)
-            return isBossWaveWellDefined(config, path);
+            return isBossWaveWellDefined(config, path, wellDefined);
         else if (type == WaveType.SWARM)
-            return isSwarmWaveWellDefined(config, path);
+            return isSwarmWaveWellDefined(config, path, wellDefined);
         
         return false;
+    }
+    
+    /**
+     * Check if a default wave is well-defined.
+     * The default waves have an optional wave growth node. Otherwise,
+     * they share nodes with special waves.
+     * @param config Config-file Configuration
+     * @param path The absolute path of the wave
+     * @param wellDefined Pass-through boolean for "leaf methods".
+     * @return true, only if the entire wave-node is well-defined.
+     */
+    private static boolean isDefaultWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    {
+        // OPTIONAL: Wave growth
+        String growth = config.getString(path + "growth");
+        if (growth != null && WaveGrowth.fromString(growth) == null)
+        {
+            MobArena.warning("Invalid wave growth '" + growth + "' in " + path);
+            wellDefined = false;
+        }
+        
+        return isNormalWaveWellDefined(config, path, wellDefined);
+    }
+    
+    /**
+     * Check if a special wave is well-defined.
+     * The special waves have no unique nodes.
+     * @param config Config-file Configuration
+     * @param path The absolute path of the wave
+     * @param wellDefined Pass-through boolean for "leaf methods".
+     * @return true, only if the entire wave-node is well-defined.
+     */
+    private static boolean isSpecialWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    {
+        return isNormalWaveWellDefined(config, path, wellDefined);
     }
     
     /**
@@ -244,75 +291,82 @@ public class WaveUtils
      * The only OPTIONAL node is (currently) 'monsters'
      * @param config Config-file Configuration
      * @param path The absolute path of the wave
-     * @return true, if the wave type is well-defined, false otherwise
+     * @param wellDefined Pass-through boolean for "leaf methods".
+     * @return true, wellDefined is true.
      */
-    private static boolean isNormalWaveWellDefined(Configuration config, String path)
+    private static boolean isNormalWaveWellDefined(Configuration config, String path, boolean wellDefined)
     {
         // OPTIONAL: Monsters
         List<String> monsters = config.getKeys(path + "monsters");
-        if (monsters == null)
-            return true;
-        
-        for (String monster : monsters)
+        if (monsters != null)
         {
-            if (getEnumFromString(MACreature.class, monster) != null)
-                continue;
-            
-            MAUtils.error("Invalid monster type '" + monster + "' in " + path);
-            return false;
+            for (String monster : monsters)
+            {
+                if (getEnumFromString(MACreature.class, monster) != null)
+                    continue;
+                
+                MobArena.warning("Invalid monster type '" + monster + "' in " + path);
+                wellDefined = false;
+            }
         }
+        else MobArena.info("No monsters listed in " + path + ", using defaults...");
         
-        return true;
+        return wellDefined;
     }
     
     /**
      * Check if a swarm wave is well defined
      * @param config Config-file Configuration
      * @param path The absolute path of the wave
-     * @return true, if the wave type is well-defined, false otherwise
+     * @param wellDefined Pass-through boolean for "leaf methods".
+     * @return true, wellDefined is true.
      */
-    private static boolean isSwarmWaveWellDefined(Configuration config, String path)
+    private static boolean isSwarmWaveWellDefined(Configuration config, String path, boolean wellDefined)
     {
         // REQUIRED: Monster type
         String monster = config.getString(path + "monster");
         if (monster == null)
         {
-            MAUtils.error("Missing monster type in '" + path);
-            return false;
+            MobArena.warning("Missing monster type in '" + path);
+            wellDefined = false;
         }
         else if (getEnumFromString(MACreature.class, monster) == null)
         {
-            MAUtils.error("Invalid monster type '" + monster + "' in " + path);
-            return false;
+            MobArena.warning("Invalid monster type '" + monster + "' in " + path);
+            wellDefined = false;
         }
         
         // OPTIONAL: Amount
         String amount = config.getString(path + "amount");
         if (amount != null && SwarmAmount.fromString(amount) == null)
-            return false;
+        {
+            MobArena.warning("Invalid swarm amount '" + amount + "' in " + path);
+            wellDefined = false;
+        }
         
-        return true;
+        return wellDefined;
     }
     
     /**
      * Check if a boss wave is well defined.
      * @param config Config-file Configuration
      * @param path The absolute path of the wave
-     * @return true, if the wave type is well-defined, false otherwise
+     * @param wellDefined Pass-through boolean for "leaf methods".
+     * @return true, wellDefined is true.
      */
-    private static boolean isBossWaveWellDefined(Configuration config, String path)
+    private static boolean isBossWaveWellDefined(Configuration config, String path, boolean wellDefined)
     {
         // REQUIRED: Monster type
         String monster = config.getString(path + "monster");
         if (monster == null)
         {
-            MAUtils.error("Missing monster type in '" + path);
-            return false;
+            MobArena.warning("Missing monster type in '" + path);
+            wellDefined = false;
         }
         else if (getEnumFromString(MACreature.class, monster) == null)
         {
-            MAUtils.error("Invalid monster type '" + monster + "' in " + path);
-            return false;
+            MobArena.warning("Invalid monster type '" + monster + "' in " + path);
+            wellDefined = false;
         }
         
         // OPTIONAL: Abilities
@@ -324,8 +378,8 @@ public class WaveUtils
                 if (BossAbility.fromString(ability.trim().replaceAll("-", "_").toUpperCase()) != null)
                     continue;
 
-                MAUtils.error("Invalid boss ability '" + ability + "' in " + path);
-                return false;
+                MobArena.warning("Invalid boss ability '" + ability + "' in " + path);
+                wellDefined = false;
             }
         }
         
@@ -335,9 +389,12 @@ public class WaveUtils
         // OPTIONAL: Health
         String health = config.getString(path + "health");
         if (health != null && BossHealth.fromString(health) == null)
-            return false;
+        {
+            MobArena.warning("Invalid boss health '" + health + "' in " + path);
+            wellDefined = false;
+        }
         
-        return true;
+        return wellDefined;
     }
     
     

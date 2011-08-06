@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 
 import com.garbagemule.MobArena.util.data.PlainText;
 import com.garbagemule.MobArena.util.data.Totals;
+import com.garbagemule.MobArena.util.data.XML;
+import com.garbagemule.MobArena.util.data.YAML;
 
 public class ArenaLog
 {
@@ -20,6 +22,11 @@ public class ArenaLog
     public Map<Player,ArenaPlayer> players;
     public Map<String,Integer>     distribution;
     
+    /**
+     * Create a new ArenaLog.
+     * @param plugin MobArena instance
+     * @param arena The arena
+     */
     public ArenaLog(MobArena plugin, Arena arena)
     {
         this.plugin       = plugin;
@@ -28,6 +35,10 @@ public class ArenaLog
         this.distribution = new HashMap<String,Integer>(arena.classes.size());
     }
     
+    /**
+     * Start logging by creating ArenaPlayer objects and recording
+     * the class distributions and the start time.
+     */
     public void start()
     {
         // Populate the data maps
@@ -35,9 +46,12 @@ public class ArenaLog
         populateDistributionMap();
         
         // Grab the current timestamp
-        startTime    = new Timestamp((new Date()).getTime());
+        startTime = new Timestamp((new Date()).getTime());
     }
     
+    /**
+     * End logging by recording the last wave and the end time.
+     */
     public void end()
     {
         lastWave = arena.spawnThread.getWave() - 1;
@@ -72,19 +86,26 @@ public class ArenaLog
      */
     public void saveSessionData()
     {
-        /*
-         * Call saveSessionData on the correct utility class
-         */
-        //XML.saveSessionData(this, plugin);
+        if (arena.logging.equals("xml"))
+            XML.saveSessionData(this);
+        else if (arena.logging.equals("yml") || arena.logging.equals("yaml"))
+            YAML.saveSessionData(this);
+        else
+            PlainText.saveSessionData(this);
         //CSV.saveSessionData(this, plugin);
-        //YAML.saveSessionData(this, plugin);
-        PlainText.saveSessionData(this);
+        //YAML.saveSessionData(this);
     }
     
+    /**
+     * Update the totals-file
+     */
     public void updateArenaTotals()
     {
         Totals.updateArenaTotals(this);
-        PlainText.updateArenaTotals(this);
+        
+        if (arena.logging.equals("xml"))
+            XML.updateArenaTotals(this);
+        //PlainText.updateArenaTotals(this);
     }
     
     /**

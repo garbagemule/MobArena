@@ -47,10 +47,12 @@ public class Arena
     // Setup fields
     protected String name;
     protected World world;
-    protected boolean enabled, protect, logging, running, setup, lobbySetup, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
+    protected boolean enabled, protect, running, setup, lobbySetup, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
+
     protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena;
     protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
     protected Map<String,Location> spawnpoints;
+    protected String logging;
 
     // Wave/reward/entryfee fields
     protected int spawnTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
@@ -197,9 +199,13 @@ public class Arena
         // Set the boolean.
         running = false;
         
+        // Finish logging
         log.end();
-        log.saveSessionData();
-        log.updateArenaTotals();
+        if (logging != null)
+        {
+            log.saveSessionData();
+            log.updateArenaTotals();
+        }
         
         // Stop spawning.
         stopSpawning();
@@ -220,7 +226,6 @@ public class Arena
         notifyPlayers.clear();
         rewardedPlayers.clear();
         classMap.clear();
-        //rewardMap.clear();
         spawnThread = null;
         
         // Notify listeners.
@@ -273,8 +278,8 @@ public class Arena
     public void playerJoin(Player p, Location loc)
     {
         storePlayerData(p, loc);
-        p.setHealth(20);
         MAUtils.sitPets(p);
+        p.setHealth(20);
         movePlayerToLobby(p);
     }
     
@@ -292,29 +297,19 @@ public class Arena
     }
     
     public void playerLeave(Player p)
-    {
-        //if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
-        //    MAUtils.clearInventory(p);
-        
+    {        
         if (arenaPlayers.contains(p))
             finishArenaPlayer(p);
         else if (lobbyPlayers.contains(p))
             MAUtils.clearInventory(p);
         
-        //restoreInvAndGiveRewards(p);
-        //if (log != null && log.players.get(p) != null)
-        //    log.players.get(p).lastWave = spawnThread.getWave() - 1;
         movePlayerToEntry(p);
-        finishWithPlayer(p);
+        discardPlayer(p);
         endArena();
     }
     
     public void playerDeath(Player p)
     {
-        //MAUtils.clearInventory(p);
-        //restoreInvAndGiveRewards(p);
-        //log.players.get(p).lastWave = spawnThread.getWave() - 1;
-
         finishArenaPlayer(p);
         
         if (specOnDeath)
@@ -325,7 +320,7 @@ public class Arena
         else
         {
             movePlayerToEntry(p);
-            finishWithPlayer(p);
+            discardPlayer(p);
         }
         
         if (running && spawnThread != null)
@@ -472,12 +467,7 @@ public class Arena
     {
         if (healthMap.containsKey(p))
             p.setHealth(healthMap.remove(p));
-        
-        removePlayer(p);
-    }
-    
-    public void removePlayer(Player p)
-    {
+
         // Put out fire.
         p.setFireTicks(0);
         
@@ -491,18 +481,29 @@ public class Arena
         lobbyPlayers.remove(p);
     }
     
-    private void finishWithPlayer(Player p)
+    /**
+     * Completely remove a player from the arena collections.
+     * @param p A player
+     */
+    private void discardPlayer(Player p)
     {
         locations.remove(p);
         plugin.getAM().arenaMap.remove(p);
         resetPlayer(p);
     }
     
+    /**
+     * Give the player back his inventory and record his last wave.
+     * Called when a player dies or leaves prematurely. 
+     * @param p
+     */
     private void finishArenaPlayer(Player p)
     {
         MAUtils.clearInventory(p);
         restoreInvAndGiveRewards(p);
-        log.players.get(p).lastWave = spawnThread.getWave() - 1;
+        
+        if (log != null)
+            log.players.get(p).lastWave = spawnThread.getWave() - 1;
     }
     
     
@@ -545,7 +546,7 @@ public class Arena
         {
             if (classes.isEmpty())
             {
-                System.out.println("[MobArena] ERROR! Player '" + p.getName() + "' has no class permissions!");
+                MobArena.info("Player '" + p.getName() + "' has no class permissions!");
                 playerLeave(p);
                 return;
             }
@@ -641,7 +642,7 @@ public class Arena
         
         enabled          = config.getBoolean(arenaPath + "enabled", true);
         protect          = config.getBoolean(arenaPath + "protect", true);
-        logging          = config.getBoolean(arenaPath + "logging", false);
+        logging          = config.getString(arenaPath + "logging", null);
         autoEquip        = config.getBoolean(arenaPath + "auto-equip-armor", true);
         waveClear        = config.getBoolean(arenaPath + "clear-wave-before-next", false);
         detCreepers      = config.getBoolean(arenaPath + "detonate-creepers", false);
@@ -689,12 +690,12 @@ public class Arena
         
         System.out.println();
         System.out.println("ARENA: " + configName);
-        System.out.println("Single waves");
+        System.out.println("- Single waves");
         for (Wave w : singleWaves)
-            System.out.println("- " + w);
-        System.out.println("Reccurent waves");
+            System.out.println("  - " + w);
+        System.out.println("- Reccurent waves");
         for (Wave w : recurrentWaves)
-            System.out.println("- " + w);
+            System.out.println("  - " + w);
         System.out.println();
         
         
@@ -775,7 +776,7 @@ public class Arena
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! Could not create region file. The arena will not be started!");
+            MobArena.warning("Could not create region file. The arena will not be started!");
             e.printStackTrace();
             return false;
         }
@@ -799,7 +800,7 @@ public class Arena
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! Could not find region file. The arena cannot be restored!");
+            MobArena.warning("Could not find region file. The arena cannot be restored!");
             e.printStackTrace();
             return false;
         }

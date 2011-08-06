@@ -230,7 +230,7 @@ public class ArenaMaster
             World  world;
             if (worldName == null || worldName.equals(""))
             {
-                System.out.println("[MobArena] ERROR! Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
+                MobArena.warning("Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
                 world = Bukkit.getServer().getWorlds().get(0);
             }
             else world = Bukkit.getServer().getWorld(worldName);

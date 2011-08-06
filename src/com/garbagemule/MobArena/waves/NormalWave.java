@@ -48,28 +48,33 @@ public abstract class NormalWave extends AbstractWave
             for (String m : config.getKeys(path + "monsters"))
             {
                 prob = config.getInt(path + "monsters." + m, 1);
+                if (prob == 0) continue;
+                
                 incTotalProbability(prob);
-                getProbabilityMap().put(getTotalProbability(), MACreature.fromString(m));
+                probabilities.put(totalProbability, MACreature.fromString(m));
             }
         }
         else
         {
             if (type == WaveType.DEFAULT)
             {
-                getProbabilityMap().put(10, MACreature.ZOMBIES);
-                getProbabilityMap().put(10, MACreature.SKELETONS);
-                getProbabilityMap().put(10, MACreature.SPIDERS);
-                getProbabilityMap().put(10, MACreature.CREEPERS);
-                getProbabilityMap().put(10, MACreature.WOLVES);
+                probabilities.put(10, MACreature.ZOMBIES);
+                probabilities.put(20, MACreature.SKELETONS);
+                probabilities.put(30, MACreature.SPIDERS);
+                probabilities.put(40, MACreature.CREEPERS);
+                probabilities.put(50, MACreature.WOLVES);
+                totalProbability = 50;
             }
             else if (type == WaveType.SPECIAL)
             {
-                getProbabilityMap().put(10, MACreature.POWERED_CREEPERS);
-                getProbabilityMap().put(10, MACreature.ANGRY_WOLVES);
-                getProbabilityMap().put(10, MACreature.ZOMBIE_PIGMEN);
-                getProbabilityMap().put(10, MACreature.SLIMES);
+                probabilities.put(10, MACreature.POWERED_CREEPERS);
+                probabilities.put(20, MACreature.ANGRY_WOLVES);
+                probabilities.put(30, MACreature.ZOMBIE_PIGMEN);
+                probabilities.put(40, MACreature.SLIMES);
+                totalProbability = 40;
             }
         }
+        System.out.println(probabilities);
     }
     
     public int getTotalProbability()

@@ -2,13 +2,16 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/craftbukkit-0.0.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/Permissions.jar"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/BOSEconomy7.jar"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/Essentials.jar"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/iCo4.jar"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/iCo5.jar"/>
 	<classpathentry kind="lib" path="MobArena.jar"/>
-	<classpathentry kind="lib" path="S:/Java/Minecraft/lib/jdom.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/BOSEconomy7.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/Essentials.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/iCo4.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/iCo5.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/MeanAdmins.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/Permissions.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/Register.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/craftbukkit-0.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/iCo6.jar"/>
+	<classpathentry kind="lib" path="D:/General/Java/Minecraft/lib/MultiCurrency.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

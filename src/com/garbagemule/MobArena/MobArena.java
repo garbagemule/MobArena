@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import java.io.File;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -44,12 +45,12 @@ public class MobArena extends JavaPlugin
 
     public void onEnable()
     {        
-        // Description file and data folder
+        // Description file and data folders
         desc     = getDescription();
         dir      = getDataFolder();
         arenaDir = new File(dir, "arenas"); 
         if (!dir.exists()) dir.mkdir();
-        //if (!arenaDir.exists()) arenaDir.mkdir();
+        if (!arenaDir.exists()) arenaDir.mkdir();
         
         // Create default files and initialize config-file
         FileUtils.extractDefaults("config.yml", "announcements.properties");
@@ -71,7 +72,7 @@ public class MobArena extends JavaPlugin
         registerListeners();
         
         // Announce enable!
-        System.out.println("[MobArena] v" + desc.getVersion() + " enabled.");
+        info("v" + desc.getVersion() + " enabled.");
     }
     
     public void onDisable()
@@ -86,10 +87,10 @@ public class MobArena extends JavaPlugin
         if (Methods != null && Methods.hasMethod())
         {
             Methods = null;
-            System.out.println("[MobArena] Payment method was disabled. No longer accepting payments.");
+            info("Payment method was disabled. No longer accepting payments.");
         }
         
-        System.out.println("[MobArena] disabled.");
+        info("disabled.");
     }
     
     private void loadConfig()
@@ -97,13 +98,13 @@ public class MobArena extends JavaPlugin
         File file = new File(dir, "config.yml");
         if (!file.exists())
         {
-            System.out.println("[MobArena] ERROR! Config-file could not be created!");
+            error("Config-file could not be created!");
             return;
         }
         
         config = new Configuration(file);
         config.load();
-        config.setHeader(header());
+        config.setHeader(getHeader());
     }
     
     private void registerListeners()
@@ -154,6 +155,11 @@ public class MobArena extends JavaPlugin
         return (permissionHandler == null || permissionHandler.has(p, s));
     }
     
+    // Console printing
+    public static void info(String msg)    { Bukkit.getServer().getLogger().info("[MobArena] " + msg); }
+    public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
+    public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
+    
     private void setupPermissions()
     {
         if (permissionHandler != null)
@@ -171,7 +177,7 @@ public class MobArena extends JavaPlugin
         if (!Methods.hasMethod() && Methods.setMethod(this))
         {
             Method = Methods.getMethod();
-            System.out.println("[MobArena] Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
+            info("Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
         }
     }
     
@@ -179,7 +185,7 @@ public class MobArena extends JavaPlugin
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
     
-    private String header()
+    private String getHeader()
     {
         String sep = System.getProperty("line.separator");
         return "# MobArena v" + desc.getVersion() + " - Config-file" + sep + 

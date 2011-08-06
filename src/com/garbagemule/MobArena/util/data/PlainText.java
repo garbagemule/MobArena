@@ -44,24 +44,7 @@ public class PlainText
         toWrite.addAll(getPlayerData(log.players, classLength));
         
         // Serialize!
-        try
-        {
-            File file = new File(dir, "lastsession.txt");
-            if (!file.exists()) file.createNewFile();
-            
-            FileWriter fw = new FileWriter(file);
-            for (String s : toWrite)
-            {
-                fw.write(s);
-                fw.write(System.getProperty("line.separator"));
-            }
-            fw.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Problem saving session data for arena '" + log.getArena().configName() + "'");
-        }
+        serialize(log, dir, "lastsession.txt", toWrite);
     }
     
     public static void updateArenaTotals(ArenaLog log)
@@ -71,14 +54,33 @@ public class PlainText
         
         // Parse shit
         
+        
         // Serialize
+        
     }
     
-    /* public static void updateTotals(ArenaLog log, MobArena plugin)
+    private static void serialize(ArenaLog log, File dir, String filename, List<String> toWrite)
     {
-        File dir = new File(MobArena.arenaDir, log.getArena().configName());
-        if (!dir.exists()) dir.mkdir();
-    } */
+        try
+        {
+            File file = new File(dir, filename);
+            if (!file.exists()) file.createNewFile();
+            
+            FileWriter fw = new FileWriter(file);
+            String linebreak = System.getProperty("line.separator");
+            for (String s : toWrite)
+            {
+                fw.write(s);
+                fw.write(linebreak);
+            }
+            fw.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            MobArena.warning("Problem saving session data for arena '" + log.getArena().configName() + "'");
+        }
+    }
     
     private static List<String> getClassDistribution(Map<String,Integer> map, int playerCount, int classLength)
     {

@@ -27,7 +27,7 @@ public interface Wave
 
         public static WaveType fromString(String string)
         {
-            return WaveUtils.getEnumFromString(WaveType.class, string, DEFAULT);
+            return WaveUtils.getEnumFromString(WaveType.class, string);
         }
     }
     
