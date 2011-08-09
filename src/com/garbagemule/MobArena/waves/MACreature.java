@@ -8,6 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 
+import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public enum MACreature
@@ -26,7 +27,13 @@ public enum MACreature
     HUMAN(CreatureType.MONSTER),            HUMANS(CreatureType.MONSTER),
     SLIME(CreatureType.SLIME),              SLIMES(CreatureType.SLIME),
     GIANT(CreatureType.GIANT),              GIANTS(CreatureType.GIANT),
-    GHAST(CreatureType.GHAST),              GHASTS(CreatureType.GHAST);
+    GHAST(CreatureType.GHAST),              GHASTS(CreatureType.GHAST),
+    
+    // Passive creatures
+    CHICKEN(CreatureType.CHICKEN),          CHICKENS(CreatureType.CHICKEN),
+    COW(CreatureType.COW),                  COWS(CreatureType.COW),
+    PIG(CreatureType.PIG),                  PIGS(CreatureType.PIG),
+    SHEEP(CreatureType.SHEEP);
     
     // Misc
     // EXPLODING_SHEEP(CreatureType.SHEEP), // Explode (power: 1) when close enough to players
@@ -51,12 +58,15 @@ public enum MACreature
         return WaveUtils.getEnumFromString(MACreature.class, string);
     }
     
-    public LivingEntity spawn(World world, Location loc)
+    public LivingEntity spawn(Arena arena, World world, Location loc)
     {
         LivingEntity e = world.spawnCreature(loc, type);
         
         switch (this)
         {
+            case SHEEP:
+                arena.addExplodingSheep(e);
+                break;
             case POWERED_CREEPERS:
                 ((Creeper) e).setPowered(true);
                 break;

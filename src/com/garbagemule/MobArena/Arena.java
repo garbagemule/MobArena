@@ -15,6 +15,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.minecraft.server.WorldServer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -23,6 +25,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -55,7 +59,7 @@ public class Arena
     protected String logging;
 
     // Wave/reward/entryfee fields
-    protected int spawnTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
+    protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
     protected MASpawnThread spawnThread;
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<String,Integer> distDefault, distSpecial;
@@ -174,6 +178,7 @@ public class Arena
         
         // Start spawning monsters.
         startSpawning();
+        startBouncingSheep();
         
         // Start logging
         log = new ArenaLog(plugin, this);
@@ -183,7 +188,7 @@ public class Arena
         running = true;
         
         // Announce and notify.
-        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_START));
+        MAUtils.tellAll(this, Msg.ARENA_START.get());
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onArenaStart();
         
@@ -221,7 +226,7 @@ public class Arena
             deserializeRegion();
 
         // Announce and clear sets.
-        MAUtils.tellAll(this, MAMessages.get(Msg.ARENA_END), true);
+        MAUtils.tellAll(this, Msg.ARENA_END.get(), true);
         arenaPlayers.clear();
         notifyPlayers.clear();
         rewardedPlayers.clear();
@@ -254,8 +259,9 @@ public class Arena
     }
     
     public void forceEnd()
-    {        
+    {
         Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
+        Bukkit.getServer().getScheduler().cancelTask(sheepTaskId);
         
         for (Player p : getAllPlayers())
             playerLeave(p);
@@ -271,8 +277,9 @@ public class Arena
         readyPlayers.clear();
         
         cleanup();
-        
+
         spawnTaskId = -1;
+        sheepTaskId = -1;
     }
     
     public void playerJoin(Player p, Location loc)
@@ -289,7 +296,7 @@ public class Arena
         
         if (minPlayers > 0 && lobbyPlayers.size() < minPlayers)
         {
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_NOT_ENOUGH_PLAYERS, "" + minPlayers));
+            MAUtils.tellPlayer(p, Msg.LOBBY_NOT_ENOUGH_PLAYERS, "" + minPlayers);
             return;
         }
         
@@ -298,10 +305,10 @@ public class Arena
     
     public void playerLeave(Player p)
     {        
-        if (arenaPlayers.contains(p))
+        if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
             finishArenaPlayer(p);
-        else if (lobbyPlayers.contains(p))
-            MAUtils.clearInventory(p);
+        //else if (lobbyPlayers.contains(p))
+        //    MAUtils.clearInventory(p);
         
         movePlayerToEntry(p);
         discardPlayer(p);
@@ -326,7 +333,7 @@ public class Arena
         if (running && spawnThread != null)
             spawnThread.updateTargets();
         
-        MAUtils.tellAll(this, MAMessages.get(Msg.PLAYER_DIED, p.getName()));
+        MAUtils.tellAll(this, Msg.PLAYER_DIED.get(p.getName()));
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() { public void run() {
         endArena();
         }});
@@ -378,12 +385,48 @@ public class Arena
         {
             Bukkit.getServer().getScheduler().cancelTask(spawnThread.getTaskId());
             Bukkit.getServer().getScheduler().cancelTask(spawnTaskId);
+            Bukkit.getServer().getScheduler().cancelTask(sheepTaskId);
             spawnTaskId = -1;
+            sheepTaskId = -1;
             spawnThread = null;
         }
         
         // Restore spawn flags.
         MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
+    }
+    
+    private void startBouncingSheep()
+    {
+        sheepTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    if (explodingSheep.isEmpty()) return;
+                    
+                    for (LivingEntity e : new LinkedList<LivingEntity>(explodingSheep))
+                    {
+                        Creature c = (Creature) e;
+                        if (c.getTarget() != null && e.getLocation().distanceSquared(c.getTarget().getLocation()) < 8)
+                        {
+                            CraftEntity ce = (CraftEntity) e;
+                            CraftWorld cw = (CraftWorld) e.getWorld();
+                            WorldServer ws = cw.getHandle();
+                            ws.createExplosion(ce.getHandle(), e.getLocation().getX(), e.getLocation().getY() + 1, e.getLocation().getZ(), 2f, false);
+                            e.remove();
+                        }
+                        
+                        if (e.isDead())
+                        {
+                            explodingSheep.remove(e);
+                            continue;
+                        }
+                        
+                        if (Math.abs(e.getVelocity().getY()) < 1)
+                            e.setVelocity(e.getVelocity().setY(0.5));
+                    }
+                }
+            }, waveDelay, 20);
     }
     
     private void updateChunk(Location loc)
@@ -502,7 +545,7 @@ public class Arena
         MAUtils.clearInventory(p);
         restoreInvAndGiveRewards(p);
         
-        if (log != null)
+        if (log != null && spawnThread != null)
             log.players.get(p).lastWave = spawnThread.getWave() - 1;
     }
     
@@ -554,7 +597,7 @@ public class Arena
         }
         
         assignClass(p, className);
-        MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+        MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
     }
     
     private void cleanup()
@@ -615,6 +658,7 @@ public class Arena
     
     private void removeEntities()
     {
+        if (p1 == null || p2 == null) return;
         Chunk c1 = world.getChunkAt(p1);
         Chunk c2 = world.getChunkAt(p2);
         
@@ -687,7 +731,7 @@ public class Arena
         singleWaves      = WaveUtils.getWaves(this, config, WaveBranch.SINGLE);
         recurrentWaves   = WaveUtils.getWaves(this, config, WaveBranch.RECURRENT);
 
-        
+        /*
         System.out.println();
         System.out.println("ARENA: " + configName);
         System.out.println("- Single waves");
@@ -697,7 +741,7 @@ public class Arena
         for (Wave w : recurrentWaves)
             System.out.println("  - " + w);
         System.out.println();
-        
+        */
         
         classes          = plugin.getAM().classes;
         classItems       = plugin.getAM().classItems;
@@ -937,6 +981,11 @@ public class Arena
         monsters.add(e);
     }
     
+    public void addExplodingSheep(LivingEntity e)
+    {
+        explodingSheep.add(e);
+    }
+    
     public List<Player> getAllPlayers()
     {
         List<Player> result = new LinkedList<Player>();
@@ -961,13 +1010,21 @@ public class Arena
         return result;
     }
     
+    public Set<LivingEntity> getMonsters()
+    {
+        Set<LivingEntity> tmp = new HashSet<LivingEntity>(monsters);
+        tmp.addAll(explodingSheep);
+        return tmp;
+    }
+    
     public void resetIdleTimer()
     {
         if (maxIdleTime <= 0 || !running)
             return;
         
         // Reset the previousSize, cancel the previous timer, and start the new timer.
-        spawnThread.setPreviousSize(monsters.size());
+        //spawnThread.setPreviousSize(monsters.size());
+        spawnThread.setPreviousSize(getMonsters().size());
         Bukkit.getServer().getScheduler().cancelTask(spawnThread.getTaskId());
         int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
@@ -992,7 +1049,7 @@ public class Arena
                     for (Player p : ps)
                     {
                         MAUtils.clearInventory(p);
-                        MAUtils.tellPlayer(p, MAMessages.get(Msg.FORCE_END_IDLE));
+                        MAUtils.tellPlayer(p, Msg.FORCE_END_IDLE);
                         playerDeath(p);
                     }
                 }
@@ -1100,6 +1157,54 @@ public class Arena
         
         MAUtils.giveItems(p, entryFee, false, plugin);
         hasPaid.remove(p);
+    }
+    
+    public boolean canJoin(Player p)
+    {
+        if (!enabled)
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_NOT_ENABLED);
+        else if (!setup || recurrentWaves.isEmpty())
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_NOT_SETUP);
+        else if (edit)
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_EDIT_MODE);
+        else if (running && (notifyPlayers.contains(p) || notifyPlayers.add(p)))
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_IS_RUNNING);
+        else if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
+            MAUtils.tellPlayer(p, Msg.JOIN_ALREADY_PLAYING);
+        else if (!plugin.has(p, "mobarena.arenas." + configName()))
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_PERMISSION);
+        else if (maxPlayers > 0 && lobbyPlayers.size() >= maxPlayers)
+            MAUtils.tellPlayer(p, Msg.JOIN_PLAYER_LIMIT_REACHED);
+        else if (joinDistance > 0 && !inRegionRadius(p.getLocation(), joinDistance))
+            MAUtils.tellPlayer(p, Msg.JOIN_TOO_FAR);
+        else if (!canAfford(p) || !takeFee(p))
+            MAUtils.tellPlayer(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
+        else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
+            MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
+        else if (!emptyInvJoin && !MAUtils.storeInventory(p))
+            MAUtils.tellPlayer(p, Msg.JOIN_STORE_INV_FAIL);
+        else return true;
+        
+        return false;
+    }
+    
+    public boolean canSpec(Player p)
+    {
+        if (!enabled)
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_NOT_ENABLED);
+        else if (!setup)
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_NOT_SETUP);
+        else if (edit)
+            MAUtils.tellPlayer(p, Msg.JOIN_ARENA_EDIT_MODE);
+        else if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
+            MAUtils.tellPlayer(p, Msg.SPEC_ALREADY_PLAYING);
+        else if (emptyInvSpec && !MAUtils.hasEmptyInventory(p))
+            MAUtils.tellPlayer(p, Msg.SPEC_EMPTY_INV);
+        else if (joinDistance > 0 && !inRegionRadius(p.getLocation(), joinDistance))
+            MAUtils.tellPlayer(p, Msg.JOIN_TOO_FAR);
+        else return true;
+        
+        return false;
     }
         
     /**

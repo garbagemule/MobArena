@@ -59,10 +59,12 @@ public class XML
             Element rewards = new Element("rewards");
             for (ItemStack stack : ap.rewards)
             {
+                // TODO: Move this to a method
+                boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
                 Element r = new Element("reward");
                 r.setAttribute(new Attribute("id", stack.getTypeId() + ""));
-                r.setAttribute(new Attribute("material", stack.getType().toString().toLowerCase()));
-                r.setAttribute(new Attribute("data", (stack.getData() != null) ? stack.getData().toString().toLowerCase() : "0"));
+                r.setAttribute(new Attribute("material", money ? "money" : stack.getType().toString().toLowerCase()));
+                r.setAttribute(new Attribute("data", money || stack.getData() == null ? "0" : stack.getData().toString().toLowerCase()));
                 r.setAttribute(new Attribute("amount", stack.getAmount() + ""));
 
                 rewards.addContent(r);
@@ -110,7 +112,23 @@ public class XML
             cl.addContent(e);
         }
         
-        // Rewards TODO: THIS!
+        // Rewards
+        Element rw = new Element("rewards");
+        for (ArenaPlayer ap : log.players.values())
+        {
+            for (ItemStack stack : ap.rewards)
+            {
+                // TODO: Move this to a method
+                boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
+                Element r = new Element("reward");
+                r.setAttribute(new Attribute("id", stack.getTypeId() + ""));
+                r.setAttribute(new Attribute("material", money ? "money" : stack.getType().toString().toLowerCase()));
+                r.setAttribute(new Attribute("data", money || stack.getData() == null ? "0" : stack.getData().toString().toLowerCase()));
+                r.setAttribute(new Attribute("amount", stack.getAmount() + ""));
+    
+                rw.addContent(r);
+            }
+        }
         
         // Players
         Element pl = new Element("players");
@@ -141,6 +159,7 @@ public class XML
         Element root = new Element("last-session");
         root.addContent(gd);
         root.addContent(cl);
+        root.addContent(rw);
         root.addContent(pl);
         
         // Create a new document

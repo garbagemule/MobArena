@@ -51,7 +51,8 @@ public class YAML
             config.setProperty("player-data." + p + ".hits", ap.hits);
             for (ItemStack stack : ap.rewards)
             {
-                String path = "player-data." + p + ".rewards." + stack.getType().toString().toLowerCase();
+                boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
+                String path = "player-data." + p + ".rewards." + (money ? "money" : stack.getType().toString().toLowerCase());
                 config.setProperty(path, config.getInt(path, 0) + stack.getAmount());
             }
         }

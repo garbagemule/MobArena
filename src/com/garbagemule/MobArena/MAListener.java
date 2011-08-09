@@ -384,7 +384,7 @@ public class MAListener implements ArenaListener
         if (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p))
             return;
         
-        MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_DROP_ITEM));
+        MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
         event.setCancelled(true);
     }
 
@@ -429,12 +429,12 @@ public class MAListener implements ArenaListener
         {
             if (arena.classMap.containsKey(p))
             {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_PLAYER_READY));
+                MAUtils.tellPlayer(p, Msg.LOBBY_PLAYER_READY);
                 arena.playerReady(p);
             }
             else
             {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_PICK_CLASS));
+                MAUtils.tellPlayer(p, Msg.LOBBY_PICK_CLASS);
             }
             return;
         }
@@ -444,7 +444,7 @@ public class MAListener implements ArenaListener
         {
             if (a == Action.RIGHT_CLICK_BLOCK)
             {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_RIGHT_CLICK));
+                MAUtils.tellPlayer(p, Msg.LOBBY_RIGHT_CLICK);
                 return;
             }
             
@@ -456,18 +456,18 @@ public class MAListener implements ArenaListener
             if (!arena.classes.contains(className) && !className.equalsIgnoreCase("random"))
                 return;
             
-            if (!plugin.hasDefTrue(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
+            if (!plugin.has(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
             {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PERMISSION));
+                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PERMISSION);
                 return;
             }
 
             // Set the player's class.
             arena.assignClass(p, className);
             if (!className.equalsIgnoreCase("random"))
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_PICKED, className));
+                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
             else
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LOBBY_CLASS_RANDOM));
+                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
                 
             return;
         }
@@ -513,7 +513,7 @@ public class MAListener implements ArenaListener
                 if (arena.inRegion(to) || to.equals(arena.arenaLoc) || to.equals(arena.lobbyLoc) || to.equals(arena.spectatorLoc) || to.equals(old))
                     return;
                 
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_FROM_ARENA));
+                MAUtils.tellPlayer(p, Msg.WARP_FROM_ARENA);
                 event.setCancelled(true);
                 return;
             }
@@ -523,7 +523,7 @@ public class MAListener implements ArenaListener
                 if (to.equals(arena.arenaLoc) || to.equals(arena.lobbyLoc) || to.equals(arena.spectatorLoc) || to.equals(old))
                     return;
                 
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.WARP_TO_ARENA));
+                MAUtils.tellPlayer(p, Msg.WARP_TO_ARENA);
                 event.setCancelled(true);
                 return;
             }
@@ -553,6 +553,6 @@ public class MAListener implements ArenaListener
             return;
         
         event.setCancelled(true);
-        MAUtils.tellPlayer(p, MAMessages.get(Msg.MISC_COMMAND_NOT_ALLOWED));
+        MAUtils.tellPlayer(p, Msg.MISC_COMMAND_NOT_ALLOWED);
     }
 }

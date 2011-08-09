@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.util.data;
 
 import java.io.File;
 
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
@@ -34,17 +35,26 @@ public class Totals
         updateDuration(totals, "general-info.longest-session-duration", log.getDurationLong(), false);
         
         // Classes
-        updateInt(totals, "classes.overall-distribution.total-count", log.players.keySet().size(), true);
+        //updateInt(totals, "classes.overall-distribution.total-count", log.players.keySet().size(), true);
         for (String c : log.arena.getClasses())
         {
             // Array {kills, dmgDone, dmgTaken}
             int[] a = getKillsAndDamageByClass(log, c);
-            updateInt(totals,"classes." + c + ".kills",       a[0],true);
-            updateInt(totals,"classes." + c + ".damage-done", a[1],true);
-            updateInt(totals,"classes." + c + ".damage-taken",a[2],true);
+            updateInt(totals, "classes." + c + ".kills",        a[0], true);
+            updateInt(totals, "classes." + c + ".damage-done",  a[1], true);
+            updateInt(totals, "classes." + c + ".damage-taken", a[2], true);
+            updateInt(totals, "classes." + c + ".played", log.distribution.get(c), true);
         }
         
         // Rewards
+        for (ArenaPlayer ap : log.players.values())
+        {
+            for (ItemStack stack : ap.rewards)
+            {
+                boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
+                updateInt(totals, "rewards." + (money ? "money" : stack.getType().toString().toLowerCase()), stack.getAmount(), true);
+            }
+        }
         
         // Players
         for (ArenaPlayer ap : log.players.values())
@@ -125,17 +135,6 @@ public class Totals
             kills += ap.kills;
         return kills;
     }
-    
-    /*
-    private static int getKillsByClass(ArenaLog log, String className)
-    {
-        int kills = 0;
-        for (ArenaPlayer ap : log.players.values())
-            if (ap.className.equals(className))
-                kills += ap.kills;
-        return kills;
-    }
-    */
     
     /**
      * Get a (dirty) int-array in the form {kills, damage done, damage taken} for a class

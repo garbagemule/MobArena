@@ -133,7 +133,7 @@ public class WaveUtils
         if (type == null || !isWaveWellDefined(config, path, branch, type))
             return null;
         
-        // TODO: Generate waves properly. These are place-holders!
+        // 
         Wave result = null;
         if (branch == WaveBranch.RECURRENT)
         {

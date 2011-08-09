@@ -186,12 +186,12 @@ public class MASpawnThread implements Runnable
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID)
             {
                 if (plugin.Methods.hasMethod())
-                    MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, plugin.Method.format(reward.getAmount())));
+                    MAUtils.tellPlayer(p, Msg.WAVE_REWARD, plugin.Method.format(reward.getAmount()));
                 else MobArena.warning("Tried to add money, but no economy plugin detected!");
             }
             else
             {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount()));
+                MAUtils.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
             }
         }
     }

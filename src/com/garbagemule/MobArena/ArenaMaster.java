@@ -13,6 +13,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
 import org.bukkit.util.config.Configuration;
 
 public class ArenaMaster
@@ -65,6 +66,15 @@ public class ArenaMaster
         List<Arena> result = new LinkedList<Arena>();
         for (Arena arena : arenas)
             if (arena.enabled)
+                result.add(arena);
+        return result;
+    }
+    
+    public List<Arena> getPermittedArenas(Player p)
+    {
+        List<Arena> result = new LinkedList<Arena>();
+        for (Arena arena : arenas)
+            if (plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
         return result;
     }
@@ -222,7 +232,7 @@ public class ArenaMaster
         
         if (config.getKeys("arenas") == null)
             createArenaNode("default", Bukkit.getServer().getWorlds().get(0));
-        
+
         for (String configName : config.getKeys("arenas"))
         {
             String arenaPath = "arenas." + configName + ".";

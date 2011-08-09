@@ -12,19 +12,19 @@ public abstract class AbstractArena
     public abstract void startArena();
     
     /**
+     * Stop the arena session.
+     * Distribute rewards, clean up arena floor and reset everything to how it was before
+     * the arena session was started, false otherwise
+     */
+    public abstract void endArena();
+    
+    /**
      * Force the arena to start.
      * If some players are ready, this method will force all non-ready players to leave,
      * and the arena will start with only the currently ready players.
      * @return true, if the arena was successfully started, false otherwise
      */
     public abstract boolean forceStart();
-    
-    /**
-     * Stop the arena session.
-     * Distribute rewards, clean up arena floor and reset everything to how it was before
-     * the arena session was started, false otherwise
-     */
-    public abstract void endArena();
     
     /**
      * Force the arena to end.
@@ -94,14 +94,14 @@ public abstract class AbstractArena
     public abstract boolean isEnabled();
     
     /**
-     * Check if the arena is running.
-     * @return true, if the arena is running.
-     */
-    public abstract boolean isRunning();
-    
-    /**
      * Check if the arena is set up and ready for use.
      * @return true, if the arena is ready for use.
      */
     public abstract boolean isSetup();
+    
+    /**
+     * Check if the arena is running.
+     * @return true, if the arena is running.
+     */
+    public abstract boolean isRunning();
 }

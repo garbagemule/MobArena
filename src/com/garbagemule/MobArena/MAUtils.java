@@ -35,6 +35,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.util.EntityPosition;
+import com.garbagemule.MobArena.util.MAInventoryItem;
 
 public class MAUtils
 {         
@@ -765,6 +767,10 @@ public class MAUtils
             arena.p1.setY(arena.p2.getY());
             arena.p2.setY(tmp);
         }
+        
+        if (!arena.world.getName().equals(world.getName()))
+            arena.world = world;
+        
         arena.serializeConfig();
         arena.load(config);
     }
@@ -882,10 +888,19 @@ public class MAUtils
         return true;
     }
     
+    public static boolean tellPlayer(CommandSender p, Msg msg)
+    {
+        return tellPlayer(p, msg.get());
+    }
+    
+    public static boolean tellPlayer(CommandSender p, Msg msg, String s)
+    {
+        return tellPlayer(p, msg.get(s));
+    }
+    
     /**
      * Sends a message to all players in and around the arena.
      */
-    public static void tellAll(Arena arena, String msg) { tellAll(arena, msg, false); }
     public static void tellAll(Arena arena, String msg, boolean notifyPlayers)
     {
         Set<Player> tmp = new HashSet<Player>();
@@ -897,6 +912,11 @@ public class MAUtils
         if (notifyPlayers) tmp.addAll(arena.notifyPlayers);
         for (Player p : tmp)
             tellPlayer(p, msg);
+    }
+    
+    public static void tellAll(Arena arena, String msg)
+    {
+        tellAll(arena, msg, false);
     }
     
     public static Player getClosestPlayer(Entity e, Arena arena)
@@ -979,7 +999,7 @@ public class MAUtils
         if (list == null || list.isEmpty())
         {
             if (none)
-                return MAMessages.get(Msg.MISC_NONE);
+                return Msg.MISC_NONE.get();
             else
                 return "";
         }
@@ -1066,7 +1086,7 @@ public class MAUtils
      * and spawnpoints are all set up.
      */    
     public static boolean verifyData(Arena arena)
-    {        
+    {
         return ((arena.arenaLoc       != null) &&
                 (arena.lobbyLoc       != null) &&
                 (arena.spectatorLoc   != null) &&
@@ -1079,6 +1099,24 @@ public class MAUtils
     {
         return ((arena.l1 != null) &&
                 (arena.l2 != null));
+    }
+    
+    public static void checkData(Arena arena, CommandSender p)
+    {
+        if (arena.arenaLoc == null)
+            tellPlayer(p, "Missing warp: arena");
+        if (arena.lobbyLoc == null)
+            tellPlayer(p, "Missing warp: lobby");
+        if (arena.spectatorLoc == null)
+            tellPlayer(p, "Missing warp: spectator");
+        if (arena.p1 == null)
+            tellPlayer(p, "Missing region point: p1");
+        if (arena.p2 == null)
+            tellPlayer(p, "Missing region point: p2");
+        if (arena.spawnpoints.size() <= 0)
+            tellPlayer(p, "Missing spawnpoints");
+        if (arena.setup)
+            tellPlayer(p, "Arena is ready to be used!");
     }
 
     /**

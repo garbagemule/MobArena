@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.io.File;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -9,6 +10,7 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.entity.EntityListener;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -53,13 +55,14 @@ public class MobArena extends JavaPlugin
         if (!arenaDir.exists()) arenaDir.mkdir();
         
         // Create default files and initialize config-file
-        FileUtils.extractDefaults("config.yml", "announcements.properties");
+        FileUtils.extractDefaults("config.yml");
         loadConfig();
         
         // Download external libraries if needed.
         FileUtils.fetchLibs(config);
         
         // Set up permissions and economy
+        //setupSuperPerms();
         setupPermissions();
         setupRegister();
         
@@ -78,6 +81,7 @@ public class MobArena extends JavaPlugin
     public void onDisable()
     {
         // Force all arenas to end.
+        if (am == null) return;
         for (Arena arena : am.arenas)
             arena.forceEnd();
         am.arenaMap.clear();
@@ -109,10 +113,9 @@ public class MobArena extends JavaPlugin
     
     private void registerListeners()
     {
-        // Bind the /ma, /marena, and /mobarena commands to MACommands.
+        // Bind the /ma, /mobarena commands to MACommands.
         MACommands commandExecutor = new MACommands(this, am);
         getCommand("ma").setExecutor(commandExecutor);
-        getCommand("marena").setExecutor(commandExecutor);
         getCommand("mobarena").setExecutor(commandExecutor);
         
         // Create event listeners.
@@ -146,19 +149,30 @@ public class MobArena extends JavaPlugin
     // Permissions stuff
     public boolean has(Player p, String s)
     {
-        //return (permissionHandler != null && permissionHandler.has(p, s));
-        return (permissionHandler == null || permissionHandler.has(p, s));
+        //return (permissionHandler == null || permissionHandler.has(p, s));
+        return hasSuperPerms(p, s) || hasNijikoPerms(p, s);
     }
     
-    public boolean hasDefTrue(Player p, String s)
+    public boolean hasSuperPerms(Player p, String s)
     {
-        return (permissionHandler == null || permissionHandler.has(p, s));
+        return p.hasPermission(s);
+    }
+    
+    public boolean hasNijikoPerms(Player p, String s)
+    {
+        return permissionHandler != null && permissionHandler.has(p, s);
     }
     
     // Console printing
     public static void info(String msg)    { Bukkit.getServer().getLogger().info("[MobArena] " + msg); }
     public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
     public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
+    
+    private void setupSuperPerms()
+    {
+        getServer().getPluginManager().addPermission(new Permission("mobarena.classes"));
+        getServer().getPluginManager().addPermission(new Permission("mobarena.arenas"));
+    }
     
     private void setupPermissions()
     {

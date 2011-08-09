@@ -9,7 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.MAMessages;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
@@ -33,14 +32,14 @@ public class SpecialWave extends NormalWave
 	public void spawn(int wave)
 	{
         // Announce spawning
-        MAUtils.tellAll(getArena(), MAMessages.get(Msg.WAVE_SPECIAL, ""+wave));
+        MAUtils.tellAll(getArena(), Msg.WAVE_SPECIAL.get(""+wave));
         
         // Get the valid spawnpoints, and initialize counter
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena().getSpawnpoints(), getArena().getLivingPlayers());
         
         // Spawn all the monsters
         spawnAll(getMonstersToSpawn(getArena().getPlayerCount()), validSpawnpoints);
-		System.out.println("WAVE SPAWN! Wave: " + wave + ", name: " + getName() + ", type: " + getType());
+        System.out.println(this);
 	}
     
     private Map<MACreature,Integer> getMonstersToSpawn(int playerCount)

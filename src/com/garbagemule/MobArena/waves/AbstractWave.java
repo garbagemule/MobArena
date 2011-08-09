@@ -84,7 +84,7 @@ public abstract class AbstractWave implements Wave
     public LivingEntity spawnMonster(MACreature creature, Location loc)
     {
         // Spawn and add to collection
-        LivingEntity e = creature.spawn(getWorld(), loc);
+        LivingEntity e = creature.spawn(getArena(), getWorld(), loc);
         getArena().addMonster(e);
 
         // Grab a random target.
@@ -185,10 +185,15 @@ public abstract class AbstractWave implements Wave
     // MISC
     public String toString()
     {
-        return "[name=" + waveName +
-                ", wave=" + wave +
-                ", frequency=" + frequency +
-                ", priority=" + priority +
-                ", type=" + type + "]";
+        if (branch == WaveBranch.RECURRENT)
+            return "[Wave type=" + type +
+                    " name=" + waveName +
+                    " branch=" + branch.toString().charAt(0) +
+                    " freq=" + frequency +
+                    " prio=" + priority + "]";
+        return "[Wave type=" + type +
+                    " name=" + waveName +
+                    " branch=" + branch.toString().charAt(0) +
+                    " wave=" + wave + "]";
     }
 }

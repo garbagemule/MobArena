@@ -74,7 +74,6 @@ public abstract class NormalWave extends AbstractWave
                 totalProbability = 40;
             }
         }
-        System.out.println(probabilities);
     }
     
     public int getTotalProbability()

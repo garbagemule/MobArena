@@ -10,7 +10,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.MAMessages;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
@@ -64,10 +63,10 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
     public void spawn(int wave)
     {
         // Announce spawning
-        MAUtils.tellAll(getArena(), MAMessages.get(Msg.WAVE_BOSS, ""+wave));
+        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS.get(""+wave));
         
         // Spawn the boss and set the arena
-        bossCreature = boss.spawn(getWorld(), getArena().getBossSpawnpoint());
+        bossCreature = boss.spawn(getArena(), getWorld(), getArena().getBossSpawnpoint());
         if (bossCreature instanceof Creature)
             ((Creature) bossCreature).setTarget(MAUtils.getClosestPlayer(bossCreature, getArena()));
         getArena().addMonster(bossCreature);
@@ -78,6 +77,7 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
         healthAmount = bossHealth.getAmount(getArena().getPlayerCount());
         
         startAbilityTasks();
+        System.out.println(this);
     }
     
     private void startAbilityTasks()
@@ -94,7 +94,7 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
                     public void run()
                     {
                         // Announce ability
-                        MAUtils.tellAll(getArena(), MAMessages.get(Msg.WAVE_BOSS_ABILITY, MAUtils.toCamelCase(ability.toString())));
+                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(MAUtils.toCamelCase(ability.toString())));
                         
                         // Activate!
                         ability.activate(getArena(), bossCreature);
