@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -23,5 +24,11 @@ public class MABlockListener extends BlockListener
     {
         for (Arena arena : am.arenas)
             arena.eventListener.onBlockPlace(event);
+    }
+    
+    public void onBlockIgnite(BlockIgniteEvent event)
+    {
+        for (Arena arena : am.arenas)
+            arena.eventListener.onBlockIgnite(event);
     }
 }

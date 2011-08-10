@@ -2,7 +2,9 @@ package com.garbagemule.MobArena.waves;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
@@ -33,7 +35,7 @@ public interface Wave
     
     public enum WaveGrowth
     {
-        OLD(0), SLOW(0.5), MEDIUM(0.65), FAST(0.8), PSYCHO(1.1);
+        OLD(0), SLOW(0.5), MEDIUM(0.65), FAST(0.8), PSYCHO(1.2);
         private double exp;
         
         private WaveGrowth(double exp)
@@ -60,86 +62,215 @@ public interface Wave
     
     public enum BossAbility
     {
-        ARROWS, FIREBALLS, FIRE_AURA, THROW_TARGET, THROW_NEARBY, FETCH_TARGET, FETCH_DISTANT;
-        
-        public static BossAbility fromString(String string)
+        ARROWS("Arrow")
         {
-            return WaveUtils.getEnumFromString(BossAbility.class, string);
-        }
-        
-        public void activate(Arena arena, LivingEntity boss)
-        {
-            LivingEntity target = getTarget(boss);
-            Location bLoc = boss.getLocation();
-            Location loc;
-            
-            switch (this)
+            public void run(Arena arena, LivingEntity boss)
             {
-                // Fire an arrow in the direction the boss is facing.
-                case ARROWS:
-                    System.out.println("Shooting arrow");
-                    boss.shootArrow();
-                    break;
-                // Hurl a fireball in the direction the boss is facing.
-                case FIREBALLS:
-                    System.out.println("Shooting fireball");
-                    loc = bLoc.add(bLoc.getDirection().normalize().multiply(2).toLocation(boss.getWorld(), bLoc.getYaw(), bLoc.getPitch()));
-                    Fireball fireball = boss.getWorld().spawn(loc, Fireball.class);
-                    fireball.setIsIncendiary(false);
-                    break;
-                // Set fire to all players nearby.
-                case FIRE_AURA:
-                    System.out.println("Fire aura");
-                    for (Player p : getNearbyPlayers(arena, boss, 5))
-                            p.setFireTicks(20);
-                    break;
-                // Throw target back
-                case THROW_TARGET:
-                    System.out.println("Throw target");
-                    if (target != null)
-                    {
-                        loc = target.getLocation();
-                        Vector v   = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
-                        target.setVelocity(v.normalize().setY(0.8));
-                    }
-                    break;
-                // Throw nearby players back
-                case THROW_NEARBY:
-                    System.out.println("Throw nearby");
-                    for (Player p : getNearbyPlayers(arena, boss, 5))
-                    {
-                        loc      = p.getLocation();
-                        Vector v = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
-                        p.setVelocity(v.normalize().setY(0.8));
-                    }
-                    break;
-                // Warp target to boss
-                case FETCH_TARGET:
-                    System.out.println("Fetch target");
-                    if (target != null) target.teleport(boss);
-                    break;
-                // Warp nearby players to boss
-                case FETCH_DISTANT:
-                    System.out.println("Fetch distant");
-                    for (Player p : getDistantPlayers(arena, boss, 8))
-                        p.teleport(boss);
-                default:
-                    break;
+                System.out.println("Shooting arrow");
+                boss.shootArrow();
             }
+        },
+        FIREBALLS("Fireball")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Shooting fireball");
+                Location bLoc = boss.getLocation();
+                Location loc = bLoc.add(bLoc.getDirection().normalize().multiply(2).toLocation(boss.getWorld(), bLoc.getYaw(), bLoc.getPitch()));
+                Fireball fireball = boss.getWorld().spawn(loc, Fireball.class);
+                fireball.setIsIncendiary(false);
+            }
+        },
+        FIREAURA("Fire aura")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Fire aura");
+                for (Player p : getNearbyPlayers(arena, boss, 5))
+                        p.setFireTicks(20);
+            }
+        },
+        LIGHTNINGAURA("Lightning aura")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Lightning aura.");
+                Location base = boss.getLocation();
+                Location ne = base.getBlock().getRelative( 2,  0,  2).getLocation();
+                Location nw = base.getBlock().getRelative(-2,  0,  2).getLocation();
+                Location se = base.getBlock().getRelative( 2,  0, -2).getLocation();
+                Location sw = base.getBlock().getRelative(-2,  0, -2).getLocation();
+
+                arena.getWorld().strikeLightning(ne);
+                arena.getWorld().strikeLightning(nw);
+                arena.getWorld().strikeLightning(se);
+                arena.getWorld().strikeLightning(sw);
+            }
+        },
+        DISORIENTTARGET("Disorient target")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                LivingEntity target = getTarget(boss);
+                if (target == null) return;
+
+                Location loc = target.getLocation();
+                loc.setYaw(target.getLocation().getYaw() + 45 + (new Random()).nextInt(270));
+                target.teleport(loc);
+            }
+        },
+        ROOTTARGET("Root target")
+        {
+            public void run(final Arena arena, LivingEntity boss)
+            {
+                System.out.println("Intimidate target");
+                final LivingEntity target = getTarget(boss);
+                if (target == null) return;
+                
+                final Location loc = target.getLocation();
+                final int freezeTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(arena.getPlugin(),
+                    new Runnable()
+                    {
+                        public void run()
+                        {
+                            if (arena.getLivingPlayers().contains(target))
+                                    target.teleport(loc);
+                        }
+                    }, 3, 3);
+                
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
+                    new Runnable()
+                    {
+                        public void run()
+                        {
+                            Bukkit.getServer().getScheduler().cancelTask(freezeTaskId);
+                        }
+                    }, 45);
+            }
+        },
+        WARPTOPLAYER("Warp to player")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                List<Player> list = arena.getLivingPlayers();
+                boss.teleport(list.get((new Random()).nextInt(list.size())));
+            }
+        },
+        THROWTARGET("Throw target")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Throw target");
+                LivingEntity target = getTarget(boss);
+                if (target == null) return;
+                
+                Location bLoc       = boss.getLocation();
+                Location loc        = target.getLocation();
+                Vector v            = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
+                target.setVelocity(v.normalize().setY(0.8));
+            }
+        },
+        THROWNEARBY("Throw nearby players")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Throw nearby");
+                for (Player p : getNearbyPlayers(arena, boss, 5))
+                {
+                    Location bLoc = boss.getLocation();
+                    Location loc  = p.getLocation();
+                    Vector v      = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
+                    p.setVelocity(v.normalize().setY(0.8));
+                }
+            }
+        },
+        THROWDISTANT("Throw distant players")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Throw distant");
+                for (Player p : getDistantPlayers(arena, boss, 8))
+                {
+                    Location bLoc = boss.getLocation();
+                    Location loc  = p.getLocation();
+                    Vector v      = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
+                    p.setVelocity(v.normalize().setY(0.8));
+                }
+            }
+        },
+        FETCHTARGET("Fetch target")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Fetch target");
+                LivingEntity target = getTarget(boss);
+                if (target != null) target.teleport(boss);
+            }
+        },
+        FETCHNEARBY("Fetch nearby players")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Fetch nearby");
+                for (Player p : getNearbyPlayers(arena, boss, 5))
+                    p.teleport(boss);
+            }
+        },
+        FETCHDISTANT("Fetch distant players")
+        {
+            public void run(Arena arena, LivingEntity boss)
+            {
+                System.out.println("Fetch distant");
+                for (Player p : getDistantPlayers(arena, boss, 8))
+                    p.teleport(boss);
+            }
+        };
+        
+        private String name;
+        
+        private BossAbility(String name)
+        {
+            this.name = name;
         }
         
-        private LivingEntity getTarget(LivingEntity entity)
+        /**
+         * The run-method that all boss abilities must define.
+         * The method is called in the ability cycle for the given boss.
+         * @param arena The Arena the boss is in
+         * @param boss The boss entity
+         */
+        public abstract void run(Arena arena, LivingEntity boss);
+        
+        /**
+         * Get the target player of the LivingEntity if possible.
+         * @param entity The entity whose target to get
+         * @return The target player, or null
+         */
+        protected LivingEntity getTarget(LivingEntity entity)
         {
             if (entity instanceof Creature)
             {
-                LivingEntity target = ((Creature) entity).getTarget();
+                LivingEntity target = null;
+                try
+                {
+                    target = ((Creature) entity).getTarget();
+                }
+                catch (Exception e) {}
+                
                 if (target instanceof Player)
                     return target;
             }
             return null;
         }
         
-        private List<Player> getNearbyPlayers(Arena arena, Entity boss, int x)
+        /**
+         * Get a list of nearby players
+         * @param arena The arena
+         * @param boss The boss
+         * @param x The 'radius' in which to grab players
+         * @return A list of nearby players
+         */
+        protected List<Player> getNearbyPlayers(Arena arena, Entity boss, int x)
         {
             List<Player> result = new LinkedList<Player>();
             for (Entity e : boss.getNearbyEntities(x, x, x))
@@ -148,7 +279,14 @@ public interface Wave
             return result;
         }
         
-        private List<Player> getDistantPlayers(Arena arena, Entity boss, int x)
+        /**
+         * Get a list of distant players
+         * @param arena The arena
+         * @param boss The boss
+         * @param x The 'radius' in which to exclude players 
+         * @return A list of distant players
+         */
+        protected List<Player> getDistantPlayers(Arena arena, Entity boss, int x)
         {
             List<Player> result = new LinkedList<Player>();
             for (Player p : arena.getLivingPlayers())
@@ -156,11 +294,21 @@ public interface Wave
                     result.add(p);
             return result;
         }
+        
+        public static BossAbility fromString(String string)
+        {
+            return WaveUtils.getEnumFromString(BossAbility.class, string);
+        }
+        
+        public String toString()
+        {
+            return name;
+        }
     }
     
     public enum BossHealth
     {
-        LOW(5), MEDIUM(8), HIGH(12), PSYCHO(20);
+        LOW(5), MEDIUM(9), HIGH(14), PSYCHO(25);
         private int multiplier;
         
         private BossHealth(int multiplier)
@@ -181,7 +329,7 @@ public interface Wave
     
     public enum SwarmAmount
     {
-        LOW(10), MEDIUM(20), HIGH(30), PSYCHO(50);
+        LOW(10), MEDIUM(20), HIGH(30), PSYCHO(60);
         private int multiplier;
         
         private SwarmAmount(int multiplier)
@@ -213,6 +361,12 @@ public interface Wave
      * @return The WaveType of this Wave.
      */
     public WaveType getType();
+
+    /**
+     * Get the branch type.
+     * @return The WaveBranch of this Wave.
+     */
+    public WaveBranch getBranch();
     
     /**
      * Get the growth rate of this wave.

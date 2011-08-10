@@ -375,7 +375,7 @@ public class WaveUtils
         {
             for (String ability : abilities.split(","))
             {
-                if (BossAbility.fromString(ability.trim().replaceAll("-", "_").toUpperCase()) != null)
+                if (BossAbility.fromString(ability.trim().replaceAll("[-_\\.]", "").toUpperCase()) != null)
                     continue;
 
                 MobArena.warning("Invalid boss ability '" + ability + "' in " + path);

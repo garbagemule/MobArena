@@ -56,20 +56,11 @@ public class XML
             p.addContent(new Element("hits").addContent(ap.hits + ""));
             
             // Rewards
-            Element rewards = new Element("rewards");
+            Element rw = new Element("rewards");
             for (ItemStack stack : ap.rewards)
-            {
-                // TODO: Move this to a method
-                boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
-                Element r = new Element("reward");
-                r.setAttribute(new Attribute("id", stack.getTypeId() + ""));
-                r.setAttribute(new Attribute("material", money ? "money" : stack.getType().toString().toLowerCase()));
-                r.setAttribute(new Attribute("data", money || stack.getData() == null ? "0" : stack.getData().toString().toLowerCase()));
-                r.setAttribute(new Attribute("amount", stack.getAmount() + ""));
-
-                rewards.addContent(r);
-            }
-            p.addContent(rewards);
+                rw.addContent(getReward(stack));
+            
+            p.addContent(rw);
             pd.addContent(p);
         }
         
@@ -115,20 +106,8 @@ public class XML
         // Rewards
         Element rw = new Element("rewards");
         for (ArenaPlayer ap : log.players.values())
-        {
             for (ItemStack stack : ap.rewards)
-            {
-                // TODO: Move this to a method
-                boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
-                Element r = new Element("reward");
-                r.setAttribute(new Attribute("id", stack.getTypeId() + ""));
-                r.setAttribute(new Attribute("material", money ? "money" : stack.getType().toString().toLowerCase()));
-                r.setAttribute(new Attribute("data", money || stack.getData() == null ? "0" : stack.getData().toString().toLowerCase()));
-                r.setAttribute(new Attribute("amount", stack.getAmount() + ""));
-    
-                rw.addContent(r);
-            }
-        }
+                rw.addContent(getReward(stack));
         
         // Players
         Element pl = new Element("players");
@@ -170,6 +149,19 @@ public class XML
         File dir = new File(MobArena.arenaDir, log.getArena().configName());
         if (!dir.exists()) dir.mkdirs();
         serialize(log, dir, doc, "totals.xml");
+    }
+    
+    private static Element getReward(ItemStack stack)
+    {
+        boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;
+        
+        Element result = new Element("reward");        
+        result.setAttribute(new Attribute("id", stack.getTypeId() + ""));
+        result.setAttribute(new Attribute("material", money ? "money" : stack.getType().toString().toLowerCase()));
+        result.setAttribute(new Attribute("data", money || stack.getData() == null ? "0" : stack.getData().toString().toLowerCase()));
+        result.setAttribute(new Attribute("amount", stack.getAmount() + ""));
+        
+        return result;
     }
     
     private static void serialize(ArenaLog log, File dir, Document doc, String filename)

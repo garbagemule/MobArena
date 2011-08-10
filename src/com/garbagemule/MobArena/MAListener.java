@@ -15,6 +15,8 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -94,6 +96,15 @@ public class MAListener implements ArenaListener
 
         // If the arena isn't running, or if the player isn't in the arena, cancel.
         event.setCancelled(true);
+    }
+    
+    public void onBlockIgnite(BlockIgniteEvent event)
+    {
+        if (!arena.inRegion(event.getBlock().getLocation()))
+            return;
+        
+        if (event.getCause() == IgniteCause.LIGHTNING)
+            event.setCancelled(true);
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event)
@@ -189,62 +200,6 @@ public class MAListener implements ArenaListener
             }, arena.repairDelay);
     }
 
-    public void onEntityCombust(EntityCombustEvent event)
-    {
-        if (arena.monsters.contains(event.getEntity()))
-            event.setCancelled(true);
-    }
-
-    public void onEntityTarget(EntityTargetEvent event)
-    {
-        if (!arena.running || event.isCancelled())
-            return;
-        
-        if (arena.pets.contains(event.getEntity()))
-        {
-            if (event.getReason() != TargetReason.TARGET_ATTACKED_OWNER && event.getReason() != TargetReason.OWNER_ATTACKED_TARGET)
-                return;
-            
-            if (!(event.getTarget() instanceof Player))
-                return;
-            
-            // If the target is a player, cancel.
-            event.setCancelled(true);
-            return;
-        }
-        
-        if (arena.monsters.contains(event.getEntity()))
-        {
-            if (event.getReason() == TargetReason.FORGOT_TARGET)
-            {
-                event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), arena));
-                return;
-            }
-                
-            if (event.getReason() == TargetReason.TARGET_DIED)
-            {
-                event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), arena));
-                return;
-            }
-            
-            if (event.getReason() == TargetReason.CLOSEST_PLAYER)
-                if (!arena.arenaPlayers.contains(event.getTarget()))
-                    event.setCancelled(true);
-            return;
-        }
-    }
-
-    public void onEntityRegainHealth(EntityRegainHealthEvent event)
-    {
-        if (!arena.running) return;
-        
-        if (!(event.getEntity() instanceof Player) || !arena.arenaPlayers.contains((Player)event.getEntity()))
-            return;
-        
-        if (event.getRegainReason() == RegainReason.REGEN)
-            event.setCancelled(true);
-    }
-
     public void onEntityDeath(EntityDeathEvent event)
     {        
         if (event.getEntity() instanceof Player)
@@ -267,7 +222,7 @@ public class MAListener implements ArenaListener
             
             if (damager instanceof Player)
                 arena.playerKill((Player) damager);
-                
+            
             event.getDrops().clear();
             arena.resetIdleTimer();
             return;
@@ -345,6 +300,12 @@ public class MAListener implements ArenaListener
             // Boss
             if (arena.bossWave != null && damagee.equals(arena.bossWave.getEntity()))
             {
+                if (event.getCause() == DamageCause.LIGHTNING)
+                {
+                    event.setCancelled(true);
+                    return;
+                }
+                
                 // Subtract boss health, and reset actual entity health
                 arena.bossWave.subtractHealth(event.getDamage());
                 arena.bossWave.getEntity().setHealth(200);
@@ -358,8 +319,69 @@ public class MAListener implements ArenaListener
                     arena.bossWave.clear();
                     arena.bossWave = null;
                 }
+                else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
+                {
+                    MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH.get());
+                    arena.bossWave.setLowHealthAnnounced(true);
+                }
             }
         }
+    }
+
+    public void onEntityCombust(EntityCombustEvent event)
+    {
+        if (arena.monsters.contains(event.getEntity()))
+            event.setCancelled(true);
+    }
+
+    public void onEntityTarget(EntityTargetEvent event)
+    {
+        if (!arena.running || event.isCancelled())
+            return;
+        
+        if (arena.pets.contains(event.getEntity()))
+        {
+            if (event.getReason() != TargetReason.TARGET_ATTACKED_OWNER && event.getReason() != TargetReason.OWNER_ATTACKED_TARGET)
+                return;
+            
+            if (!(event.getTarget() instanceof Player))
+                return;
+            
+            // If the target is a player, cancel.
+            event.setCancelled(true);
+            return;
+        }
+        
+        if (arena.monsters.contains(event.getEntity()))
+        {
+            if (event.getReason() == TargetReason.FORGOT_TARGET)
+            {
+                event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), arena));
+                return;
+            }
+                
+            if (event.getReason() == TargetReason.TARGET_DIED)
+            {
+                event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), arena));
+                return;
+            }
+            
+            if (event.getReason() == TargetReason.CLOSEST_PLAYER)
+                if (!arena.arenaPlayers.contains(event.getTarget()))
+                    event.setCancelled(true);
+            return;
+        }
+    }
+
+    public void onEntityRegainHealth(EntityRegainHealthEvent event)
+    {
+        if (!arena.running) return;
+        
+        if (!(event.getEntity() instanceof Player) || !arena.arenaPlayers.contains((Player)event.getEntity()))
+            return;
+        
+        if (event.getRegainReason() == RegainReason.REGEN)
+            event.setCancelled(true);
     }
     
     public void onPlayerAnimation(PlayerAnimationEvent event)

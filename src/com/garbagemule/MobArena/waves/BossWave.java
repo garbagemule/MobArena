@@ -4,7 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.minecraft.server.WorldServer;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.config.Configuration;
@@ -14,7 +19,7 @@ import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
 
-public class BossWave extends AbstractWave// TODO: implement/extend something?
+public class BossWave extends AbstractWave
 {
     private MACreature boss;
     private LivingEntity bossCreature;
@@ -23,6 +28,7 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
     private BossHealth bossHealth;
     private int healthAmount;
     private List<Integer> taskList;
+    private boolean lowHealthAnnounced = false;
     
     // Recurrent
     public BossWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
@@ -54,7 +60,7 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
         {
             for (String a : abilities.split(","))
             {
-                String ability = a.trim().replaceAll("-", "_").toUpperCase();
+                String ability = a.trim().replaceAll("[-_\\.]", "").toUpperCase();
                 addAbility(BossAbility.fromString(ability));
             }
         }
@@ -94,10 +100,10 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
                     public void run()
                     {
                         // Announce ability
-                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(MAUtils.toCamelCase(ability.toString())));
+                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(ability.toString()));
                         
                         // Activate!
-                        ability.activate(getArena(), bossCreature);
+                        ability.run(getArena(), bossCreature);
                     }
                 }, 50*i, 50*abilityCount);
             
@@ -117,8 +123,14 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
     {
         cancelAbilityTasks();
         getArena().setBossWave(null);
-        getWorld().createExplosion(bossCreature.getLocation(), 1);
-        bossCreature.damage(32768);
+        
+        CraftEntity ce = (CraftEntity) bossCreature;
+        CraftWorld cw = (CraftWorld) getWorld();
+        WorldServer ws = cw.getHandle();
+        Location l = bossCreature.getLocation();
+        ws.createExplosion(ce.getHandle(), l.getX(), l.getY() + 1, l.getZ(), 1f, false);
+        
+        bossCreature.remove();
     }
     
     public void addAbility(BossAbility ability)
@@ -131,14 +143,14 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
         adds.add(creature);
     }
     
-    public int getHealth()
-    {
-        return healthAmount;
-    }
-    
     public LivingEntity getEntity()
     {
         return bossCreature;
+    }
+    
+    public int getHealth()
+    {
+        return healthAmount;
     }
     
     public void setHealth(int healthAmount)
@@ -149,5 +161,15 @@ public class BossWave extends AbstractWave// TODO: implement/extend something?
     public void subtractHealth(int amount)
     {
         healthAmount -= amount;
+    }
+    
+    public boolean isLowHealthAnnounced()
+    {
+        return lowHealthAnnounced;
+    }
+    
+    public void setLowHealthAnnounced(boolean value)
+    {
+        lowHealthAnnounced = value;
     }
 }

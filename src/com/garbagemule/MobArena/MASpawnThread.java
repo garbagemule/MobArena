@@ -43,7 +43,7 @@ public class MASpawnThread implements Runnable
     	// WAVES
         defaultWave    = arena.recurrentWaves.first();
     	recurrentWaves = arena.recurrentWaves;
-    	singleWaves    = arena.singleWaves;
+    	singleWaves    = new TreeSet<Wave>(arena.singleWaves);
     	
         this.plugin  = plugin;
         this.arena   = arena;
@@ -110,6 +110,10 @@ public class MASpawnThread implements Runnable
             SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
             w = matches.isEmpty() ? defaultWave : matches.last();
         }
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onWave(arena, wave, w.getName(), w.getBranch(), w.getType());
         
         w.spawn(wave);
     }

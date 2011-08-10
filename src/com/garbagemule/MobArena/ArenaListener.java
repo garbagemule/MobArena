@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -20,7 +21,8 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 public interface ArenaListener
 {	
 	public void onBlockBreak(BlockBreakEvent event);
-	public void onBlockPlace(BlockPlaceEvent event);
+    public void onBlockPlace(BlockPlaceEvent event);
+    public void onBlockIgnite(BlockIgniteEvent event);
     public void onCreatureSpawn(CreatureSpawnEvent event);
     public void onEntityExplode(EntityExplodeEvent event);
     public void onEntityCombust(EntityCombustEvent event);

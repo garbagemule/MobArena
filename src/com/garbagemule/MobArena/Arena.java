@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,7 +66,6 @@ public class Arena
     protected Map<String,Integer> distDefault, distSpecial;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
-    protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected List<ItemStack> entryFee;
 
     // NEW IMPLEMENTATION
@@ -76,7 +76,7 @@ public class Arena
     // Wave stuff
     //protected TreeSet<SingleWave>    singleWaves;
     //protected TreeSet<RecurrentWave> recurrentWaves;
-    protected TreeSet<Wave> singleWaves;
+    protected TreeSet<Wave> singleWaves, singleWavesInstance;
     protected TreeSet<Wave> recurrentWaves;
     protected BossWave bossWave;
     //
@@ -176,6 +176,9 @@ public class Arena
         // Spawn pets.
         spawnPets();
         
+        // Copy the singleWaves Set.
+        singleWavesInstance = new TreeSet<Wave>(singleWaves);
+        
         // Start spawning monsters.
         startSpawning();
         startBouncingSheep();
@@ -190,7 +193,7 @@ public class Arena
         // Announce and notify.
         MAUtils.tellAll(this, Msg.ARENA_START.get());
         for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onArenaStart();
+            listener.onArenaStart(this);
         
         return true;
     }
@@ -211,6 +214,7 @@ public class Arena
             log.saveSessionData();
             log.updateArenaTotals();
         }
+        log.clearSessionData();
         
         // Stop spawning.
         stopSpawning();
@@ -235,7 +239,7 @@ public class Arena
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onArenaEnd();
+            listener.onArenaEnd(this);
         
         return true;
     }
@@ -288,6 +292,10 @@ public class Arena
         MAUtils.sitPets(p);
         p.setHealth(20);
         movePlayerToLobby(p);
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerJoin(this, p);
     }
     
     public void playerReady(Player p)
@@ -304,14 +312,16 @@ public class Arena
     }
     
     public void playerLeave(Player p)
-    {        
-        if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
-            finishArenaPlayer(p);
-        //else if (lobbyPlayers.contains(p))
-        //    MAUtils.clearInventory(p);
-        
+    {
+        finishArenaPlayer(p);        
         movePlayerToEntry(p);
         discardPlayer(p);
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerLeave(this, p);
+        
+        // End arena if possible.
         endArena();
     }
     
@@ -321,7 +331,8 @@ public class Arena
         
         if (specOnDeath)
         {
-            resetPlayer(p);
+            //resetPlayer(p);
+            clearPlayer(p);
             movePlayerToSpec(p);
         }
         else
@@ -334,9 +345,17 @@ public class Arena
             spawnThread.updateTargets();
         
         MAUtils.tellAll(this, Msg.PLAYER_DIED.get(p.getName()));
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() { public void run() {
-        endArena();
-        }});
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
+        {
+            public void run()
+            {
+                endArena();
+            }
+        });
+        
+        // Notify listeners.
+        for (MobArenaListener listener : plugin.getAM().listeners)
+            listener.onPlayerDeath(this, p);
     }
     
     public void playerSpec(Player p, Location loc)
@@ -451,7 +470,7 @@ public class Arena
     
     public void restoreInvAndGiveRewards(final Player p)
     {
-        final List<ItemStack> rewards = log != null ? log.players.get(p).rewards : new LinkedList<ItemStack>();
+        final List<ItemStack> rewards = log != null && log.players.get(p) != null ? log.players.get(p).rewards : new LinkedList<ItemStack>();
         final boolean hadRewards = rewardedPlayers.contains(p);
         
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
@@ -506,7 +525,8 @@ public class Arena
         p.teleport(entry);
     }
     
-    private void resetPlayer(Player p)
+    private void clearPlayer(Player p)
+    //private void resetPlayer(Player p)
     {
         if (healthMap.containsKey(p))
             p.setHealth(healthMap.remove(p));
@@ -532,7 +552,8 @@ public class Arena
     {
         locations.remove(p);
         plugin.getAM().arenaMap.remove(p);
-        resetPlayer(p);
+        //resetPlayer(p);
+        clearPlayer(p);
     }
     
     /**
@@ -542,6 +563,9 @@ public class Arena
      */
     private void finishArenaPlayer(Player p)
     {
+        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
+            return;
+        
         MAUtils.clearInventory(p);
         restoreInvAndGiveRewards(p);
         
@@ -948,9 +972,22 @@ public class Arena
         return classes;
     }
     
-    public Collection<Location> getSpawnpoints()
+    public Collection<Location> getAllSpawnpoints()
     {
         return spawnpoints.values();
+    }
+    
+    public Collection<Location> getSpawnpoints()
+    {
+        List<Location> result = new ArrayList<Location>(spawnpoints.size());
+        
+        for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
+        {
+            if (entry.getKey().matches("^*boss*$")) continue;
+            result.add(entry.getValue());
+        }
+        
+        return !result.isEmpty() ? result : spawnpoints.values();
     }
     
     public Location getBossSpawnpoint()
@@ -1023,7 +1060,6 @@ public class Arena
             return;
         
         // Reset the previousSize, cancel the previous timer, and start the new timer.
-        //spawnThread.setPreviousSize(monsters.size());
         spawnThread.setPreviousSize(getMonsters().size());
         Bukkit.getServer().getScheduler().cancelTask(spawnThread.getTaskId());
         int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
@@ -1038,7 +1074,7 @@ public class Arena
                             monsters.remove(e);
                     
                     // Compare the current size with the previous size.
-                    if (monsters.size() < spawnThread.getPreviousSize() || spawnThread.getPreviousSize() == 0)
+                    if (monsters.size() < spawnThread.getPreviousSize() || spawnThread.getPreviousSize() == 0 || bossWave != null)
                     {
                         resetIdleTimer();
                         return;

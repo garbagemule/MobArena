@@ -33,13 +33,7 @@ public enum MACreature
     CHICKEN(CreatureType.CHICKEN),          CHICKENS(CreatureType.CHICKEN),
     COW(CreatureType.COW),                  COWS(CreatureType.COW),
     PIG(CreatureType.PIG),                  PIGS(CreatureType.PIG),
-    SHEEP(CreatureType.SHEEP);
-    
-    // Misc
-    // EXPLODING_SHEEP(CreatureType.SHEEP), // Explode (power: 1) when close enough to players
-    // PLAGUED_PIGS(CreatureType.PIG),      // Damage "aura" (getNearbyEntities)
-    // MAD_COWS(CreatureType.COW);          // Ram/throw players
-    // 
+    SHEEP(CreatureType.SHEEP),              EXPLODING_SHEEP(CreatureType.SHEEP);
     
     private CreatureType type;
     
@@ -65,6 +59,7 @@ public enum MACreature
         switch (this)
         {
             case SHEEP:
+            case EXPLODING_SHEEP:
                 arena.addExplodingSheep(e);
                 break;
             case POWERED_CREEPERS:

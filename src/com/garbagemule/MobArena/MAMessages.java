@@ -61,6 +61,7 @@ public class MAMessages
         WAVE_SWARM("Wave #%! [SWARM]"),
         WAVE_BOSS("Wave #%! [BOSS]"),
         WAVE_BOSS_ABILITY("Boss used ability: %!"),
+        WAVE_BOSS_LOW_HEALTH("Boss is almost dead!"),
         WAVE_REWARD("You just earned a reward: %"),
         MISC_LIST_PLAYERS("Live players: %"),
         MISC_LIST_ARENAS("Available arenas: %"),

@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena;
 
 import java.io.File;
-import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -10,7 +9,6 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.entity.EntityListener;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -87,7 +85,7 @@ public class MobArena extends JavaPlugin
         am.arenaMap.clear();
         
         // Permissions & Economy
-        permissionHandler = null;
+        //permissionHandler = null;
         if (Methods != null && Methods.hasMethod())
         {
             Methods = null;
@@ -100,12 +98,6 @@ public class MobArena extends JavaPlugin
     private void loadConfig()
     {
         File file = new File(dir, "config.yml");
-        if (!file.exists())
-        {
-            error("Config-file could not be created!");
-            return;
-        }
-        
         config = new Configuration(file);
         config.load();
         config.setHeader(getHeader());
@@ -125,6 +117,9 @@ public class MobArena extends JavaPlugin
         BlockListener  blockListener  = new MABlockListener(am);
         
         // Register events.
+        pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
+        pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
+        pm.registerEvent(Event.Type.BLOCK_IGNITE,              blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT,           playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM,          playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_BUCKET_EMPTY,       playerListener,   Priority.Normal,  this);
@@ -133,8 +128,6 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_KICK,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_JOIN,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_ANIMATION,          playerListener,   Priority.Normal,  this);
-        pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
-        pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_DAMAGE,             entityListener,   Priority.High,    this); // mcMMO is "Highest"
         pm.registerEvent(Event.Type.ENTITY_DEATH,              entityListener,   Priority.Lowest,  this); // Lowest because of Tombstone
         pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH,      entityListener,   Priority.Normal,  this);
@@ -168,11 +161,13 @@ public class MobArena extends JavaPlugin
     public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
     public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
     
+    /*
     private void setupSuperPerms()
     {
         getServer().getPluginManager().addPermission(new Permission("mobarena.classes"));
         getServer().getPluginManager().addPermission(new Permission("mobarena.arenas"));
     }
+    */
     
     private void setupPermissions()
     {
