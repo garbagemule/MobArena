@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,6 +26,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Creature;
@@ -40,6 +43,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.repairable.RepairableComparator;
+import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
@@ -74,8 +80,6 @@ public class Arena
     // Player sets
     protected Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers;
     // Wave stuff
-    //protected TreeSet<SingleWave>    singleWaves;
-    //protected TreeSet<RecurrentWave> recurrentWaves;
     protected TreeSet<Wave> singleWaves, singleWavesInstance;
     protected TreeSet<Wave> recurrentWaves;
     protected BossWave bossWave;
@@ -84,12 +88,13 @@ public class Arena
     // NEW IMPLEMENTATION
     
     // Arena sets/maps
-    protected Set<Player>         hasPaid, rewardedPlayers, notifyPlayers, randoms;
-    protected Set<LivingEntity>   monsters, explodingSheep, plaguedPigs, madCows;
-    protected Set<Block>          blocks;
-    protected Set<Wolf>           pets;
-    protected Map<Player,Integer> petMap;
-    protected List<int[]>         repairList;
+    protected Set<Player>            hasPaid, rewardedPlayers, notifyPlayers, randoms;
+    protected Set<LivingEntity>      monsters, explodingSheep, plaguedPigs, madCows;
+    protected Set<Block>             blocks;
+    protected Set<Wolf>              pets;
+    protected Map<Player,Integer>    petMap;
+    //protected List<int[]>          repairList;
+    protected LinkedList<Repairable> repairables;
     
     // Spawn overriding
     protected int spawnMonsters;
@@ -134,7 +139,8 @@ public class Arena
         petMap          = new HashMap<Player,Integer>();
         classMap        = new HashMap<Player,String>();
         randoms         = new HashSet<Player>();
-        repairList      = new LinkedList<int[]>();
+        //repairList      = new LinkedList<int[]>();
+        repairables     = new LinkedList<Repairable>();
         
         running         = false;
         edit            = false;
@@ -153,6 +159,8 @@ public class Arena
             return false;
         if (!softRestore && forceRestore && !serializeRegion())
             return false;
+
+        saveContainerContents();
         
         // Populate arenaPlayers and clear the lobby.
         arenaPlayers.addAll(lobbyPlayers);
@@ -223,9 +231,13 @@ public class Arena
         cleanup();
         
         // Restore region.
+        /*
         if (softRestore)
             for (int[] buffer : repairList)
                 world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) buffer[4], false);
+        */
+        if (softRestore)
+            restoreRegion();
         else if (forceRestore)
             deserializeRegion();
 
@@ -502,6 +514,29 @@ public class Arena
             healthMap.put(p, p.getHealth());
     }
     
+    public void saveContainerContents()
+    {
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    long start = System.nanoTime();
+                    LinkedList<RepairableContainer> list = new LinkedList<RepairableContainer>();
+                    for (int x = p1.getBlockX(); x <= p2.getBlockX(); x++)
+                        for (int y = p1.getBlockY(); y <= p2.getBlockY(); y++)
+                            for (int z = p1.getBlockZ(); z <= p2.getBlockZ(); z++)
+                            {
+                                BlockState bs = world.getBlockAt(x,y,z).getState();
+                                if (bs instanceof ContainerBlock)
+                                    list.add(new RepairableContainer(bs));
+                            }
+                    list.clear();
+                    System.out.println("Iteration took: " + (System.nanoTime() - start) + " ns");
+                }
+            });
+    }
+    
     public void movePlayerToLobby(Player p)
     {
         updateChunk(lobbyLoc);
@@ -774,6 +809,14 @@ public class Arena
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
         lobbySetup       = MAUtils.verifyLobby(this);
+    }
+    
+    public void restoreRegion()
+    {
+        Collections.sort(repairables, new RepairableComparator());
+        
+        for (Repairable r : repairables)
+            r.repair();
     }
     
     public void serializeConfig()

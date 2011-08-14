@@ -1,12 +1,15 @@
 package com.garbagemule.MobArena;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -19,7 +22,6 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -39,8 +41,14 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Attachable;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.repairable.RepairableBlock;
+import com.garbagemule.MobArena.repairable.RepairableComparator;
+import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.repairable.RepairableSign;
 
 public class MAListener implements ArenaListener
 {
@@ -58,26 +66,38 @@ public class MAListener implements ArenaListener
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit || (!arena.protect && arena.running))
             return;
         
+        BlockState statez = event.getBlock().getState();
+        
+        if (statez.getData() instanceof Attachable)
+        {
+            System.out.println(statez.getData());
+            event.setCancelled(true);
+        }
+        
         Block b = event.getBlock();
         if (arena.blocks.remove(b) || b.getType() == Material.TNT)
             return;
         
         if (arena.softRestore && arena.running)
         {
-            int[] buffer = new int[5];
-            buffer[0] = b.getX();
-            buffer[1] = b.getY();
-            buffer[2] = b.getZ();
-            buffer[3] = b.getTypeId();
-            buffer[4] = (int) b.getData();
-            arena.repairList.add(buffer);
-            if (!arena.softRestoreDrops) event.getBlock().setTypeId(0);
+            BlockState state = b.getState();
+            
+            if (state instanceof ContainerBlock)
+                arena.repairables.add(new RepairableContainer(state));
+            else if (state instanceof Sign)
+                arena.repairables.add(new RepairableSign(state));
+            else
+                arena.repairables.add(new RepairableBlock(state));
+                
+            if (!arena.softRestoreDrops)
+                b.setTypeId(0);
+            
             return;
         }
         
         event.setCancelled(true);
     }
-
+    
     public void onBlockPlace(BlockPlaceEvent event)
     {
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit)
@@ -109,14 +129,79 @@ public class MAListener implements ArenaListener
 
     public void onCreatureSpawn(CreatureSpawnEvent event)
     {
-        if (!arena.inRegion(event.getLocation()) || event.getSpawnReason() == SpawnReason.CUSTOM)
+        if (!arena.inRegion(event.getLocation())) // || event.getSpawnReason() == SpawnReason.CUSTOM)
             return;
         
         // If running == true, setCancelled(false), and vice versa.
         event.setCancelled(!arena.running);
     }
-
+    
     public void onEntityExplode(EntityExplodeEvent event)
+    {
+        if (!arena.monsters.contains(event.getEntity()) && !arena.inRegionRadius(event.getLocation(), 10))
+            return;
+        
+        event.setYield(0);
+        arena.monsters.remove(event.getEntity());
+        
+        // Cancel if the arena isn't running or if the repair delay is 0
+        if (!arena.running || arena.repairDelay == 0)
+        {
+            event.setCancelled(true);
+            return;
+        }
+        
+        // Uncancel, just in case.
+        event.setCancelled(false);
+        
+        // Initialize the repair list.
+        final List<Repairable> toRepair = new LinkedList<Repairable>();
+        
+        // Handle all the blocks in the block list.
+        for (Block b : event.blockList())
+        {
+            BlockState state = b.getState();
+            
+            // Create a Repairable from the block.
+            Repairable r = null;
+            if (state instanceof ContainerBlock)
+                r = new RepairableContainer(state);
+            else if (state instanceof Sign)
+                r = new RepairableSign(state);
+            else
+                r = new RepairableBlock(state);
+            
+            Material mat = state.getType();
+            if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || mat == Material.FIRE || mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
+                arena.blocks.remove(b);
+            else if (arena.blocks.remove(b))
+                arena.world.dropItemNaturally(b.getLocation(), new ItemStack(state.getTypeId(), 1));
+            else if (arena.softRestore)
+                arena.repairables.add(r);
+            else
+                toRepair.add(r);
+        }
+        
+        // If the arena isn't protected, or soft-restore is on, return.
+        if (!arena.protect || arena.softRestore)
+            return;
+        
+        // Otherwise, schedule repairs!
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    Collections.sort(toRepair, new RepairableComparator());
+                    
+                    for (Repairable r : toRepair)
+                        r.repair();
+                }
+            }, arena.repairDelay);
+    }
+    
+    /*
+    public void onEntityExplodez(EntityExplodeEvent event)
     {
         if (!arena.monsters.contains(event.getEntity()) && !arena.inRegionRadius(event.getLocation(), 10))
             return;
@@ -143,7 +228,7 @@ public class MAListener implements ArenaListener
 
         // Uncancel, just in case.
         event.setCancelled(false);
-
+        
         int[] buffer;
         final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
         for (Block b : event.blockList())
@@ -186,6 +271,7 @@ public class MAListener implements ArenaListener
             {
                 public void run()
                 {
+                    long start = System.nanoTime();
                     for (Map.Entry<Block,Integer> entry : blockMap.entrySet())
                     {
                         Block b = entry.getKey();
@@ -196,9 +282,11 @@ public class MAListener implements ArenaListener
                         if (type > 1000)
                             b.getLocation().getBlock().setData((byte) (type / 1000));
                     }
+                    System.out.println("Repair took: " + (System.nanoTime() - start) + " ns");
                 }
             }, arena.repairDelay);
     }
+    */
 
     public void onEntityDeath(EntityDeathEvent event)
     {        
@@ -394,20 +482,38 @@ public class MAListener implements ArenaListener
 
     public void onPlayerDropItem(PlayerDropItemEvent event)
     {
-        if (arena.running && arena.shareInArena) return;
-        
         Player p = event.getPlayer();
-        if (p.getLocation().equals(arena.spectatorLoc))
+        
+        // Player is in the lobby
+        if (arena.lobbyPlayers.contains(p))
         {
-            event.getItemDrop().setItemStack(new ItemStack(1, 0));
+            MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
         }
         
-        if (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p))
-            return;
+        // Player is in the arena
+        else if (arena.arenaPlayers.contains(p))
+        {
+            if (!arena.shareInArena)
+            {
+                MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+                event.setCancelled(true);
+            }
+        }
         
-        MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
-        event.setCancelled(true);
+        // Player died/left
+        else if (p.getLocation().equals(arena.spectatorLoc) || p.getLocation().equals(arena.locations.get(p)))
+        {
+            MobArena.warning("Player '" + p.getName() + "' tried to steal item " + event.getItemDrop().getItemStack().getType());
+            event.getItemDrop().remove();
+        }
+        
+        // Player is in the spectator area
+        else if (arena.specPlayers.contains(p))
+        {
+            MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+            event.setCancelled(true);
+        }
     }
 
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)

@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena;
 
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public interface Arenaz

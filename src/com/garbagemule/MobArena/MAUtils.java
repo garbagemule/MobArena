@@ -476,7 +476,8 @@ public class MAUtils
             // If these are rewards, don't tamper with them.
             if (rewards)
             {
-                inv.addItem(stack);
+                //inv.addItem(stack);
+                giveItem(inv, stack);
                 continue;
             }
 
@@ -491,17 +492,34 @@ public class MAUtils
             if (WEAPONS_TYPE.contains(stack.getType()))
                 stack.setDurability((short) -32768);
 
-            inv.addItem(stack);
+            giveItem(inv, stack);
+            //inv.addItem(stack);
         }
-    }
-    public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
-    {
-        giveItems(p, stacks, false, true, plugin);
     }
     
     public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, MobArena plugin)
     {
         giveItems(p, stacks, autoEquip, false, plugin);
+    }
+    
+    public static void giveItem(PlayerInventory inv, ItemStack stack)
+    {
+        int id     = stack.getTypeId();
+        int amount = stack.getAmount();
+        
+        int times     = amount / 64;
+        int remainder = amount % 64;
+        
+        for (int i = 0; i < times; i++)
+            inv.addItem(new ItemStack(id, 64));
+            
+        if (remainder > 0)
+            inv.addItem(new ItemStack(id, remainder));
+    }
+    
+    public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
+    {
+        giveItems(p, stacks, false, true, plugin);
     }
     
     public static int getPetAmount(Player p)

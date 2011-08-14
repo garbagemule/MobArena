@@ -123,7 +123,7 @@ public interface Wave
         {
             public void run(final Arena arena, LivingEntity boss)
             {
-                System.out.println("Intimidate target");
+                System.out.println("Root target");
                 final LivingEntity target = getTarget(boss);
                 if (target == null) return;
                 

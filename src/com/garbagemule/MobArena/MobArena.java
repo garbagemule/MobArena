@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.io.File;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -40,6 +41,7 @@ public class MobArena extends JavaPlugin
     // Global variables
     public static PluginDescriptionFile desc;
     public static File dir, arenaDir;
+    public static List<String> permissionOps;
     public static final double MIN_PLAYER_DISTANCE = 256.0;
     public static final int ECONOMY_MONEY_ID = -29;
 
@@ -60,7 +62,6 @@ public class MobArena extends JavaPlugin
         FileUtils.fetchLibs(config);
         
         // Set up permissions and economy
-        //setupSuperPerms();
         setupPermissions();
         setupRegister();
         
@@ -85,7 +86,6 @@ public class MobArena extends JavaPlugin
         am.arenaMap.clear();
         
         // Permissions & Economy
-        //permissionHandler = null;
         if (Methods != null && Methods.hasMethod())
         {
             Methods = null;
@@ -136,14 +136,13 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.ENTITY_COMBUST,            entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,             entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN,            entityListener,   Priority.Highest, this);
-        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener,   Priority.Monitor, this);
+        pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener,   Priority.Monitor, this); // I know Monitor is bad, but other plugins suck! :(
     }
     
     // Permissions stuff
     public boolean has(Player p, String s)
     {
-        //return (permissionHandler == null || permissionHandler.has(p, s));
-        return hasSuperPerms(p, s) || hasNijikoPerms(p, s);
+        return hasSuperPerms(p, s) || hasNijikoPerms(p, s) || hasOpPerms(p, s);
     }
     
     public boolean hasSuperPerms(Player p, String s)
@@ -156,18 +155,15 @@ public class MobArena extends JavaPlugin
         return permissionHandler != null && permissionHandler.has(p, s);
     }
     
+    public boolean hasOpPerms (Player p, String node)
+    {
+        return permissionOps == null  ||  permissionOps.contains(node) == false || p.isOp();
+    }
+    
     // Console printing
     public static void info(String msg)    { Bukkit.getServer().getLogger().info("[MobArena] " + msg); }
     public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
     public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
-    
-    /*
-    private void setupSuperPerms()
-    {
-        getServer().getPluginManager().addPermission(new Permission("mobarena.classes"));
-        getServer().getPluginManager().addPermission(new Permission("mobarena.arenas"));
-    }
-    */
     
     private void setupPermissions()
     {
