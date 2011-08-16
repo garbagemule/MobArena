@@ -1043,7 +1043,7 @@ public class MACommands implements CommandExecutor
             }
             
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1, p.getLocation());
-            MAUtils.tellPlayer(sender, "Sspawnpoint " + arg1 + " added for arena \"" + am.selectedArena.configName() + "\"");
+            MAUtils.tellPlayer(sender, "Spawnpoint " + arg1 + " added for arena \"" + am.selectedArena.configName() + "\"");
             return true;
         }
         

@@ -48,11 +48,10 @@ public class SwarmWave extends AbstractWave
         MAUtils.tellAll(getArena(), Msg.WAVE_SWARM.get(""+wave));
         
         // Get the valid spawnpoints, and initialize counter
-        List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena().getSpawnpoints(), getArena().getLivingPlayers());
+        List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());
         
         // Spawn the hellians!
         spawnAll(monster, amount.getAmount(getArena().getPlayerCount()), validSpawnpoints);
-        System.out.println(this);
     }
     
     public void spawnAll(MACreature monster, int amount, List<Location> spawnpoints)

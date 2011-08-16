@@ -32,7 +32,7 @@ public class RepairableBlock implements Repairable
      */
     public void repair()
     {
-        getWorld().getBlockAt(x,y,z).setTypeIdAndData(id, data, false);
+        world.getBlockAt(x,y,z).setTypeIdAndData(id, data, false);
     }
 
     public BlockState getState()
@@ -45,19 +45,9 @@ public class RepairableBlock implements Repairable
         return world;
     }
     
-    public void setWorld(World world)
-    {
-        this.world = world;
-    }
-    
     public Material getType()
     {
         return type;
-    }
-    
-    public void setType(Material type)
-    {
-        this.type = type;
     }
     
     public int getId()
@@ -65,19 +55,9 @@ public class RepairableBlock implements Repairable
         return id;
     }
     
-    public void setId(int id)
-    {
-        this.id = id;
-    }
-    
     public byte getData()
     {
         return data;
-    }
-    
-    public void setData(byte data)
-    {
-        this.data = data;
     }
     
     public int getX()
@@ -85,19 +65,9 @@ public class RepairableBlock implements Repairable
         return x;
     }
     
-    public void setX(int x)
-    {
-        this.x = x;
-    }
-    
     public int getY()
     {
         return y;
-    }
-    
-    public void setY(int y)
-    {
-        this.y = y;
     }
     
     public int getZ()
@@ -105,8 +75,40 @@ public class RepairableBlock implements Repairable
         return z;
     }
     
+    /*
+    public void setWorld(World world)
+    {
+        this.world = world;
+    }
+    
+    public void setType(Material type)
+    {
+        this.type = type;
+    }
+    
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+    
+    public void setData(byte data)
+    {
+        this.data = data;
+    }
+    
+    public void setX(int x)
+    {
+        this.x = x;
+    }
+    
+    public void setY(int y)
+    {
+        this.y = y;
+    }
+    
     public void setZ(int z)
     {
         this.z = z;
     }
+    */
 }

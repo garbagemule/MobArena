@@ -35,7 +35,6 @@ public class Totals
         updateDuration(totals, "general-info.longest-session-duration", log.getDurationLong(), false);
         
         // Classes
-        //updateInt(totals, "classes.overall-distribution.total-count", log.players.keySet().size(), true);
         for (String c : log.arena.getClasses())
         {
             // Array {kills, dmgDone, dmgTaken}

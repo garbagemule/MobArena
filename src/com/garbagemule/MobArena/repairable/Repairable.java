@@ -11,10 +11,12 @@ public interface Repairable// extends Serializable
     public void repair();
 
     public BlockState getState();
-    public World getWorld();
+    
     public Material getType();
     public int getId();
     public byte getData();
+    
+    public World getWorld();
     public int getX();
     public int getY();
     public int getZ();

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import net.minecraft.server.WorldServer;
 
@@ -74,18 +75,13 @@ public class Arena
     protected Map<String,List<ItemStack>>  classItems, classArmor;
     protected List<ItemStack> entryFee;
 
-    // NEW IMPLEMENTATION
-    //
-    //
     // Player sets
     protected Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers;
+    
     // Wave stuff
     protected TreeSet<Wave> singleWaves, singleWavesInstance;
     protected TreeSet<Wave> recurrentWaves;
     protected BossWave bossWave;
-    //
-    //
-    // NEW IMPLEMENTATION
     
     // Arena sets/maps
     protected Set<Player>            hasPaid, rewardedPlayers, notifyPlayers, randoms;
@@ -93,8 +89,7 @@ public class Arena
     protected Set<Block>             blocks;
     protected Set<Wolf>              pets;
     protected Map<Player,Integer>    petMap;
-    //protected List<int[]>          repairList;
-    protected LinkedList<Repairable> repairables;
+    protected LinkedList<Repairable> repairables, containers;
     
     // Spawn overriding
     protected int spawnMonsters;
@@ -110,6 +105,8 @@ public class Arena
     protected ArenaLog log;
     
     protected MAListener eventListener;
+    
+    protected PriorityBlockingQueue<Repairable> repairQueue;
     
     /**
      * Primary constructor. Requires a name and a world.
@@ -139,8 +136,8 @@ public class Arena
         petMap          = new HashMap<Player,Integer>();
         classMap        = new HashMap<Player,String>();
         randoms         = new HashSet<Player>();
-        //repairList      = new LinkedList<int[]>();
         repairables     = new LinkedList<Repairable>();
+        containers      = new LinkedList<Repairable>();
         
         running         = false;
         edit            = false;
@@ -150,6 +147,7 @@ public class Arena
         spawnMonsters   = ((net.minecraft.server.World) ((CraftWorld) world).getHandle()).spawnMonsters;
         
         eventListener   = new MAListener(this, plugin);
+        repairQueue     = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
     }
     
     public boolean startArena()
@@ -160,7 +158,8 @@ public class Arena
         if (!softRestore && forceRestore && !serializeRegion())
             return false;
 
-        saveContainerContents();
+        // Store all chest contents.
+        storeContainerContents();
         
         // Populate arenaPlayers and clear the lobby.
         arenaPlayers.addAll(lobbyPlayers);
@@ -178,7 +177,6 @@ public class Arena
         {
             p.teleport(arenaLoc);
             p.setHealth(20);
-            //rewardMap.put(p, new LinkedList<ItemStack>());
         }
         
         // Spawn pets.
@@ -231,15 +229,13 @@ public class Arena
         cleanup();
         
         // Restore region.
-        /*
-        if (softRestore)
-            for (int[] buffer : repairList)
-                world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) buffer[4], false);
-        */
         if (softRestore)
             restoreRegion();
         else if (forceRestore)
             deserializeRegion();
+        
+        // Restore chests
+        restoreContainerContents();
 
         // Announce and clear sets.
         MAUtils.tellAll(this, Msg.ARENA_END.get(), true);
@@ -490,6 +486,9 @@ public class Arena
             {
                 public void run()
                 {
+                    if (!p.isOnline())
+                        return;
+                    
                     if (!emptyInvJoin)
                         MAUtils.restoreInventory(p);
                     
@@ -514,25 +513,34 @@ public class Arena
             healthMap.put(p, p.getHealth());
     }
     
-    public void saveContainerContents()
+    public void storeContainerContents()
     {
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()
                 {
-                    long start = System.nanoTime();
-                    LinkedList<RepairableContainer> list = new LinkedList<RepairableContainer>();
                     for (int x = p1.getBlockX(); x <= p2.getBlockX(); x++)
                         for (int y = p1.getBlockY(); y <= p2.getBlockY(); y++)
                             for (int z = p1.getBlockZ(); z <= p2.getBlockZ(); z++)
                             {
-                                BlockState bs = world.getBlockAt(x,y,z).getState();
-                                if (bs instanceof ContainerBlock)
-                                    list.add(new RepairableContainer(bs));
+                                BlockState state = world.getBlockAt(x,y,z).getState();
+                                if (state instanceof ContainerBlock)
+                                    containers.add(new RepairableContainer(state, false));
                             }
-                    list.clear();
-                    System.out.println("Iteration took: " + (System.nanoTime() - start) + " ns");
+                }
+            });
+    }
+    
+    public void restoreContainerContents()
+    {
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
+            {
+                public void run()
+                {
+                    for (Repairable r : containers)
+                        r.repair();
                 }
             });
     }
@@ -561,7 +569,6 @@ public class Arena
     }
     
     private void clearPlayer(Player p)
-    //private void resetPlayer(Player p)
     {
         if (healthMap.containsKey(p))
             p.setHealth(healthMap.remove(p));
@@ -587,7 +594,6 @@ public class Arena
     {
         locations.remove(p);
         plugin.getAM().arenaMap.remove(p);
-        //resetPlayer(p);
         clearPlayer(p);
     }
     
@@ -606,6 +612,22 @@ public class Arena
         
         if (log != null && spawnThread != null)
             log.players.get(p).lastWave = spawnThread.getWave() - 1;
+    }
+    
+    public void repairBlocks()
+    {
+        //long start = System.nanoTime();
+        //System.out.println(start + " - Attempting to repair things...");
+        while (!repairQueue.isEmpty())
+        {
+            repairQueue.poll().repair();
+        }
+        //System.out.println(start + " - Repair finished!");
+    }
+    
+    public void queueRepairable(Repairable r)
+    {
+        repairQueue.add(r);
     }
     
     
@@ -789,18 +811,6 @@ public class Arena
         // NEW WAVES
         singleWaves      = WaveUtils.getWaves(this, config, WaveBranch.SINGLE);
         recurrentWaves   = WaveUtils.getWaves(this, config, WaveBranch.RECURRENT);
-
-        /*
-        System.out.println();
-        System.out.println("ARENA: " + configName);
-        System.out.println("- Single waves");
-        for (Wave w : singleWaves)
-            System.out.println("  - " + w);
-        System.out.println("- Reccurent waves");
-        for (Wave w : recurrentWaves)
-            System.out.println("  - " + w);
-        System.out.println();
-        */
         
         classes          = plugin.getAM().classes;
         classItems       = plugin.getAM().classItems;
@@ -1048,7 +1058,7 @@ public class Arena
         if (result != null)
             return result;
         
-        return spawnpoints.values().iterator().next();
+        return WaveUtils.getValidSpawnpoints(this, arenaPlayers).iterator().next();
     }
     
     public int getPlayerCount()

@@ -26,9 +26,8 @@ public class BossWave extends AbstractWave
     private List<BossAbility> abilities;
     private Set<Creature> adds;
     private BossHealth bossHealth;
-    private int healthAmount;
-    private List<Integer> taskList;
-    private boolean lowHealthAnnounced = false;
+    private int healthAmount, abilityTask, abilityInterval;
+    private boolean lowHealthAnnounced = false, abilityAnnounce;
     
     // Recurrent
     public BossWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
@@ -47,7 +46,7 @@ public class BossWave extends AbstractWave
     private void load(Configuration config, String path)
     {
         setType(WaveType.BOSS);
-        taskList     = new LinkedList<Integer>();
+        abilityTask  = -1;
         abilities    = new LinkedList<BossAbility>();
         
         // Get monster and health
@@ -55,6 +54,8 @@ public class BossWave extends AbstractWave
         bossHealth   = WaveUtils.getEnumFromString(BossHealth.class, config.getString(path + "health"), BossHealth.MEDIUM);
 
         // Get abilities
+        abilityInterval  = config.getInt(path + "ability-interval", 3) * 20;
+        abilityAnnounce  = config.getBoolean(path + "ability-announce", true);
         String abilities = config.getString(path + "abilities");
         if (abilities != null)
         {
@@ -83,45 +84,48 @@ public class BossWave extends AbstractWave
         healthAmount = bossHealth.getAmount(getArena().getPlayerCount());
         
         startAbilityTasks();
-        System.out.println(this);
     }
     
     private void startAbilityTasks()
     {
         final int abilityCount = abilities.size();
         
-        int i = 1;
-        for (final BossAbility ability : abilities)
-        {
-            // Schedule the task
-            int abilityTask = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(getArena().getPlugin(),
-                new Runnable()
+        // If there are no abilities, don't start the timer.
+        if (abilityCount == 0)
+            return;
+        
+        abilityTask = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(getArena().getPlugin(),
+            new Runnable()
+            {
+                private int counter = 0;
+                
+                public void run()
                 {
-                    public void run()
-                    {
-                        // Announce ability
+                    // Grab the next ability
+                    BossAbility ability = abilities.get(counter % abilityCount);
+                    
+                    // Announce it
+                    if (abilityAnnounce)
                         MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(ability.toString()));
-                        
-                        // Activate!
-                        ability.run(getArena(), bossCreature);
-                    }
-                }, 50*i, 50*abilityCount);
-            
-            // Add the task to the task list for cancelling later, and increment counter
-            taskList.add(abilityTask);
-            i++;
-        }
+                    
+                    // Activate!
+                    ability.run(getArena(), bossCreature);
+                    
+                    // Increment counter
+                    counter++;
+                }
+            }, 100, abilityInterval);
     }
     
-    public void cancelAbilityTasks()
+    public void cancelAbilityTask()
     {
-        for (Integer i : taskList)
-            Bukkit.getServer().getScheduler().cancelTask(i);
+        if (abilityTask != -1)
+            Bukkit.getServer().getScheduler().cancelTask(abilityTask);
     }
     
     public void clear()
     {
-        cancelAbilityTasks();
+        cancelAbilityTask();
         getArena().setBossWave(null);
         
         CraftEntity ce = (CraftEntity) bossCreature;

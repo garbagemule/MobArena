@@ -35,11 +35,10 @@ public class SpecialWave extends NormalWave
         MAUtils.tellAll(getArena(), Msg.WAVE_SPECIAL.get(""+wave));
         
         // Get the valid spawnpoints, and initialize counter
-        List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena().getSpawnpoints(), getArena().getLivingPlayers());
+        List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());
         
         // Spawn all the monsters
         spawnAll(getMonstersToSpawn(getArena().getPlayerCount()), validSpawnpoints);
-        System.out.println(this);
 	}
     
     private Map<MACreature,Integer> getMonstersToSpawn(int playerCount)

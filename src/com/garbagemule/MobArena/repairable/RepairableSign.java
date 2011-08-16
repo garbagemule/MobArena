@@ -3,7 +3,7 @@ package com.garbagemule.MobArena.repairable;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 
-public class RepairableSign extends RepairableBlock
+public class RepairableSign extends RepairableAttachable
 {
     private String[] lines = new String[4];
     

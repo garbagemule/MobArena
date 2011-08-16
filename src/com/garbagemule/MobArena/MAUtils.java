@@ -336,19 +336,21 @@ public class MAUtils
     
     public static boolean storeInventory(Player p)
     {
-        // Grab the contents.
-        ItemStack[] armor = p.getInventory().getArmorContents();
-        ItemStack[] items = p.getInventory().getContents();
-        
+        // Set up the files and paths
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         new File(invPath).mkdir();
         File backupFile = new File(invPath + sep + p.getName() + ".inv");
         
+        // If a backup file already exists, restore the inventory first
+        if (backupFile.exists() && !restoreInventory(p))
+            return false;
+        
+        // Grab the inventory contents.
+        ItemStack[] armor = p.getInventory().getArmorContents();
+        ItemStack[] items = p.getInventory().getContents();
+        
         try
         {
-            if (backupFile.exists() && !restoreInventory(p))
-                return false;
-
             backupFile.createNewFile();
             
             MAInventoryItem[] inv = new MAInventoryItem[armor.length + items.length];

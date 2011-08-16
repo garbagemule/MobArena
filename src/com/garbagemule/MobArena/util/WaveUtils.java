@@ -21,11 +21,11 @@ public class WaveUtils
     /**
      * Get all the spawnpoints that have players nearby.
      */
-    public static List<Location> getValidSpawnpoints(Collection<Location> spawnpoints, Collection<Player> players)
+    public static List<Location> getValidSpawnpoints(Arena arena, Collection<Player> players)
     {
         List<Location> result = new ArrayList<Location>();
         
-        for (Location s : spawnpoints)
+        for (Location s : arena.getAllSpawnpoints())
         {
             for (Player p : players)
             {
@@ -47,7 +47,10 @@ public class WaveUtils
         
         // If no players are in range, just use all the spawnpoints.
         if (result.isEmpty())
-            result.addAll(spawnpoints);
+        {
+            MobArena.warning("Spawnpoints of arena '" + arena.configName() + "' may be too far apart!");
+            result.addAll(arena.getAllSpawnpoints());
+        }
         
         // Else, return the valid spawnpoints.
         return result;
@@ -382,6 +385,16 @@ public class WaveUtils
                 wellDefined = false;
             }
         }
+        
+        // OPTIONAL: Ability-interval
+        int abilityDelay = config.getInt(path + "ability-interval", 3);
+        if (abilityDelay <= 0)
+        {
+            MobArena.warning("Boss ability-delay must be greater than 0, " + path);
+            wellDefined = false;
+        }
+        
+        // OPTIONAL: Ability-announce
         
         // TODO: OPTIONAL: Adds
         // Unsure about config-file implementation...

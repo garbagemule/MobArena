@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena;
 
 import java.io.File;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -41,7 +40,6 @@ public class MobArena extends JavaPlugin
     // Global variables
     public static PluginDescriptionFile desc;
     public static File dir, arenaDir;
-    public static List<String> permissionOps;
     public static final double MIN_PLAYER_DISTANCE = 256.0;
     public static final int ECONOMY_MONEY_ID = -29;
 
@@ -85,13 +83,6 @@ public class MobArena extends JavaPlugin
             arena.forceEnd();
         am.arenaMap.clear();
         
-        // Permissions & Economy
-        if (Methods != null && Methods.hasMethod())
-        {
-            Methods = null;
-            info("Payment method was disabled. No longer accepting payments.");
-        }
-        
         info("disabled.");
     }
     
@@ -132,7 +123,6 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.ENTITY_DEATH,              entityListener,   Priority.Lowest,  this); // Lowest because of Tombstone
         pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH,      entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,            entityListener,   Priority.Highest, this);
-        pm.registerEvent(Event.Type.EXPLOSION_PRIME,           entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST,            entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,             entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN,            entityListener,   Priority.Highest, this);
@@ -142,22 +132,16 @@ public class MobArena extends JavaPlugin
     // Permissions stuff
     public boolean has(Player p, String s)
     {
-        return hasSuperPerms(p, s) || hasNijikoPerms(p, s) || hasOpPerms(p, s);
-    }
-    
-    public boolean hasSuperPerms(Player p, String s)
-    {
-        return p.hasPermission(s);
-    }
-    
-    public boolean hasNijikoPerms(Player p, String s)
-    {
-        return permissionHandler != null && permissionHandler.has(p, s);
-    }
-    
-    public boolean hasOpPerms (Player p, String node)
-    {
-        return permissionOps == null  ||  permissionOps.contains(node) == false || p.isOp();
+        // First check for NijikoPerms
+        if (permissionHandler != null)
+            return permissionHandler.has(p, s);
+        
+        // If the permission is set, check if player has permission
+        if (p.isPermissionSet(s))
+            return p.hasPermission(s);
+        
+        // Otherwise, only allow commands that aren't admin/setup commands.
+        return !s.matches("^.*\\.setup\\..*$") && !s.matches("^.*\\.admin\\..*$");
     }
     
     // Console printing

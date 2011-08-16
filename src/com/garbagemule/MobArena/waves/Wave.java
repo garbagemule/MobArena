@@ -66,7 +66,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Shooting arrow");
                 boss.shootArrow();
             }
         },
@@ -74,7 +73,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Shooting fireball");
                 Location bLoc = boss.getLocation();
                 Location loc = bLoc.add(bLoc.getDirection().normalize().multiply(2).toLocation(boss.getWorld(), bLoc.getYaw(), bLoc.getPitch()));
                 Fireball fireball = boss.getWorld().spawn(loc, Fireball.class);
@@ -85,7 +83,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Fire aura");
                 for (Player p : getNearbyPlayers(arena, boss, 5))
                         p.setFireTicks(20);
             }
@@ -94,7 +91,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Lightning aura.");
                 Location base = boss.getLocation();
                 Location ne = base.getBlock().getRelative( 2,  0,  2).getLocation();
                 Location nw = base.getBlock().getRelative(-2,  0,  2).getLocation();
@@ -123,7 +119,6 @@ public interface Wave
         {
             public void run(final Arena arena, LivingEntity boss)
             {
-                System.out.println("Root target");
                 final LivingEntity target = getTarget(boss);
                 if (target == null) return;
                 
@@ -174,7 +169,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Throw nearby");
                 for (Player p : getNearbyPlayers(arena, boss, 5))
                 {
                     Location bLoc = boss.getLocation();
@@ -188,7 +182,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Throw distant");
                 for (Player p : getDistantPlayers(arena, boss, 8))
                 {
                     Location bLoc = boss.getLocation();
@@ -202,7 +195,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Fetch target");
                 LivingEntity target = getTarget(boss);
                 if (target != null) target.teleport(boss);
             }
@@ -211,7 +203,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Fetch nearby");
                 for (Player p : getNearbyPlayers(arena, boss, 5))
                     p.teleport(boss);
             }
@@ -220,7 +211,6 @@ public interface Wave
         {
             public void run(Arena arena, LivingEntity boss)
             {
-                System.out.println("Fetch distant");
                 for (Player p : getDistantPlayers(arena, boss, 8))
                     p.teleport(boss);
             }

@@ -29,6 +29,7 @@ public class MAMessages
         JOIN_EMPTY_INV("You must empty your inventory to join the arena."),
         JOIN_PLAYER_LIMIT_REACHED("The player limit of this arena has been reached."),
         JOIN_STORE_INV_FAIL("Failed to store inventory. Try again."),
+        JOIN_EXISTING_INV_RESTORED("Your old inventory items have been restored."),
         JOIN_PLAYER_JOINED("You joined the arena. Have fun!"),
         LEAVE_NOT_PLAYING("You are not in the arena."),
         LEAVE_PLAYER_LEFT("You left the arena. Thanks for playing!"),

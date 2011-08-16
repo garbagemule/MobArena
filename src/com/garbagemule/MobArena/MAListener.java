@@ -1,13 +1,10 @@
 package com.garbagemule.MobArena;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.block.Sign;
@@ -42,13 +39,12 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
+import org.bukkit.material.Bed;
+import org.bukkit.material.Door;
+import org.bukkit.material.Redstone;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
-import com.garbagemule.MobArena.repairable.Repairable;
-import com.garbagemule.MobArena.repairable.RepairableBlock;
-import com.garbagemule.MobArena.repairable.RepairableComparator;
-import com.garbagemule.MobArena.repairable.RepairableContainer;
-import com.garbagemule.MobArena.repairable.RepairableSign;
+import com.garbagemule.MobArena.repairable.*;
 
 public class MAListener implements ArenaListener
 {
@@ -66,14 +62,6 @@ public class MAListener implements ArenaListener
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit || (!arena.protect && arena.running))
             return;
         
-        BlockState statez = event.getBlock().getState();
-        
-        if (statez.getData() instanceof Attachable)
-        {
-            System.out.println(statez.getData());
-            event.setCancelled(true);
-        }
-        
         Block b = event.getBlock();
         if (arena.blocks.remove(b) || b.getType() == Material.TNT)
             return;
@@ -81,14 +69,19 @@ public class MAListener implements ArenaListener
         if (arena.softRestore && arena.running)
         {
             BlockState state = b.getState();
-            
+
+            Repairable r = null;
             if (state instanceof ContainerBlock)
-                arena.repairables.add(new RepairableContainer(state));
+                r = new RepairableContainer(state);
             else if (state instanceof Sign)
-                arena.repairables.add(new RepairableSign(state));
+                r = new RepairableSign(state);
+            else if (state.getData() instanceof Attachable)
+                r = new RepairableAttachable(state);
             else
-                arena.repairables.add(new RepairableBlock(state));
-                
+                r = new RepairableBlock(state);
+            
+            arena.repairables.add(r);
+            
             if (!arena.softRestoreDrops)
                 b.setTypeId(0);
             
@@ -154,13 +147,15 @@ public class MAListener implements ArenaListener
         // Uncancel, just in case.
         event.setCancelled(false);
         
-        // Initialize the repair list.
-        final List<Repairable> toRepair = new LinkedList<Repairable>();
-        
         // Handle all the blocks in the block list.
         for (Block b : event.blockList())
         {
             BlockState state = b.getState();
+            
+            if (state.getData() instanceof Door && ((Door) state.getData()).isTopHalf())
+                state = b.getRelative(BlockFace.DOWN).getState();
+            else if (state.getData() instanceof Bed && ((Bed) state.getData()).isHeadOfBed())
+                state = b.getRelative(((Bed) state.getData()).getFacing().getOppositeFace()).getState();
             
             // Create a Repairable from the block.
             Repairable r = null;
@@ -168,18 +163,25 @@ public class MAListener implements ArenaListener
                 r = new RepairableContainer(state);
             else if (state instanceof Sign)
                 r = new RepairableSign(state);
+            else if (state.getData() instanceof Bed)
+                r = new RepairableBed(state);
+            else if (state.getData() instanceof Door)
+                r = new RepairableDoor(state);
+            else if (state.getData() instanceof Attachable || state.getData() instanceof Redstone)
+                r = new RepairableAttachable(state);
             else
                 r = new RepairableBlock(state);
             
+            // Cakes and liquids should just get removed. If player-placed block, drop as item.
             Material mat = state.getType();
-            if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || mat == Material.FIRE || mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
+            if (mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
                 arena.blocks.remove(b);
             else if (arena.blocks.remove(b))
                 arena.world.dropItemNaturally(b.getLocation(), new ItemStack(state.getTypeId(), 1));
             else if (arena.softRestore)
                 arena.repairables.add(r);
             else
-                toRepair.add(r);
+                arena.queueRepairable(r);
         }
         
         // If the arena isn't protected, or soft-restore is on, return.
@@ -192,101 +194,10 @@ public class MAListener implements ArenaListener
             {
                 public void run()
                 {
-                    Collections.sort(toRepair, new RepairableComparator());
-                    
-                    for (Repairable r : toRepair)
-                        r.repair();
+                    arena.repairBlocks();
                 }
             }, arena.repairDelay);
     }
-    
-    /*
-    public void onEntityExplodez(EntityExplodeEvent event)
-    {
-        if (!arena.monsters.contains(event.getEntity()) && !arena.inRegionRadius(event.getLocation(), 10))
-            return;
-        
-        event.setYield(0);
-        arena.monsters.remove(event.getEntity());
-        
-        // If the arena isn't running
-        if (!arena.running || arena.repairDelay == 0)
-        {
-            event.setCancelled(true);
-            return;
-        }
-        
-        // If there is a sign in the blocklist, cancel
-        for (Block b : event.blockList())
-        {
-            if (!(b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN))
-                continue;
-            
-            event.setCancelled(true);
-            return;
-        }
-
-        // Uncancel, just in case.
-        event.setCancelled(false);
-        
-        int[] buffer;
-        final HashMap<Block,Integer> blockMap = new HashMap<Block,Integer>();
-        for (Block b : event.blockList())
-        {
-            Material mat = b.getType();
-            
-            if (mat == Material.LAVA)       b.setType(Material.STATIONARY_LAVA);
-            else if (mat == Material.WATER) b.setType(Material.STATIONARY_WATER);
-            
-            if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || mat == Material.FIRE || mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
-            {
-                arena.blocks.remove(b);
-            }
-            else if (arena.blocks.remove(b))
-            {
-                arena.world.dropItemNaturally(b.getLocation(), new ItemStack(b.getTypeId(), 1));
-            }
-            else if (arena.softRestore)
-            {
-                buffer = new int[5];
-                buffer[0] = b.getX();
-                buffer[1] = b.getY();
-                buffer[2] = b.getZ();
-                buffer[3] = b.getTypeId();
-                buffer[4] = (int) b.getData();
-                arena.repairList.add(buffer);
-                blockMap.put(b, b.getTypeId() + (b.getData() * 1000));
-            }
-            else
-            {
-                blockMap.put(b, b.getTypeId() + (b.getData() * 1000));
-            }
-        }
-        
-        if (!arena.protect || arena.softRestore)
-            return;
-        
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable()
-            {
-                public void run()
-                {
-                    long start = System.nanoTime();
-                    for (Map.Entry<Block,Integer> entry : blockMap.entrySet())
-                    {
-                        Block b = entry.getKey();
-                        int type = entry.getValue();
-                        
-                        b.getLocation().getBlock().setTypeId(type % 1000);
-                        
-                        if (type > 1000)
-                            b.getLocation().getBlock().setData((byte) (type / 1000));
-                    }
-                    System.out.println("Repair took: " + (System.nanoTime() - start) + " ns");
-                }
-            }, arena.repairDelay);
-    }
-    */
 
     public void onEntityDeath(EntityDeathEvent event)
     {        
@@ -607,7 +518,6 @@ public class MAListener implements ArenaListener
         if (!arena.enabled || (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p)))
             return;
         
-        plugin.getAM().arenaMap.remove(p);
         arena.playerLeave(p);
     }
 
@@ -617,7 +527,6 @@ public class MAListener implements ArenaListener
         if (!arena.enabled || (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p)))
             return;
         
-        plugin.getAM().arenaMap.remove(p);
         arena.playerLeave(p);
     }
 

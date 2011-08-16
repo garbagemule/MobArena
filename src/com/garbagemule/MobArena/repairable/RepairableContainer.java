@@ -9,13 +9,19 @@ public class RepairableContainer extends RepairableBlock
 {
     private ItemStack[] contents;
     
-    public RepairableContainer(BlockState state)
+    public RepairableContainer(BlockState state, boolean clear)
     {
         super(state);
         
         Inventory inv = ((ContainerBlock) state).getInventory();
-        contents = inv.getContents();
-        inv.clear();
+        contents = inv.getContents().clone();
+        
+        if (clear) inv.clear();
+    }
+    
+    public RepairableContainer(BlockState state)
+    {
+        this(state, true);
     }
     
     /**
