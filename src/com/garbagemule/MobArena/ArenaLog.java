@@ -91,9 +91,9 @@ public class ArenaLog
             // Class
             buffy.append(MAUtils.padRight(entry.getValue(), CLASS + 2, ' '));
             // Wave
-            buffy.append(MAUtils.padLeft(arena.waveMap.remove(p).toString(), WAVE, ' ') + "  ");
+            buffy.append(MAUtils.padLeft(String.valueOf(arena.waveMap.remove(p)), WAVE, ' ') + "  ");
             // Kills
-            buffy.append(MAUtils.padLeft(arena.killMap.remove(p).toString(), KILLS, ' ') + "  ");
+            buffy.append(MAUtils.padLeft(String.valueOf(arena.killMap.remove(p)), KILLS, ' ') + "  ");
             // Rewards
             buffy.append(MAUtils.listToString(arena.rewardMap.get(p), plugin));
             log.add(buffy.toString());
