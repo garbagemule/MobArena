@@ -26,20 +26,27 @@ public class BossWave extends AbstractWave
     private List<BossAbility> abilities;
     private Set<Creature> adds;
     private BossHealth bossHealth;
+    private String bossName;
     private int healthAmount, abilityTask, abilityInterval;
     private boolean lowHealthAnnounced = false, abilityAnnounce;
     
     // Recurrent
-    public BossWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
+    public BossWave(Arena arena, String name, String bName, int wave, int frequency, int priority, Configuration config, String path)
     {
         super(arena, name, wave, frequency, priority);
+        
+        bossName = bName;
+        
         load(config, path);
     }
     
     // Single
-    public BossWave(Arena arena, String name, int wave, Configuration config, String path)
+    public BossWave(Arena arena, String name, String bName, int wave, Configuration config, String path)
     {
         super(arena, name, wave);
+        
+        bossName = bName;
+        
         load(config, path);
     }
     
@@ -70,7 +77,7 @@ public class BossWave extends AbstractWave
     public void spawn(int wave)
     {
         // Announce spawning
-        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS.get(""+wave));
+        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS.get(""+wave, getBossName()));
         
         // Spawn the boss and set the arena
         bossCreature = boss.spawn(getArena(), getWorld(), getArena().getBossSpawnpoint());
@@ -106,7 +113,7 @@ public class BossWave extends AbstractWave
                     
                     // Announce it
                     if (abilityAnnounce)
-                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(ability.toString()));
+                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(ability.toString(), getBossName()));
                     
                     // Activate!
                     ability.run(getArena(), bossCreature);
@@ -175,5 +182,8 @@ public class BossWave extends AbstractWave
     public void setLowHealthAnnounced(boolean value)
     {
         lowHealthAnnounced = value;
+    }
+    public String getBossName () {
+    	return bossName;
     }
 }

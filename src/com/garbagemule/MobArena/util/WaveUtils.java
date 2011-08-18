@@ -171,8 +171,10 @@ public class WaveUtils
             	result = new SpecialWave(arena, name, wave, frequency, priority, config, path);
             else if (type == WaveType.SWARM)
                 result = new SwarmWave(arena, name, wave, frequency, priority, config, path);
-            else if (type == WaveType.BOSS)
-                result = new BossWave(arena, name, wave, frequency, priority, config, path);
+            else if (type == WaveType.BOSS) {
+            	String bname = config.getString(path + "name", "Boss");
+                result = new BossWave(arena, name, bname, wave, frequency, priority, config, path);
+            }
         }
         else
         {
@@ -184,8 +186,10 @@ public class WaveUtils
             	result = new SpecialWave(arena, name, wave, config, path);
             else if (type == WaveType.SWARM)
                 result = new SwarmWave(arena, name, wave, config, path);
-            else if (type == WaveType.BOSS)
-                result = new BossWave(arena, name, wave, config, path);
+            else if (type == WaveType.BOSS) {
+            	String bname = config.getString(path + "name", "Boss");
+                result = new BossWave(arena, name, bname, wave, config, path);
+            }
         }
         return result;
     }
