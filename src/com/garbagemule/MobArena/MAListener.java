@@ -368,7 +368,7 @@ public class MAListener implements ArenaListener
                 }
                 else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
                 {
-                    MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH.get());
+                    MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH.get(), arena.bossWave.getBossName());
                     arena.bossWave.setLowHealthAnnounced(true);
                 }
             }
