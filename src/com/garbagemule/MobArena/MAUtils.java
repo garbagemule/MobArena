@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.minecraft.server.WorldServer;
 
@@ -36,7 +38,7 @@ import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.EntityPosition;
-import com.garbagemule.MobArena.util.MAInventoryItem;
+import com.garbagemule.MobArena.util.InventoryItem;
 
 public class MAUtils
 {         
@@ -132,6 +134,20 @@ public class MAUtils
             INITIALIZATION METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
+    
+    public static Map<String,Location> getArenaContainers(Configuration config, World world, String arena)
+    {
+        Map<String,Location> containers = new HashMap<String,Location>();
+        String arenaPath = "arenas." + arena + ".coords.containers";
+        
+        if (config.getKeys(arenaPath) == null)
+            return containers;
+        
+        for (String point : config.getKeys(arenaPath))
+            containers.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        
+        return containers;
+    }
     
     /**
      * Grab all the spawnpoints for a specific arena.
@@ -353,11 +369,11 @@ public class MAUtils
         {
             backupFile.createNewFile();
             
-            MAInventoryItem[] inv = new MAInventoryItem[armor.length + items.length];
+            InventoryItem[] inv = new InventoryItem[armor.length + items.length];
             for (int i = 0; i < armor.length; i++)
-                inv[i] = stackToItem(armor[i]);
+                inv[i] = InventoryItem.parseItemStack(armor[i]);
             for (int i = 0; i < items.length; i++)
-                inv[armor.length + i] = stackToItem(items[i]);
+                inv[armor.length + i] = InventoryItem.parseItemStack(items[i]);
             
             FileOutputStream   fos = new FileOutputStream(backupFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -389,7 +405,7 @@ public class MAUtils
             // Grab the MAInventoryItem array from the backup-file.
             FileInputStream   fis      = new FileInputStream(backupFile);
             ObjectInputStream ois      = new ObjectInputStream(fis);
-            MAInventoryItem[] fromFile = (MAInventoryItem[]) ois.readObject();
+            InventoryItem[] fromFile   = (InventoryItem[]) ois.readObject();
             ois.close();
             
             // Split that shit.
@@ -397,17 +413,20 @@ public class MAUtils
             ItemStack[] items = new ItemStack[fromFile.length-4];
             
             for (int i = 0; i < 4; i++)
-                armor[i] = itemToStack(fromFile[i]);
+                armor[i] = InventoryItem.toItemStack(fromFile[i]);
             for (int i = 4; i < fromFile.length; i++)
-                items[i - 4] = itemToStack(fromFile[i]);
+                items[i - 4] = InventoryItem.toItemStack(fromFile[i]);
             
             // Restore the inventory.
             PlayerInventory inv = p.getInventory();
             inv.setArmorContents(armor);
+            for (int i = 0; i < items.length; i++)
+                inv.setItem(i, items[i]);
+            /*
             for (ItemStack stack : items)
                 if (stack != null)
                     inv.addItem(stack);
-            
+            */
             // Remove the backup-file.
             backupFile.delete();
         }
@@ -419,20 +438,6 @@ public class MAUtils
         }
         
         return true;
-    }
-    
-    private static MAInventoryItem stackToItem(ItemStack stack)
-    {
-        if (stack == null)
-            return new MAInventoryItem(-1, -1, (short)0);
-        return new MAInventoryItem(stack.getTypeId(), stack.getAmount(), stack.getDurability());
-    }
-    
-    private static ItemStack itemToStack(MAInventoryItem item)
-    {
-        if (item.getTypeId() == -1)
-            return null;
-        return new ItemStack(item.getTypeId(), item.getAmount(), item.getDurability());
     }
     
     /* Checks if all inventory and armor slots are empty. */
@@ -635,6 +640,20 @@ public class MAUtils
             REGION METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
+    
+    /**
+     * Check if a Location is inside two points (x1,y1,z1) (x2,y2,z2)
+     */
+    public static boolean inRegion(Location loc, double x1, double y1, double z1, double x2, double y2, double z2)
+    {
+        double x = loc.getBlockX();
+        double y = loc.getBlockY();
+        double z = loc.getBlockZ();
+        
+        return x >= x1 && x <= x2 &&
+               y >= y1 && y <= y2 &&
+               z >= z1 && z <= z2;
+    }
     
     /**
      * Create a frame spanned by the two input coordinates.
@@ -1153,6 +1172,7 @@ public class MAUtils
             
             // Open the connection and don't redirect.
             HttpURLConnection con = (HttpURLConnection) baseURI.toURL().openConnection();
+            con.setConnectTimeout(5000);
             con.setInstanceFollowRedirects(false);
             
             String header = con.getHeaderField("Location");
@@ -1167,18 +1187,27 @@ public class MAUtils
             // Otherwise, grab the location header to get the real URI.
             String url = new URI(con.getHeaderField("Location")).toString();
             
-            // If the current version is the same as the thread version.
-            if (url.contains(plugin.getDescription().getVersion().replace(".", "-")))
-            {
-                if (!response)
-                    return;
-                    
-                tellPlayer(p, "Your version of MobArena is up to date!");
+            // Set up the regex and matcher
+            Pattern regex   = Pattern.compile("v([0-9]+-)*[0-9]+");
+            Matcher matcher = regex.matcher(url);
+            if (!matcher.find())
                 return;
+
+            // Split the version strings
+            String[] forumVersion = matcher.group().substring(1).split("-");
+            String[] thisVersion  = plugin.getDescription().getVersion().split("\\.");
+
+            // If the current version is older than the forum version, notify.
+            for (int i = 0; i < Math.min(forumVersion.length, thisVersion.length); i++)
+            {
+                if (Integer.parseInt(forumVersion[i]) > Integer.parseInt(thisVersion[i]))
+                {
+                    tellPlayer(p, "There is a new version of MobArena available!");;
+                    return;
+                }
             }
             
-            // Otherwise, notify the player that there is a new version.
-            tellPlayer(p, "There is a new version of MobArena available!");;
+            if (response) tellPlayer(p, "Your version of MobArena is up to date!");
         }
         catch (Exception e)
         {

@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+
 public class MAPlayerListener extends PlayerListener
 {
     private MobArena plugin;
@@ -90,6 +91,6 @@ public class MAPlayerListener extends PlayerListener
                 {
                     MAUtils.checkForUpdates(plugin, p, false);
                 }
-            }, 100);
+            }, 60);
     }
 }

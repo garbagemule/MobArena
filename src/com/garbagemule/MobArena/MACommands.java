@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
@@ -55,14 +56,16 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("setwarp");           // Set arena/lobby/spec
         COMMANDS.add("spawnpoints");       // List spawnpoints
         COMMANDS.add("addspawn");          // Add a spawnpoint
-        COMMANDS.add("delspawn");          // Delete a spawnpoint 
+        COMMANDS.add("delspawn");          // Delete a spawnpoint
+        COMMANDS.add("containers");        // List containers
+        COMMANDS.add("addcontainer");      // Add a container block
+        COMMANDS.add("delcontainer");      // Delete a container block
         COMMANDS.add("reset");             // Reset arena coordinates
         COMMANDS.add("addclass");          // Add a new class
         COMMANDS.add("delclass");          // Delete a class
         COMMANDS.add("checkdata");         // Check arena well formedness
         COMMANDS.add("auto-generate");     // Auto-generate arena
         COMMANDS.add("auto-degenerate");   // Restore cuboid
-        COMMANDS.add("lol");
     }
     private boolean meanAdmins, showingRegion;
     private Server server;
@@ -154,6 +157,10 @@ public class MACommands implements CommandExecutor
             // If player is in a boat/minecart, eject!
             if (p.isInsideVehicle())
                 p.leaveVehicle();
+            
+            // Take entry fee and store inventory
+            arena.takeFee(p);
+            if (!arena.emptyInvJoin) MAUtils.storeInventory(p);
             
             // If player is in a bed, unbed!
             if (p.isSleeping())
@@ -1067,6 +1074,77 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, "Spawnpoint " + arg1 + " deleted for arena '" + am.selectedArena.configName() + "'");
             else
                 MAUtils.tellPlayer(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+        
+        if (base.equals("containers"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.setup.containers")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            
+            StringBuffer buffy = new StringBuffer();
+            List<String> containers = plugin.getConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.containers");
+            
+            if (containers != null)
+            {
+                for (String s : containers)
+                {
+                    buffy.append(s);
+                    buffy.append(" ");
+                }
+            }
+            else
+            {
+                buffy.append(Msg.MISC_NONE);
+            }
+            
+            MAUtils.tellPlayer(sender, "Containers for arena '" + am.selectedArena.configName() + "': " + buffy.toString());
+            return true;
+        }
+        
+        if (base.equals("addcontainer"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.addchest")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma addchest <container name>");
+                return true;
+            }
+            if (!(p.getTargetBlock(null, 50).getState() instanceof ContainerBlock))
+            {
+                MAUtils.tellPlayer(sender, "You must look at container.");
+                return true;
+            }
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "containers." + arg1, p.getTargetBlock(null, 50).getLocation());
+            MAUtils.tellPlayer(sender, "Container '" + arg1 + "' added for arena \"" + am.selectedArena.configName() + "\"");
+            return true;
+        }
+        
+        if (base.equals("delcontainer"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.setup.delcontainer")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma delcontainer <container name>");
+                return true;
+            }
+
+            if (MAUtils.delArenaCoord(plugin.getConfig(), am.selectedArena, "containers." + arg1))
+                MAUtils.tellPlayer(sender, "Container '" + arg1 + "' deleted for arena '" + am.selectedArena.configName() + "'");
+            else
+                MAUtils.tellPlayer(sender, "Could not find the container '" + arg1 + "' for arena '" + am.selectedArena.configName() + "'");
             return true;
         }
         

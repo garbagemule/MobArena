@@ -5,17 +5,28 @@ import org.bukkit.block.ContainerBlock;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.garbagemule.MobArena.util.InventoryItem;
+
 public class RepairableContainer extends RepairableBlock
 {
-    private ItemStack[] contents;
+    private InventoryItem[] items;
     
     public RepairableContainer(BlockState state, boolean clear)
     {
         super(state);
-        
+
+        // Grab the inventory and its contents
         Inventory inv = ((ContainerBlock) state).getInventory();
-        contents = inv.getContents().clone();
+        ItemStack[] contents = inv.getContents();
         
+        // Initialize the items array
+        items = new InventoryItem[contents.length];
+        
+        // Turn every ItemStack into an InventoryItem
+        for (int i = 0; i < items.length; i++)
+            items[i] = InventoryItem.parseItemStack(contents[i]);
+        
+        // Clear the inventory if prompted
         if (clear) inv.clear();
     }
     
@@ -31,7 +42,15 @@ public class RepairableContainer extends RepairableBlock
     {
         super.repair();
         
+        // Grab the inventory
         ContainerBlock cb = (ContainerBlock) getWorld().getBlockAt(getX(),getY(),getZ()).getState();
-        cb.getInventory().setContents(contents);
+        Inventory inv = cb.getInventory();
+        
+        // Turn every InventoryItem into an ItemStack
+        for (int i = 0; i < items.length; i++)
+        {
+            InventoryItem item = items[i]; 
+            inv.setItem(i, item != null ? item.toItemStack() : null);
+        }
     }
 }

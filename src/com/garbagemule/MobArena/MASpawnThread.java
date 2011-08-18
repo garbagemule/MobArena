@@ -64,6 +64,10 @@ public class MASpawnThread implements Runnable
         if (arena.waveClear && wave > 1 && !arena.monsters.isEmpty())
             return;
         
+        // Check if we're on a boss wave
+        if (!arena.waveClear && arena.bossWave != null)
+            return;
+        
         // Grant rewards (if any) for this wave
         grantRewards(wave);
         
@@ -82,7 +86,7 @@ public class MASpawnThread implements Runnable
     {
         List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
         for (Entity e : tmp)
-            if (e.isDead())
+            if (e.isDead() || !arena.inRegion(e.getLocation()))
                 arena.monsters.remove(e);
     }
     

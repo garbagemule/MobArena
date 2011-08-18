@@ -11,12 +11,15 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -41,6 +44,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
+import org.bukkit.material.MaterialData;
 import org.bukkit.material.Redstone;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
@@ -57,14 +61,40 @@ public class MAListener implements ArenaListener
         this.plugin = plugin;
     }
     
+    public void onBlockPhysics(BlockPhysicsEvent event)
+    {
+        if (!arena.inRegion(event.getBlock().getLocation()) || arena.softRestore)
+            return;
+        
+        MaterialData data = event.getBlock().getState().getData();
+        if (data instanceof Attachable || data instanceof Bed || data instanceof Door || data instanceof Redstone)
+            event.setCancelled(true);
+    }
+    
     public void onBlockBreak(BlockBreakEvent event)
     {
-        if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit || (!arena.protect && arena.running))
+        if (onBlockDestroy(event))
             return;
+        
+        event.setCancelled(true);
+    }
+    
+    public void onBlockBurn(BlockBurnEvent event)
+    {
+        if (onBlockDestroy(event))
+            return;
+        
+        event.setCancelled(true);
+    }
+    
+    private boolean onBlockDestroy(BlockEvent event)
+    {
+        if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit || (!arena.protect && arena.running))
+            return true;
         
         Block b = event.getBlock();
         if (arena.blocks.remove(b) || b.getType() == Material.TNT)
-            return;
+            return true;
         
         if (arena.softRestore && arena.running)
         {
@@ -85,10 +115,10 @@ public class MAListener implements ArenaListener
             if (!arena.softRestoreDrops)
                 b.setTypeId(0);
             
-            return;
+            return true;
         }
         
-        event.setCancelled(true);
+        return false;
     }
     
     public void onBlockPlace(BlockPlaceEvent event)
@@ -104,6 +134,7 @@ public class MAListener implements ArenaListener
             
             if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK)
                 arena.blocks.add(b.getRelative(0,1,0));
+            
             return;
         }
 
@@ -116,8 +147,21 @@ public class MAListener implements ArenaListener
         if (!arena.inRegion(event.getBlock().getLocation()))
             return;
         
-        if (event.getCause() == IgniteCause.LIGHTNING)
-            event.setCancelled(true);
+        switch (event.getCause())
+        {
+            case LIGHTNING:
+                event.setCancelled(true);
+                break;
+            case SPREAD:
+            case FLINT_AND_STEEL:
+                if (arena.running)
+                    arena.blocks.add(event.getBlock());
+                else
+                    event.setCancelled(true);
+                break;
+            default:
+                break;
+        }
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event)
@@ -125,8 +169,12 @@ public class MAListener implements ArenaListener
         if (!arena.inRegion(event.getLocation())) // || event.getSpawnReason() == SpawnReason.CUSTOM)
             return;
         
-        // If running == true, setCancelled(false), and vice versa.
-        event.setCancelled(!arena.running);
+        LivingEntity entity = (LivingEntity) event.getEntity();
+        if (arena.running && entity instanceof Slime)
+            arena.monsters.add(entity);
+        else
+            // If running == true, setCancelled(false), and vice versa.
+            event.setCancelled(!arena.running);
     }
     
     public void onEntityExplode(EntityExplodeEvent event)
@@ -532,7 +580,7 @@ public class MAListener implements ArenaListener
 
     public void onPlayerTeleport(PlayerTeleportEvent event)
     {
-        if (arena.edit || !arena.enabled || !arena.setup || arena.allowWarp)
+        if (!arena.running || arena.edit || !arena.enabled || !arena.setup || arena.allowWarp)
             return;
         
         if (!arena.inRegion(event.getTo()) && !arena.inRegion(event.getFrom()))

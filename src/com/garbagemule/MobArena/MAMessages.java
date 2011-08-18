@@ -106,6 +106,11 @@ public class MAMessages
         {
             m.msg = msg;
         }
+        
+        public String toString()
+        {
+            return msg;
+        }
     }
     
     /**

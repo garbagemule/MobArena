@@ -47,6 +47,7 @@ import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.util.InventoryItem;
 import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
@@ -63,7 +64,7 @@ public class Arena
 
     protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena;
     protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
-    protected Map<String,Location> spawnpoints;
+    protected Map<String,Location> spawnpoints, containers;
     protected String logging;
 
     // Wave/reward/entryfee fields
@@ -89,7 +90,7 @@ public class Arena
     protected Set<Block>             blocks;
     protected Set<Wolf>              pets;
     protected Map<Player,Integer>    petMap;
-    protected LinkedList<Repairable> repairables, containers;
+    protected LinkedList<Repairable> repairables, containables;
     
     // Spawn overriding
     protected int spawnMonsters;
@@ -137,7 +138,7 @@ public class Arena
         classMap        = new HashMap<Player,String>();
         randoms         = new HashSet<Player>();
         repairables     = new LinkedList<Repairable>();
-        containers      = new LinkedList<Repairable>();
+        containables    = new LinkedList<Repairable>();
         
         running         = false;
         edit            = false;
@@ -179,7 +180,10 @@ public class Arena
             p.setHealth(20);
         }
         
-        // Spawn pets.
+        // Set the boolean.
+        running = true;
+        
+        // Spawn pets (must happen after 'running = true;')
         spawnPets();
         
         // Copy the singleWaves Set.
@@ -192,9 +196,6 @@ public class Arena
         // Start logging
         log = new ArenaLog(plugin, this);
         log.start();
-        
-        // Set the boolean.
-        running = true;
         
         // Announce and notify.
         MAUtils.tellAll(this, Msg.ARENA_START.get());
@@ -339,7 +340,6 @@ public class Arena
         
         if (specOnDeath)
         {
-            //resetPlayer(p);
             clearPlayer(p);
             movePlayerToSpec(p);
         }
@@ -353,13 +353,14 @@ public class Arena
             spawnThread.updateTargets();
         
         MAUtils.tellAll(this, Msg.PLAYER_DIED.get(p.getName()));
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
-        {
-            public void run()
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
             {
-                endArena();
-            }
-        });
+                public void run()
+                {
+                    endArena();
+                }
+            });
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
@@ -520,14 +521,12 @@ public class Arena
             {
                 public void run()
                 {
-                    for (int x = p1.getBlockX(); x <= p2.getBlockX(); x++)
-                        for (int y = p1.getBlockY(); y <= p2.getBlockY(); y++)
-                            for (int z = p1.getBlockZ(); z <= p2.getBlockZ(); z++)
-                            {
-                                BlockState state = world.getBlockAt(x,y,z).getState();
-                                if (state instanceof ContainerBlock)
-                                    containers.add(new RepairableContainer(state, false));
-                            }
+                    for (Location loc : containers.values())
+                    {
+                        BlockState state = world.getBlockAt(loc).getState();
+                        if (state instanceof ContainerBlock)
+                            containables.add(new RepairableContainer(state, false));
+                    }
                 }
             });
     }
@@ -539,7 +538,7 @@ public class Arena
             {
                 public void run()
                 {
-                    for (Repairable r : containers)
+                    for (Repairable r : containables)
                         r.repair();
                 }
             });
@@ -807,6 +806,7 @@ public class Arena
         lobbyLoc         = MAUtils.getArenaCoord(config, world, configName, "lobby");
         spectatorLoc     = MAUtils.getArenaCoord(config, world, configName, "spectator");
         spawnpoints      = MAUtils.getArenaSpawnpoints(config, world, configName);
+        containers       = MAUtils.getArenaContainers(config, world, configName);
         
         // NEW WAVES
         singleWaves      = WaveUtils.getWaves(this, config, WaveBranch.SINGLE);
@@ -1025,12 +1025,12 @@ public class Arena
         return classes;
     }
     
-    public Collection<Location> getAllSpawnpoints()
+    public List<Location> getAllSpawnpoints()
     {
-        return spawnpoints.values();
+        return new ArrayList<Location>(spawnpoints.values());
     }
     
-    public Collection<Location> getSpawnpoints()
+    public List<Location> getSpawnpoints()
     {
         List<Location> result = new ArrayList<Location>(spawnpoints.size());
         
@@ -1040,7 +1040,7 @@ public class Arena
             result.add(entry.getValue());
         }
         
-        return !result.isEmpty() ? result : spawnpoints.values();
+        return !result.isEmpty() ? result : new ArrayList<Location>(spawnpoints.values());
     }
     
     public Location getBossSpawnpoint()
@@ -1200,52 +1200,23 @@ public class Arena
             return true;
         
         PlayerInventory inv = p.getInventory();
-        for (ItemStack stack : entryFee)
-        {
-            // Economy money
-            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
-            {
-                if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).subtract(stack.getAmount()))                
-                    return false;
-            }
+        InventoryItem[] items = InventoryItem.parseItemStacks(inv.getContents());
+        InventoryItem[] fee   = InventoryItem.parseItemStacks(entryFee);
 
-            // Normal stack
-            else
-            {
-                int id = stack.getTypeId();
-                int amount = stack.getAmount();
-                
-                while (amount > 0)
-                {
-                    int pos = inv.first(id);
-                    if (pos == -1) return false;
-                    
-                    ItemStack is = inv.getItem(pos);
-                    if (is.getAmount() > amount)
-                    {
-                        is.setAmount(is.getAmount() - amount);
-                        amount = 0;
-                    }
-                    else
-                    {
-                        amount -= is.getAmount();
-                        inv.setItem(pos, null);
-                    }
-                }
-            }
-        }
+        // Take some economy money
+        for (InventoryItem item : InventoryItem.extractAllFromArray(MobArena.ECONOMY_MONEY_ID, fee))
+            if (plugin.Methods.hasMethod())
+                plugin.Method.getAccount(p.getName()).subtract(item.getAmount());
+
+        // Take any other items
+        for (InventoryItem item : fee)
+            InventoryItem.removeItemFromArray(item, items);
         
-        hasPaid.add(p);
+        // Turn everything back into ItemStacks
+        for (int i = 0; i < items.length; i++)
+            inv.setItem(i, items[i].toItemStack());
+
         return true;
-    }
-    
-    public void refund(Player p)
-    {
-        if (!hasPaid.contains(p))
-            return;
-        
-        MAUtils.giveItems(p, entryFee, false, plugin);
-        hasPaid.remove(p);
     }
     
     public boolean canJoin(Player p)
@@ -1266,12 +1237,14 @@ public class Arena
             MAUtils.tellPlayer(p, Msg.JOIN_PLAYER_LIMIT_REACHED);
         else if (joinDistance > 0 && !inRegionRadius(p.getLocation(), joinDistance))
             MAUtils.tellPlayer(p, Msg.JOIN_TOO_FAR);
-        else if (!canAfford(p) || !takeFee(p))
+        else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
+            MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
+        /*else if (!canAfford(p) || !takeFee(p))
             MAUtils.tellPlayer(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
         else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
         else if (!emptyInvJoin && !MAUtils.storeInventory(p))
-            MAUtils.tellPlayer(p, Msg.JOIN_STORE_INV_FAIL);
+            MAUtils.tellPlayer(p, Msg.JOIN_STORE_INV_FAIL);*/
         else return true;
         
         return false;

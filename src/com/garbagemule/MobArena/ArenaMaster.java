@@ -15,7 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.config.Configuration;
 
-public class ArenaMaster
+import com.garbagemule.ArenaPlugin.Master;
+
+public class ArenaMaster implements Master
 {
     private MobArena plugin;
     private Configuration config;

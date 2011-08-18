@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.io.File;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,12 +21,14 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
+import com.garbagemule.ArenaPlugin.ArenaPlugin;
+import com.garbagemule.ArenaPlugin.Master;
 
 /**
  * MobArena
  * @author garbagemule
  */
-public class MobArena extends JavaPlugin
+public class MobArena extends JavaPlugin implements ArenaPlugin
 {
     private Configuration config;
     private ArenaMaster am;
@@ -40,8 +43,10 @@ public class MobArena extends JavaPlugin
     // Global variables
     public static PluginDescriptionFile desc;
     public static File dir, arenaDir;
-    public static final double MIN_PLAYER_DISTANCE = 256.0;
+    public static final double MIN_PLAYER_DISTANCE = 15.0;
+    public static final double MIN_PLAYER_DISTANCE_SQUARED = MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE;
     public static final int ECONOMY_MONEY_ID = -29;
+    public static Random random = new Random();
 
     public void onEnable()
     {        
@@ -109,8 +114,10 @@ public class MobArena extends JavaPlugin
         
         // Register events.
         pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
+        pm.registerEvent(Event.Type.BLOCK_BURN,                blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
-        pm.registerEvent(Event.Type.BLOCK_IGNITE,              blockListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.BLOCK_PHYSICS,             blockListener,    Priority.Normal,  this);
+        pm.registerEvent(Event.Type.BLOCK_IGNITE,              blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT,           playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM,          playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_BUCKET_EMPTY,       playerListener,   Priority.Normal,  this);
@@ -173,6 +180,11 @@ public class MobArena extends JavaPlugin
     public Configuration getConfig()      { return config; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
+    
+    public Master getMaster()
+    {
+        return am;
+    }
     
     private String getHeader()
     {

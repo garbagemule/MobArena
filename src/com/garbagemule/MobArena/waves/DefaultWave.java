@@ -9,8 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public class DefaultWave extends NormalWave

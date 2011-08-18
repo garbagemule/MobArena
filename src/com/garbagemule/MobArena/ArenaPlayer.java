@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -13,6 +14,7 @@ public class ArenaPlayer
     public String className;
     public Arena arena;
     public List<ItemStack> rewards;
+    public List<Block> blocks;
     
     protected boolean inArena, inLobby, inSpec, isReady;
     
@@ -34,6 +36,7 @@ public class ArenaPlayer
         
         className   = arena.classMap.get(player);
         rewards     = new LinkedList<ItemStack>();
+        blocks      = new LinkedList<Block>();
     }
     
     public Player getPlayer()    { return player; }
