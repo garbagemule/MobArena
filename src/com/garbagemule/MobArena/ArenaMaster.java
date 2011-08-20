@@ -392,4 +392,9 @@ public class ArenaMaster implements Master
     public void updateClasses()  { update(false, true,  false); }
     public void updateArenas()   { update(false, false, true);  }
     public void updateAll()      { update(true,  true,  true);  }
+
+    public Map<Player, com.garbagemule.ArenaPlugin.Arena> getArenaMap()
+    {
+        return null;//arenaMap;
+    }
 }

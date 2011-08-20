@@ -64,6 +64,16 @@ public class InventoryItem implements Serializable
         return item.toItemStack();
     }
     
+    public static ItemStack[] toItemStacks(InventoryItem[] items)
+    {
+        ItemStack[] result = new ItemStack[items.length];
+        
+        for (int i = 0; i < items.length; i++)
+            result[i] = items[i].toItemStack();
+        
+        return result;
+    }
+    
     /**
      * Static method for converting an ItemStack to an InventoryItems.
      * @param stack The ItemStack to convert

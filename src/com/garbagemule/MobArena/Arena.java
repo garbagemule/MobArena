@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -478,7 +477,7 @@ public class Arena
     }
     
     public void restoreInvAndGiveRewards(final Player p)
-    {
+    {        
         final List<ItemStack> rewards = log != null && log.players.get(p) != null ? log.players.get(p).rewards : new LinkedList<ItemStack>();
         final boolean hadRewards = rewardedPlayers.contains(p);
         
@@ -486,10 +485,7 @@ public class Arena
             new Runnable()
             {
                 public void run()
-                {
-                    if (!p.isOnline())
-                        return;
-                    
+                {                    
                     if (!emptyInvJoin)
                         MAUtils.restoreInventory(p);
                     
@@ -502,6 +498,21 @@ public class Arena
                 }
             });
     }
+    
+    public void restoreInvAndGiveRewardz(final Player p, List<ItemStack> rewards, boolean hadRewards)
+    {
+        if (!p.isOnline())
+            return;
+        
+        if (!emptyInvJoin)
+            MAUtils.restoreInventory(p);
+        
+        if (hadRewards)
+            return;
+        
+        MAUtils.giveRewards(p, rewards, plugin);
+        if (running)
+            rewardedPlayers.add(p);}
     
     public void storePlayerData(Player p, Location loc)
     {
@@ -1035,10 +1046,8 @@ public class Arena
         List<Location> result = new ArrayList<Location>(spawnpoints.size());
         
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
-        {
-            if (entry.getKey().matches("^*boss*$")) continue;
-            result.add(entry.getValue());
-        }
+            if (!entry.getKey().matches("^*boss*$"))
+                result.add(entry.getValue());
         
         return !result.isEmpty() ? result : new ArrayList<Location>(spawnpoints.values());
     }
@@ -1105,6 +1114,11 @@ public class Arena
         Set<LivingEntity> tmp = new HashSet<LivingEntity>(monsters);
         tmp.addAll(explodingSheep);
         return tmp;
+    }
+    
+    public Set<Wolf> getPets()
+    {
+        return pets;
     }
     
     public void resetIdleTimer()

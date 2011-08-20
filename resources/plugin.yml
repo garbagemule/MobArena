@@ -1,6 +1,6 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.93.4
+version: 0.93.5
 softdepend: [Permissions,MultiVerse,XcraftGate,Towny]
 commands:
     ma:
@@ -17,3 +17,99 @@ commands:
             /mobarena leave     - Leave the arena.
             /mobarena notready  - List of players who aren't ready.
             /mobarena spectate  - Warp to the spectator area.
+permissions:
+    mobarena.use.*:
+        description: Gives access to usage commands
+        default: true
+        children:
+            mobarena.use.join: true
+            mobarena.use.spec: true
+            mobarena.use.leave: true
+    mobarena.use.join:
+        default: true
+    mobarena.use.spec:
+        default: true
+    mobarena.use.leave:
+        default: true
+    
+    mobarena.admin.*:
+        description: Gives access to admin commands
+        default: op
+        children:
+            mobarena.admin.enable: true
+            mobarena.admin.kick: true
+            mobarena.admin.restore: true
+            mobarena.admin.force.end: true
+            mobarena.admin.force.start: true
+            mobarena.admin.config.reload: true
+    mobarena.admin.enable:
+        default: false
+    mobarena.admin.kick:
+        default: false
+    mobarena.admin.restore:
+        default: false
+    mobarena.admin.force.end:
+        default: false
+    mobarena.admin.force.start:
+        default: false
+    mobarena.admin.config.reload:
+        default: false
+    
+    mobarena.setup.*:
+        description: Gives access to setup commands
+        default: op
+        children:
+            mobarena.setup.arena: true
+            mobarena.setup.setarena: true
+            mobarena.setup.addarena: true
+            mobarena.setup.delarena: true
+            mobarena.setup.protect: true
+            mobarena.setup.editarena: true
+            mobarena.setup.setregion: true
+            mobarena.setup.expandregion: true
+            mobarena.setup.showregion: true
+            mobarena.setup.setlobbyregion: true
+            mobarena.setup.expandlobbyregion: true
+            mobarena.setup.setwarp: true
+            mobarena.setup.spawnpoints: true
+            mobarena.setup.addspawn: true
+            mobarena.setup.delspawn: true
+            mobarena.setup.checkdata: true
+            mobarena.setup.autogenerate: true
+            mobarena.setup.autodegenerate: true
+    mobarena.setup.arena:
+        default: false
+    mobarena.setup.setarena:
+        default: false
+    mobarena.setup.addarena:
+        default: false
+    mobarena.setup.delarena:
+        default: false
+    mobarena.setup.protect:
+        default: false
+    mobarena.setup.editarena:
+        default: false
+    mobarena.setup.setregion:
+        default: false
+    mobarena.setup.expandregion:
+        default: false
+    mobarena.setup.showregion:
+        default: false
+    mobarena.setup.setlobbyregion:
+        default: false
+    mobarena.setup.expandlobbyregion:
+        default: false
+    mobarena.setup.setwarp:
+        default: false
+    mobarena.setup.spawnpoints:
+        default: false
+    mobarena.setup.addspawn:
+        default: false
+    mobarena.setup.delspawn:
+        default: false
+    mobarena.setup.checkdata:
+        default: false
+    mobarena.setup.autogenerate:
+        default: false
+    mobarena.setup.autodegenerate:
+        default: false

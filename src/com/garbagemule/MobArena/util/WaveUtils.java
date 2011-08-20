@@ -24,7 +24,7 @@ public class WaveUtils
      */    
     public static List<Location> getValidSpawnpoints(Arena arena, Collection<Player> players)
     {
-        long start = System.nanoTime();
+        //long start = System.nanoTime();
         List<Location> result = new ArrayList<Location>();
 
         double x1 = Double.NaN, y1 = Double.NaN, z1 = Double.NaN, // Bottom
@@ -232,6 +232,13 @@ public class WaveUtils
                 MobArena.warning("Missing 'frequency'-node in " + path);
                 wellDefined = false;
             }
+            // OPTIONAL: Wave
+            int wave = config.getInt(path + "wave", 0);
+            if (wave < 0)
+            {
+                MobArena.warning("'wave' must be greater than 0 in " + path);
+                wellDefined = false;
+            }
         }
         else if (branch == WaveBranch.SINGLE)
         {
@@ -240,6 +247,11 @@ public class WaveUtils
             if (wave == 0)
             {
                 MobArena.warning("Missing 'wave'-node in " + path);
+                wellDefined = false;
+            }
+            else if (wave < 0)
+            {
+                MobArena.warning("'wave' must be greater than 0 in " + path);
                 wellDefined = false;
             }
         }

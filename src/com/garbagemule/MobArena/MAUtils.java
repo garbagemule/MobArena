@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,13 @@ import org.bukkit.util.config.Configuration;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.InventoryItem;
+import com.garbagemule.MobArena.util.jnbt.ByteTag;
+import com.garbagemule.MobArena.util.jnbt.CompoundTag;
+import com.garbagemule.MobArena.util.jnbt.ListTag;
+import com.garbagemule.MobArena.util.jnbt.NBTInputStream;
+import com.garbagemule.MobArena.util.jnbt.NBTOutputStream;
+import com.garbagemule.MobArena.util.jnbt.ShortTag;
+import com.garbagemule.MobArena.util.jnbt.Tag;
 
 public class MAUtils
 {         
@@ -337,8 +345,7 @@ public class MAUtils
             INVENTORY AND REWARD METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
-
-    /* Clears the players inventory and armor slots. */
+    
     public static PlayerInventory clearInventory(Player p)
     {
         PlayerInventory inv = p.getInventory();
@@ -362,18 +369,18 @@ public class MAUtils
             return false;
         
         // Grab the inventory contents.
-        ItemStack[] armor = p.getInventory().getArmorContents();
         ItemStack[] items = p.getInventory().getContents();
+        ItemStack[] armor = p.getInventory().getArmorContents();
         
         try
         {
             backupFile.createNewFile();
             
-            InventoryItem[] inv = new InventoryItem[armor.length + items.length];
-            for (int i = 0; i < armor.length; i++)
-                inv[i] = InventoryItem.parseItemStack(armor[i]);
+            InventoryItem[] inv = new InventoryItem[items.length + armor.length];
             for (int i = 0; i < items.length; i++)
-                inv[armor.length + i] = InventoryItem.parseItemStack(items[i]);
+                inv[i] = InventoryItem.parseItemStack(items[i]);
+            for (int i = 0; i < armor.length; i++)
+                inv[i + items.length] = InventoryItem.parseItemStack(armor[i]);
             
             FileOutputStream   fos = new FileOutputStream(backupFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -393,6 +400,33 @@ public class MAUtils
     
     public static boolean restoreInventory(Player p)
     {
+        // Grab the items from the MobArena .inv file
+        ItemStack[] stacks = getInventoryFile(p);
+        
+        // If the player isn't online, hack the playerName.dat file
+        if (!p.isOnline())
+            return writeInventoryData(p, stacks);
+        
+        // Otherwise, restore the inventory directly
+        ItemStack[] items = new ItemStack[stacks.length-4];
+        ItemStack[] armor = new ItemStack[4];
+        
+        for (int i = 0; i < stacks.length - 4; i++)
+            items[i] = stacks[i];
+        for (int i = 0; i < 4; i++)
+            armor[i] = stacks[stacks.length - 4 + i];
+        
+        // Restore the inventory.
+        PlayerInventory inv = p.getInventory();
+        inv.setArmorContents(armor);
+        for (int i = 0; i < items.length; i++)
+            inv.setItem(i, items[i]);
+        
+        return true;
+    }
+    
+    public static ItemStack[] getInventoryFile(Player p)
+    {
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         File backupFile = new File(invPath + sep + p.getName() + ".inv");
         
@@ -400,35 +434,104 @@ public class MAUtils
         {
             // If the backup-file couldn't be found, return.
             if (!backupFile.exists())
-                return false;
+                return null;
             
             // Grab the MAInventoryItem array from the backup-file.
             FileInputStream   fis      = new FileInputStream(backupFile);
             ObjectInputStream ois      = new ObjectInputStream(fis);
             InventoryItem[] fromFile   = (InventoryItem[]) ois.readObject();
             ois.close();
-            
-            // Split that shit.
-            ItemStack[] armor = new ItemStack[4];
-            ItemStack[] items = new ItemStack[fromFile.length-4];
-            
-            for (int i = 0; i < 4; i++)
-                armor[i] = InventoryItem.toItemStack(fromFile[i]);
-            for (int i = 4; i < fromFile.length; i++)
-                items[i - 4] = InventoryItem.toItemStack(fromFile[i]);
-            
-            // Restore the inventory.
-            PlayerInventory inv = p.getInventory();
-            inv.setArmorContents(armor);
-            for (int i = 0; i < items.length; i++)
-                inv.setItem(i, items[i]);
-            /*
-            for (ItemStack stack : items)
-                if (stack != null)
-                    inv.addItem(stack);
-            */
-            // Remove the backup-file.
+
+            // Delete the file
             backupFile.delete();
+            
+            return InventoryItem.toItemStacks(fromFile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            MobArena.warning("Could not restore inventory for " + p.getName());
+            return null;
+        }
+    }
+    
+    public static ItemStack[] readInventoryData(Player p)
+    {
+        // Grab the data dir <world>/players/
+        File playerDir = new File(Bukkit.getServer().getWorlds().get(0).getName(), "players");
+        
+        try
+        {
+            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(playerDir, p.getName() + ".dat")));
+            CompoundTag tag = (CompoundTag) in.readTag();
+            in.close();
+
+            ListTag inventory = (ListTag) tag.getValue().get("Inventory");
+            
+            ItemStack[] stacks = new ItemStack[40];
+            for (int i = 0; i < inventory.getValue().size(); i++)
+            {
+                CompoundTag item = (CompoundTag) inventory.getValue().get(i);
+                byte count = ((ByteTag)     item.getValue().get("Count")).getValue();
+                byte slot = ((ByteTag)      item.getValue().get("Slot")).getValue();
+                short damage = ((ShortTag)  item.getValue().get("Damage")).getValue();
+                short id = ((ShortTag)      item.getValue().get("id")).getValue();
+                stacks[slot < 36 ? slot : 36 + 103-slot] = new ItemStack(id, count, damage);
+            }
+            return stacks;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            MobArena.warning("Could not restore inventory for " + p.getName());
+            return null;
+        }
+    }
+    
+    public static boolean writeInventoryData(Player p, ItemStack[] stacks)
+    {
+        // Abort if stacks is null
+        if (stacks == null) return false;
+        
+        // Grab the data dir <world>/players/
+        File playerDir = new File(Bukkit.getServer().getWorlds().get(0).getName(), "players");
+        
+        try
+        {
+            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(playerDir, p.getName() + ".dat")));
+            CompoundTag tag = (CompoundTag) in.readTag();
+            in.close();
+
+            ArrayList<Tag> tagList = new ArrayList<Tag>();
+            
+            for (int i = 0; i < stacks.length; i++)
+            {
+                if (stacks[i] == null) continue;
+
+                ByteTag count = new ByteTag("Count", (byte) stacks[i].getAmount());
+                ByteTag slot = new ByteTag("Slot", (byte) (i < 36 ? i : 104-(stacks.length-i)));
+                ShortTag damage = new ShortTag("Damage", stacks[i].getDurability());
+                ShortTag id = new ShortTag("id", (short) stacks[i].getTypeId());
+
+                HashMap<String, Tag> tagMap = new HashMap<String, Tag>();
+                tagMap.put("Count", count);
+                tagMap.put("Slot", slot);
+                tagMap.put("Damage", damage);
+                tagMap.put("id", id);
+
+                tagList.add(new CompoundTag("", tagMap));
+            }
+            
+            ListTag inventory = new ListTag("Inventory", CompoundTag.class, tagList);
+
+            HashMap<String, Tag> tagCompound = new HashMap<String, Tag>(tag.getValue());
+            tagCompound.put("Inventory", inventory);
+            tag = new CompoundTag("Player", tagCompound);
+
+            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(playerDir, p.getName() + ".dat")));
+            out.writeTag(tag);
+            out.close();
+            return true;
         }
         catch (Exception e)
         {
@@ -436,8 +539,6 @@ public class MAUtils
             MobArena.warning("Could not restore inventory for " + p.getName());
             return false;
         }
-        
-        return true;
     }
     
     /* Checks if all inventory and armor slots are empty. */
@@ -464,6 +565,25 @@ public class MAUtils
     {
         if (stacks == null)
             return;
+        
+        if (!p.isOnline())
+        {
+            ItemStack[] items = readInventoryData(p);
+            int currentSlot = 0;
+            for (ItemStack stack : stacks)
+            {
+                while (currentSlot < items.length && items[currentSlot] != null)
+                    currentSlot++;
+                
+                if (currentSlot >= items.length)
+                    break;
+                
+                items[currentSlot] = stack;
+            }
+            
+            writeInventoryData(p, items);
+            return;
+        }
         
         PlayerInventory inv = p.getInventory();
         for (ItemStack stack : stacks)

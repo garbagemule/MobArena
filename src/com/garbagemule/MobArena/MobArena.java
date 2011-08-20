@@ -49,7 +49,7 @@ public class MobArena extends JavaPlugin implements ArenaPlugin
     public static Random random = new Random();
 
     public void onEnable()
-    {        
+    {
         // Description file and data folders
         desc     = getDescription();
         dir      = getDataFolder();
