@@ -63,7 +63,7 @@ public class Arena
 
     protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena;
     protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
-    protected Map<String,Location> spawnpoints, containers;
+    protected Map<String,Location> spawnpoints, spawnpointsBoss, containers;
     protected String logging;
 
     // Wave/reward/entryfee fields
@@ -814,6 +814,7 @@ public class Arena
         lobbyLoc         = MAUtils.getArenaCoord(config, world, configName, "lobby");
         spectatorLoc     = MAUtils.getArenaCoord(config, world, configName, "spectator");
         spawnpoints      = MAUtils.getArenaSpawnpoints(config, world, configName);
+        spawnpointsBoss  = MAUtils.getArenaBossSpawnpoints(config, world, configName);
         containers       = MAUtils.getArenaContainers(config, world, configName);
         
         // NEW WAVES
@@ -852,6 +853,8 @@ public class Arena
         if (lobbyLoc != null)     config.setProperty(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
         if (spectatorLoc != null) config.setProperty(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
+            config.setProperty(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
+        for (Map.Entry<String,Location> entry : spawnpointsBoss.entrySet())
             config.setProperty(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
         
         config.save();
@@ -1035,36 +1038,23 @@ public class Arena
     
     public List<Location> getAllSpawnpoints()
     {
-        return new ArrayList<Location>(spawnpoints.values());
+        ArrayList<Location> result = new ArrayList<Location>(spawnpoints.size() + spawnpointsBoss.size());
+        result.addAll(spawnpoints.values());
+        result.addAll(spawnpointsBoss.values());
+        return result;
     }
     
     public List<Location> getSpawnpoints()
     {
-        List<Location> result = new ArrayList<Location>(spawnpoints.size());
-        
-        for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
-            if (!entry.getKey().matches("^*boss*$"))
-                result.add(entry.getValue());
-        
-        return !result.isEmpty() ? result : new ArrayList<Location>(spawnpoints.values());
+        return new ArrayList<Location>(spawnpoints.values());
     }
     
     public Location getBossSpawnpoint()
     {
-        Location result = null;
+        if (spawnpointsBoss.isEmpty())
+            return getSpawnpoints().get(0);
         
-        for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
-        {
-            if (!entry.getKey().matches("^*boss*$")) continue;
-            
-            result = entry.getValue();
-            break;
-        }
-        
-        if (result != null)
-            return result;
-        
-        return WaveUtils.getValidSpawnpoints(this, arenaPlayers).iterator().next();
+        return new ArrayList<Location>(spawnpointsBoss.values()).get(MobArena.random.nextInt(spawnpointsBoss.size()));
     }
     
     public int getPlayerCount()

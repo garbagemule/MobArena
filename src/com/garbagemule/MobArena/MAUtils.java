@@ -171,7 +171,23 @@ public class MAUtils
             return spawnpoints;
         
         for (String point : config.getKeys(arenaPath))
-            spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+            if (!point.matches("^(.)*boss(.)*$"))
+                spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        
+        return spawnpoints;
+    }
+    
+    public static Map<String,Location> getArenaBossSpawnpoints(Configuration config, World world, String arena)
+    {
+        Map<String,Location> spawnpoints = new HashMap<String,Location>();
+        String arenaPath = "arenas." + arena + ".coords.spawnpoints";
+        
+        if (config.getKeys(arenaPath) == null)
+            return spawnpoints;
+        
+        for (String point : config.getKeys(arenaPath))
+            if (point.matches("^(.)*boss(.)*$"))
+                spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
         
         return spawnpoints;
     }
