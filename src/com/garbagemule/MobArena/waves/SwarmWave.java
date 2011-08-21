@@ -45,7 +45,7 @@ public class SwarmWave extends AbstractWave
     public void spawn(int wave)
     {
         // Announce spawning
-        MAUtils.tellAll(getArena(), Msg.WAVE_SWARM.get(""+wave));
+        MAUtils.tellAll(getArena(), Msg.WAVE_SWARM, ""+wave);
         
         // Get the valid spawnpoints, and initialize counter
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());

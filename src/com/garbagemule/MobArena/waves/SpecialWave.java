@@ -32,7 +32,7 @@ public class SpecialWave extends NormalWave
 	public void spawn(int wave)
 	{
         // Announce spawning
-        MAUtils.tellAll(getArena(), Msg.WAVE_SPECIAL.get(""+wave));
+        MAUtils.tellAll(getArena(), Msg.WAVE_SPECIAL, ""+wave);
         
         // Get the valid spawnpoints, and initialize counter
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());

@@ -70,7 +70,6 @@ public class Arena
     protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
     protected MASpawnThread spawnThread;
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
-    protected Map<String,Integer> distDefault, distSpecial;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
     protected List<ItemStack> entryFee;
@@ -197,7 +196,7 @@ public class Arena
         log.start();
         
         // Announce and notify.
-        MAUtils.tellAll(this, Msg.ARENA_START.get());
+        MAUtils.tellAll(this, Msg.ARENA_START);
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onArenaStart(this);
         
@@ -238,7 +237,7 @@ public class Arena
         restoreContainerContents();
 
         // Announce and clear sets.
-        MAUtils.tellAll(this, Msg.ARENA_END.get(), true);
+        MAUtils.tellAll(this, Msg.ARENA_END, true);
         arenaPlayers.clear();
         notifyPlayers.clear();
         rewardedPlayers.clear();
@@ -351,7 +350,7 @@ public class Arena
         if (running && spawnThread != null)
             spawnThread.updateTargets();
         
-        MAUtils.tellAll(this, Msg.PLAYER_DIED.get(p.getName()));
+        MAUtils.tellAll(this, Msg.PLAYER_DIED, p.getName());
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
             {
@@ -802,9 +801,7 @@ public class Arena
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
         specialModulo    = config.getInt(arenaPath + "special-modulo", 4);
         maxIdleTime      = config.getInt(arenaPath + "max-idle-time", 0) * 20;
-
-        distDefault      = MAUtils.getArenaDistributions(config, configName, "default");
-        distSpecial      = MAUtils.getArenaDistributions(config, configName, "special");
+        
         everyWaveMap     = MAUtils.getArenaRewardMap(config, configName, "every");
         afterWaveMap     = MAUtils.getArenaRewardMap(config, configName, "after");
         entryFee         = MAUtils.getEntryFee(config, configName);

@@ -368,7 +368,7 @@ public class MAListener implements ArenaListener
                 }
                 else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
                 {
-                    MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH.get());
+                    MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH);
                     arena.bossWave.setLowHealthAnnounced(true);
                 }
             }
@@ -548,7 +548,7 @@ public class MAListener implements ArenaListener
             // Set the player's class.
             arena.assignClass(p, className);
             if (!className.equalsIgnoreCase("random"))
-                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
+                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className, arena.classItems.get(className).get(0).getType());
             else
                 MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
                 

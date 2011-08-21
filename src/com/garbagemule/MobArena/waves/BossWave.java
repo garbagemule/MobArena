@@ -70,7 +70,7 @@ public class BossWave extends AbstractWave
     public void spawn(int wave)
     {
         // Announce spawning
-        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS.get(""+wave));
+        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS, ""+wave);
         
         // Spawn the boss and set the arena
         bossCreature = boss.spawn(getArena(), getWorld(), getArena().getBossSpawnpoint());
@@ -106,7 +106,7 @@ public class BossWave extends AbstractWave
                     
                     // Announce it
                     if (abilityAnnounce)
-                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY.get(ability.toString()));
+                        MAUtils.tellAll(getArena(), Msg.WAVE_BOSS_ABILITY, ability.toString());
                     
                     // Activate!
                     ability.run(getArena(), bossCreature);

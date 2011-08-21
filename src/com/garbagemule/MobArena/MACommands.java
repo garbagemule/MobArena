@@ -1114,7 +1114,7 @@ public class MACommands implements CommandExecutor
             }
             if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
             {
-                MAUtils.tellPlayer(sender, "Usage: /ma addchest <container name>");
+                MAUtils.tellPlayer(sender, "Usage: /ma addcontainer <container name>");
                 return true;
             }
             if (!(p.getTargetBlock(null, 50).getState() instanceof ContainerBlock))

@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.waves.*;
 import com.garbagemule.MobArena.waves.Wave.*;
@@ -27,9 +26,21 @@ public class WaveUtils
         //long start = System.nanoTime();
         List<Location> result = new ArrayList<Location>();
 
-        double x1 = Double.NaN, y1 = Double.NaN, z1 = Double.NaN, // Bottom
-               x2 = Double.NaN, y2 = Double.NaN, z2 = Double.NaN; // Top
+        //double x1 = Double.NaN, y1 = Double.NaN, z1 = Double.NaN, // Bottom
+        //       x2 = Double.NaN, y2 = Double.NaN, z2 = Double.NaN; // Top
         
+        for (Location l : arena.getSpawnpoints())
+        {
+            for (Player p : players)
+            {
+                if (l.distanceSquared(p.getLocation()) >= MobArena.MIN_PLAYER_DISTANCE_SQUARED)
+                    continue;
+                
+                result.add(l);
+                break;
+            }
+        }
+        /*
         // Get the region that the players span.
         for (Player p : players)
         {
@@ -65,7 +76,7 @@ public class WaveUtils
         for (Location s : arena.getAllSpawnpoints())
             if (MAUtils.inRegion(s, x1, y1, z1, x2, y2, z2))
                 result.add(s);
-        
+        */
         // If no players are in range, just use all the spawnpoints.
         if (result.isEmpty())
         {

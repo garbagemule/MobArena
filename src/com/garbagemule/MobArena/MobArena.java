@@ -46,6 +46,7 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
     public static final double MIN_PLAYER_DISTANCE = 15.0;
     public static final double MIN_PLAYER_DISTANCE_SQUARED = MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE;
     public static final int ECONOMY_MONEY_ID = -29;
+    public static boolean hasSpout;
     public static Random random = new Random();
 
     public void onEnable()
@@ -67,6 +68,7 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
         // Set up permissions and economy
         setupPermissions();
         setupRegister();
+        setupSpout();
         
         // Set up the ArenaMaster and the announcements
         am = new ArenaMaster(this);
@@ -82,6 +84,9 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
     
     public void onDisable()
     {
+        // Disable Spout features.
+        hasSpout = false;
+        
         // Force all arenas to end.
         if (am == null) return;
         for (Arena arena : am.arenas)
@@ -175,6 +180,15 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
             Method = Methods.getMethod();
             info("Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
         }
+    }
+    
+    private void setupSpout()
+    {
+        if (hasSpout) 
+            return;
+        
+        Plugin spoutPlugin = this.getServer().getPluginManager().getPlugin("Spout");
+        hasSpout = spoutPlugin != null;
     }
     
     public Configuration getConfig()      { return config; }

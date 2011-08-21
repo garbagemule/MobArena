@@ -32,7 +32,7 @@ classes:
         items: iron_sword, grilled_pork:3, apple
         armor: 310,311,312,313
     Archer:
-        items: wood_sword, bow, arrow:64, arrow:64, grilled_pork, bone:2
+        items: wood_sword, bow, arrow:256, grilled_pork, bone
         armor: 298,299,300,301
     Chef:
         items: stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:5
@@ -81,20 +81,26 @@ arenas:
             special-modulo: 4
             max-idle-time: 0
         waves:
-            default:
-                zombies: 10
-                skeletons: 10
-                spiders: 10
-                creepers: 10
-                wolves: 10
-            special:
-                powered-creepers: 10
-                zombie-pigmen: 10
-                angry-wolves: 10
-                slimes: 10
-                humans: 10
-                giants: 0
-                ghasts: 0
+            recurrent:
+                def1:
+                    type: default
+                    priority: 1
+                    frequency: 1
+                    monsters:
+                        zombies: 10
+                        skeletons: 10
+                        spiders: 10
+                        creepers: 10
+                        wolves: 10
+                spec1:
+                    type: special
+                    priority: 2
+                    frequency: 4
+                    monsters:
+                        powered-creepers: 10
+                        zombie-pigmen: 10
+                        angry-wolves: 10
+                        humans: 10
         rewards:
             waves:
                 every:

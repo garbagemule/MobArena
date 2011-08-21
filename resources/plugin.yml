@@ -1,7 +1,7 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.93.5
-softdepend: [Permissions,MultiVerse,XcraftGate,Towny]
+version: 0.94
+softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny]
 commands:
     ma:
         description: Base command for MobArena
@@ -74,6 +74,9 @@ permissions:
             mobarena.setup.spawnpoints: true
             mobarena.setup.addspawn: true
             mobarena.setup.delspawn: true
+            mobarena.setup.containers: true
+            mobarena.setup.addcontainer: true
+            mobarena.setup.delcontainer: true
             mobarena.setup.checkdata: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
@@ -106,6 +109,12 @@ permissions:
     mobarena.setup.addspawn:
         default: false
     mobarena.setup.delspawn:
+        default: false
+    mobarena.setup.containers:
+        default: false
+    mobarena.setup.addcontainer:
+        default: false
+    mobarena.setup.delcontainer:
         default: false
     mobarena.setup.checkdata:
         default: false

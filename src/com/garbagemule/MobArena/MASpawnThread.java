@@ -204,7 +204,7 @@ public class MASpawnThread implements Runnable
             }
             else
             {
-                MAUtils.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
+                MAUtils.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount(), reward.getType());
             }
         }
     }
