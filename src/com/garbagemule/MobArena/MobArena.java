@@ -21,14 +21,14 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
-import com.garbagemule.ArenaPlugin.ArenaPlugin;
-import com.garbagemule.ArenaPlugin.Master;
+//import com.garbagemule.ArenaPlugin.ArenaPlugin;
+//import com.garbagemule.ArenaPlugin.Master;
 
 /**
  * MobArena
  * @author garbagemule
  */
-public class MobArena extends JavaPlugin implements ArenaPlugin
+public class MobArena extends JavaPlugin// implements ArenaPlugin
 {
     private Configuration config;
     private ArenaMaster am;
@@ -180,11 +180,6 @@ public class MobArena extends JavaPlugin implements ArenaPlugin
     public Configuration getConfig()      { return config; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
-    
-    public Master getMaster()
-    {
-        return am;
-    }
     
     private String getHeader()
     {

@@ -396,27 +396,23 @@ public class MAListener implements ArenaListener
             
             // If the target is a player, cancel.
             event.setCancelled(true);
-            return;
         }
         
-        if (arena.monsters.contains(event.getEntity()))
+        else if (arena.monsters.contains(event.getEntity()))
         {
             if (event.getReason() == TargetReason.FORGOT_TARGET)
-            {
                 event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), arena));
-                return;
-            }
                 
-            if (event.getReason() == TargetReason.TARGET_DIED)
-            {
+            else if (event.getReason() == TargetReason.TARGET_DIED)
                 event.setTarget(MAUtils.getClosestPlayer(event.getEntity(), arena));
-                return;
-            }
             
-            if (event.getReason() == TargetReason.CLOSEST_PLAYER)
+            else if (event.getReason() == TargetReason.TARGET_ATTACKED_ENTITY)
+                if (arena.pets.contains(event.getTarget()))
+                    event.setCancelled(true);
+            
+            else if (event.getReason() == TargetReason.CLOSEST_PLAYER)
                 if (!arena.arenaPlayers.contains(event.getTarget()))
                     event.setCancelled(true);
-            return;
         }
     }
 

@@ -15,9 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.config.Configuration;
 
-import com.garbagemule.ArenaPlugin.Master;
+//import com.garbagemule.ArenaPlugin.Master;
 
-public class ArenaMaster implements Master
+public class ArenaMaster //implements Master
 {
     private MobArena plugin;
     private Configuration config;
@@ -392,9 +392,4 @@ public class ArenaMaster implements Master
     public void updateClasses()  { update(false, true,  false); }
     public void updateArenas()   { update(false, false, true);  }
     public void updateAll()      { update(true,  true,  true);  }
-
-    public Map<Player, com.garbagemule.ArenaPlugin.Arena> getArenaMap()
-    {
-        return null;//arenaMap;
-    }
 }

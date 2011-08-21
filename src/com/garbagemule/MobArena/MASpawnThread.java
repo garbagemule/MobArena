@@ -86,8 +86,13 @@ public class MASpawnThread implements Runnable
     {
         List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
         for (Entity e : tmp)
+        {
             if (e.isDead() || !arena.inRegion(e.getLocation()))
+            {
                 arena.monsters.remove(e);
+                e.remove();
+            }
+        }
     }
     
     private void grantRewards(int wave)
