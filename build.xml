@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="MobArena" default="dist" basedir=".">
 	<property name="pluginname" value="MobArena"/>
-	<property name="server" location="S:\Minecraft Server\plugins"/>
+	<property name="server" location="D:\General\Java\Minecraft\Minecraft Server\plugins"/>
 
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
