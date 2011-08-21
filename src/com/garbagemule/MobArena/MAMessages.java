@@ -6,164 +6,192 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.bukkit.Material;
 
 public class MAMessages
 {
-    protected static Map<Msg,String> msgMap;
-    private static Map<Msg,String> defaults = new HashMap<Msg,String>();
-    protected static enum Msg
+    public static enum Msg
     {
-        ARENA_START,
-        ARENA_END,
-        ARENA_DOES_NOT_EXIST,
-        JOIN_PLAYER_JOINED,
-        JOIN_NOT_ENABLED,
-        JOIN_IN_OTHER_ARENA,
-        JOIN_ARENA_NOT_ENABLED,
-        JOIN_ARENA_NOT_SETUP,
-        JOIN_ARENA_PERMISSION,
-        JOIN_FEE_REQUIRED,
-        JOIN_FEE_PAID,
-        JOIN_ARENA_IS_RUNNING,
-        JOIN_ALREADY_PLAYING,
-        JOIN_ARG_NEEDED,
-        JOIN_TOO_FAR,
-        JOIN_EMPTY_INV,
-        JOIN_PLAYER_LIMIT_REACHED,
-        JOIN_STORE_INV_FAIL,
-        LEAVE_PLAYER_LEFT,
-        LEAVE_NOT_PLAYING,
-        PLAYER_DIED,
-        SPEC_PLAYER_SPECTATE,
-        SPEC_NOT_RUNNING,
-        SPEC_ARG_NEEDED,
-        SPEC_EMPTY_INV,
-        SPEC_ALREADY_PLAYING,
-        NOT_READY_PLAYERS,
-        FORCE_START_STARTED,
-        FORCE_START_RUNNING,
-        FORCE_START_NOT_READY,
-        FORCE_END_ENDED,
-        FORCE_END_EMPTY,
-        FORCE_END_IDLE,
-        REWARDS_GIVE,
-        LOBBY_CLASS_PICKED,
-        LOBBY_CLASS_RANDOM,
-        LOBBY_CLASS_PERMISSION,
-        LOBBY_NOT_ENOUGH_PLAYERS,
-        LOBBY_PLAYER_READY,
-        LOBBY_DROP_ITEM,
-        LOBBY_PICK_CLASS,
-        LOBBY_RIGHT_CLICK,
-        WARP_TO_ARENA,
-        WARP_FROM_ARENA,
-        WAVE_DEFAULT,
-        WAVE_SPECIAL,
-        WAVE_REWARD,
-        MISC_LIST_ARENAS,
-        MISC_LIST_PLAYERS,
-        MISC_COMMAND_NOT_ALLOWED,
-        MISC_NO_ACCESS,
-        MISC_NONE
+        ARENA_START("Let the slaughter begin!", "Arena started!", Material.REDSTONE_TORCH_ON),
+        ARENA_END("Arena finished.", "Arena finished.", Material.REDSTONE_TORCH_OFF),
+        ARENA_DOES_NOT_EXIST("That arena does not exist. Type /ma arenas for a list.", "Can't find arena."),
+        JOIN_NOT_ENABLED("MobArena is not enabled.", "MobArena disabled.", Material.REDSTONE_TORCH_OFF),
+        JOIN_IN_OTHER_ARENA("You are already in an arena! Leave that one first.", "In another arena."),
+        JOIN_ARENA_NOT_ENABLED("This arena is not enabled.", "Arena disabled.", Material.REDSTONE_TORCH_OFF),
+        JOIN_ARENA_NOT_SETUP("This arena has not been set up yet.", "Arena not set up.", Material.REDSTONE_TORCH_OFF),
+        JOIN_ARENA_EDIT_MODE("This arena is in edit mode.", "Arena in edit mode.", Material.IRON_SPADE),
+        JOIN_ARENA_PERMISSION("You don't have permission to join this arena.", "No permission!", Material.FENCE),
+        JOIN_FEE_REQUIRED("Insufficient funds. Price: %", "Price: %", Material.DIAMOND),
+        JOIN_FEE_PAID("Price to join was: %", "Paid: %", Material.DIAMOND),
+        JOIN_ARENA_IS_RUNNING("This arena is in already progress.", "Already running!", Material.GOLD_RECORD),
+        JOIN_ALREADY_PLAYING("You are already playing!", "Already playing!", Material.GOLD_RECORD),
+        JOIN_ARG_NEEDED("You must specify an arena. Type /ma arenas for a list."),
+        JOIN_TOO_FAR("You are too far away from the arena to join/spectate.", "Too far from arena.", Material.COMPASS),
+        JOIN_EMPTY_INV("You must empty your inventory to join the arena.", "Empty your inventory.", Material.CHEST),
+        JOIN_PLAYER_LIMIT_REACHED("The player limit of this arena has been reached.", "No spots left.", Material.MILK_BUCKET),
+        JOIN_STORE_INV_FAIL("Failed to store inventory. Try again."),
+        JOIN_EXISTING_INV_RESTORED("Your old inventory items have been restored."),
+        JOIN_PLAYER_JOINED("You joined the arena. Have fun!", "Joined arena.", Material.IRON_SWORD),
+        LEAVE_NOT_PLAYING("You are not in the arena.", "Not in arena."),
+        LEAVE_PLAYER_LEFT("You left the arena. Thanks for playing!", "Left arena.", Material.WOOD_DOOR),
+        PLAYER_DIED("% died!", "% died!", Material.BONE),
+        SPEC_PLAYER_SPECTATE("Enjoy the show!", "Enjoy the show!"),
+        SPEC_NOT_RUNNING("This arena isn't running.", "Arena not running.", Material.REDSTONE_TORCH_OFF),
+        SPEC_ARG_NEEDED("You must specify an arena. Type /ma arenas for a list.", "Arena name required."),
+        SPEC_EMPTY_INV("Empty your inventory first!", "Empty your inventory.", Material.CHEST),
+        SPEC_ALREADY_PLAYING("Can't spectate when in the arena!", "Already playing!"),
+        NOT_READY_PLAYERS("Not ready: %"),
+        FORCE_START_RUNNING("Arena has already started."),
+        FORCE_START_NOT_READY("Can't force start, no players are ready."),
+        FORCE_START_STARTED("Forced arena start."),
+        FORCE_END_EMPTY("No one is in the arena."),
+        FORCE_END_ENDED("Forced arena end."),
+        FORCE_END_IDLE("You weren't quick enough!"),
+        REWARDS_GIVE("Here are all of your rewards!"),
+        LOBBY_DROP_ITEM("No sharing allowed at this time!", "Can't drop items here."),
+        LOBBY_PLAYER_READY("You have been flagged as ready!", "Flagged as ready!"),
+        LOBBY_PICK_CLASS("You must first pick a class!", "Pick a class first!"),
+        LOBBY_NOT_ENOUGH_PLAYERS("Not enough players to start. Need at least % players.", "Need more players."),
+        LOBBY_RIGHT_CLICK("Punch the sign. Don't right-click.", "Punch the sign."),
+        LOBBY_CLASS_PICKED("You have chosen % as your class!", "%"),
+        LOBBY_CLASS_RANDOM("You will get a random class on arena start."),
+        LOBBY_CLASS_PERMISSION("You don't have permission to use this class!", "No permission!", Material.FENCE),
+        WARP_TO_ARENA("Can't warp to the arena during battle!"),
+        WARP_FROM_ARENA("Warping not allowed in the arena!"),
+        WAVE_DEFAULT("Wave #%!", "Wave #%!", Material.YELLOW_FLOWER),
+        WAVE_SPECIAL("Wave #%! [SPECIAL]", "Wave #%! [SPECIAL]", Material.RED_ROSE),
+        WAVE_SWARM("Wave #%! [SWARM]", "Wave #%! [SWARM]", Material.LONG_GRASS),
+        WAVE_BOSS("Wave #%! [BOSS]", "Wave #%! [BOSS]", Material.FIRE),
+        WAVE_BOSS_ABILITY("Boss used ability: %!", "Boss: %", Material.FIRE),
+        WAVE_BOSS_LOW_HEALTH("Boss is almost dead!", "Boss almost dead!", Material.FIRE),
+        WAVE_REWARD("You just earned a reward: %", "Reward: %"),
+        MISC_LIST_PLAYERS("Live players: %"),
+        MISC_LIST_ARENAS("Available arenas: %"),
+        MISC_COMMAND_NOT_ALLOWED("You can't use that command in the arena!"),
+        MISC_NO_ACCESS("You don't have access to this command."),
+        MISC_NONE("<none>");
+        
+        private String msg, spoutMsg;
+        private Material logo;
+        
+        private Msg(String msg)
+        {
+            this(msg, null);
+        }
+        
+        private Msg(String msg, String spoutMsg)
+        {
+            this(msg, spoutMsg, null);
+        }
+        
+        private Msg(String msg, String spoutMsg, Material logo)
+        {
+            this.msg      = msg;
+            this.spoutMsg = spoutMsg;
+            this.logo     = logo;
+        }
+        
+        public String get()
+        {
+            return msg;
+        }
+        
+        public String get(String s)
+        {
+            return (s != null) ? msg.replace("%", s) : msg;
+        }
+        
+        public String getSpout(String s)
+        {
+            if (spoutMsg == null)
+                return get(s);
+            
+            return (s != null) ? spoutMsg.replace("%", s) : spoutMsg;
+        }
+        
+        public void set(String msg)
+        {
+            this.msg = msg;
+        }
+        
+        public void setSpout(String spoutMsg)
+        {
+            this.spoutMsg = spoutMsg;
+            
+            if (spoutMsg == null)
+                logo = null;
+        }
+        
+        public boolean hasSpoutMsg()
+        {
+            return spoutMsg != null;
+        }
+        
+        public Material getLogo()
+        {
+            return logo == null ? Material.SLIME_BALL : logo;
+        }
+        
+        public static String get(Msg m)
+        {
+            return m.msg;
+        }
+        
+        public static String get(Msg m, String s)
+        {
+            return m.msg.replace("%", s);   
+        }
+        
+        public static void set(Msg m, String msg)
+        {
+            m.msg = msg;
+        }
+        
+        public String toString()
+        {
+            return msg;
+        }
     }
-    
-    // Populate the defaults map.
-    static
-    {
-        defaults.put(Msg.ARENA_START, "Let the slaughter begin!");
-        defaults.put(Msg.ARENA_END, "Arena finished.");
-        defaults.put(Msg.ARENA_DOES_NOT_EXIST, "That arena does not exist. Type /ma arenas for a list.");
-        defaults.put(Msg.JOIN_NOT_ENABLED, "MobArena is not enabled.");
-        defaults.put(Msg.JOIN_IN_OTHER_ARENA, "You are already in an arena! Leave that one first.");
-        defaults.put(Msg.JOIN_ARENA_NOT_ENABLED, "This arena is not enabled.");
-        defaults.put(Msg.JOIN_ARENA_NOT_SETUP, "This arena has not been set up yet.");
-        defaults.put(Msg.JOIN_ARENA_PERMISSION, "You don't have permission to join this arena.");
-        defaults.put(Msg.JOIN_FEE_REQUIRED, "Insufficient funds. Price: %");
-        defaults.put(Msg.JOIN_FEE_PAID, "Price to join was: %");
-        defaults.put(Msg.JOIN_ARENA_IS_RUNNING, "This arena is in already progress.");
-        defaults.put(Msg.JOIN_ALREADY_PLAYING, "You are already playing!");
-        defaults.put(Msg.JOIN_ARG_NEEDED, "You must specify an arena. Type /ma arenas for a list.");
-        defaults.put(Msg.JOIN_TOO_FAR, "You are too far away from the arena to join/spectate.");
-        defaults.put(Msg.JOIN_EMPTY_INV, "You must empty your inventory to join the arena.");
-        defaults.put(Msg.JOIN_PLAYER_LIMIT_REACHED, "The player limit of this arena has been reached.");
-        defaults.put(Msg.JOIN_STORE_INV_FAIL, "Failed to store inventory. Try again.");
-        defaults.put(Msg.JOIN_PLAYER_JOINED, "You joined the arena. Have fun!");
-        defaults.put(Msg.LEAVE_NOT_PLAYING, "You are not in the arena.");
-        defaults.put(Msg.LEAVE_PLAYER_LEFT, "You left the arena. Thanks for playing!");
-        defaults.put(Msg.PLAYER_DIED, "% died!");
-        defaults.put(Msg.SPEC_PLAYER_SPECTATE, "Enjoy the show!");
-        defaults.put(Msg.SPEC_NOT_RUNNING, "This arena isn't running.");
-        defaults.put(Msg.SPEC_ARG_NEEDED, "You must specify an arena. Type /ma arenas for a list.");
-        defaults.put(Msg.SPEC_EMPTY_INV, "Empty your inventory first!");
-        defaults.put(Msg.SPEC_ALREADY_PLAYING, "Can't spectate when in the arena!");
-        defaults.put(Msg.NOT_READY_PLAYERS, "Not ready: %");
-        defaults.put(Msg.FORCE_START_RUNNING, "Arena has already started.");
-        defaults.put(Msg.FORCE_START_NOT_READY, "Can't force start, no players are ready.");
-        defaults.put(Msg.FORCE_START_STARTED, "Forced arena start.");
-        defaults.put(Msg.FORCE_END_EMPTY, "No one is in the arena.");
-        defaults.put(Msg.FORCE_END_ENDED, "Forced arena end.");
-        defaults.put(Msg.FORCE_END_IDLE, "You weren't quick enough!");
-        defaults.put(Msg.REWARDS_GIVE, "Here are all of your rewards!");
-        defaults.put(Msg.LOBBY_DROP_ITEM, "No sharing allowed at this time!");
-        defaults.put(Msg.LOBBY_PLAYER_READY, "You have been flagged as ready!");
-        defaults.put(Msg.LOBBY_PICK_CLASS, "You must first pick a class!");
-        defaults.put(Msg.LOBBY_NOT_ENOUGH_PLAYERS, "Not enough players to start. Need at least % players.");
-        defaults.put(Msg.LOBBY_RIGHT_CLICK, "Punch the sign. Don't right-click.");
-        defaults.put(Msg.LOBBY_CLASS_PICKED, "You have chosen % as your class!");
-        defaults.put(Msg.LOBBY_CLASS_RANDOM, "You will get a random class on arena start.");
-        defaults.put(Msg.LOBBY_CLASS_PERMISSION, "You don't have permission to use this class!");
-        defaults.put(Msg.WARP_TO_ARENA, "Can't warp to the arena during battle!");
-        defaults.put(Msg.WARP_FROM_ARENA, "Warping not allowed in the arena!");
-        defaults.put(Msg.WAVE_DEFAULT, "Get ready for wave #%!");
-        defaults.put(Msg.WAVE_SPECIAL, "Get ready for wave #%! [SPECIAL]");
-        defaults.put(Msg.WAVE_REWARD, "You just earned a reward: %");
-        defaults.put(Msg.MISC_LIST_PLAYERS, "Live players: %");
-        defaults.put(Msg.MISC_LIST_ARENAS, "Available arenas: %");
-        defaults.put(Msg.MISC_COMMAND_NOT_ALLOWED, "You can't use that command in the arena!");
-        defaults.put(Msg.MISC_NO_ACCESS, "You don't have access to this command.");
-        defaults.put(Msg.MISC_NONE, "<none>");
-    }  
     
     /**
      * Initializes the msgMap by reading from the announcements-file.
      */
-    public static void init(MobArena plugin, boolean update)
-    {
-        // Use defaults in case of any errors.
-        msgMap = defaults;
-        
+    public static void init(MobArena plugin)
+    {        
         // Grab the announcements-file.
-        File msgFile;
-        try
+        File msgFile = new File(MobArena.dir, "announcements.properties");
+        
+        // If the file doesn't exist, create it and use defaults.
+        if (!msgFile.exists())
         {
-            msgFile = new File(plugin.getDataFolder(), "announcements.properties");
-            
-            // If it doesn't exist, create it.
-            if (!msgFile.exists())
+            try
             {
-                System.out.println("[MobArena] Announcements-file not found. Creating one...");
                 msgFile.createNewFile();
-                
                 BufferedWriter bw = new BufferedWriter(new FileWriter(msgFile));
+                
                 for (Msg m : Msg.values())
                 {
-                    bw.write(m.toString() + "=" + defaults.get(m));
+                    if (m.hasSpoutMsg())
+                        bw.write(m.name() + "=" + m.msg + "|" + m.spoutMsg);
+                    else
+                        bw.write(m.name() + "=" + m.msg);
+                    
                     bw.newLine();
                 }
-                bw.close();
                 
+                bw.close();
                 return;
             }
-        }
-        catch (Exception e)
-        {
-            System.out.println("[MobArena] ERROR! Couldn't initialize announcements-file. Using defaults.");
+            catch (Exception e)
+            {
+                MobArena.warning("Couldn't initialize announcements-file. Using defaults.");
+            }
+            
             return;
         }
-
-        // If the file was found, populate the msgMap.
+        
+        // Otherwise, read the file's contents.
         try
         {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(msgFile), "UTF-8"));
@@ -181,36 +209,9 @@ public class MAMessages
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Problem with announcements-file. Using defaults.");
+            MobArena.warning("Problem with announcements-file. Using defaults.");
             return;
         }
-    }
-    
-    public static void init(MobArena plugin)
-    {
-        init(plugin, false);
-    }
-    
-    /**
-     * Grabs the announcement from the msgMap, and in case of
-     * s not being null, replaces the % with s.
-     */
-    public static String get(Msg msg, String s)
-    {
-        // If p is null, just return the announcement as is.
-        if (s == null)
-            return msgMap.get(msg);
-
-        // Otherwise, replace the % with the input string.
-        return msgMap.get(msg).replace("%", s);
-    }
-    
-    /**
-     * Grabs the announcement from the msgMap.
-     */
-    public static String get(Msg msg)
-    {
-        return get(msg, null);
     }
     
     /**
@@ -219,27 +220,34 @@ public class MAMessages
      */
     private static void process(String s)
     {
+        // If the line ends with =, just add a space
+        if (s.endsWith("=") || s.endsWith("|")) s += " ";
+        
         // Split the string by the equals-sign.
         String[] split = s.split("=");
         if (split.length != 2)
         {
-            System.out.println("[MobArena] ERROR! Couldn't parse \"" + s + "\". Check announcements-file.");
+            MobArena.warning("Couldn't parse \"" + s + "\". Check announcements-file.");
             return;
         }
         
+        // Split the value by the pipe-sign.
+        String[] vals = split[1].split("\\|");
+        
         // For simplicity...
         String key = split[0];
-        String val = split[1];
-        Msg msg;
+        String val = vals.length == 2 ? vals[0] : split[1];
+        String spoutVal = vals.length == 2 ? vals[1] : null;
         
         try
         {
-            msg = Msg.valueOf(key);
-            msgMap.put(msg, val);
+            Msg msg = Msg.valueOf(key);
+            msg.set(val);
+            msg.setSpout(spoutVal);
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! " + key + " is not a valid key. Check announcements-file.");
+            MobArena.warning(key + " is not a valid key. Check announcements-file.");
             return;
         }
     }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MobArena" default="dist" basedir=".">
+	<property name="pluginname" value="MobArena"/>
+	<property name="server" location="D:\General\Java\Minecraft\Minecraft Server\plugins"/>
+
+	<property name="src" location="src"/>
+	<property name="bin" location="bin"/>
+	<property name="lib" location="../lib"/>
+	<property name="res" location="resources"/>
+    <path id="classpath">
+        <fileset dir="${lib}" includes="**/*.jar"/>
+    	<fileset dir="${res}" includes="**/*.*"/>
+    </path>
+	
+	<target name="init">
+		<mkdir dir="${bin}"/>
+	</target>
+	
+	<!-- Compile the source and put in the bin-folder -->
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${bin}" includeantruntime="false" classpathref="classpath"/>
+	</target>
+	
+	<!-- Build a .jar and copy to server's plugins-folder -->
+	<target name="dist" depends="compile">
+		<delete file="${pluginname}.jar"/>
+		<jar jarfile="${pluginname}.jar">
+			<!-- Include the class-files (bin) and the resources (res) -->
+			<fileset dir="${bin}"/>
+			<fileset dir="${res}"/>
+			<!-- Set up the classpath so MobArena can find JDOM if needed -->
+			<manifest>
+				<attribute name="Main-Class" value="com.garbagemule.MobArena.MobArena"/>
+				<attribute name="Class-Path" value="plugins/MobArena/lib/jdom.jar MobArena/lib/jdom.jar"/>
+			</manifest>
+		</jar>
+		<!-- Copy to server and clean up -->
+		<copy file="${pluginname}.jar" tofile="${server}/${pluginname}.jar"/>
+		<delete dir="${bin}"/>
+	</target>
+</project>

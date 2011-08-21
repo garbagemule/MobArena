@@ -1,14 +1,17 @@
 package com.garbagemule.register.payment.methods;
 
 import com.garbagemule.register.payment.Method;
-
 import cosine.boseconomy.BOSEconomy;
 import org.bukkit.plugin.Plugin;
 
 /**
+ * BOSEconomy 7 Implementation of Method
+ *
  * @author Acrobot
+ * @author Nijikokun <nijikokun@shortmail.com> (@nijikokun)
+ * @copyright (c) 2011
+ * @license AOL license <http://aol.nexua.org>
  */
-
 public class BOSE7 implements Method {
     private BOSEconomy BOSEconomy;
 

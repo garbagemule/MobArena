@@ -1,4 +1,4 @@
-package com.garbagemule.MobArena;
+package com.garbagemule.MobArena.util;
 
 import java.io.Serializable;
 import org.bukkit.Location;

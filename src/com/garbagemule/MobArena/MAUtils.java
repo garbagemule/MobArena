@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.minecraft.server.WorldServer;
 
@@ -33,8 +36,19 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.config.Configuration;
+import org.getspout.spoutapi.SpoutManager;
+import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.util.EntityPosition;
+import com.garbagemule.MobArena.util.InventoryItem;
+import com.garbagemule.MobArena.util.jnbt.ByteTag;
+import com.garbagemule.MobArena.util.jnbt.CompoundTag;
+import com.garbagemule.MobArena.util.jnbt.ListTag;
+import com.garbagemule.MobArena.util.jnbt.NBTInputStream;
+import com.garbagemule.MobArena.util.jnbt.NBTOutputStream;
+import com.garbagemule.MobArena.util.jnbt.ShortTag;
+import com.garbagemule.MobArena.util.jnbt.Tag;
 
 public class MAUtils
 {         
@@ -130,6 +144,20 @@ public class MAUtils
             INITIALIZATION METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
+    
+    public static Map<String,Location> getArenaContainers(Configuration config, World world, String arena)
+    {
+        Map<String,Location> containers = new HashMap<String,Location>();
+        String arenaPath = "arenas." + arena + ".coords.containers";
+        
+        if (config.getKeys(arenaPath) == null)
+            return containers;
+        
+        for (String point : config.getKeys(arenaPath))
+            containers.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        
+        return containers;
+    }
     
     /**
      * Grab all the spawnpoints for a specific arena.
@@ -250,55 +278,6 @@ public class MAUtils
         return result;
     }
     
-    /**
-     * Grabs the distribution coefficients from the config-file. If
-     * no coefficients are found, defaults (10) are added.
-     */
-    public static Map<String,Integer> getArenaDistributions(Configuration config, String arena, String wave)
-    {
-        String arenaPath = "arenas." + arena + ".waves." + wave;
-        Map<String,Integer> result = new HashMap<String,Integer>();
-        List<String> dists = (config.getKeys(arenaPath) != null) ? config.getKeys(arenaPath) : new LinkedList<String>();
-        
-        String[] monsters = (wave.equals("default")) ? new String[]{"zombies", "skeletons", "spiders", "creepers", "wolves"}
-                                                     : new String[]{"powered-creepers", "zombie-pigmen", "slimes", "humans", "angry-wolves", "giants", "ghasts"};
-        boolean update = false;
-        for (String monster : monsters)
-        {
-            if (dists.contains(monster))
-                continue;
-            
-            //if (config.getInt(arenaPath + "." + m, -1) == -1)
-            config.setProperty(arenaPath + "." + monster, (monster.equals("giants") || monster.equals("ghasts")) ? 0 : 10);
-            update = true;
-        }
-        
-        if (update)
-        {
-            config.save();
-            dists = config.getKeys(arenaPath);
-        }
-        
-        for (String monster : dists)
-        {
-            int value = config.getInt(arenaPath + "." + monster, -1);
-            
-            // If no distribution value was found, set one.
-            if (value == -1)
-            {
-                value = 10;
-                if (monster.equals("giant") || monster.equals("ghast"))
-                    value = 0;
-                
-                config.setProperty(arenaPath + "." + monster, value);
-            }
-            config.save();  
-            
-            result.put(monster, value);
-        }
-        return result;
-    }
-    
     public static List<String> getAllowedCommands(Configuration config)
     {
         String commands = config.getString("global-settings.allowed-commands");
@@ -319,8 +298,7 @@ public class MAUtils
             INVENTORY AND REWARD METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
-
-    /* Clears the players inventory and armor slots. */
+    
     public static PlayerInventory clearInventory(Player p)
     {
         PlayerInventory inv = p.getInventory();
@@ -334,26 +312,28 @@ public class MAUtils
     
     public static boolean storeInventory(Player p)
     {
-        // Grab the contents.
-        ItemStack[] armor = p.getInventory().getArmorContents();
-        ItemStack[] items = p.getInventory().getContents();
-        
+        // Set up the files and paths
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         new File(invPath).mkdir();
         File backupFile = new File(invPath + sep + p.getName() + ".inv");
         
+        // If a backup file already exists, restore the inventory first
+        if (backupFile.exists() && !restoreInventory(p))
+            return false;
+        
+        // Grab the inventory contents.
+        ItemStack[] items = p.getInventory().getContents();
+        ItemStack[] armor = p.getInventory().getArmorContents();
+        
         try
         {
-            if (backupFile.exists() && !restoreInventory(p))
-                return false;
-
             backupFile.createNewFile();
             
-            MAInventoryItem[] inv = new MAInventoryItem[armor.length + items.length];
-            for (int i = 0; i < armor.length; i++)
-                inv[i] = stackToItem(armor[i]);
+            InventoryItem[] inv = new InventoryItem[items.length + armor.length];
             for (int i = 0; i < items.length; i++)
-                inv[armor.length + i] = stackToItem(items[i]);
+                inv[i] = InventoryItem.parseItemStack(items[i]);
+            for (int i = 0; i < armor.length; i++)
+                inv[i + items.length] = InventoryItem.parseItemStack(armor[i]);
             
             FileOutputStream   fos = new FileOutputStream(backupFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -363,7 +343,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Could not create backup file for " + p.getName() + ".");
+            MobArena.warning("Could not create backup file for " + p.getName() + ".");
             return false;
         }
         
@@ -373,6 +353,33 @@ public class MAUtils
     
     public static boolean restoreInventory(Player p)
     {
+        // Grab the items from the MobArena .inv file
+        ItemStack[] stacks = getInventoryFile(p);
+        
+        // If the player isn't online, hack the playerName.dat file
+        if (!p.isOnline())
+            return writeInventoryData(p, stacks);
+        
+        // Otherwise, restore the inventory directly
+        ItemStack[] items = new ItemStack[stacks.length-4];
+        ItemStack[] armor = new ItemStack[4];
+        
+        for (int i = 0; i < stacks.length - 4; i++)
+            items[i] = stacks[i];
+        for (int i = 0; i < 4; i++)
+            armor[i] = stacks[stacks.length - 4 + i];
+        
+        // Restore the inventory.
+        PlayerInventory inv = p.getInventory();
+        inv.setArmorContents(armor);
+        for (int i = 0; i < items.length; i++)
+            inv.setItem(i, items[i]);
+        
+        return true;
+    }
+    
+    public static ItemStack[] getInventoryFile(Player p)
+    {
         String invPath = "plugins" + sep + "MobArena" + sep + "inventories";
         File backupFile = new File(invPath + sep + p.getName() + ".inv");
         
@@ -380,55 +387,111 @@ public class MAUtils
         {
             // If the backup-file couldn't be found, return.
             if (!backupFile.exists())
-                return false;
+                return null;
             
             // Grab the MAInventoryItem array from the backup-file.
             FileInputStream   fis      = new FileInputStream(backupFile);
             ObjectInputStream ois      = new ObjectInputStream(fis);
-            MAInventoryItem[] fromFile = (MAInventoryItem[]) ois.readObject();
+            InventoryItem[] fromFile   = (InventoryItem[]) ois.readObject();
             ois.close();
-            
-            // Split that shit.
-            ItemStack[] armor = new ItemStack[4];
-            ItemStack[] items = new ItemStack[fromFile.length-4];
-            
-            for (int i = 0; i < 4; i++)
-                armor[i] = itemToStack(fromFile[i]);
-            for (int i = 4; i < fromFile.length; i++)
-                items[i - 4] = itemToStack(fromFile[i]);
-            
-            // Restore the inventory.
-            PlayerInventory inv = p.getInventory();
-            inv.setArmorContents(armor);
-            for (ItemStack stack : items)
-                if (stack != null)
-                    inv.addItem(stack);
-            
-            // Remove the backup-file.
+
+            // Delete the file
             backupFile.delete();
+            
+            return InventoryItem.toItemStacks(fromFile);
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Could not restore inventory for " + p.getName());
+            MobArena.warning("Could not restore inventory for " + p.getName());
+            return null;
+        }
+    }
+    
+    public static ItemStack[] readInventoryData(Player p)
+    {
+        // Grab the data dir <world>/players/
+        File playerDir = new File(Bukkit.getServer().getWorlds().get(0).getName(), "players");
+        
+        try
+        {
+            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(playerDir, p.getName() + ".dat")));
+            CompoundTag tag = (CompoundTag) in.readTag();
+            in.close();
+
+            ListTag inventory = (ListTag) tag.getValue().get("Inventory");
+            
+            ItemStack[] stacks = new ItemStack[40];
+            for (int i = 0; i < inventory.getValue().size(); i++)
+            {
+                CompoundTag item = (CompoundTag) inventory.getValue().get(i);
+                byte count = ((ByteTag)     item.getValue().get("Count")).getValue();
+                byte slot = ((ByteTag)      item.getValue().get("Slot")).getValue();
+                short damage = ((ShortTag)  item.getValue().get("Damage")).getValue();
+                short id = ((ShortTag)      item.getValue().get("id")).getValue();
+                stacks[slot < 36 ? slot : 36 + 103-slot] = new ItemStack(id, count, damage);
+            }
+            return stacks;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            MobArena.warning("Could not restore inventory for " + p.getName());
+            return null;
+        }
+    }
+    
+    public static boolean writeInventoryData(Player p, ItemStack[] stacks)
+    {
+        // Abort if stacks is null
+        if (stacks == null) return false;
+        
+        // Grab the data dir <world>/players/
+        File playerDir = new File(Bukkit.getServer().getWorlds().get(0).getName(), "players");
+        
+        try
+        {
+            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(playerDir, p.getName() + ".dat")));
+            CompoundTag tag = (CompoundTag) in.readTag();
+            in.close();
+
+            ArrayList<Tag> tagList = new ArrayList<Tag>();
+            
+            for (int i = 0; i < stacks.length; i++)
+            {
+                if (stacks[i] == null) continue;
+
+                ByteTag count = new ByteTag("Count", (byte) stacks[i].getAmount());
+                ByteTag slot = new ByteTag("Slot", (byte) (i < 36 ? i : 104-(stacks.length-i)));
+                ShortTag damage = new ShortTag("Damage", stacks[i].getDurability());
+                ShortTag id = new ShortTag("id", (short) stacks[i].getTypeId());
+
+                HashMap<String, Tag> tagMap = new HashMap<String, Tag>();
+                tagMap.put("Count", count);
+                tagMap.put("Slot", slot);
+                tagMap.put("Damage", damage);
+                tagMap.put("id", id);
+
+                tagList.add(new CompoundTag("", tagMap));
+            }
+            
+            ListTag inventory = new ListTag("Inventory", CompoundTag.class, tagList);
+
+            HashMap<String, Tag> tagCompound = new HashMap<String, Tag>(tag.getValue());
+            tagCompound.put("Inventory", inventory);
+            tag = new CompoundTag("Player", tagCompound);
+
+            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(playerDir, p.getName() + ".dat")));
+            out.writeTag(tag);
+            out.close();
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            MobArena.warning("Could not restore inventory for " + p.getName());
             return false;
         }
-        
-        return true;
-    }
-    
-    private static MAInventoryItem stackToItem(ItemStack stack)
-    {
-        if (stack == null)
-            return new MAInventoryItem(-1, -1, (short)0);
-        return new MAInventoryItem(stack.getTypeId(), stack.getAmount(), stack.getDurability());
-    }
-    
-    private static ItemStack itemToStack(MAInventoryItem item)
-    {
-        if (item.getTypeId() == -1)
-            return null;
-        return new ItemStack(item.getTypeId(), item.getAmount(), item.getDurability());
     }
     
     /* Checks if all inventory and armor slots are empty. */
@@ -456,6 +519,25 @@ public class MAUtils
         if (stacks == null)
             return;
         
+        if (!p.isOnline())
+        {
+            ItemStack[] items = readInventoryData(p);
+            int currentSlot = 0;
+            for (ItemStack stack : stacks)
+            {
+                while (currentSlot < items.length && items[currentSlot] != null)
+                    currentSlot++;
+                
+                if (currentSlot >= items.length)
+                    break;
+                
+                items[currentSlot] = stack;
+            }
+            
+            writeInventoryData(p, items);
+            return;
+        }
+        
         PlayerInventory inv = p.getInventory();
         for (ItemStack stack : stacks)
         {
@@ -474,7 +556,8 @@ public class MAUtils
             // If these are rewards, don't tamper with them.
             if (rewards)
             {
-                inv.addItem(stack);
+                //inv.addItem(stack);
+                giveItem(inv, stack);
                 continue;
             }
 
@@ -489,17 +572,34 @@ public class MAUtils
             if (WEAPONS_TYPE.contains(stack.getType()))
                 stack.setDurability((short) -32768);
 
-            inv.addItem(stack);
+            giveItem(inv, stack);
+            //inv.addItem(stack);
         }
-    }
-    public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
-    {
-        giveItems(p, stacks, false, true, plugin);
     }
     
     public static void giveItems(Player p, List<ItemStack> stacks, boolean autoEquip, MobArena plugin)
     {
         giveItems(p, stacks, autoEquip, false, plugin);
+    }
+    
+    public static void giveItem(PlayerInventory inv, ItemStack stack)
+    {
+        int id     = stack.getTypeId();
+        int amount = stack.getAmount();
+        
+        int times     = amount / 64;
+        int remainder = amount % 64;
+        
+        for (int i = 0; i < times; i++)
+            inv.addItem(new ItemStack(id, 64));
+            
+        if (remainder > 0)
+            inv.addItem(new ItemStack(id, remainder));
+    }
+    
+    public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
+    {
+        giveItems(p, stacks, false, true, plugin);
     }
     
     public static int getPetAmount(Player p)
@@ -559,7 +659,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            System.out.println("[MobArena] ERROR! Could not create item \"" + name + "\". Check config.yml");
+            MobArena.warning("Could not create item \"" + name + "\". Check config.yml");
             return null;
         }
     }
@@ -592,10 +692,7 @@ public class MAUtils
     public static void sitPets(Player p)
     {
         if (p == null)
-        {
-            System.out.println("Player is null!");
             return;
-        }
         
         List<Entity> entities = p.getNearbyEntities(80, 40, 80);
         for (Entity e : entities)
@@ -609,18 +706,6 @@ public class MAUtils
         }
     }
     
-    /**
-     * Removes all the pets belonging to this player.
-     *//*
-    public static void clearPets(Arena arena, Player p)
-    {
-        for (Wolf w : arena.pets)
-        {
-            if (w.getOwner().equals(p))
-                w.remove();
-        }
-    }*/
-    
     
     
     /* ///////////////////////////////////////////////////////////////////// //
@@ -628,6 +713,20 @@ public class MAUtils
             REGION METHODS
     
     // ///////////////////////////////////////////////////////////////////// */
+    
+    /**
+     * Check if a Location is inside two points (x1,y1,z1) (x2,y2,z2)
+     */
+    public static boolean inRegion(Location loc, double x1, double y1, double z1, double x2, double y2, double z2)
+    {
+        double x = loc.getBlockX();
+        double y = loc.getBlockY();
+        double z = loc.getBlockZ();
+        
+        return x >= x1 && x <= x2 &&
+               y >= y1 && y <= y2 &&
+               z >= z1 && z <= z2;
+    }
     
     /**
      * Create a frame spanned by the two input coordinates.
@@ -780,6 +879,10 @@ public class MAUtils
             arena.p1.setY(arena.p2.getY());
             arena.p2.setY(tmp);
         }
+        
+        if (!arena.world.getName().equals(world.getName()))
+            arena.world = world;
+        
         arena.serializeConfig();
         arena.load(config);
     }
@@ -885,23 +988,84 @@ public class MAUtils
     
     // ///////////////////////////////////////////////////////////////////// */
     
-    /**
-     * Sends a message to a player.
-     */
+    public static boolean tellSpoutPlayer(Player p, Msg msg, String s, Material logo)
+    {
+        // Grab the SpoutPlayer.
+        SpoutPlayer sp = MobArena.hasSpout ? SpoutManager.getPlayer(p) : null;
+        
+        if (msg.hasSpoutMsg() && sp != null && sp.isSpoutCraftEnabled())
+        {
+            // Grab the message text.
+            String text = msg.getSpout(s);
+            
+            // If more than 26 characters, truncate.
+            if (text.length() > 26)
+                text = text.substring(0, 26);
+            
+            // If the logo is null, use an iron sword.
+            if (logo == null)
+                logo = msg.getLogo();
+            
+            // Send the notification.
+            sp.sendNotification("MobArena", text, logo, (short) 0, 2000);
+            return true;
+        }
+        else return tellPlayer(p, msg.get(s));
+    }
+    
+    public static boolean tellSpoutPlayer(Player p, Msg msg, Material logo)
+    {
+        return tellSpoutPlayer(p, msg, null, logo);
+    }
+    
+    public static boolean tellSpoutPlayer(Player p, Msg msg, String s)
+    {
+        return tellSpoutPlayer(p, msg, s, null);
+    }
+    
+    public static boolean tellSpoutPlayer(Player p, Msg msg)
+    {
+        return tellSpoutPlayer(p, msg, null, null);
+    }
+    
     public static boolean tellPlayer(CommandSender p, String msg)
     {
-        if (p == null)
+        // If the input sender is null or the string is empty, return.
+        if (p == null || msg.equals(" "))
             return false;
         
+        // Otherwise, send the message with the [MobArena] tag.
         p.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.WHITE + msg);
         return true;
+    }
+    
+    public static boolean tellPlayer(CommandSender p, Msg msg, String s, boolean spout, Material logo)
+    {
+        if (spout && p instanceof Player)
+            return tellSpoutPlayer((Player) p, msg, s, logo);
+        
+        return tellPlayer(p, msg.get(s));
+    }
+    
+    public static boolean tellPlayer(CommandSender p, Msg msg, String s, Material logo)
+    {
+        return tellPlayer(p, msg, s, MobArena.hasSpout, logo);
+    }
+    
+    public static boolean tellPlayer(CommandSender p, Msg msg, String s)
+    {
+        return tellPlayer(p, msg, s, MobArena.hasSpout, null);
+    }
+    
+    public static boolean tellPlayer(CommandSender p, Msg msg)
+    {
+        return tellPlayer(p, msg, null, MobArena.hasSpout, null);
     }
     
     /**
      * Sends a message to all players in and around the arena.
      */
-    public static void tellAll(Arena arena, String msg) { tellAll(arena, msg, false); }
-    public static void tellAll(Arena arena, String msg, boolean notifyPlayers)
+    public static void tellAll(Arena arena, Msg msg, String s, boolean notifyPlayers)
     {
         Set<Player> tmp = new HashSet<Player>();
         tmp.addAll(arena.arenaPlayers);
@@ -911,7 +1075,22 @@ public class MAUtils
         tmp.addAll(arena.specPlayers);
         if (notifyPlayers) tmp.addAll(arena.notifyPlayers);
         for (Player p : tmp)
-            tellPlayer(p, msg);
+            tellPlayer(p, msg, s);
+    }
+    
+    public static void tellAll(Arena arena, Msg msg, String s)
+    {
+        tellAll(arena, msg, s, false);
+    }
+    
+    public static void tellAll(Arena arena, Msg msg, boolean notifyPlayers)
+    {
+        tellAll(arena, msg, null, notifyPlayers);
+    }
+    
+    public static void tellAll(Arena arena, Msg msg)
+    {
+        tellAll(arena, msg, null, false);
     }
     
     public static Player getClosestPlayer(Entity e, Arena arena)
@@ -927,8 +1106,8 @@ public class MAUtils
         {
             if (!arena.world.equals(p.getWorld()))
             {
-                System.out.println("[MobArena] MAUtils:908: Player '" + p.getName() + "' is not in the right world. Force leaving...");
-                arena.playerLeave(p);
+                MobArena.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 tellPlayer(p, "You warped out of the arena world.");
                 continue;
             }
@@ -994,7 +1173,7 @@ public class MAUtils
         if (list == null || list.isEmpty())
         {
             if (none)
-                return MAMessages.get(Msg.MISC_NONE);
+                return Msg.MISC_NONE.get();
             else
                 return "";
         }
@@ -1045,6 +1224,7 @@ public class MAUtils
         return buffy.toString().substring(0, buffy.length() - trimLength);
     }
     public static <E> String listToString(List<E> list, MobArena plugin) { return listToString(list, true, plugin); }
+    public static <E> String listToString(List<E> list) { return listToString(list, true, (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena")); }
     
     /**
      * Returns a String-list version of a comma-separated list.
@@ -1080,7 +1260,7 @@ public class MAUtils
      * and spawnpoints are all set up.
      */    
     public static boolean verifyData(Arena arena)
-    {        
+    {
         return ((arena.arenaLoc       != null) &&
                 (arena.lobbyLoc       != null) &&
                 (arena.spectatorLoc   != null) &&
@@ -1093,6 +1273,24 @@ public class MAUtils
     {
         return ((arena.l1 != null) &&
                 (arena.l2 != null));
+    }
+    
+    public static void checkData(Arena arena, CommandSender p)
+    {
+        if (arena.arenaLoc == null)
+            tellPlayer(p, "Missing warp: arena");
+        if (arena.lobbyLoc == null)
+            tellPlayer(p, "Missing warp: lobby");
+        if (arena.spectatorLoc == null)
+            tellPlayer(p, "Missing warp: spectator");
+        if (arena.p1 == null)
+            tellPlayer(p, "Missing region point: p1");
+        if (arena.p2 == null)
+            tellPlayer(p, "Missing region point: p2");
+        if (arena.spawnpoints.size() <= 0)
+            tellPlayer(p, "Missing spawnpoints");
+        if (arena.setup)
+            tellPlayer(p, "Arena is ready to be used!");
     }
 
     /**
@@ -1109,6 +1307,7 @@ public class MAUtils
             
             // Open the connection and don't redirect.
             HttpURLConnection con = (HttpURLConnection) baseURI.toURL().openConnection();
+            con.setConnectTimeout(5000);
             con.setInstanceFollowRedirects(false);
             
             String header = con.getHeaderField("Location");
@@ -1123,18 +1322,27 @@ public class MAUtils
             // Otherwise, grab the location header to get the real URI.
             String url = new URI(con.getHeaderField("Location")).toString();
             
-            // If the current version is the same as the thread version.
-            if (url.contains(plugin.getDescription().getVersion().replace(".", "-")))
-            {
-                if (!response)
-                    return;
-                    
-                tellPlayer(p, "Your version of MobArena is up to date!");
+            // Set up the regex and matcher
+            Pattern regex   = Pattern.compile("v([0-9]+-)*[0-9]+");
+            Matcher matcher = regex.matcher(url);
+            if (!matcher.find())
                 return;
+
+            // Split the version strings
+            String[] forumVersion = matcher.group().substring(1).split("-");
+            String[] thisVersion  = plugin.getDescription().getVersion().split("\\.");
+
+            // If the current version is older than the forum version, notify.
+            for (int i = 0; i < Math.min(forumVersion.length, thisVersion.length); i++)
+            {
+                if (Integer.parseInt(forumVersion[i]) > Integer.parseInt(thisVersion[i]))
+                {
+                    tellPlayer(p, "There is a new version of MobArena available!");;
+                    return;
+                }
             }
             
-            // Otherwise, notify the player that there is a new version.
-            tellPlayer(p, "There is a new version of MobArena available!");;
+            if (response) tellPlayer(p, "Your version of MobArena is up to date!");
         }
         catch (Exception e)
         {
@@ -1162,27 +1370,16 @@ public class MAUtils
         long hrs  = ((seconds - secs) - (mins * 60)) / 60 / 60;
         return hrs + ":" + ((mins < 10) ? "0" + mins : mins) + ":" + ((secs < 10) ? "0" + secs : secs);
     }
-
-    public static String padRight(String s, int length) { return padRight(s, length, ' '); }
-    public static String padRight(String s, int length, char pad)
-    {
-        StringBuffer buffy = new StringBuffer();
-        buffy.append(s);
-        for (int i = s.length(); i < length; i++)
-            buffy.append(pad);
-        return buffy.toString();
-    }
-
-    public static String padLeft(String s, int length) { return padLeft(s, length, ' '); }
-    public static String padLeft(String s, int length, char pad)
-    {
-        StringBuffer buffy = new StringBuffer();
-        for (int i = 0; i < length - s.length(); i++)
-            buffy.append(pad);
-        buffy.append(s);
-        return buffy.toString();
-    }
     
+    public static long parseDuration(String duration)
+    {
+        String[] elements = duration.split(":");
+        long hrs  = Long.parseLong(elements[0]) * 60 * 60;
+        long mins = Long.parseLong(elements[1]) * 60;
+        long secs = Long.parseLong(elements[2]);
+        
+        return (hrs + mins + secs) * 1000;
+    }
     
     /**
      * Stand back, I'm going to try science!
@@ -1243,7 +1440,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            System.out.println("[MobArena] ERROR! Couldn't create backup file. Aborting auto-generate...");
+            MobArena.warning("Couldn't create backup file. Aborting auto-generate...");
             return false;
         }
         
@@ -1376,7 +1573,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            if (error) System.out.println("[MobArena] ERROR! Couldn't find backup file for arena '" + name + "'");
+            if (error) MobArena.warning("Couldn't find backup file for arena '" + name + "'");
             return false;
         }
         

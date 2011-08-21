@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
@@ -55,10 +56,14 @@ public class MACommands implements CommandExecutor
         COMMANDS.add("setwarp");           // Set arena/lobby/spec
         COMMANDS.add("spawnpoints");       // List spawnpoints
         COMMANDS.add("addspawn");          // Add a spawnpoint
-        COMMANDS.add("delspawn");          // Delete a spawnpoint 
+        COMMANDS.add("delspawn");          // Delete a spawnpoint
+        COMMANDS.add("containers");        // List containers
+        COMMANDS.add("addcontainer");      // Add a container block
+        COMMANDS.add("delcontainer");      // Delete a container block
         COMMANDS.add("reset");             // Reset arena coordinates
         COMMANDS.add("addclass");          // Add a new class
         COMMANDS.add("delclass");          // Delete a class
+        COMMANDS.add("checkdata");         // Check arena well formedness
         COMMANDS.add("auto-generate");     // Auto-generate arena
         COMMANDS.add("auto-degenerate");   // Restore cuboid
     }
@@ -115,6 +120,11 @@ public class MACommands implements CommandExecutor
         //
         ////////////////////////////////////////////////////////////////*/
         
+        if (base.equals("spawn"))
+        {
+            p.getWorld().setSpawnLocation(p.getLocation().getBlockX(), p.getLocation().getBlockY() + 1, p.getLocation().getBlockZ());
+        }
+        
         /*
          * Player join
          */
@@ -122,61 +132,113 @@ public class MACommands implements CommandExecutor
         {            
             if (!player || !plugin.has(p, "mobarena.use.join"))
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            
+            List<Arena> arenas = am.getEnabledArenas();
+            if (!am.enabled || arenas.size() < 1)
+            {
+                MAUtils.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
+                return true;
+            }
+            
+            // Grab the arena to join
+            Arena arena = arenas.size() == 1 ? arenas.get(0) : am.getArenaWithName(arg1);
+            
+            // Run a couple of basic sanity checks
+            if (!sanityChecks(p, arena, arg1, arenas))
+                return true;
+            
+            // Run a bunch of per-arena sanity checks
+            if (!arena.canJoin(p))
+                return true;
+            
+            // If player is in a boat/minecart, eject!
+            if (p.isInsideVehicle())
+                p.leaveVehicle();
+            
+            // Take entry fee and store inventory
+            arena.takeFee(p);
+            if (!arena.emptyInvJoin) MAUtils.storeInventory(p);
+            
+            // If player is in a bed, unbed!
+            if (p.isSleeping())
+            {
+                p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
+                return true;
+            }
+            
+            // Join the arena!
+            arena.playerJoin(p, p.getLocation());
+            
+            MAUtils.tellPlayer(p, Msg.JOIN_PLAYER_JOINED);
+            if (!arena.entryFee.isEmpty())
+                MAUtils.tellPlayer(p, Msg.JOIN_FEE_PAID.get(MAUtils.listToString(arena.entryFee, plugin)));
+            if (arena.hasPaid.contains(p))
+                arena.hasPaid.remove(p);
+            
+            return true;
+        }
+        
+        /*
+         * Player leave
+         */
+        if (base.equals("leave") || base.equals("l"))
+        {
+            if (!player || !plugin.has(p, "mobarena.use.leave"))
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            
+            if (!am.arenaMap.containsKey(p))
+            {
+                Arena arena = am.getArenaWithSpectator(p);
+                if (arena != null)
+                {            
+                    arena.playerLeave(p);
+                    MAUtils.tellPlayer(p, Msg.LEAVE_PLAYER_LEFT);
+                    return true;
+                }
+                
+                MAUtils.tellPlayer(p, Msg.LEAVE_NOT_PLAYING);
+                return true;
+            }
+            
+            Arena arena = am.arenaMap.get(p);            
+            arena.playerLeave(p);
+            MAUtils.tellPlayer(p, Msg.LEAVE_PLAYER_LEFT);
+            return true;
+        }
+        
+        /*
+         * Player spectate
+         */
+        if (base.equals("spectate") || base.equals("spec"))
+        {            
+            if (!player || !plugin.has(p, "mobarena.use.spectate"))
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             List<Arena> arenas = am.getEnabledArenas();
             if (!am.enabled || arenas.size() < 1)
             {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
+                MAUtils.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
                 return true;
             }
 
-            boolean error;
-            Arena arena;
-            
-            if (!arg1.isEmpty())
-                arena = am.getArenaWithName(arg1);
-            else if (arenas.size() == 1)
-                arena = arenas.get(0);
-            else
-                arena = null;
-            
-            if (arenas.size() > 1 && arg1.isEmpty())
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
-            else if (arena == null)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-            else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
-            else if (!arena.enabled)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
-            else if (!arena.setup || arena.edit)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-            else if (arena.running && (arena.notifyPlayers.contains(p) || arena.notifyPlayers.add(p)))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_IS_RUNNING));
-            else if (arena.arenaPlayers.contains(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ALREADY_PLAYING));
-            else if (!plugin.has(p, "mobarena.arenas." + arena.configName()))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_PERMISSION));
-            else if (arena.maxPlayers > 0 && arena.lobbyPlayers.size() >= arena.maxPlayers)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_LIMIT_REACHED));
-            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
-            else if (!arena.canAfford(p) || !arena.takeFee(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(arena.entryFee, plugin)));
-            else if (arena.emptyInvJoin && !MAUtils.hasEmptyInventory(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_EMPTY_INV));
-            else if (!arena.emptyInvJoin && !MAUtils.storeInventory(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_STORE_INV_FAIL));
-            else error = false;
-            
-            // If there was an error, don't join.
-            if (error)
-            {
-                if (arena != null)
-                    arena.refund(p);
+            // Grab the arena to join
+            Arena arena = arenas.size() == 1 ? arenas.get(0) : am.getArenaWithName(arg1);
+
+            // Run a couple of basic sanity checks
+            if (!sanityChecks(p, arena, arg1, arenas))
                 return true;
-            }
+
+            // Run a bunch of arena-specific sanity-checks
+            if (!arena.canSpec(p))
+                return true;
             
             // If player is in a boat/minecart, eject!
             if (p.isInsideVehicle())
@@ -189,106 +251,10 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            am.arenaMap.put(p,arena);
-            arena.playerJoin(p, p.getLocation());
-            
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_PLAYER_JOINED));
-            if (!arena.entryFee.isEmpty())
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_FEE_PAID, MAUtils.listToString(arena.entryFee, plugin)));
-            
-            return true;
-        }
-        
-        /*
-         * Player leave
-         */
-        if (base.equals("leave") || base.equals("l"))
-        {
-            if (!player || !plugin.has(p, "mobarena.use.leave"))
-            {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
-                return true;
-            }
-            
-            if (!am.arenaMap.containsKey(p))
-            {
-                Arena arena = am.getArenaWithSpectator(p);
-                if (arena != null)
-                {            
-                    arena.playerLeave(p);
-                    MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_PLAYER_LEFT));
-                    return true;
-                }
-                
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_NOT_PLAYING));
-                return true;
-            }
-            
-            Arena arena = am.arenaMap.remove(p);            
-            arena.playerLeave(p);
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.LEAVE_PLAYER_LEFT));
-            return true;
-        }
-        
-        /*
-         * Player spectate
-         */
-        if (base.equals("spectate") || base.equals("spec"))
-        {            
-            if (!player || !plugin.has(p, "mobarena.use.spectate"))
-            {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
-                return true;
-            }
-            List<Arena> arenas = am.getEnabledArenas();
-            if (!am.enabled || arenas.size() < 1)
-            {
-                MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_NOT_ENABLED));
-                return true;
-            }
-
-            boolean error;
-            Arena arena;
-            
-            if (!arg1.isEmpty())
-                arena = am.getArenaWithName(arg1);
-            else if (arenas.size() == 1)
-                arena = arenas.get(0);
-            else
-                arena = null;
-            
-            if (arenas.size() > 1 && arg1.isEmpty())
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARG_NEEDED));
-            else if (arena == null)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
-            //else if (am.arenaMap.containsKey(p) && am.arenaMap.get(p).livePlayers.contains(p))
-            else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_IN_OTHER_ARENA));
-            else if (!arena.enabled)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_ENABLED));
-            else if (!arena.setup || arena.edit)
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_ARENA_NOT_SETUP));
-            //else if (arena.livePlayers.contains(p))
-            else if (arena.arenaPlayers.contains(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_ALREADY_PLAYING));
-            else if (arena.emptyInvSpec && !MAUtils.hasEmptyInventory(p))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_EMPTY_INV));
-            else if (arena.joinDistance > 0 && !arena.inRegionRadius(p.getLocation(), arena.joinDistance))
-                error = MAUtils.tellPlayer(p, MAMessages.get(Msg.JOIN_TOO_FAR));
-            else error = false;
-            
-            // If there was an error, don't spec.
-            if (error)
-                return true;
-            
-            // If player is in a boat/minecart, eject!
-            if (p.isInsideVehicle())
-                p.leaveVehicle();
-            
-            am.arenaMap.put(p,arena);
+            // Spectate the arena!
             arena.playerSpec(p, p.getLocation());
             
-            MAUtils.tellPlayer(p, MAMessages.get(Msg.SPEC_PLAYER_SPECTATE));
+            MAUtils.tellPlayer(p, Msg.SPEC_PLAYER_SPECTATE);
             return true;
         }
         
@@ -297,8 +263,8 @@ public class MACommands implements CommandExecutor
          */
         if (base.equals("arenas"))
         {            
-            String list = MAUtils.listToString(am.arenas, plugin);
-            MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_ARENAS, list));
+            String list = MAUtils.listToString(player ? am.getPermittedArenas(p) : am.arenas, plugin);
+            MAUtils.tellPlayer(sender, Msg.MISC_LIST_ARENAS.get(list));
             return true;
         }
         
@@ -312,12 +278,12 @@ public class MACommands implements CommandExecutor
                 Arena arena = am.getArenaWithName(arg1);
                 if (arena == null)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                     return true;
                 }
                 
                 String list = MAUtils.listToString(arena.getLivingPlayers(), plugin);
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
+                MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.get(list));
             }
             else
             {
@@ -326,7 +292,7 @@ public class MACommands implements CommandExecutor
                 for (Arena arena : am.arenas)
                     players.addAll(arena.getLivingPlayers());
                 buffy.append(MAUtils.listToString(players, plugin));
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, buffy.toString()));
+                MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.get(buffy.toString()));
             }
             return true;
         }
@@ -342,7 +308,7 @@ public class MACommands implements CommandExecutor
                 arena = am.getArenaWithName(arg1);
                 if (arena == null)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                     return true;
                 }
             }
@@ -351,7 +317,7 @@ public class MACommands implements CommandExecutor
                 arena = am.getArenaWithPlayer(p);
                 if (arena == null)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.LEAVE_NOT_PLAYING));
+                    MAUtils.tellPlayer(sender, Msg.LEAVE_NOT_PLAYING);
                     return true;
                 }
             }
@@ -362,7 +328,7 @@ public class MACommands implements CommandExecutor
             }
             
             String list = MAUtils.listToString(arena.getNonreadyPlayers(), plugin);
-            MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_LIST_PLAYERS, list));
+            MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.get(list));
             return true;
         }
 
@@ -381,7 +347,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.admin.enable")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -396,7 +362,7 @@ public class MACommands implements CommandExecutor
                 }
                 else
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                 }
             }
             else
@@ -415,7 +381,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.admin.kick")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -449,7 +415,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.admin.restore")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -476,7 +442,7 @@ public class MACommands implements CommandExecutor
             {
                 if (!console && !(player && plugin.has(p, "mobarena.admin.force.end")) && !op)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                    MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                     return true;
                 }
                 
@@ -492,26 +458,25 @@ public class MACommands implements CommandExecutor
                 Arena arena = am.getArenaWithName(arg2);
                 if (arena == null)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                     return true;
                 }
                 
-                //if (arena.livePlayers.isEmpty())
-                if (arena.arenaPlayers.isEmpty())
+                if (arena.getAllPlayers().isEmpty())
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_EMPTY));
+                    MAUtils.tellPlayer(sender, Msg.FORCE_END_EMPTY);
                     return true;
                 }
                 
                 arena.forceEnd();
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_END_ENDED));
+                MAUtils.tellPlayer(sender, Msg.FORCE_END_ENDED);
                 return true;
             }
             else if (arg1.equals("start"))
             {
                 if (!console && !(player && plugin.has(p, "mobarena.admin.force.start")) && !op)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                    MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                     return true;
                 }
                 
@@ -524,23 +489,23 @@ public class MACommands implements CommandExecutor
                 Arena arena = am.getArenaWithName(arg2);
                 if (arena == null)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                    MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                     return true;
                 }
                 
                 if (arena.running)
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_RUNNING));
+                    MAUtils.tellPlayer(sender, Msg.FORCE_START_RUNNING);
                     return true;
                 }
                 if (arena.readyPlayers.isEmpty())
                 {
-                    MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_NOT_READY));
+                    MAUtils.tellPlayer(sender, Msg.FORCE_START_NOT_READY);
                     return true;
                 }
                 
                 arena.forceStart();
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.FORCE_START_STARTED));
+                MAUtils.tellPlayer(sender, Msg.FORCE_START_STARTED);
                 return true;
             }
             else
@@ -557,7 +522,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.admin.config.reload")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -579,7 +544,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.arena")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -592,7 +557,7 @@ public class MACommands implements CommandExecutor
                     if (!arena.equals(am.selectedArena))
                         buffy.append(arena.configName() + " ");
             }
-            else buffy.append(MAMessages.get(Msg.MISC_NONE));
+            else buffy.append(Msg.MISC_NONE);
             
             MAUtils.tellPlayer(sender, "Other arenas: " + buffy.toString());
             return true;
@@ -605,7 +570,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.setarena")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1.isEmpty())
@@ -622,7 +587,7 @@ public class MACommands implements CommandExecutor
             }
             else
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
             }
             return true;
         }
@@ -634,7 +599,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.addarena")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1.isEmpty())
@@ -662,7 +627,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.delarena")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1.isEmpty())
@@ -698,7 +663,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.protect")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -764,7 +729,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.editarena")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -833,7 +798,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.setregion")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -855,7 +820,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.expandregion")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (args.length != 3 || !arg1.matches("(-)?[0-9]+"))
@@ -903,7 +868,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.showregion")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
@@ -955,7 +920,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.setlobbyregion")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -974,7 +939,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.expandlobbyregion")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (args.length != 3 || !arg1.matches("[0-9]+"))
@@ -1022,7 +987,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.setwarp")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (!(arg1.equals("arena") || arg1.equals("lobby") || arg1.equals("spectator")))
@@ -1032,7 +997,8 @@ public class MACommands implements CommandExecutor
             }
             
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation());
-            MAUtils.tellPlayer(sender, "Set warp point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+            MAUtils.tellPlayer(sender, "Warp point " + arg1 + " was set for arena '" + am.selectedArena.configName() + "'");
+            MAUtils.tellPlayer(sender, "Type /ma checkdata to see if you're missing anything...");
             return true;
         }
         
@@ -1043,7 +1009,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.spawnpoints")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -1060,7 +1026,7 @@ public class MACommands implements CommandExecutor
             }
             else
             {
-                buffy.append(MAMessages.get(Msg.MISC_NONE));
+                buffy.append(Msg.MISC_NONE);
             }
             
             MAUtils.tellPlayer(sender, "Spawnpoints for arena '" + am.selectedArena.configName() + "': " + buffy.toString());
@@ -1074,7 +1040,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.addspawn")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
@@ -1084,7 +1050,7 @@ public class MACommands implements CommandExecutor
             }
             
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1, p.getLocation());
-            MAUtils.tellPlayer(sender, "Added spawnpoint " + arg1 + " for arena \"" + am.selectedArena.configName() + "\"");
+            MAUtils.tellPlayer(sender, "Spawnpoint " + arg1 + " added for arena \"" + am.selectedArena.configName() + "\"");
             return true;
         }
         
@@ -1095,7 +1061,7 @@ public class MACommands implements CommandExecutor
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.delspawn")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
@@ -1105,22 +1071,112 @@ public class MACommands implements CommandExecutor
             }
 
             if (MAUtils.delArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1))
-                MAUtils.tellPlayer(sender, "Deleted spawnpoint " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
+                MAUtils.tellPlayer(sender, "Spawnpoint " + arg1 + " deleted for arena '" + am.selectedArena.configName() + "'");
             else
                 MAUtils.tellPlayer(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.selectedArena.configName() + "'");
             return true;
         }
         
-        if (base.equals("auto-generate"))
+        if (base.equals("containers"))
         {
-            if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
+            if (!console && !(player && plugin.has(p, "mobarena.setup.containers")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            
+            StringBuffer buffy = new StringBuffer();
+            List<String> containers = plugin.getConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.containers");
+            
+            if (containers != null)
+            {
+                for (String s : containers)
+                {
+                    buffy.append(s);
+                    buffy.append(" ");
+                }
+            }
+            else
+            {
+                buffy.append(Msg.MISC_NONE);
+            }
+            
+            MAUtils.tellPlayer(sender, "Containers for arena '" + am.selectedArena.configName() + "': " + buffy.toString());
+            return true;
+        }
+        
+        if (base.equals("addcontainer"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.addchest")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
             {
-                MAUtils.tellPlayer(sender, "Usage: /ma autogenerate <arena name>");
+                MAUtils.tellPlayer(sender, "Usage: /ma addcontainer <container name>");
+                return true;
+            }
+            if (!(p.getTargetBlock(null, 50).getState() instanceof ContainerBlock))
+            {
+                MAUtils.tellPlayer(sender, "You must look at container.");
+                return true;
+            }
+            
+            MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "containers." + arg1, p.getTargetBlock(null, 50).getLocation());
+            MAUtils.tellPlayer(sender, "Container '" + arg1 + "' added for arena \"" + am.selectedArena.configName() + "\"");
+            return true;
+        }
+        
+        if (base.equals("delcontainer"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.setup.delcontainer")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma delcontainer <container name>");
+                return true;
+            }
+
+            if (MAUtils.delArenaCoord(plugin.getConfig(), am.selectedArena, "containers." + arg1))
+                MAUtils.tellPlayer(sender, "Container '" + arg1 + "' deleted for arena '" + am.selectedArena.configName() + "'");
+            else
+                MAUtils.tellPlayer(sender, "Could not find the container '" + arg1 + "' for arena '" + am.selectedArena.configName() + "'");
+            return true;
+        }
+        
+        if (base.equals("checkdata"))
+        {
+            if (!console && !(player && plugin.has(p, "mobarena.setup.checkdata")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            
+            Arena arena = arg1.isEmpty() ? am.selectedArena : am.getArenaWithName(arg1);
+            if (arena == null)
+            {
+                MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                return true;
+            }
+            
+            MAUtils.checkData(arena, sender);
+            return true;
+        }
+        
+        if (base.equals("auto-generate") || base.equals("autogenerate"))
+        {
+            if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
+            {
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+                return true;
+            }
+            if (arg1 == null || !arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$"))
+            {
+                MAUtils.tellPlayer(sender, "Usage: /ma auto-generate <arena name>");
                 return true;
             }
             if (am.getArenaWithName(arg1) != null)
@@ -1136,11 +1192,11 @@ public class MACommands implements CommandExecutor
             return true;
         }
         
-        if (base.equals("auto-degenerate"))
+        if (base.equals("auto-degenerate") || base.equals("autodegenerate"))
         {
             if (!console && !(player && plugin.has(p, "mobarena.setup.autodegenerate")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (arg1.isEmpty())
@@ -1155,7 +1211,7 @@ public class MACommands implements CommandExecutor
             }
             if (am.getArenaWithName(arg1) == null)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return true;
             }
             
@@ -1170,7 +1226,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.autogenerate")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             
@@ -1189,7 +1245,7 @@ public class MACommands implements CommandExecutor
         {
             if (!(player && plugin.has(p, "mobarena.setup.autodegenerate")) && !op)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.MISC_NO_ACCESS));
+                MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
             if (am.arenas.size() < 2)
@@ -1199,7 +1255,7 @@ public class MACommands implements CommandExecutor
             }
             if (am.getArenaWithName("a1") == null)
             {
-                MAUtils.tellPlayer(sender, MAMessages.get(Msg.ARENA_DOES_NOT_EXIST));
+                MAUtils.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return true;
             }
             
@@ -1217,5 +1273,19 @@ public class MACommands implements CommandExecutor
         
         MAUtils.tellPlayer(sender, "Command not found.");
         return true;
+    }
+    
+    private boolean sanityChecks(Player p, Arena arena, String arg1, List<Arena> arenas)
+    {
+        if (arenas.size() > 1 && arg1.isEmpty())
+            MAUtils.tellPlayer(p, Msg.JOIN_ARG_NEEDED);
+        else if (arena == null)
+            MAUtils.tellPlayer(p, Msg.ARENA_DOES_NOT_EXIST);
+        else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
+            MAUtils.tellPlayer(p, Msg.JOIN_IN_OTHER_ARENA);
+        else
+            return true;
+        
+        return false;
     }
 }

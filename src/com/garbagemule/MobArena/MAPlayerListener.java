@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -12,6 +13,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+
 public class MAPlayerListener extends PlayerListener
 {
     private MobArena plugin;
@@ -21,6 +23,13 @@ public class MAPlayerListener extends PlayerListener
     {
         this.plugin = plugin;
         this.am = am;
+    }
+    
+    public void onPlayerAnimation(PlayerAnimationEvent event)
+    {
+        if (!am.enabled) return;
+        for (Arena arena : am.arenas)
+            arena.eventListener.onPlayerAnimation(event);
     }
     
     public void onPlayerInteract(PlayerInteractEvent event)
@@ -82,6 +91,6 @@ public class MAPlayerListener extends PlayerListener
                 {
                     MAUtils.checkForUpdates(plugin, p, false);
                 }
-            }, 100);
+            }, 60);
     }
 }

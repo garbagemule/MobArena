@@ -15,7 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.config.Configuration;
 
-public class ArenaMaster
+//import com.garbagemule.ArenaPlugin.Master;
+
+public class ArenaMaster //implements Master
 {
     private MobArena plugin;
     private Configuration config;
@@ -49,6 +51,7 @@ public class ArenaMaster
     {
         plugin = instance;
         config = plugin.getConfig();
+        arenas = new LinkedList<Arena>();
     }
     
     
@@ -64,6 +67,15 @@ public class ArenaMaster
         List<Arena> result = new LinkedList<Arena>();
         for (Arena arena : arenas)
             if (arena.enabled)
+                result.add(arena);
+        return result;
+    }
+    
+    public List<Arena> getPermittedArenas(Player p)
+    {
+        List<Arena> result = new LinkedList<Arena>();
+        for (Arena arena : arenas)
+            if (plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
         return result;
     }
@@ -221,21 +233,18 @@ public class ArenaMaster
         
         if (config.getKeys("arenas") == null)
             createArenaNode("default", Bukkit.getServer().getWorlds().get(0));
-        
+
         for (String configName : config.getKeys("arenas"))
         {
             String arenaPath = "arenas." + configName + ".";
-            String worldName = config.getString(arenaPath + "settings.world");
+            String worldName = config.getString(arenaPath + "settings.world", null);
             World  world;
-            if (worldName == null)
+            if (worldName == null || worldName.equals(""))
             {
-                System.out.println("[MobArena] ERROR! Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
+                MobArena.warning("Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
                 world = Bukkit.getServer().getWorlds().get(0);
             }
-            else
-            {
-                world = Bukkit.getServer().getWorld(worldName);
-            }
+            else world = Bukkit.getServer().getWorld(worldName);
             
             Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
             arena.load(config);

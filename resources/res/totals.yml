@@ -1,0 +1,57 @@
+### General data
+### Statistics for overall information about the arena, such as
+### times played, durations, max players seen, total kills, etc.
+general-info:
+    total-games-played: 0
+    total-duration: 0:00:00
+    longest-session-duration: 0:00:00
+    most-players: 0
+    highest-wave-reached: 0
+    total-monsters-killed: 0
+
+### Class specific data
+### How many times has each class been played, and how many kills, how
+### much damage, etc. does the class make/do/take.
+classes:
+    overall-distribution:
+        # Percentages can be calculated with <classname> / total-count * 100.
+        total-count: 0
+
+#classes:
+#    overall-distribution:
+#        total-count: 0
+#    archer:
+#        kills:
+#        damage-done:
+#        damage-taken: 
+#        accuracy:
+#    knight:
+#        kills:
+#        damage-done:
+#        damage-taken: 
+#        accuracy:
+#    ...
+### Reward data
+### Totals for all rewards given, perhaps good for balancing?
+rewards:
+    total-given:
+        # This might be useless information, I don't know.
+        # Might have to make it data values instead of Material names?
+        money: 0
+
+### Player data
+### Total games played, kills, damage, swings and hits (for accuracy), and how
+### many times the player has played as each class.
+players: {}
+#    garbagemule:
+#        games-played: 5
+#        kills: 4
+#        damage-done: 251
+#        damage-taken: 102
+#        swings: 1820
+#        hits: 1214
+#        classes-played:
+#           archer: 2
+#           ...
+#    Agnate:
+#        ...

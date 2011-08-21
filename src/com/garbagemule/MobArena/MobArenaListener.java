@@ -3,6 +3,9 @@ package com.garbagemule.MobArena;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import com.garbagemule.MobArena.waves.Wave.WaveBranch;
+import com.garbagemule.MobArena.waves.Wave.WaveType;
+
 public class MobArenaListener
 {
     protected MobArena plugin;
@@ -13,11 +16,10 @@ public class MobArenaListener
         plugin.getAM().listeners.add(this);
     }
     
-    public void onArenaStart() {}
-    public void onArenaEnd() {}
-    public void onDefaultWave(int waveNumber) {}
-    public void onSpecialWave(int waveNumber, int specialwaveNumber) {}
-    public void onPlayerJoin(Player p) {}
-    public void onPlayerLeave(Player p) {}
-    public void onPlayerDeath(Player p) {}
+    public void onArenaStart(Arena arena) {}
+    public void onArenaEnd(Arena arena) {}
+    public void onWave(Arena arena, int waveNumber, String waveName, WaveBranch waveBranch, WaveType waveType) {}
+    public void onPlayerJoin(Arena arena, Player p) {}
+    public void onPlayerLeave(Arena arena, Player p) {}
+    public void onPlayerDeath(Arena arena, Player p) {}
 }
