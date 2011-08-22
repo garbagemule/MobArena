@@ -1065,6 +1065,11 @@ public class Arena
         return spawnThread.getPlayerCount();
     }
     
+    public void addBlock(Block b)
+    {
+        blocks.add(b);
+    }
+    
     public void addMonster(LivingEntity e)
     {
         monsters.add(e);
@@ -1089,6 +1094,11 @@ public class Arena
         List<Player> result = new LinkedList<Player>();
         result.addAll(arenaPlayers);
         return result;
+    }
+    
+    public Set<Player> getArenaPlayers()
+    {
+        return arenaPlayers;
     }
     
     public List<Player> getNonreadyPlayers()

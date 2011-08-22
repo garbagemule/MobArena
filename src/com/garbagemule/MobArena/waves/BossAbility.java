@@ -1,11 +1,13 @@
 package com.garbagemule.MobArena.waves;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 
@@ -58,46 +61,6 @@ public enum BossAbility
             arena.getWorld().strikeLightning(nw);
             arena.getWorld().strikeLightning(se);
             arena.getWorld().strikeLightning(sw);
-        }
-    },
-    DISORIENTTARGET("Disorient Target")
-    {
-        public void run(Arena arena, LivingEntity boss)
-        {
-            LivingEntity target = getTarget(boss);
-            if (target == null) return;
-
-            Location loc = target.getLocation();
-            loc.setYaw(target.getLocation().getYaw() + 45 + (new Random()).nextInt(270));
-            target.teleport(loc);
-        }
-    },
-    ROOTTARGET("Root Target")
-    {
-        public void run(final Arena arena, LivingEntity boss)
-        {
-            final LivingEntity target = getTarget(boss);
-            if (target == null) return;
-            
-            final Location loc = target.getLocation();
-            final int freezeTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(arena.getPlugin(),
-                new Runnable()
-                {
-                    public void run()
-                    {
-                        if (arena.getLivingPlayers().contains(target))
-                            target.teleport(loc);
-                    }
-                }, 3, 3);
-            
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
-                new Runnable()
-                {
-                    public void run()
-                    {
-                        Bukkit.getServer().getScheduler().cancelTask(freezeTaskId);
-                    }
-                }, 45);
         }
     },
     LIVINGBOMB("Living Bomb")
@@ -163,12 +126,84 @@ public enum BossAbility
                 }, 8);
         }
     },
+    DISORIENTTARGET("Disorient Target")
+    {
+        public void run(Arena arena, LivingEntity boss)
+        {
+            LivingEntity target = getTarget(boss);
+            if (target == null) return;
+
+            Location loc = target.getLocation();
+            loc.setYaw(target.getLocation().getYaw() + 45 + MobArena.random.nextInt(270));
+            target.teleport(loc);
+        }
+    },
+    ROOTTARGET("Root Target")
+    {
+        public void run(final Arena arena, LivingEntity boss)
+        {
+            final LivingEntity target = getTarget(boss);
+            if (target == null) return;
+            
+            final Location loc = target.getLocation();
+            final int freezeTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(arena.getPlugin(),
+                new Runnable()
+                {
+                    public void run()
+                    {
+                        if (arena.getLivingPlayers().contains(target))
+                            target.teleport(loc);
+                    }
+                }, 3, 3);
+            
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
+                new Runnable()
+                {
+                    public void run()
+                    {
+                        Bukkit.getServer().getScheduler().cancelTask(freezeTaskId);
+                    }
+                }, 45);
+        }
+    },
     WARPTOPLAYER("Warp")
     {
         public void run(Arena arena, LivingEntity boss)
         {
             List<Player> list = arena.getLivingPlayers();
             boss.teleport(list.get((new Random()).nextInt(list.size())));
+        }
+    },
+    SHUFFLEPOSITIONS("Shuffle Positions")
+    {
+        public void run(Arena arena, LivingEntity boss)
+        {
+            // Grab the players and add the boss
+            List<LivingEntity> entities = new LinkedList<LivingEntity>(arena.getArenaPlayers());
+            entities.add(boss);
+            
+            // Grab the locations
+            List<Location> locations = new LinkedList<Location>();
+            for (LivingEntity e : entities)
+                locations.add(e.getLocation());
+            
+            // Shuffle the entities, and then begin warping.
+            Collections.shuffle(entities);
+            while (!entities.isEmpty() && !locations.isEmpty())
+                entities.remove(0).teleport(locations.remove(0));
+        }
+    },
+    FLOOD("Flood")
+    {
+        public void run(Arena arena, LivingEntity boss)
+        {
+            List<Player> players = arena.getLivingPlayers();
+            Block block = players.get(MobArena.random.nextInt(players.size())).getLocation().getBlock();
+            if (block.getTypeId() == 0)
+            {
+                block.setTypeId(8);
+                arena.addBlock(block);
+            }
         }
     },
     THROWTARGET("Throw Target")

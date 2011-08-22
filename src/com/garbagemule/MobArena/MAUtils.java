@@ -535,12 +535,18 @@ public class MAUtils
         if (stacks == null)
             return;
         
+        // If the player isn't online, write directly to their data file.
         if (!p.isOnline())
         {
             ItemStack[] items = readInventoryData(p);
             int currentSlot = 0;
             for (ItemStack stack : stacks)
             {
+                // Skip money rewards for now. TODO: Make this work as well
+                if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
+                    continue;
+                
+                // Find the first available slot
                 while (currentSlot < items.length && items[currentSlot] != null)
                     currentSlot++;
                 
@@ -550,10 +556,12 @@ public class MAUtils
                 items[currentSlot] = stack;
             }
             
+            // Write the data
             writeInventoryData(p, items);
             return;
         }
         
+        // Otherwise, give the player some items!
         PlayerInventory inv = p.getInventory();
         for (ItemStack stack : stacks)
         {
@@ -572,7 +580,6 @@ public class MAUtils
             // If these are rewards, don't tamper with them.
             if (rewards)
             {
-                //inv.addItem(stack);
                 giveItem(inv, stack);
                 continue;
             }
