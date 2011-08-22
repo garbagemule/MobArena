@@ -239,6 +239,8 @@ public class Arena
         // Announce and clear sets.
         MAUtils.tellAll(this, Msg.ARENA_END, true);
         arenaPlayers.clear();
+        lobbyPlayers.clear();
+        readyPlayers.clear();
         notifyPlayers.clear();
         rewardedPlayers.clear();
         classMap.clear();
@@ -593,6 +595,7 @@ public class Arena
         specPlayers.remove(p);
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
+        classMap.remove(p);
     }
     
     /**

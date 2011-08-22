@@ -586,7 +586,7 @@ public class MAUtils
             
             // If this is a weapon, set its durability to "unlimited".
             if (WEAPONS_TYPE.contains(stack.getType()))
-                stack.setDurability((short) -32768);
+                stack.setDurability(Short.MIN_VALUE);
 
             giveItem(inv, stack);
             //inv.addItem(stack);
@@ -600,17 +600,30 @@ public class MAUtils
     
     public static void giveItem(PlayerInventory inv, ItemStack stack)
     {
-        int id     = stack.getTypeId();
-        int amount = stack.getAmount();
+        // If the stack isn't too big, just add it
+        if (stack.getAmount() <= 64)
+        {
+            inv.addItem(stack);
+            return;
+        }
         
-        int times     = amount / 64;
+        // Otherwise, grab the id, durability and data.
+        int id           = stack.getTypeId();
+        int amount       = stack.getAmount();
+        short durability = stack.getDurability();
+        Byte data        = stack.getData() != null ? stack.getData().getData() : null;
+        
+        // Initialize the quotient and remainder.
+        int quotient  = amount / 64;
         int remainder = amount % 64;
         
-        for (int i = 0; i < times; i++)
-            inv.addItem(new ItemStack(id, 64));
-            
+        // Add a bunch of stacks of amount 64.
+        for (int i = 0; i < quotient; i++)
+            inv.addItem(new ItemStack(id, 64, durability, data));
+        
+        // Add the rest.
         if (remainder > 0)
-            inv.addItem(new ItemStack(id, remainder));
+            inv.addItem(new ItemStack(id, remainder, durability, data));
     }
     
     public static void giveRewards(Player p, List<ItemStack> stacks, MobArena plugin)
