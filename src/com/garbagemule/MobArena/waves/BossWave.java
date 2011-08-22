@@ -61,7 +61,7 @@ public class BossWave extends AbstractWave
         {
             for (String a : abilities.split(","))
             {
-                String ability = a.trim().replaceAll("[-_\\.]", "").toUpperCase();
+                String ability = a.trim();
                 addAbility(BossAbility.fromString(ability));
             }
         }

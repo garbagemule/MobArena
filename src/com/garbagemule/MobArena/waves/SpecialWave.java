@@ -54,9 +54,9 @@ public class SpecialWave extends NormalWave
             int amount;
             switch (entry.getValue())
             {
-                case POWERED_CREEPERS:
-                case ZOMBIE_PIGMEN:
-                case ANGRY_WOLVES:      amount = playerCount * 2; break;
+                case POWEREDCREEPERS:
+                case ZOMBIEPIGMEN:
+                case ANGRYWOLVES:       amount = playerCount * 2; break;
                 case SLIMES:            amount = playerCount * 4; break;
                 case HUMANS:            amount = playerCount + 2; break;
                 case GIANTS:

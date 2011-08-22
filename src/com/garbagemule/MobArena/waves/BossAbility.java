@@ -306,7 +306,7 @@ public enum BossAbility
     
     public static BossAbility fromString(String string)
     {
-        return WaveUtils.getEnumFromString(BossAbility.class, string);
+        return WaveUtils.getEnumFromString(BossAbility.class, string.replaceAll("[-_\\.]", ""));
     }
     
     public String toString()

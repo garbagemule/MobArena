@@ -67,11 +67,12 @@ public abstract class NormalWave extends AbstractWave
             }
             else if (type == WaveType.SPECIAL)
             {
-                probabilities.put(10, MACreature.POWERED_CREEPERS);
-                probabilities.put(20, MACreature.ANGRY_WOLVES);
-                probabilities.put(30, MACreature.ZOMBIE_PIGMEN);
+                probabilities.put(10, MACreature.POWEREDCREEPERS);
+                probabilities.put(20, MACreature.ANGRYWOLVES);
+                probabilities.put(30, MACreature.ZOMBIEPIGMEN);
                 probabilities.put(40, MACreature.SLIMES);
-                totalProbability = 40;
+                probabilities.put(50, MACreature.HUMANS);
+                totalProbability = 50;
             }
         }
     }

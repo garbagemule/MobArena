@@ -349,7 +349,7 @@ public class WaveUtils
         {
             for (String monster : monsters)
             {
-                if (getEnumFromString(MACreature.class, monster) != null)
+                if (MACreature.fromString(monster) != null)
                     continue;
                 
                 MobArena.warning("Invalid monster type '" + monster + "' in " + path);
@@ -377,7 +377,7 @@ public class WaveUtils
             MobArena.warning("Missing monster type in '" + path);
             wellDefined = false;
         }
-        else if (getEnumFromString(MACreature.class, monster) == null)
+        else if (MACreature.fromString(monster) == null)
         {
             MobArena.warning("Invalid monster type '" + monster + "' in " + path);
             wellDefined = false;
@@ -410,7 +410,7 @@ public class WaveUtils
             MobArena.warning("Missing monster type in '" + path);
             wellDefined = false;
         }
-        else if (getEnumFromString(MACreature.class, monster) == null)
+        else if (MACreature.fromString(monster) == null)
         {
             MobArena.warning("Invalid monster type '" + monster + "' in " + path);
             wellDefined = false;
@@ -422,7 +422,7 @@ public class WaveUtils
         {
             for (String ability : abilities.split(","))
             {
-                if (BossAbility.fromString(ability.trim().replaceAll("[-_\\.]", "").toUpperCase()) != null)
+                if (BossAbility.fromString(ability.trim()) != null)
                     continue;
 
                 MobArena.warning("Invalid boss ability '" + ability + "' in " + path);

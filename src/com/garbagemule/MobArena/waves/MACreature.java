@@ -22,9 +22,9 @@ public enum MACreature
     WOLF(CreatureType.WOLF),                WOLVES(CreatureType.WOLF),
     
     // Special creatures
-    ZOMBIE_PIGMAN(CreatureType.PIG_ZOMBIE), ZOMBIE_PIGMEN(CreatureType.PIG_ZOMBIE),
-    POWERED_CREEPER(CreatureType.CREEPER),  POWERED_CREEPERS(CreatureType.CREEPER),
-    ANGRY_WOLF(CreatureType.WOLF),          ANGRY_WOLVES(CreatureType.WOLF),
+    ZOMBIEPIGMAN(CreatureType.PIG_ZOMBIE),  ZOMBIEPIGMEN(CreatureType.PIG_ZOMBIE),
+    POWEREDCREEPER(CreatureType.CREEPER),   POWEREDCREEPERS(CreatureType.CREEPER),
+    ANGRYWOLF(CreatureType.WOLF),           ANGRYWOLVES(CreatureType.WOLF),
     HUMAN(CreatureType.MONSTER),            HUMANS(CreatureType.MONSTER),
     GIANT(CreatureType.GIANT),              GIANTS(CreatureType.GIANT),
     GHAST(CreatureType.GHAST),              GHASTS(CreatureType.GHAST),
@@ -37,14 +37,14 @@ public enum MACreature
     SQUID(CreatureType.SQUID),              SQUIDS(CreatureType.SQUID),
     
     // Extended creatures
-    EXPLODING_SHEEP(CreatureType.SHEEP),
+    EXPLODINGSHEEP(CreatureType.SHEEP),
     
     // Slimes
     SLIME(CreatureType.SLIME),              SLIMES(CreatureType.SLIME),
-    SLIME_TINY(CreatureType.SLIME),         SLIMES_TINY(CreatureType.SLIME),
-    SLIME_SMALL(CreatureType.SLIME),        SLIMES_SMALL(CreatureType.SLIME),
-    SLIME_BIG(CreatureType.SLIME),          SLIMES_BIG(CreatureType.SLIME),
-    SLIME_HUGE(CreatureType.SLIME),         SLIMES_HUGE(CreatureType.SLIME);
+    SLIMETINY(CreatureType.SLIME),          SLIMESTINY(CreatureType.SLIME),
+    SLIMESMALL(CreatureType.SLIME),         SLIMESSMALL(CreatureType.SLIME),
+    SLIMEBIG(CreatureType.SLIME),           SLIMESBIG(CreatureType.SLIME),
+    SLIMEHUGE(CreatureType.SLIME),          SLIMESHUGE(CreatureType.SLIME);
     
     private CreatureType type;
     
@@ -60,7 +60,7 @@ public enum MACreature
     
     public static MACreature fromString(String string)
     {
-        return WaveUtils.getEnumFromString(MACreature.class, string);
+        return WaveUtils.getEnumFromString(MACreature.class, string.replaceAll("[-_\\.]", ""));
     }
     
     public LivingEntity spawn(Arena arena, World world, Location loc)
@@ -70,33 +70,33 @@ public enum MACreature
         switch (this)
         {
             case SHEEP:
-            case EXPLODING_SHEEP:
+            case EXPLODINGSHEEP:
                 arena.addExplodingSheep(e);
                 break;
-            case POWERED_CREEPERS:
+            case POWEREDCREEPERS:
                 ((Creeper) e).setPowered(true);
                 break;
-            case ANGRY_WOLVES:
+            case ANGRYWOLVES:
                 ((Wolf) e).setAngry(true);
                 break;
             case SLIME:
             case SLIMES:
                 ((Slime) e).setSize( (1 + MobArena.random.nextInt(3)) );
                 break;
-            case SLIME_TINY:
-            case SLIMES_TINY:
+            case SLIMETINY:
+            case SLIMESTINY:
                 ((Slime) e).setSize(1);
                 break;
-            case SLIME_SMALL:
-            case SLIMES_SMALL:
+            case SLIMESMALL:
+            case SLIMESSMALL:
                 ((Slime) e).setSize(2);
                 break;
-            case SLIME_BIG:
-            case SLIMES_BIG:
+            case SLIMEBIG:
+            case SLIMESBIG:
                 ((Slime) e).setSize(3);
                 break;
-            case SLIME_HUGE:
-            case SLIMES_HUGE:
+            case SLIMEHUGE:
+            case SLIMESHUGE:
                 ((Slime) e).setSize(4);
                 break;
             default:

@@ -874,7 +874,7 @@ public class MAUtils
     {
         if (arena.p1 == null || arena.p2 == null)
             return;
-        
+
         if (arena.p1.getX() > arena.p2.getX())
         {
             double tmp = arena.p1.getX();
