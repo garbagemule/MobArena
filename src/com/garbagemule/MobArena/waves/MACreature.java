@@ -69,7 +69,6 @@ public enum MACreature
         
         switch (this)
         {
-            case SHEEP:
             case EXPLODINGSHEEP:
                 arena.addExplodingSheep(e);
                 break;
