@@ -178,18 +178,18 @@ public class Arena
             p.setHealth(20);
         }
         
+        // Copy the singleWaves Set for polling.
+        singleWavesInstance = new TreeSet<Wave>(singleWaves);
+        
+        // Start spawning monsters (must happen before 'running = true;')
+        startSpawning();
+        startBouncingSheep();
+        
         // Set the boolean.
         running = true;
         
         // Spawn pets (must happen after 'running = true;')
         spawnPets();
-        
-        // Copy the singleWaves Set.
-        singleWavesInstance = new TreeSet<Wave>(singleWaves);
-        
-        // Start spawning monsters.
-        startSpawning();
-        startBouncingSheep();
         
         // Start logging
         log = new ArenaLog(plugin, this);
