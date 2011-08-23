@@ -30,7 +30,8 @@ public class ArenaMaster //implements Master
     // Classes
     protected List<String> classes;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
-    protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
+    protected Map<String,List<String>> classPerms;
+    //protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,Arena> arenaMap;
     
     // Location map
@@ -219,9 +220,10 @@ public class ArenaMaster //implements Master
             config.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             config.setProperty("classes.Chef.armor",   "314,315,316,317");
         }
-        classes      = config.getKeys("classes");
-        classItems   = MAUtils.getClassItems(config, "items");
-        classArmor   = MAUtils.getClassItems(config, "armor");
+        classes    = config.getKeys("classes");
+        classItems = MAUtils.getClassItems(config, "items");
+        classArmor = MAUtils.getClassItems(config, "armor");
+        classPerms = MAUtils.getClassPerms(config);
     }
     
     /**

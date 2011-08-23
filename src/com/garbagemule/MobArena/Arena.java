@@ -40,6 +40,7 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
@@ -72,6 +73,8 @@ public class Arena
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
+    protected Map<String,List<String>> classPerms;
+    protected Map<Player,List<PermissionAttachment>> attachments;
     protected List<ItemStack> entryFee;
 
     // Player sets
@@ -137,6 +140,7 @@ public class Arena
         randoms         = new HashSet<Player>();
         repairables     = new LinkedList<Repairable>();
         containables    = new LinkedList<Repairable>();
+        attachments     = new HashMap<Player,List<PermissionAttachment>>();
         
         running         = false;
         edit            = false;
@@ -176,6 +180,7 @@ public class Arena
         {
             p.teleport(arenaLoc);
             p.setHealth(20);
+            assignClassPermissions(p);
         }
         
         // Copy the singleWaves Set for polling.
@@ -619,6 +624,7 @@ public class Arena
         if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
             return;
         
+        removeClassPermissions(p);
         MAUtils.clearInventory(p);
         restoreInvAndGiveRewards(p);
         
@@ -629,12 +635,10 @@ public class Arena
     public void repairBlocks()
     {
         //long start = System.nanoTime();
-        //System.out.println(start + " - Attempting to repair things...");
         while (!repairQueue.isEmpty())
         {
             repairQueue.poll().repair();
         }
-        //System.out.println(start + " - Repair finished!");
     }
     
     public void queueRepairable(Repairable r)
@@ -691,6 +695,26 @@ public class Arena
         
         assignClass(p, className);
         MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
+    }
+    
+    public void assignClassPermissions(Player p)
+    {
+        Configuration config = plugin.getConfig();
+        String clazz = classMap.get(p);
+        String path  = "classes." + clazz + ".permissions.";
+        
+        List<String> permissions = classPerms.get(classMap.get(p));
+        if (permissions == null || permissions.isEmpty()) return;
+
+        attachments.put(p, new LinkedList<PermissionAttachment>());
+        for (String perm : permissions)
+            attachments.get(p).add(p.addAttachment(plugin, perm, config.getBoolean(path + perm, true)));
+    }
+    
+    public void removeClassPermissions(Player p)
+    {
+        for (PermissionAttachment pa : attachments.get(p))
+            pa.remove();
     }
     
     private void cleanup()
@@ -827,6 +851,7 @@ public class Arena
         classes          = plugin.getAM().classes;
         classItems       = plugin.getAM().classItems;
         classArmor       = plugin.getAM().classArmor;
+        classPerms       = plugin.getAM().classPerms;
         
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
