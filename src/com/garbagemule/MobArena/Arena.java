@@ -713,6 +713,8 @@ public class Arena
     
     public void removeClassPermissions(Player p)
     {
+        if (attachments.get(p) == null) return;
+        
         for (PermissionAttachment pa : attachments.get(p))
             pa.remove();
     }
