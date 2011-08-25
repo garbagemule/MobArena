@@ -249,7 +249,6 @@ public class Arena
         notifyPlayers.clear();
         rewardedPlayers.clear();
         classMap.clear();
-        spawnThread = null;
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
@@ -327,7 +326,7 @@ public class Arena
     
     public void playerLeave(Player p)
     {
-        finishArenaPlayer(p);        
+        finishArenaPlayer(p, false);     
         movePlayerToEntry(p);
         discardPlayer(p);
         
@@ -341,7 +340,7 @@ public class Arena
     
     public void playerDeath(Player p)
     {
-        finishArenaPlayer(p);
+        finishArenaPlayer(p, true);
         
         if (specOnDeath)
         {
@@ -482,7 +481,7 @@ public class Arena
         log.players.get(p).kills++;
     }
     
-    public void restoreInvAndGiveRewards(final Player p)
+    public void restoreInvAndGiveRewardsDelayed(final Player p)
     {        
         final List<ItemStack> rewards = log != null && log.players.get(p) != null ? log.players.get(p).rewards : new LinkedList<ItemStack>();
         final boolean hadRewards = rewardedPlayers.contains(p);
@@ -505,20 +504,22 @@ public class Arena
             });
     }
     
-    public void restoreInvAndGiveRewardz(final Player p, List<ItemStack> rewards, boolean hadRewards)
+    public void restoreInvAndGiveRewards(final Player p)
     {
-        if (!p.isOnline())
-            return;
-        
         if (!emptyInvJoin)
             MAUtils.restoreInventory(p);
         
-        if (hadRewards)
+        if (rewardedPlayers.contains(p))
             return;
+        
+        final List<ItemStack> rewards = (log != null && log.players.get(p) != null) ?
+                                         log.players.get(p).rewards :
+                                         new LinkedList<ItemStack>();
         
         MAUtils.giveRewards(p, rewards, plugin);
         if (running)
-            rewardedPlayers.add(p);}
+            rewardedPlayers.add(p);
+    }
     
     public void storePlayerData(Player p, Location loc)
     {
@@ -617,9 +618,9 @@ public class Arena
     /**
      * Give the player back his inventory and record his last wave.
      * Called when a player dies or leaves prematurely. 
-     * @param p
+     * @param p A player
      */
-    private void finishArenaPlayer(Player p)
+    /*private void finishArenaPlayer(Player p)
     {
         if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
             return;
@@ -627,6 +628,22 @@ public class Arena
         removeClassPermissions(p);
         MAUtils.clearInventory(p);
         restoreInvAndGiveRewards(p);
+        
+        if (log != null && spawnThread != null)
+            log.players.get(p).lastWave = spawnThread.getWave() - 1;
+    }*/
+    
+    private void finishArenaPlayer(Player p, boolean dead)
+    {
+        System.out.println(p.getName() + " in finishArenaPlayer");
+        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
+            return;
+        
+        removeClassPermissions(p);
+        MAUtils.clearInventory(p);
+        
+        if (dead) restoreInvAndGiveRewardsDelayed(p);
+        else      restoreInvAndGiveRewards(p);
         
         if (log != null && spawnThread != null)
             log.players.get(p).lastWave = spawnThread.getWave() - 1;

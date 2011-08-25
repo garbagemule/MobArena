@@ -386,7 +386,7 @@ public class MAUtils
         
         // If the player isn't online, hack the playerName.dat file
         if (!p.isOnline())
-            return writeInventoryData(p, stacks);
+            System.out.println("FUCKKKKKKKKKKKKKKKKKKKKKKKKKK!");//return writeInventoryData(p, stacks);
         
         // Otherwise, restore the inventory directly
         ItemStack[] items = new ItemStack[stacks.length-4];
