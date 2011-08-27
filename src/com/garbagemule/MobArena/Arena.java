@@ -40,6 +40,7 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
@@ -72,6 +73,8 @@ public class Arena
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
+    protected Map<String,List<String>> classPerms;
+    protected Map<Player,List<PermissionAttachment>> attachments;
     protected List<ItemStack> entryFee;
 
     // Player sets
@@ -137,6 +140,7 @@ public class Arena
         randoms         = new HashSet<Player>();
         repairables     = new LinkedList<Repairable>();
         containables    = new LinkedList<Repairable>();
+        attachments     = new HashMap<Player,List<PermissionAttachment>>();
         
         running         = false;
         edit            = false;
@@ -176,6 +180,7 @@ public class Arena
         {
             p.teleport(arenaLoc);
             p.setHealth(20);
+            assignClassPermissions(p);
         }
         
         // Copy the singleWaves Set for polling.
@@ -197,6 +202,7 @@ public class Arena
         
         // Announce and notify.
         MAUtils.tellAll(this, Msg.ARENA_START);
+        
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onArenaStart(this);
         
@@ -244,7 +250,6 @@ public class Arena
         notifyPlayers.clear();
         rewardedPlayers.clear();
         classMap.clear();
-        spawnThread = null;
         
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
@@ -322,7 +327,7 @@ public class Arena
     
     public void playerLeave(Player p)
     {
-        finishArenaPlayer(p);        
+        finishArenaPlayer(p, false);     
         movePlayerToEntry(p);
         discardPlayer(p);
         
@@ -336,7 +341,7 @@ public class Arena
     
     public void playerDeath(Player p)
     {
-        finishArenaPlayer(p);
+        finishArenaPlayer(p, true);
         
         if (specOnDeath)
         {
@@ -477,7 +482,7 @@ public class Arena
         log.players.get(p).kills++;
     }
     
-    public void restoreInvAndGiveRewards(final Player p)
+    public void restoreInvAndGiveRewardsDelayed(final Player p)
     {        
         final List<ItemStack> rewards = log != null && log.players.get(p) != null ? log.players.get(p).rewards : new LinkedList<ItemStack>();
         final boolean hadRewards = rewardedPlayers.contains(p);
@@ -500,20 +505,22 @@ public class Arena
             });
     }
     
-    public void restoreInvAndGiveRewardz(final Player p, List<ItemStack> rewards, boolean hadRewards)
+    public void restoreInvAndGiveRewards(final Player p)
     {
-        if (!p.isOnline())
-            return;
-        
         if (!emptyInvJoin)
             MAUtils.restoreInventory(p);
         
-        if (hadRewards)
+        if (rewardedPlayers.contains(p))
             return;
+        
+        final List<ItemStack> rewards = (log != null && log.players.get(p) != null) ?
+                                         log.players.get(p).rewards :
+                                         new LinkedList<ItemStack>();
         
         MAUtils.giveRewards(p, rewards, plugin);
         if (running)
-            rewardedPlayers.add(p);}
+            rewardedPlayers.add(p);
+    }
     
     public void storePlayerData(Player p, Location loc)
     {
@@ -612,15 +619,19 @@ public class Arena
     /**
      * Give the player back his inventory and record his last wave.
      * Called when a player dies or leaves prematurely. 
-     * @param p
-     */
-    private void finishArenaPlayer(Player p)
+     * @param p A player
+     * @param dead If the player died or not
+     */    
+    private void finishArenaPlayer(Player p, boolean dead)
     {
         if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
             return;
         
+        removeClassPermissions(p);
         MAUtils.clearInventory(p);
-        restoreInvAndGiveRewards(p);
+        
+        if (dead) restoreInvAndGiveRewardsDelayed(p);
+        else      restoreInvAndGiveRewards(p);
         
         if (log != null && spawnThread != null)
             log.players.get(p).lastWave = spawnThread.getWave() - 1;
@@ -629,12 +640,10 @@ public class Arena
     public void repairBlocks()
     {
         //long start = System.nanoTime();
-        //System.out.println(start + " - Attempting to repair things...");
         while (!repairQueue.isEmpty())
         {
             repairQueue.poll().repair();
         }
-        //System.out.println(start + " - Repair finished!");
     }
     
     public void queueRepairable(Repairable r)
@@ -691,6 +700,29 @@ public class Arena
         
         assignClass(p, className);
         MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
+    }
+    
+    public void assignClassPermissions(Player p)
+    {
+        Configuration config = plugin.getConfig();
+        String clazz = classMap.get(p);
+        String path  = "classes." + clazz + ".permissions.";
+        
+        List<String> permissions = classPerms.get(classMap.get(p));
+        if (permissions == null || permissions.isEmpty()) return;
+
+        attachments.put(p, new LinkedList<PermissionAttachment>());
+        for (String perm : permissions)
+            attachments.get(p).add(p.addAttachment(plugin, perm, config.getBoolean(path + perm, true)));
+    }
+    
+    public void removeClassPermissions(Player p)
+    {
+        if (attachments.get(p) == null) return;
+        
+        for (PermissionAttachment pa : attachments.get(p))
+            if (pa != null)
+                pa.remove();
     }
     
     private void cleanup()
@@ -827,6 +859,7 @@ public class Arena
         classes          = plugin.getAM().classes;
         classItems       = plugin.getAM().classItems;
         classArmor       = plugin.getAM().classArmor;
+        classPerms       = plugin.getAM().classPerms;
         
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
@@ -1194,7 +1227,8 @@ public class Arena
             // Economy money
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
             {
-                if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).hasEnough(stack.getAmount()))                
+                //if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).hasEnough(stack.getAmount()))                
+                if (plugin.Methods.hasMethod() && !(plugin.Method.getAccount(p.getName()).balance() >= stack.getAmount()))
                     return false;
             }
             // Normal stack
@@ -1253,9 +1287,9 @@ public class Arena
             MAUtils.tellPlayer(p, Msg.JOIN_TOO_FAR);
         else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
-        /*else if (!canAfford(p) || !takeFee(p))
+        else if (!canAfford(p))// || !takeFee(p))
             MAUtils.tellPlayer(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
-        else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
+        /*else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
         else if (!emptyInvJoin && !MAUtils.storeInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_STORE_INV_FAIL);*/

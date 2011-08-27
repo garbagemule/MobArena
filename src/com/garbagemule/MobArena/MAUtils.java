@@ -205,6 +205,18 @@ public class MAUtils
         return result;
     }
     
+    public static Map<String,List<String>> getClassPerms(Configuration config)
+    {
+        Map<String,List<String>> result = new HashMap<String,List<String>>();
+        List<String> classes = config.getKeys("classes");
+        if (classes == null) return result;
+        
+        for (String c : classes)
+            result.put(c, config.getKeys("classes." + c + ".permissions"));
+        
+        return result;
+    }
+    
     public static List<ItemStack> getEntryFee(Configuration config, String arena)
     {
         return makeItemStackList(config.getString("arenas." + arena + ".settings.entry-fee", null));
@@ -374,7 +386,7 @@ public class MAUtils
         
         // If the player isn't online, hack the playerName.dat file
         if (!p.isOnline())
-            return writeInventoryData(p, stacks);
+            System.out.println("FUCKKKKKKKKKKKKKKKKKKKKKKKKKK!");//return writeInventoryData(p, stacks);
         
         // Otherwise, restore the inventory directly
         ItemStack[] items = new ItemStack[stacks.length-4];

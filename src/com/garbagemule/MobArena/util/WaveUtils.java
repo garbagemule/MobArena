@@ -244,7 +244,7 @@ public class WaveUtils
                 wellDefined = false;
             }
             // OPTIONAL: Wave
-            int wave = config.getInt(path + "wave", 0);
+            int wave = config.getInt(path + "wave", frequency);
             if (wave < 0)
             {
                 MobArena.warning("'wave' must be greater than 0 in " + path);

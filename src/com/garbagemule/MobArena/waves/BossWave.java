@@ -101,6 +101,13 @@ public class BossWave extends AbstractWave
                 
                 public void run()
                 {
+                    // Check to see if the boss is still alive. If not, end this boss wave.
+                    if (bossCreature.isDead())
+                    {
+                        clear();
+                        return;
+                    }
+                    
                     // Grab the next ability
                     BossAbility ability = abilities.get(counter % abilityCount);
                     

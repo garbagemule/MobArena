@@ -6,12 +6,12 @@ import org.bukkit.entity.Player;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 import com.garbagemule.MobArena.waves.Wave.WaveType;
 
-public class MobArenaListener
+public abstract class MobArenaListener
 {
     protected MobArena plugin;
     
     public MobArenaListener()
-    {       
+    {
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
         plugin.getAM().listeners.add(this);
     }
