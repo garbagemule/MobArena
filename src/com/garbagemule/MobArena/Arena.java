@@ -202,6 +202,7 @@ public class Arena
         
         // Announce and notify.
         MAUtils.tellAll(this, Msg.ARENA_START);
+        
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onArenaStart(this);
         
@@ -619,23 +620,10 @@ public class Arena
      * Give the player back his inventory and record his last wave.
      * Called when a player dies or leaves prematurely. 
      * @param p A player
-     */
-    /*private void finishArenaPlayer(Player p)
-    {
-        if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
-            return;
-        
-        removeClassPermissions(p);
-        MAUtils.clearInventory(p);
-        restoreInvAndGiveRewards(p);
-        
-        if (log != null && spawnThread != null)
-            log.players.get(p).lastWave = spawnThread.getWave() - 1;
-    }*/
-    
+     * @param dead If the player died or not
+     */    
     private void finishArenaPlayer(Player p, boolean dead)
     {
-        System.out.println(p.getName() + " in finishArenaPlayer");
         if (!arenaPlayers.contains(p) && !lobbyPlayers.contains(p))
             return;
         
@@ -733,7 +721,8 @@ public class Arena
         if (attachments.get(p) == null) return;
         
         for (PermissionAttachment pa : attachments.get(p))
-            pa.remove();
+            if (pa != null)
+                pa.remove();
     }
     
     private void cleanup()
@@ -1238,7 +1227,8 @@ public class Arena
             // Economy money
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
             {
-                if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).hasEnough(stack.getAmount()))                
+                //if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).hasEnough(stack.getAmount()))                
+                if (plugin.Methods.hasMethod() && !(plugin.Method.getAccount(p.getName()).balance() >= stack.getAmount()))
                     return false;
             }
             // Normal stack
@@ -1297,9 +1287,9 @@ public class Arena
             MAUtils.tellPlayer(p, Msg.JOIN_TOO_FAR);
         else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
-        /*else if (!canAfford(p) || !takeFee(p))
+        else if (!canAfford(p))// || !takeFee(p))
             MAUtils.tellPlayer(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
-        else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
+        /*else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
         else if (!emptyInvJoin && !MAUtils.storeInventory(p))
             MAUtils.tellPlayer(p, Msg.JOIN_STORE_INV_FAIL);*/
