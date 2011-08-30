@@ -22,6 +22,8 @@ public class RepairableAttachable extends RepairableBlock
         x = attached.getX();
         y = attached.getY();
         z = attached.getZ();
+        
+        state.getBlock().setTypeId(1);
     }
 
     public void repair()

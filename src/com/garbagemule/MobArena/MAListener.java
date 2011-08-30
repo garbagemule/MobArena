@@ -212,10 +212,7 @@ public class MAListener implements ArenaListener
             else if (state.getData() instanceof Door)
                 r = new RepairableDoor(state);
             else if (state.getData() instanceof Attachable || state.getData() instanceof Redstone)
-            {
                 r = new RepairableAttachable(state);
-                b.setTypeId(1);
-            }
             else
                 r = new RepairableBlock(state);
             
