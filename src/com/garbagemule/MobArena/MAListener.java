@@ -64,10 +64,6 @@ public class MAListener implements ArenaListener
     {
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.softRestore)
             return;
-        
-        MaterialData data = event.getBlock().getState().getData();
-        if (data instanceof Attachable || data instanceof Bed || data instanceof Door || data instanceof Redstone)
-            event.setCancelled(true);
     }
     */
     
@@ -216,7 +212,10 @@ public class MAListener implements ArenaListener
             else if (state.getData() instanceof Door)
                 r = new RepairableDoor(state);
             else if (state.getData() instanceof Attachable || state.getData() instanceof Redstone)
+            {
                 r = new RepairableAttachable(state);
+                b.setTypeId(1);
+            }
             else
                 r = new RepairableBlock(state);
             
