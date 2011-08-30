@@ -19,7 +19,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
@@ -44,7 +43,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
 import org.bukkit.material.Redstone;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
@@ -61,6 +59,7 @@ public class MAListener implements ArenaListener
         this.plugin = plugin;
     }
     
+    /*
     public void onBlockPhysics(BlockPhysicsEvent event)
     {
         if (!arena.inRegion(event.getBlock().getLocation()) || arena.softRestore)
@@ -70,6 +69,7 @@ public class MAListener implements ArenaListener
         if (data instanceof Attachable || data instanceof Bed || data instanceof Door || data instanceof Redstone)
             event.setCancelled(true);
     }
+    */
     
     public void onBlockBreak(BlockBreakEvent event)
     {
@@ -270,7 +270,7 @@ public class MAListener implements ArenaListener
             if (damager instanceof Player)
                 arena.playerKill((Player) damager);
             
-            event.getDrops().clear();
+            event.getDrops().clear();            
             arena.resetIdleTimer();
             return;
         }
@@ -355,7 +355,7 @@ public class MAListener implements ArenaListener
                 
                 // Subtract boss health, and reset actual entity health
                 arena.bossWave.subtractHealth(event.getDamage());
-                arena.bossWave.getEntity().setHealth(200);
+                arena.bossWave.getEntity().setHealth(100);
                 
                 // Set damage to 1 for knockback and feedback
                 event.setDamage(1);

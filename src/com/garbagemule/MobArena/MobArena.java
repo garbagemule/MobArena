@@ -121,7 +121,6 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
         pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_BURN,                blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
-        pm.registerEvent(Event.Type.BLOCK_PHYSICS,             blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE,              blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT,           playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM,          playerListener,   Priority.Normal,  this);
@@ -153,7 +152,7 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
             return p.hasPermission(s);
         
         // Otherwise, only allow commands that aren't admin/setup commands.
-        return !s.matches("^.*\\.setup\\..*$") && !s.matches("^.*\\.admin\\..*$");
+        return !s.matches("^mobarena\\.setup\\..*$") && !s.matches("^mobarena\\.admin\\..*$");
     }
     
     // Console printing
