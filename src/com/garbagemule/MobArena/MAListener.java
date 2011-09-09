@@ -326,7 +326,7 @@ public class MAListener implements ArenaListener
             event.setCancelled(true);
         
         // If PvP is disabled and damager is a player, cancel damage
-        else if (damager instanceof Player && !arena.pvp)
+        else if (!arena.pvp && (damager instanceof Player || (damager instanceof Projectile && ((Projectile) damager).getShooter() instanceof Player)))
             event.setCancelled(true);
         
         // Log damage
