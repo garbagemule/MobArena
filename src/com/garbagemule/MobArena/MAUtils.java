@@ -386,7 +386,7 @@ public class MAUtils
         
         // If the player isn't online, hack the playerName.dat file
         if (!p.isOnline())
-            System.out.println("FUCKKKKKKKKKKKKKKKKKKKKKKKKKK!");//return writeInventoryData(p, stacks);
+            System.out.println("THE WORLD IS GOING TO END! SOMETHING IS WRONG!");//return writeInventoryData(p, stacks);
         
         // Otherwise, restore the inventory directly
         ItemStack[] items = new ItemStack[stacks.length-4];
@@ -1026,6 +1026,16 @@ public class MAUtils
         }
         
         return false;
+    }
+    
+    public static int getInt(Configuration config, String path)
+    {
+        Object o = config.getProperty(path);
+        
+        if (o instanceof Integer)
+            return (Integer) o;
+        
+        return 0;
     }
     
     

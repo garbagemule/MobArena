@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.waves.*;
 import com.garbagemule.MobArena.waves.Wave.*;
@@ -174,7 +175,8 @@ public class WaveUtils
         {
             int frequency = config.getInt(path + "frequency", 0);
             int priority = config.getInt(path + "priority", 0);
-            int wave = config.getInt(path + "wave", frequency);
+            int wave = MAUtils.getInt(config, path + "wave");
+            //int wave = config.getInt(path + "wave", frequency);
             
             if (type == WaveType.DEFAULT)
             	result = new DefaultWave(arena, name, wave, frequency, priority, config, path);
@@ -187,7 +189,8 @@ public class WaveUtils
         }
         else
         {
-            int wave = config.getInt(path + "wave", 0);
+            int wave = MAUtils.getInt(config, path + "wave");
+            //int wave = config.getInt(path + "wave", 0);
             
             if (type == WaveType.DEFAULT)
             	result = new DefaultWave(arena, name, wave, config, path);
@@ -244,7 +247,8 @@ public class WaveUtils
                 wellDefined = false;
             }
             // OPTIONAL: Wave
-            int wave = config.getInt(path + "wave", frequency);
+            int wave = MAUtils.getInt(config, path + "wave");
+            //int wave = config.getInt(path + "wave", frequency);
             if (wave < 0)
             {
                 MobArena.warning("'wave' must be greater than 0 in " + path);
@@ -254,7 +258,8 @@ public class WaveUtils
         else if (branch == WaveBranch.SINGLE)
         {
             // REQUIRED: Wave number
-            int wave = config.getInt(path + "wave", 0);
+            int wave = MAUtils.getInt(config, path + "wave");
+            //int wave = config.getInt(path + "wave", 0);
             if (wave == 0)
             {
                 MobArena.warning("Missing 'wave'-node in " + path);

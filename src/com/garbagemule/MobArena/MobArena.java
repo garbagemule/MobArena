@@ -21,14 +21,12 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
-//import com.garbagemule.ArenaPlugin.ArenaPlugin;
-//import com.garbagemule.ArenaPlugin.Master;
 
 /**
  * MobArena
  * @author garbagemule
  */
-public class MobArena extends JavaPlugin// implements ArenaPlugin
+public class MobArena extends JavaPlugin
 {
     private Configuration config;
     private ArenaMaster am;
@@ -120,7 +118,6 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
         // Register events.
         pm.registerEvent(Event.Type.BLOCK_BREAK,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_BURN,                blockListener,    Priority.Highest, this);
-        //pm.registerEvent(Event.Type.BLOCK_PHYSICS,             blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE,              blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT,           playerListener,   Priority.Normal,  this);
@@ -145,8 +142,8 @@ public class MobArena extends JavaPlugin// implements ArenaPlugin
     public boolean has(Player p, String s)
     {
         // First check for NijikoPerms
-        if (permissionHandler != null)
-            return permissionHandler.has(p, s);
+        //if (permissionHandler != null)
+        //    return permissionHandler.has(p, s);
         
         // If the permission is set, check if player has permission
         if (p.isPermissionSet(s))

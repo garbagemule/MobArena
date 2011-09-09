@@ -37,6 +37,10 @@ public class SpecialWave extends NormalWave
         // Get the valid spawnpoints, and initialize counter
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());
         
+        // Strike some lightning!
+        for (Location loc : validSpawnpoints)
+            getWorld().strikeLightningEffect(loc);
+        
         // Spawn all the monsters
         spawnAll(getMonstersToSpawn(getArena().getPlayerCount()), validSpawnpoints);
 	}

@@ -11,6 +11,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
@@ -243,34 +244,51 @@ public class MAListener implements ArenaListener
             }, arena.repairDelay);
     }
 
+    
+    /******************************************************
+     * 
+     *              DEATH LISTENERS
+     *  
+     ******************************************************/
+    
     public void onEntityDeath(EntityDeathEvent event)
-    {        
+    {
         if (event.getEntity() instanceof Player)
-        {
-            Player p = (Player) event.getEntity();
-            
-            if (!arena.arenaPlayers.contains(p))
-                return;
-            
-            event.getDrops().clear();
-            arena.playerDeath(p);
-            return;
-        }
+            onPlayerDeath(event, (Player) event.getEntity());
         
-        if (arena.monsters.remove(event.getEntity()))
+        else if (arena.monsters.remove(event.getEntity()))
+            onMonsterDeath(event);
+    }
+    
+    private void onPlayerDeath(EntityDeathEvent event, Player player)
+    {
+        if (arena.arenaPlayers.contains(player) || arena.lobbyPlayers.contains(player))
         {
-            EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
-            EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
-            Entity damager = (e2 != null) ? e2.getDamager() : null;
-            
-            if (damager instanceof Player)
-                arena.playerKill((Player) damager);
-            
-            event.getDrops().clear();            
-            arena.resetIdleTimer();
-            return;
+            event.getDrops().clear();
+            arena.playerDeath(player);
         }
     }
+    
+    private void onMonsterDeath(EntityDeathEvent event)
+    {
+        EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
+        EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
+        Entity damager = (e2 != null) ? e2.getDamager() : null;
+        
+        if (damager instanceof Player)
+            arena.playerKill((Player) damager);
+        
+        event.getDrops().clear();            
+        arena.resetIdleTimer();
+        return;
+    }
+
+    
+    /******************************************************
+     * 
+     *              DAMAGE LISTENERS
+     *  
+     ******************************************************/
 
     public void onEntityDamage(EntityDamageEvent event)
     {
@@ -282,91 +300,108 @@ public class MAListener implements ArenaListener
         
         // Pet wolf
         if (damagee instanceof Wolf && arena.pets.contains(damagee))
-        {            
-            if (damager == null)
-            {
-                damagee.setFireTicks(32768);
-                event.setCancelled(true);
-                return;
-            }
-            else if (damager instanceof Player)
-                event.setCancelled(true);
-            else
-                event.setDamage(0);
-            
-            return;
-        }
-        // Arena player
+            onPetDamage(event, (Wolf) damagee, damager);
+        
+        // Player
         else if (damagee instanceof Player)
-        {
-            if (arena.lobbyPlayers.contains(damagee))
-                event.setCancelled(true);
-            else if (!arena.arenaPlayers.contains(damagee))
-                return;
-            else if (!arena.detDamage && event.getCause() == DamageCause.BLOCK_EXPLOSION)
-                event.setCancelled(true);
-            else if (damager instanceof Player && !arena.pvp)
-            {
-                // if 'inLobby' fails, and 'not inArena' fails, 'inArena' is true
-                event.setCancelled(true);
-                return;
-            }
-            
-            if (!event.isCancelled())
-                arena.log.players.get((Player) damagee).dmgTaken += event.getDamage();
-        }
-        // Other LivingEntity
+            onPlayerDamage(event, (Player) damagee, damager);
+        
+        // Monster
         else if (arena.monsters.contains(damagee))
-        {            
-            if (damager instanceof Player)
+            onMonsterDamage(event, damagee, damager);
+    }
+    
+    private void onPlayerDamage(EntityDamageEvent event, Player player, Entity damager)
+    {
+        // Cancel all damage in the lobby
+        if (arena.lobbyPlayers.contains(player))
+            event.setCancelled(true);
+        
+        // If not in the lobby or the arena, return
+        else if (!arena.arenaPlayers.contains(player))
+            return;
+        
+        // Cancel block explosion damage if detonate-damage: false
+        else if (!arena.detDamage && event.getCause() == DamageCause.BLOCK_EXPLOSION)
+            event.setCancelled(true);
+        
+        // If PvP is disabled and damager is a player, cancel damage
+        else if (damager instanceof Player && !arena.pvp)
+            event.setCancelled(true);
+        
+        // Log damage
+        if (!event.isCancelled())
+            arena.log.players.get(player).dmgTaken += event.getDamage();
+    }
+    
+    private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager)
+    {
+        if (damager == null)
+        {
+            if (arena.hellhounds)
+                pet.setFireTicks(32768);
+            
+            event.setCancelled(true);
+        }
+        
+        // Cancel player and projectile damage
+        else if (damager instanceof Player || damager instanceof Projectile)
+            event.setCancelled(true);
+        
+        // Set damage to 0 for knockbacks from monsters
+        else event.setDamage(0);
+    }
+    
+    private void onMonsterDamage(EntityDamageEvent event, Entity monster, Entity damager)
+    {
+        if (damager instanceof Player)
+        {
+            if (!arena.arenaPlayers.contains(damager))
             {
-                if (!arena.arenaPlayers.contains(damager))
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                
-                arena.log.players.get((Player) damager).dmgDone += event.getDamage();
-                arena.log.players.get((Player) damager).hits++;
-            }
-            else if (damager instanceof Wolf && arena.pets.contains(damager))
-            {                
-                event.setDamage(1);
-                arena.log.players.get((Player) ((Wolf) damager).getOwner()).dmgDone += event.getDamage();
-            }
-            else if (damager instanceof LivingEntity)
-            {
-                if (!arena.monsterInfight)
-                    event.setCancelled(true);
+                event.setCancelled(true);
+                return;
             }
             
-            // Boss
-            if (arena.bossWave != null && damagee.equals(arena.bossWave.getEntity()))
+            arena.log.players.get((Player) damager).dmgDone += event.getDamage();
+            arena.log.players.get((Player) damager).hits++;
+        }
+        else if (damager instanceof Wolf && arena.pets.contains(damager))
+        {                
+            event.setDamage(1);
+            arena.log.players.get((Player) ((Wolf) damager).getOwner()).dmgDone += event.getDamage();
+        }
+        else if (damager instanceof LivingEntity)
+        {
+            if (!arena.monsterInfight)
+                event.setCancelled(true);
+        }
+        
+        // Boss
+        if (arena.bossWave != null && monster.equals(arena.bossWave.getEntity()))
+        {
+            if (event.getCause() == DamageCause.LIGHTNING)
             {
-                if (event.getCause() == DamageCause.LIGHTNING)
-                {
-                    event.setCancelled(true);
-                    return;
-                }
-                
-                // Subtract boss health, and reset actual entity health
-                arena.bossWave.subtractHealth(event.getDamage());
-                arena.bossWave.getEntity().setHealth(100);
-                
-                // Set damage to 1 for knockback and feedback
-                event.setDamage(1);
-                
-                // If the boss is dead, remove the entity and create an explosion!
-                if (arena.bossWave.getHealth() <= 0)
-                {
-                    arena.bossWave.clear();
-                    arena.bossWave = null;
-                }
-                else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
-                {
-                    MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH);
-                    arena.bossWave.setLowHealthAnnounced(true);
-                }
+                event.setCancelled(true);
+                return;
+            }
+            
+            // Subtract boss health, and reset actual entity health
+            arena.bossWave.subtractHealth(event.getDamage());
+            arena.bossWave.getEntity().setHealth(100);
+            
+            // Set damage to 1 for knockback and feedback
+            event.setDamage(1);
+            
+            // If the boss is dead, remove the entity and create an explosion!
+            if (arena.bossWave.getHealth() <= 0)
+            {
+                arena.bossWave.clear();
+                arena.bossWave = null;
+            }
+            else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
+            {
+                MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH);
+                arena.bossWave.setLowHealthAnnounced(true);
             }
         }
     }

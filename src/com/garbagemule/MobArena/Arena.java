@@ -213,7 +213,11 @@ public class Arena
     {
         // Sanity-checks.
         if (!running || !arenaPlayers.isEmpty())
+        {
+            //System.out.println("Arena was not ended, playercount: " + arenaPlayers.size());
             return false;
+        }
+        //else System.out.println("Arena ending...");
         
         // Set the boolean.
         running = false;
@@ -423,6 +427,7 @@ public class Arena
             sheepTaskId = -1;
             spawnThread = null;
         }
+        else System.out.println("--------- THE SPAWNTHREAD IS NULL! ----------");
         
         // Restore spawn flags.
         MAUtils.setSpawnFlags(plugin, world, spawnMonsters, allowMonsters, allowAnimals);
@@ -639,11 +644,8 @@ public class Arena
     
     public void repairBlocks()
     {
-        //long start = System.nanoTime();
         while (!repairQueue.isEmpty())
-        {
             repairQueue.poll().repair();
-        }
     }
     
     public void queueRepairable(Repairable r)
@@ -1289,10 +1291,6 @@ public class Arena
             MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
         else if (!canAfford(p))// || !takeFee(p))
             MAUtils.tellPlayer(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
-        /*else if (emptyInvJoin && !MAUtils.hasEmptyInventory(p))
-            MAUtils.tellPlayer(p, Msg.JOIN_EMPTY_INV);
-        else if (!emptyInvJoin && !MAUtils.storeInventory(p))
-            MAUtils.tellPlayer(p, Msg.JOIN_STORE_INV_FAIL);*/
         else return true;
         
         return false;
