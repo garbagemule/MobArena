@@ -1063,6 +1063,11 @@ public class Arena
     {
         return world;
     }
+    
+    public boolean isPvpEnabled()
+    {
+        return pvp;
+    }
 
     public void setBossWave(BossWave bossWave)
     {
