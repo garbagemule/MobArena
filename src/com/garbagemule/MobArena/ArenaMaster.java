@@ -207,7 +207,8 @@ public class ArenaMaster //implements Master
      */
     public void loadClasses()
     {
-        if (config.getKeys("classes") == null)
+        classes = config.getKeys("classes");
+        if (classes == null)
         {
             config.setProperty("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
             config.setProperty("classes.Archer.armor", "298,299,300,301");
@@ -219,8 +220,8 @@ public class ArenaMaster //implements Master
             config.setProperty("classes.Oddjob.armor", "298,299,300,301");
             config.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             config.setProperty("classes.Chef.armor",   "314,315,316,317");
+            classes = config.getKeys("classes");
         }
-        classes    = config.getKeys("classes");
         classItems = MAUtils.getClassItems(config, "items");
         classArmor = MAUtils.getClassItems(config, "armor");
         classPerms = MAUtils.getClassPerms(config);
