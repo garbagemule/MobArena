@@ -53,6 +53,8 @@ import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 
+import com.herocraftonline.dev.heroes.persistence.Hero;
+
 public class Arena
 {
     private MobArena plugin;
@@ -179,6 +181,11 @@ public class Arena
         for (Player p : arenaPlayers)
         {
             p.teleport(arenaLoc);
+            if (plugin.getHeroManager() != null)
+            {
+                Hero hero = plugin.getHeroManager().getHero(p);
+                hero.setHealth(hero.getMaxHealth());
+            }
             p.setHealth(20);
             assignClassPermissions(p);
         }
@@ -308,6 +315,11 @@ public class Arena
     {
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
+        if (plugin.getHeroManager() != null)
+        {
+            Hero hero = plugin.getHeroManager().getHero(p);
+            hero.setHealth(hero.getMaxHealth());
+        }
         p.setHealth(20);
         movePlayerToLobby(p);
         
@@ -594,7 +606,15 @@ public class Arena
     private void clearPlayer(Player p)
     {
         if (healthMap.containsKey(p))
-            p.setHealth(healthMap.remove(p));
+        {
+            int health = healthMap.remove(p);
+            p.setHealth(health);
+            if (plugin.getHeroManager() != null)
+            {
+                Hero hero = plugin.getHeroManager().getHero(p);
+                hero.setHealth(health * hero.getMaxHealth() / 20);
+            }
+        }
 
         // Put out fire.
         p.setFireTicks(0);

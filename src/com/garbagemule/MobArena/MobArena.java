@@ -16,11 +16,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
 
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
+//import com.nijiko.permissions.PermissionHandler;
+//import com.nijikokun.bukkit.Permissions.Permissions;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
+
+import com.herocraftonline.dev.heroes.Heroes;
+import com.herocraftonline.dev.heroes.persistence.HeroManager;
 
 /**
  * MobArena
@@ -32,7 +35,10 @@ public class MobArena extends JavaPlugin
     private ArenaMaster am;
     
     // Permissions stuff
-    private PermissionHandler permissionHandler;
+    //private PermissionHandler permissionHandler;
+    
+    // Heroes stuff
+    private HeroManager heroManager = null;
     
     // Economy stuff
     protected Methods Methods;
@@ -64,9 +70,10 @@ public class MobArena extends JavaPlugin
         FileUtils.fetchLibs(config);
         
         // Set up permissions and economy
-        setupPermissions();
+        //setupPermissions();
         setupRegister();
         setupSpout();
+        setupHeroes();
         
         // Set up the ArenaMaster and the announcements
         am = new ArenaMaster(this);
@@ -158,7 +165,7 @@ public class MobArena extends JavaPlugin
     public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
     public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
     
-    private void setupPermissions()
+    /*private void setupPermissions()
     {
         if (permissionHandler != null)
             return;
@@ -167,7 +174,7 @@ public class MobArena extends JavaPlugin
         if (permissionsPlugin == null) return;
         
         permissionHandler = ((Permissions) permissionsPlugin).getHandler();
-    }
+    }*/
     
     private void setupRegister()
     {
@@ -188,9 +195,22 @@ public class MobArena extends JavaPlugin
         hasSpout = spoutPlugin != null;
     }
     
+    private void setupHeroes()
+    {
+        Plugin heroes = this.getServer().getPluginManager().getPlugin("Heroes");
+        if (heroes == null) return;
+        
+        heroManager = ((Heroes) heroes).getHeroManager();
+    }
+    
     public Configuration getConfig()      { return config; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
+    
+    public HeroManager getHeroManager()
+    {
+        return heroManager;
+    }
     
     private String getHeader()
     {
