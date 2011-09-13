@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,13 +41,6 @@ import org.getspout.spoutapi.player.SpoutPlayer;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.InventoryItem;
-import com.garbagemule.MobArena.util.jnbt.ByteTag;
-import com.garbagemule.MobArena.util.jnbt.CompoundTag;
-import com.garbagemule.MobArena.util.jnbt.ListTag;
-import com.garbagemule.MobArena.util.jnbt.NBTInputStream;
-import com.garbagemule.MobArena.util.jnbt.NBTOutputStream;
-import com.garbagemule.MobArena.util.jnbt.ShortTag;
-import com.garbagemule.MobArena.util.jnbt.Tag;
 
 public class MAUtils
 {         
@@ -436,92 +428,6 @@ public class MAUtils
         }
     }
     
-    public static ItemStack[] readInventoryData(Player p)
-    {
-        // Grab the data dir <world>/players/
-        File playerDir = new File(Bukkit.getServer().getWorlds().get(0).getName(), "players");
-        
-        try
-        {
-            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(playerDir, p.getName() + ".dat")));
-            CompoundTag tag = (CompoundTag) in.readTag();
-            in.close();
-
-            ListTag inventory = (ListTag) tag.getValue().get("Inventory");
-            
-            ItemStack[] stacks = new ItemStack[40];
-            for (int i = 0; i < inventory.getValue().size(); i++)
-            {
-                CompoundTag item = (CompoundTag) inventory.getValue().get(i);
-                byte count = ((ByteTag)     item.getValue().get("Count")).getValue();
-                byte slot = ((ByteTag)      item.getValue().get("Slot")).getValue();
-                short damage = ((ShortTag)  item.getValue().get("Damage")).getValue();
-                short id = ((ShortTag)      item.getValue().get("id")).getValue();
-                stacks[slot < 36 ? slot : 36 + 103-slot] = new ItemStack(id, count, damage);
-            }
-            return stacks;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            MobArena.warning("Could not restore inventory for " + p.getName());
-            return null;
-        }
-    }
-    
-    public static boolean writeInventoryData(Player p, ItemStack[] stacks)
-    {
-        // Abort if stacks is null
-        if (stacks == null) return false;
-        
-        // Grab the data dir <world>/players/
-        File playerDir = new File(Bukkit.getServer().getWorlds().get(0).getName(), "players");
-        
-        try
-        {
-            NBTInputStream in = new NBTInputStream(new FileInputStream(new File(playerDir, p.getName() + ".dat")));
-            CompoundTag tag = (CompoundTag) in.readTag();
-            in.close();
-
-            ArrayList<Tag> tagList = new ArrayList<Tag>();
-            
-            for (int i = 0; i < stacks.length; i++)
-            {
-                if (stacks[i] == null) continue;
-
-                ByteTag count = new ByteTag("Count", (byte) stacks[i].getAmount());
-                ByteTag slot = new ByteTag("Slot", (byte) (i < 36 ? i : 104-(stacks.length-i)));
-                ShortTag damage = new ShortTag("Damage", stacks[i].getDurability());
-                ShortTag id = new ShortTag("id", (short) stacks[i].getTypeId());
-
-                HashMap<String, Tag> tagMap = new HashMap<String, Tag>();
-                tagMap.put("Count", count);
-                tagMap.put("Slot", slot);
-                tagMap.put("Damage", damage);
-                tagMap.put("id", id);
-
-                tagList.add(new CompoundTag("", tagMap));
-            }
-            
-            ListTag inventory = new ListTag("Inventory", CompoundTag.class, tagList);
-
-            HashMap<String, Tag> tagCompound = new HashMap<String, Tag>(tag.getValue());
-            tagCompound.put("Inventory", inventory);
-            tag = new CompoundTag("Player", tagCompound);
-
-            NBTOutputStream out = new NBTOutputStream(new FileOutputStream(new File(playerDir, p.getName() + ".dat")));
-            out.writeTag(tag);
-            out.close();
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            MobArena.warning("Could not restore inventory for " + p.getName());
-            return false;
-        }
-    }
-    
     /* Checks if all inventory and armor slots are empty. */
     public static boolean hasEmptyInventory(Player p)
     {
@@ -547,33 +453,7 @@ public class MAUtils
         if (stacks == null)
             return;
         
-        // If the player isn't online, write directly to their data file.
-        if (!p.isOnline())
-        {
-            ItemStack[] items = readInventoryData(p);
-            int currentSlot = 0;
-            for (ItemStack stack : stacks)
-            {
-                // Skip money rewards for now. TODO: Make this work as well
-                if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
-                    continue;
-                
-                // Find the first available slot
-                while (currentSlot < items.length && items[currentSlot] != null)
-                    currentSlot++;
-                
-                if (currentSlot >= items.length)
-                    break;
-                
-                items[currentSlot] = stack;
-            }
-            
-            // Write the data
-            writeInventoryData(p, items);
-            return;
-        }
-        
-        // Otherwise, give the player some items!
+        // Give the player some items!
         PlayerInventory inv = p.getInventory();
         for (ItemStack stack : stacks)
         {
@@ -608,7 +488,6 @@ public class MAUtils
                 stack.setDurability(Short.MIN_VALUE);
 
             giveItem(inv, stack);
-            //inv.addItem(stack);
         }
     }
     
