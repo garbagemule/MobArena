@@ -90,7 +90,7 @@ public abstract class AbstractWave implements Wave
         
         // Boost health
         int health = (int) Math.min(150D, e.getHealth() * healthMultiplier);
-        e.setHealth(Math.min(1, health));
+        e.setHealth(Math.max(1, health));
 
         // Grab a random target.
         if (e instanceof Creature)
