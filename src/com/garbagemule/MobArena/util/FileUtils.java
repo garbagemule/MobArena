@@ -183,15 +183,15 @@ public class FileUtils
             extractFile(MobArena.dir, filename);
     }
     
-    public static void extractFile(File dir, String filename)
+    public static File extractFile(File dir, String filename)
     {
         // Skip if file exists
         File file = new File(dir, filename);
-        if (file.exists()) return;
+        if (file.exists()) return file;
         
         // Skip if there is no resource with that name
         InputStream in = MobArena.class.getResourceAsStream("/res/" + filename);
-        if (in == null) return;
+        if (in == null) return null;
         
         try
         {
@@ -206,11 +206,15 @@ public class FileUtils
             
             if (in != null)  in.close();
             if (out != null) out.close();
+            
+            return file;
         }
         catch (Exception e)
         {
             e.printStackTrace();
             MobArena.warning("Problem creating file '" + filename + "'!");
         }
+        
+        return null;
     }
 }
