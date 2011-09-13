@@ -68,7 +68,7 @@ public class SpecialWave extends NormalWave
                 default:                amount = playerCount + 1; break;
             }
             
-            result.put(entry.getValue(), amount);
+            result.put(entry.getValue(), (int) (amount * getAmountMultiplier()));
             break;
         }
         

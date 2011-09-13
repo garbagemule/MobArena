@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public abstract class NormalWave extends AbstractWave
@@ -75,6 +76,10 @@ public abstract class NormalWave extends AbstractWave
                 totalProbability = 50;
             }
         }
+        
+        // Load multipliers
+        setHealthMultiplier(MAUtils.getDouble(config, path + "health-multiplier", 1D));
+        setAmountMultiplier(MAUtils.getDouble(config, path + "amount-multiplier", 1D));
     }
     
     public int getTotalProbability()

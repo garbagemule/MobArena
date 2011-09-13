@@ -1028,14 +1028,32 @@ public class MAUtils
         return false;
     }
     
-    public static int getInt(Configuration config, String path)
+    public static double getDouble(Configuration config, String path)
+    {
+        return getDouble(config, path, 0D);
+    }
+    
+    public static double getDouble(Configuration config, String path, double def)
     {
         Object o = config.getProperty(path);
-        
+        if (o instanceof Double)
+            return (Double) o;
+        else if (o instanceof Number)
+            return (Integer) o;
+        return def;
+    }
+    
+    public static int getInt(Configuration config, String path)
+    {
+        return getInt(config, path, 0);
+    }
+    
+    public static int getInt(Configuration config, String path, int def)
+    {
+        Object o = config.getProperty(path);
         if (o instanceof Integer)
             return (Integer) o;
-        
-        return 0;
+        return def;
     }
     
     

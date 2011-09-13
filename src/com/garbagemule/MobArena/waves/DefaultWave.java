@@ -43,19 +43,20 @@ public class DefaultWave extends NormalWave
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());
 
         // Initialize the total amount of mobs to spawn
-        int totalToSpawn = getGrowth().getAmount(wave, getArena().getPlayerCount());
+        int totalToSpawn = (int) (getGrowth().getAmount(wave, getArena().getPlayerCount()) * getAmountMultiplier());
         
         // Spawn all the monsters
         spawnAll(getMonstersToSpawn(totalToSpawn), validSpawnpoints);
     }
     
     private Map<MACreature,Integer> getMonstersToSpawn(int totalToSpawn)
-    {
+    {        
         Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
         Random random = new Random();
         int randomNumber;
         MACreature creature;
-        
+
+        if (totalToSpawn < 1) totalToSpawn = 1;
         for (int i = 0; i < totalToSpawn; i++)
         {
             randomNumber = random.nextInt(getTotalProbability());

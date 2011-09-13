@@ -18,6 +18,7 @@ public abstract class AbstractWave implements Wave
     private World world;
     private String waveName;
     private int wave, frequency, priority;
+    private double healthMultiplier, amountMultiplier;
     private WaveBranch branch;
     private WaveType type;
     private WaveGrowth growth;
@@ -86,6 +87,10 @@ public abstract class AbstractWave implements Wave
         // Spawn and add to collection
         LivingEntity e = creature.spawn(getArena(), getWorld(), loc);
         getArena().addMonster(e);
+        
+        // Boost health
+        if (getHealthMultiplier() > 1)
+            e.setHealth((int) Math.min(150D, e.getHealth() * getHealthMultiplier()));
 
         // Grab a random target.
         if (e instanceof Creature)
@@ -114,7 +119,8 @@ public abstract class AbstractWave implements Wave
         {
             for (int i = 0; i < entry.getValue(); i++)
             {
-                spawnMonster(entry.getKey(), spawnpoints.get(index % spawnpointCount));
+                LivingEntity e = spawnMonster(entry.getKey(), spawnpoints.get(index % spawnpointCount));
+                e.setHealth((int) Math.min(150D, e.getHealth() * healthMultiplier));
                 index++;
             }
         }
@@ -161,6 +167,16 @@ public abstract class AbstractWave implements Wave
         return priority;
     }
     
+    public double getHealthMultiplier()
+    {
+        return healthMultiplier;
+    }
+    
+    public double getAmountMultiplier()
+    {
+        return amountMultiplier;
+    }
+    
     public String getName()
     {
         return waveName;
@@ -180,6 +196,16 @@ public abstract class AbstractWave implements Wave
     public void setGrowth(WaveGrowth growth)
     {
         this.growth = growth;
+    }
+    
+    public void setHealthMultiplier(double value)
+    {
+        healthMultiplier = Math.max(0.1D, value);
+    }
+    
+    public void setAmountMultiplier(double value)
+    {
+        amountMultiplier = Math.max(0.1D, value);
     }
     
     // MISC

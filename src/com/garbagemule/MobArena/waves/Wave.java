@@ -134,6 +134,18 @@ public interface Wave
     public int getPriority();
     
     /**
+     * Get the wave's health multiplier.
+     * @return The health multiplier
+     */
+    public double getHealthMultiplier();
+    
+    /**
+     * Get the wave's amount multiplier.
+     * @return The amount multiplier
+     */
+    public double getAmountMultiplier();
+    
+    /**
      * Get the wave's name.
      * @return The name
      */

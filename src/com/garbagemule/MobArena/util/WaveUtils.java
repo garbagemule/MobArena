@@ -137,14 +137,12 @@ public class WaveUtils
         if (type == null || !isWaveWellDefined(config, path, branch, type))
             return null;
         
-        // 
         Wave result = null;
         if (branch == WaveBranch.RECURRENT)
         {
             int frequency = config.getInt(path + "frequency", 0);
             int priority = config.getInt(path + "priority", 0);
             int wave = MAUtils.getInt(config, path + "wave");
-            //int wave = config.getInt(path + "wave", frequency);
             
             if (type == WaveType.DEFAULT)
             	result = new DefaultWave(arena, name, wave, frequency, priority, config, path);
@@ -158,7 +156,6 @@ public class WaveUtils
         else
         {
             int wave = MAUtils.getInt(config, path + "wave");
-            //int wave = config.getInt(path + "wave", 0);
             
             if (type == WaveType.DEFAULT)
             	result = new DefaultWave(arena, name, wave, config, path);
@@ -199,6 +196,23 @@ public class WaveUtils
         // This boolean is used in the "leaf methods" 
         boolean wellDefined = true;
         
+        // OPTIONAL: Health multiplier
+        int hMulti = MAUtils.getInt(config, path + "health-multiplier");
+        if (hMulti < 0)
+        {
+            MobArena.warning("Invalid health multiplier '" + hMulti + "' in " + path);
+            wellDefined = false;
+        }
+        
+        // OPTIONAL: Amount multiplier
+        int aMulti = MAUtils.getInt(config, path + "amount-multiplier");
+        if (aMulti < 0)
+        {
+            MobArena.warning("Invalid amount multiplier '" + aMulti + "' in " + path);
+            wellDefined = false;
+        }
+        
+        // Branch-specific nodes.
         if (branch == WaveBranch.RECURRENT)
         {
             // REQUIRED: Priority and frequency
@@ -214,9 +228,9 @@ public class WaveUtils
                 MobArena.warning("Missing 'frequency'-node in " + path);
                 wellDefined = false;
             }
+            
             // OPTIONAL: Wave
             int wave = MAUtils.getInt(config, path + "wave");
-            //int wave = config.getInt(path + "wave", frequency);
             if (wave < 0)
             {
                 MobArena.warning("'wave' must be greater than 0 in " + path);
@@ -227,7 +241,6 @@ public class WaveUtils
         {
             // REQUIRED: Wave number
             int wave = MAUtils.getInt(config, path + "wave");
-            //int wave = config.getInt(path + "wave", 0);
             if (wave == 0)
             {
                 MobArena.warning("Missing 'wave'-node in " + path);

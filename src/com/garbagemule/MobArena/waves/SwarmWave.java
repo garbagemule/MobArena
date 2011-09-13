@@ -40,6 +40,10 @@ public class SwarmWave extends AbstractWave
         
         // And the amount
         amount = WaveUtils.getEnumFromString(SwarmAmount.class, config.getString(path + "amount"), SwarmAmount.LOW);
+        
+        // Load multipliers
+        setHealthMultiplier(MAUtils.getDouble(config, path + "health-multiplier", 1D));
+        setAmountMultiplier(MAUtils.getDouble(config, path + "amount-multiplier", 1D));
     }
 
     public void spawn(int wave)
@@ -51,7 +55,8 @@ public class SwarmWave extends AbstractWave
         List<Location> validSpawnpoints = WaveUtils.getValidSpawnpoints(getArena(), getArena().getLivingPlayers());
         
         // Spawn the hellians!
-        spawnAll(monster, amount.getAmount(getArena().getPlayerCount()), validSpawnpoints);
+        int toSpawn = (int) (amount.getAmount(getArena().getPlayerCount()) * getAmountMultiplier());
+        spawnAll(monster, toSpawn, validSpawnpoints);
     }
     
     public void spawnAll(MACreature monster, int amount, List<Location> spawnpoints)
