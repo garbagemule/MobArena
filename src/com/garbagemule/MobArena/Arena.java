@@ -47,6 +47,7 @@ import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.spout.Spouty;
 import com.garbagemule.MobArena.util.InventoryItem;
 import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
@@ -64,7 +65,7 @@ public class Arena
     protected World world;
     protected boolean enabled, protect, running, setup, lobbySetup, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
 
-    protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena;
+    protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena, spoutSelect;
     protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
     protected Map<String,Location> spawnpoints, spawnpointsBoss, containers;
     protected String logging;
@@ -327,6 +328,9 @@ public class Arena
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onPlayerJoin(this, p);
+        
+        if (MobArena.hasSpout && spoutSelect)
+            Spouty.classSelectionScreen(plugin, this, p);
     }
     
     public void playerReady(Player p)
@@ -852,6 +856,7 @@ public class Arena
         allowWarp        = config.getBoolean(arenaPath + "allow-teleporting", false);
         specOnDeath      = config.getBoolean(arenaPath + "spectate-on-death", true);
         shareInArena     = config.getBoolean(arenaPath + "share-items-in-arena", true);
+        spoutSelect      = config.getBoolean(arenaPath + "spout-class-select", true);
         joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
         minPlayers       = config.getInt(arenaPath + "min-players", 0);
         maxPlayers       = config.getInt(arenaPath + "max-players", 0);

@@ -17,6 +17,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
+import com.garbagemule.MobArena.spout.Spouty;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
@@ -171,11 +172,13 @@ public class MobArena extends JavaPlugin
     
     private void setupSpout()
     {
-        if (hasSpout) 
-            return;
+        if (hasSpout) return;
         
         Plugin spoutPlugin = this.getServer().getPluginManager().getPlugin("Spout");
         hasSpout = spoutPlugin != null;
+        if (!hasSpout) return;
+        
+        Spouty.registerEvents(this);
     }
     
     private void setupHeroes()
