@@ -18,6 +18,7 @@ import org.bukkit.util.config.Configuration;
 
 //import com.nijiko.permissions.PermissionHandler;
 //import com.nijikokun.bukkit.Permissions.Permissions;
+import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
@@ -34,15 +35,15 @@ public class MobArena extends JavaPlugin
     private Configuration config;
     private ArenaMaster am;
     
-    // Permissions stuff
-    //private PermissionHandler permissionHandler;
-    
-    // Heroes stuff
-    private HeroManager heroManager = null;
-    
     // Economy stuff
     protected Methods Methods;
     protected Method  Method;
+    
+    // Spout stuff
+    public static boolean hasSpout;
+    
+    // Heroes stuff
+    private HeroManager heroManager = null;
     
     // Global variables
     public static PluginDescriptionFile desc;
@@ -50,7 +51,6 @@ public class MobArena extends JavaPlugin
     public static final double MIN_PLAYER_DISTANCE = 15.0;
     public static final double MIN_PLAYER_DISTANCE_SQUARED = MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE;
     public static final int ECONOMY_MONEY_ID = -29;
-    public static boolean hasSpout;
     public static Random random = new Random();
 
     public void onEnable()
@@ -69,11 +69,11 @@ public class MobArena extends JavaPlugin
         // Download external libraries if needed.
         FileUtils.fetchLibs(config);
         
-        // Set up permissions and economy
-        //setupPermissions();
+        // Set up soft dependencies
         setupRegister();
         setupSpout();
         setupHeroes();
+        setupMagicSpells();
         
         // Set up the ArenaMaster and the announcements
         am = new ArenaMaster(this);
@@ -147,11 +147,7 @@ public class MobArena extends JavaPlugin
     
     // Permissions stuff
     public boolean has(Player p, String s)
-    {
-        // First check for NijikoPerms
-        //if (permissionHandler != null)
-        //    return permissionHandler.has(p, s);
-        
+    {        
         // If the permission is set, check if player has permission
         if (p.isPermissionSet(s))
             return p.hasPermission(s);
@@ -164,17 +160,6 @@ public class MobArena extends JavaPlugin
     public static void info(String msg)    { Bukkit.getServer().getLogger().info("[MobArena] " + msg); }
     public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
     public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
-    
-    /*private void setupPermissions()
-    {
-        if (permissionHandler != null)
-            return;
-    
-        Plugin permissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
-        if (permissionsPlugin == null) return;
-        
-        permissionHandler = ((Permissions) permissionsPlugin).getHandler();
-    }*/
     
     private void setupRegister()
     {
@@ -201,6 +186,16 @@ public class MobArena extends JavaPlugin
         if (heroes == null) return;
         
         heroManager = ((Heroes) heroes).getHeroManager();
+    }
+    
+    private void setupMagicSpells()
+    {
+        Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
+        if (spells == null) return;
+
+        PluginManager pm = getServer().getPluginManager();
+        MagicSpellsListener spellsListener = new MagicSpellsListener(this);
+        pm.registerEvent(Event.Type.CUSTOM_EVENT, spellsListener, Priority.Normal, this);
     }
     
     public Configuration getConfig()      { return config; }

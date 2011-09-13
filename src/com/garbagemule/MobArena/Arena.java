@@ -1064,6 +1064,21 @@ public class Arena
     //
     ////////////////////////////////////////////////////////////////////*/
     
+    public boolean isRunning()
+    {
+        return running;
+    }
+    
+    public boolean isPvpEnabled()
+    {
+        return pvp;
+    }
+    
+    public boolean isBossWave()
+    {
+        return bossWave != null;
+    }
+    
     public String configName()
     {
         return MAUtils.nameArenaToConfig(name);
@@ -1082,11 +1097,6 @@ public class Arena
     public World getWorld()
     {
         return world;
-    }
-    
-    public boolean isPvpEnabled()
-    {
-        return pvp;
     }
 
     public void setBossWave(BossWave bossWave)
