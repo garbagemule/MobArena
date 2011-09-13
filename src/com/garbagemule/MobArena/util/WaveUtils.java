@@ -24,60 +24,28 @@ public class WaveUtils
      */    
     public static List<Location> getValidSpawnpoints(Arena arena, Collection<Player> players)
     {
-        //long start = System.nanoTime();
         List<Location> result = new ArrayList<Location>();
-
-        //double x1 = Double.NaN, y1 = Double.NaN, z1 = Double.NaN, // Bottom
-        //       x2 = Double.NaN, y2 = Double.NaN, z2 = Double.NaN; // Top
         
         for (Location l : arena.getSpawnpoints())
         {
             for (Player p : players)
             {
-                if (l.distanceSquared(p.getLocation()) >= MobArena.MIN_PLAYER_DISTANCE_SQUARED)
-                    continue;
-                
-                result.add(l);
-                break;
+                try
+                {
+                    if (l.distanceSquared(p.getLocation()) >= MobArena.MIN_PLAYER_DISTANCE_SQUARED)
+                        continue;
+                    
+                    result.add(l);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    p.kickPlayer("Banned for life! No, but stop trying to cheat in MobArena!");
+                    MobArena.warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
+                }
             }
         }
-        /*
-        // Get the region that the players span.
-        for (Player p : players)
-        {
-            double x = p.getLocation().getBlockX();
-            double y = p.getLocation().getBlockY();
-            double z = p.getLocation().getBlockZ();
-            
-            // Initialize the coordinates if they aren't already.
-            if (Double.isNaN(x1))
-            {
-                x1 = x; y1 = y; z1 = z; // Bottom
-                x2 = x; y2 = y; z2 = z; // Top
-                continue;
-            }
-            
-            // Update x
-            if (x < x1)       x1 = x;
-            else if (x > x2)  x2 = x;
-            
-            // Update y
-            if (y < y1)       y1 = y;
-            else if (y > y2)  y2 = y;
-            
-            // Update z
-            if (z < z1)       z1 = z;
-            else if (z > z2)  z2 = z;
-        }
         
-        // Expand by the minimum player distance.
-        x1 -= MobArena.MIN_PLAYER_DISTANCE; y1 -= MobArena.MIN_PLAYER_DISTANCE; z1 -= MobArena.MIN_PLAYER_DISTANCE;
-        x2 += MobArena.MIN_PLAYER_DISTANCE; y2 += MobArena.MIN_PLAYER_DISTANCE; z2 += MobArena.MIN_PLAYER_DISTANCE;
-        
-        for (Location s : arena.getAllSpawnpoints())
-            if (MAUtils.inRegion(s, x1, y1, z1, x2, y2, z2))
-                result.add(s);
-        */
         // If no players are in range, just use all the spawnpoints.
         if (result.isEmpty())
         {

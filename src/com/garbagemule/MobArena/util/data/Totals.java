@@ -148,6 +148,7 @@ public class Totals
         {
             if (!ap.className.equals(className))
                 continue;
+            
             kills    += ap.kills;
             dmgDone  += ap.dmgDone;
             dmgTaken += ap.dmgTaken;
