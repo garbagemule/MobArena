@@ -135,7 +135,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.PLAYER_KICK,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_JOIN,               playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_ANIMATION,          playerListener,   Priority.Normal,  this);
-        pm.registerEvent(Event.Type.ENTITY_DAMAGE,             entityListener,   Priority.High,    this); // mcMMO is "Highest"
+        pm.registerEvent(Event.Type.ENTITY_DAMAGE,             entityListener,   Priority.Low,     this); // Must cancel before Heroes
         pm.registerEvent(Event.Type.ENTITY_DEATH,              entityListener,   Priority.Lowest,  this); // Lowest because of Tombstone
         pm.registerEvent(Event.Type.ENTITY_REGAIN_HEALTH,      entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,            entityListener,   Priority.Highest, this);

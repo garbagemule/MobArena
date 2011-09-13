@@ -295,8 +295,9 @@ public class MAListener implements ArenaListener
         if (!arena.running) return;
         
         EntityDamageByEntityEvent e = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
-        Entity damager = (e != null) ? e.getDamager() : null;
         Entity damagee = event.getEntity();
+        Entity damager = (e != null) ? e.getDamager() : null;
+        if (e != null) damager = ((Projectile) e.getDamager()).getShooter();
         
         // Pet wolf
         if (damagee instanceof Wolf && arena.pets.contains(damagee))
@@ -326,7 +327,7 @@ public class MAListener implements ArenaListener
             event.setCancelled(true);
         
         // If PvP is disabled and damager is a player, cancel damage
-        else if (!arena.pvp && (damager instanceof Player || (damager instanceof Projectile && ((Projectile) damager).getShooter() instanceof Player)))
+        else if (!arena.pvp && damager instanceof Player)
             event.setCancelled(true);
         
         // Log damage
@@ -340,14 +341,13 @@ public class MAListener implements ArenaListener
         {
             if (arena.hellhounds)
                 pet.setFireTicks(32768);
-            
             event.setCancelled(true);
         }
-        
-        // Cancel player and projectile damage
         else if (damager instanceof Player || damager instanceof Projectile)
+        {
+            // Cancel player and projectile damage
             event.setCancelled(true);
-        
+        }
         // Set damage to 0 for knockbacks from monsters
         else event.setDamage(0);
     }
