@@ -89,8 +89,8 @@ public abstract class AbstractWave implements Wave
         getArena().addMonster(e);
         
         // Boost health
-        if (getHealthMultiplier() > 1)
-            e.setHealth((int) Math.min(150D, e.getHealth() * getHealthMultiplier()));
+        int health = (int) Math.min(150D, e.getHealth() * healthMultiplier);
+        e.setHealth(Math.min(1, health));
 
         // Grab a random target.
         if (e instanceof Creature)
@@ -119,8 +119,7 @@ public abstract class AbstractWave implements Wave
         {
             for (int i = 0; i < entry.getValue(); i++)
             {
-                LivingEntity e = spawnMonster(entry.getKey(), spawnpoints.get(index % spawnpointCount));
-                e.setHealth((int) Math.min(150D, e.getHealth() * healthMultiplier));
+                spawnMonster(entry.getKey(), spawnpoints.get(index % spawnpointCount));
                 index++;
             }
         }
