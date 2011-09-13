@@ -9,13 +9,14 @@ import org.bukkit.util.config.Configuration;
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.FileUtils;
+import com.garbagemule.MobArena.waves.Wave.WaveType;
 import com.nisovin.MagicSpells.Events.SpellCastEvent;
 import com.nisovin.MagicSpells.Events.SpellListener;
 
 public class MagicSpellsListener extends SpellListener
 {
     private MobArena plugin;
-    private List<String> disabled, disabledOnBoss;
+    private List<String> disabled, disabledOnBoss, disabledOnSwarm;
     
     public MagicSpellsListener(MobArena plugin)
     {
@@ -34,15 +35,19 @@ public class MagicSpellsListener extends SpellListener
         if (arena == null || !arena.isRunning()) return;
         
         String spell = event.getSpell().getName();
+        WaveType type = (arena.getWave() != null) ? arena.getWave().getType() : null;
         
-        if (disabled.contains(spell) || (arena.isBossWave() && disabledOnBoss.contains(spell)))
+        if (disabled.contains(spell) ||
+            (type == WaveType.BOSS && disabledOnBoss.contains(spell)) ||
+            (type == WaveType.SWARM && disabledOnSwarm.contains(spell)))
             event.setCancelled(true);
     }
     
     private void setupSpells(Configuration config)
     {
-        this.disabled       = config.getStringList("disabled-spells", new LinkedList<String>());
-        this.disabledOnBoss = config.getStringList("disabled-only-on-bosses", new LinkedList<String>());
+        this.disabled        = config.getStringList("disabled-spells", new LinkedList<String>());
+        this.disabledOnBoss  = config.getStringList("disabled-only-on-bosses", new LinkedList<String>());
+        this.disabledOnSwarm = config.getStringList("disabled-only-on-swarms", new LinkedList<String>());
     }
     
     public void disableSpell(String spell)

@@ -123,7 +123,8 @@ public class MASpawnThread implements Runnable
         // Notify listeners.
         for (MobArenaListener listener : plugin.getAM().listeners)
             listener.onWave(arena, wave, w.getName(), w.getBranch(), w.getType());
-        
+
+        arena.setWave(w);
         w.spawn(wave);
     }
     

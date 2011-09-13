@@ -11,3 +11,7 @@ disabled-spells:
 # Spells that will be disabled only while a boss is present.
 disabled-only-on-bosses:
     - purge
+
+# Spells that will be disabled only during swarm waves.
+disabled-only-on-swarms:
+    - purge

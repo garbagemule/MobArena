@@ -86,6 +86,7 @@ public class Arena
     protected TreeSet<Wave> singleWaves, singleWavesInstance;
     protected TreeSet<Wave> recurrentWaves;
     protected BossWave bossWave;
+    protected Wave currentWave;
     
     // Arena sets/maps
     protected Set<Player>            hasPaid, rewardedPlayers, notifyPlayers, randoms;
@@ -438,6 +439,7 @@ public class Arena
             spawnTaskId = -1;
             sheepTaskId = -1;
             spawnThread = null;
+            currentWave = null;
         }
         else System.out.println("--------- THE SPAWNTHREAD IS NULL! ----------");
         
@@ -1097,6 +1099,16 @@ public class Arena
     public World getWorld()
     {
         return world;
+    }
+    
+    public Wave getWave()
+    {
+        return currentWave;
+    }
+    
+    public void setWave(Wave wave)
+    {
+        currentWave = wave;
     }
 
     public void setBossWave(BossWave bossWave)
