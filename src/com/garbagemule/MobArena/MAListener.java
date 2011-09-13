@@ -60,14 +60,6 @@ public class MAListener implements ArenaListener
         this.plugin = plugin;
     }
     
-    /*
-    public void onBlockPhysics(BlockPhysicsEvent event)
-    {
-        if (!arena.inRegion(event.getBlock().getLocation()) || arena.softRestore)
-            return;
-    }
-    */
-    
     public void onBlockBreak(BlockBreakEvent event)
     {
         if (onBlockDestroy(event))
@@ -296,8 +288,13 @@ public class MAListener implements ArenaListener
         
         EntityDamageByEntityEvent e = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
         Entity damagee = event.getEntity();
-        Entity damager = (e != null) ? e.getDamager() : null;
-        if (e != null) damager = ((Projectile) e.getDamager()).getShooter();
+        Entity damager = null;
+        if (e != null)
+        {
+            damager = e.getDamager();
+            if (damager instanceof Projectile)
+                damager = ((Projectile) damager).getShooter();
+        }
         
         // Pet wolf
         if (damagee instanceof Wolf && arena.pets.contains(damagee))
@@ -337,19 +334,10 @@ public class MAListener implements ArenaListener
     
     private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager)
     {
-        if (damager == null)
-        {
-            if (arena.hellhounds)
-                pet.setFireTicks(32768);
-            event.setCancelled(true);
-        }
-        else if (damager instanceof Player || damager instanceof Projectile)
-        {
-            // Cancel player and projectile damage
-            event.setCancelled(true);
-        }
-        // Set damage to 0 for knockbacks from monsters
-        else event.setDamage(0);
+        if (arena.hellhounds && (damager == null || damager instanceof Player))
+            pet.setFireTicks(32768);
+        
+        event.setCancelled(true);
     }
     
     private void onMonsterDamage(EntityDamageEvent event, Entity monster, Entity damager)
