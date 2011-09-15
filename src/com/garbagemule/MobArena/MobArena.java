@@ -72,7 +72,7 @@ public class MobArena extends JavaPlugin
         setupRegister();
         setupSpout();
         setupHeroes();
-        //setupMagicSpells();
+        setupMagicSpells();
         
         // Set up the ArenaMaster and the announcements
         am = new ArenaMaster(this);
@@ -189,7 +189,7 @@ public class MobArena extends JavaPlugin
         heroManager = ((Heroes) heroes).getHeroManager();
     }
     
-    /*private void setupMagicSpells()
+    private void setupMagicSpells()
     {
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) return;
@@ -197,7 +197,7 @@ public class MobArena extends JavaPlugin
         PluginManager pm = getServer().getPluginManager();
         MagicSpellsListener spellsListener = new MagicSpellsListener(this);
         pm.registerEvent(Event.Type.CUSTOM_EVENT, spellsListener, Priority.Normal, this);
-    }*/
+    }
     
     public Configuration getConfig()      { return config; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
