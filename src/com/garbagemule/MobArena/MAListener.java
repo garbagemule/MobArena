@@ -442,6 +442,8 @@ public class MAListener implements ArenaListener
         if (!(event.getEntity() instanceof Player) || !arena.arenaPlayers.contains((Player)event.getEntity()))
             return;
         
+        System.out.println(event.getRegainReason());
+        
         if (event.getRegainReason() == RegainReason.REGEN)
             event.setCancelled(true);
     }
