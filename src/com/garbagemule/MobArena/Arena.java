@@ -1081,6 +1081,11 @@ public class Arena
         return pvp;
     }
     
+    public boolean isLightningEnabled()
+    {
+        return lightning;
+    }
+    
     public boolean isBossWave()
     {
         return bossWave != null;
