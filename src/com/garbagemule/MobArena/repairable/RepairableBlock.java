@@ -74,41 +74,4 @@ public class RepairableBlock implements Repairable
     {
         return z;
     }
-    
-    /*
-    public void setWorld(World world)
-    {
-        this.world = world;
-    }
-    
-    public void setType(Material type)
-    {
-        this.type = type;
-    }
-    
-    public void setId(int id)
-    {
-        this.id = id;
-    }
-    
-    public void setData(byte data)
-    {
-        this.data = data;
-    }
-    
-    public void setX(int x)
-    {
-        this.x = x;
-    }
-    
-    public void setY(int y)
-    {
-        this.y = y;
-    }
-    
-    public void setZ(int z)
-    {
-        this.z = z;
-    }
-    */
 }

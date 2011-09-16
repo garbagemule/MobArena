@@ -1,12 +1,10 @@
 package com.garbagemule.MobArena.repairable;
 
-//import java.io.Serializable;
-
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 
-public interface Repairable// extends Serializable
+public interface Repairable
 {
     public void repair();
 
