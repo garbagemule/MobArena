@@ -197,14 +197,30 @@ public class MAUtils
         return result;
     }
     
-    public static Map<String,List<String>> getClassPerms(Configuration config)
+    public static Map<String,Map<String,Boolean>> getClassPerms(Configuration config)
     {
-        Map<String,List<String>> result = new HashMap<String,List<String>>();
+        Map<String, Map<String,Boolean>> result = new HashMap<String, Map<String,Boolean>>();
+        
         List<String> classes = config.getKeys("classes");
         if (classes == null) return result;
         
         for (String c : classes)
-            result.put(c, config.getKeys("classes." + c + ".permissions"));
+        {            
+            // Get all the permissions for the class and return if empty.
+            List<String> keys = config.getStringList("classes." + c + ".permissions", new LinkedList<String>());
+            if (keys.isEmpty()) continue;
+            
+            // If the string starts with a hyphen (-), use false.
+            Map<String,Boolean> perms = new HashMap<String,Boolean>();
+            for (String p : keys)
+            {
+                boolean b = !p.startsWith("-");
+                String  s = b ? p : p.substring(1);
+                perms.put(s,b);
+            }
+            
+            result.put(c,perms);
+        }
         
         return result;
     }

@@ -76,8 +76,8 @@ public class Arena
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<Player,String> classMap;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
-    protected Map<String,List<String>> classPerms;
-    protected Map<Player,List<PermissionAttachment>> attachments;
+    protected Map<String,Map<String,Boolean>> classPerms;
+    protected Map<Player,PermissionAttachment> attachments;
     protected List<ItemStack> entryFee;
 
     // Player sets
@@ -144,7 +144,7 @@ public class Arena
         randoms         = new HashSet<Player>();
         repairables     = new LinkedList<Repairable>();
         containables    = new LinkedList<Repairable>();
-        attachments     = new HashMap<Player,List<PermissionAttachment>>();
+        attachments     = new HashMap<Player,PermissionAttachment>();
         
         running         = false;
         edit            = false;
@@ -603,7 +603,7 @@ public class Arena
     public void movePlayerToEntry(Player p)
     {
         Location entry = locations.get(p);
-        if (entry == null) return;
+        if (entry == null || p.isDead()) return;
         
         updateChunk(entry);
         p.teleport(entry);
@@ -731,26 +731,22 @@ public class Arena
     }
     
     public void assignClassPermissions(Player p)
-    {
-        Configuration config = plugin.getConfig();
-        String clazz = classMap.get(p);
-        String path  = "classes." + clazz + ".permissions.";
-        
-        List<String> permissions = classPerms.get(classMap.get(p));
-        if (permissions == null || permissions.isEmpty()) return;
+    {        
+        Map<String,Boolean> perms = classPerms.get(classMap.get(p));
+        if (perms == null || perms.isEmpty()) return;
 
-        attachments.put(p, new LinkedList<PermissionAttachment>());
-        for (String perm : permissions)
-            attachments.get(p).add(p.addAttachment(plugin, perm, config.getBoolean(path + perm, true)));
+        PermissionAttachment pa = p.addAttachment(plugin);
+        attachments.put(p,pa);
+        for (Map.Entry<String,Boolean> entry : perms.entrySet())
+            pa.setPermission(entry.getKey(), entry.getValue());
     }
     
     public void removeClassPermissions(Player p)
     {
         if (attachments.get(p) == null) return;
         
-        for (PermissionAttachment pa : attachments.get(p))
-            if (pa != null)
-                pa.remove();
+        for (PermissionAttachment pa : attachments.values())
+            if (pa != null) pa.remove();
     }
     
     private void cleanup()

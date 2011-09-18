@@ -28,6 +28,9 @@ public enum MACreature
     HUMAN(CreatureType.MONSTER),            HUMANS(CreatureType.MONSTER),
     GIANT(CreatureType.GIANT),              GIANTS(CreatureType.GIANT),
     GHAST(CreatureType.GHAST),              GHASTS(CreatureType.GHAST),
+    ENDERMAN(CreatureType.ENDERMAN),        ENDERMEN(CreatureType.ENDERMAN),
+    CAVESPIDER(CreatureType.CAVE_SPIDER),   CAVESPIDERS(CreatureType.CAVE_SPIDER),
+    SILVERFISH(CreatureType.SILVERFISH),    
     
     // Passive creatures
     CHICKEN(CreatureType.CHICKEN),          CHICKENS(CreatureType.CHICKEN),

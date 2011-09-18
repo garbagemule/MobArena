@@ -30,7 +30,7 @@ public class ArenaMaster //implements Master
     // Classes
     protected List<String> classes;
     protected Map<String,List<ItemStack>>  classItems, classArmor;
-    protected Map<String,List<String>> classPerms;
+    protected Map<String,Map<String,Boolean>> classPerms;
     //protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
     protected Map<Player,Arena> arenaMap;
     
