@@ -106,6 +106,7 @@ public class Arena
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
+    protected Map<Player,Integer> hungerMap = new HashMap<Player,Integer>();
     
     // Logging
     protected ArenaLog log;
@@ -189,6 +190,7 @@ public class Arena
                 hero.setHealth(hero.getMaxHealth());
             }
             p.setHealth(20);
+            p.setFoodLevel(20);
             assignClassPermissions(p);
         }
         
@@ -323,6 +325,7 @@ public class Arena
             hero.setHealth(hero.getMaxHealth());
         }
         p.setHealth(20);
+        p.setFoodLevel(20);
         movePlayerToLobby(p);
         
         // Notify listeners.
@@ -554,6 +557,9 @@ public class Arena
 
         if (!healthMap.containsKey(p))
             healthMap.put(p, p.getHealth());
+        
+        if (!hungerMap.containsKey(p))
+            hungerMap.put(p, p.getFoodLevel());
     }
     
     public void storeContainerContents()
@@ -621,6 +627,9 @@ public class Arena
                 hero.setHealth(health * hero.getMaxHealth() / 20);
             }
         }
+        
+        if (hungerMap.containsKey(p))
+            p.setFoodLevel(hungerMap.remove(p));
 
         // Put out fire.
         p.setFireTicks(0);
