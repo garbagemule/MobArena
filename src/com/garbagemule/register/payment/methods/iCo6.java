@@ -1,11 +1,11 @@
 package com.garbagemule.register.payment.methods;
 
+import com.garbagemule.register.payment.Method;
 import com.iCo6.iConomy;
 import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
 import com.iCo6.system.Holdings;
 
-import com.garbagemule.register.payment.Method;
 
 import org.bukkit.plugin.Plugin;
 
@@ -30,9 +30,13 @@ public class iCo6 implements Method {
     public String getVersion() {
         return "6";
     }
+    
+    public int fractionalDigits() {
+    	return 2;
+    }
 
     public String format(double amount) {
-        return this.iConomy.format(amount);
+        return com.iCo6.iConomy.format(amount);
     }
 
     public boolean hasBanks() {
@@ -60,10 +64,9 @@ public class iCo6 implements Method {
     }
 
     public boolean isCompatible(Plugin plugin) {
-        try { Class.forName("com.iCo6.IO"); }
-        catch(Exception e) { return false; }
-
-        return plugin.getDescription().getName().equalsIgnoreCase("iconomy") && plugin.getClass().getName().equals("com.iCo6.iConomy") && plugin instanceof iConomy;
+        return plugin.getDescription().getName().equalsIgnoreCase("iconomy") 
+            && plugin.getClass().getName().equals("com.iCo6.iConomy")
+            && plugin instanceof iConomy;
     }
 
     public void setPlugin(Plugin plugin) {

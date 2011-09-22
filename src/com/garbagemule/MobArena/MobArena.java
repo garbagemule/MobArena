@@ -36,7 +36,6 @@ public class MobArena extends JavaPlugin
     private ArenaMaster am;
     
     // Economy stuff
-    protected Methods Methods;
     protected Method  Method;
     
     // Spout stuff
@@ -141,6 +140,8 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.ENTITY_EXPLODE,            entityListener,   Priority.Highest, this);
         pm.registerEvent(Event.Type.ENTITY_COMBUST,            entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.ENTITY_TARGET,             entityListener,   Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENDERMAN_PICKUP,           entityListener,   Priority.Normal,  this);
+        pm.registerEvent(Event.Type.ENDERMAN_PLACE,            entityListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.CREATURE_SPAWN,            entityListener,   Priority.Highest, this);
         pm.registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener,   Priority.Monitor, this); // I know Monitor is bad, but other plugins suck! :(
     }
@@ -163,12 +164,13 @@ public class MobArena extends JavaPlugin
     
     private void setupRegister()
     {
-        Methods = new Methods();
-        if (!Methods.hasMethod() && Methods.setMethod(this))
-        {
-            Method = Methods.getMethod();
+        Methods.setMethod(getServer().getPluginManager());
+        
+        Method = Methods.getMethod();
+        if (Method != null)
             info("Payment method found (" + Method.getName() + " version: " + Method.getVersion() + ")");
-        }
+        else
+            info("No payment method found!");
     }
     
     private void setupSpout()

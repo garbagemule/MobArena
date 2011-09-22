@@ -1,6 +1,8 @@
 package com.garbagemule.MobArena;
 
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EndermanPickupEvent;
+import org.bukkit.event.entity.EndermanPlaceEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -61,5 +63,17 @@ public class MAEntityListener extends EntityListener
     {
         for (Arena arena : am.arenas)
             arena.eventListener.onEntityTarget(event);
+    }
+    
+    public void onEndermanPickup(EndermanPickupEvent event)
+    {
+        for (Arena arena : am.arenas)
+            arena.eventListener.onEndermanPickup(event);
+    }
+    
+    public void onEndermanPickup(EndermanPlaceEvent event)
+    {
+        for (Arena arena : am.arenas)
+            arena.eventListener.onEndermanPlace(event);
     }
 }

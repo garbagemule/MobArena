@@ -1292,7 +1292,7 @@ public class Arena
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
             {
                 //if (plugin.Methods.hasMethod() && !plugin.Method.getAccount(p.getName()).hasEnough(stack.getAmount()))                
-                if (plugin.Methods.hasMethod() && !(plugin.Method.getAccount(p.getName()).balance() >= stack.getAmount()))
+                if (plugin.Method != null && !(plugin.Method.getAccount(p.getName()).balance() >= stack.getAmount()))
                     return false;
             }
             // Normal stack
@@ -1317,7 +1317,7 @@ public class Arena
 
         // Take some economy money
         for (InventoryItem item : InventoryItem.extractAllFromArray(MobArena.ECONOMY_MONEY_ID, fee))
-            if (plugin.Methods.hasMethod())
+            if (plugin.Method != null)
                 plugin.Method.getAccount(p.getName()).subtract(item.getAmount());
 
         // Take any other items

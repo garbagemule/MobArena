@@ -22,6 +22,8 @@ import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EndermanPickupEvent;
+import org.bukkit.event.entity.EndermanPlaceEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -433,6 +435,18 @@ public class MAListener implements ArenaListener
                 if (!arena.arenaPlayers.contains(event.getTarget()))
                     event.setCancelled(true);
         }
+    }
+    
+    public void onEndermanPickup(EndermanPickupEvent event)
+    {
+        if (arena.inRegion(event.getBlock().getLocation()))
+            event.setCancelled(true);
+    }
+    
+    public void onEndermanPlace(EndermanPlaceEvent event)
+    {
+        if (arena.inRegion(event.getLocation()))
+            event.setCancelled(true);
     }
 
     public void onEntityRegainHealth(EntityRegainHealthEvent event)

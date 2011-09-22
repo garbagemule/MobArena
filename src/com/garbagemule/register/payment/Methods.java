@@ -12,15 +12,13 @@ import org.bukkit.plugin.PluginManager;
  *
  * Allowing you to check whether a payment method exists or not.
  *
- * <blockquote><pre>
- *  Methods methods = new Methods();
- * </pre></blockquote>
- *
  * Methods also allows you to set a preferred method of payment before it captures
  * payment plugins in the initialization process.
  *
+ * in <code>bukkit.yml</code>:
  * <blockquote><pre>
- *  Methods methods = new Methods("iConomy");
+ *  economy:
+ *      preferred: "iConomy"
  * </pre></blockquote>
  *
  * @author: Nijikokun <nijikokun@shortmail.com> (@nijikokun)
@@ -28,48 +26,58 @@ import org.bukkit.plugin.PluginManager;
  * @license: AOL license <http://aol.nexua.org>
  */
 public class Methods {
-    private boolean self = false;
-    private Method Method = null;
-    private String preferred = "";
-    private Set<Method> Methods = new HashSet<Method>();
-    private Set<String> Dependencies = new HashSet<String>();
-    private Set<Method> Attachables = new HashSet<Method>();
+    private static String version = null;
+    private static boolean self = false;
+    private static Method Method = null;
+    private static String preferred = "";
+    private static Set<Method> Methods = new HashSet<Method>();
+    private static Set<String> Dependencies = new HashSet<String>();
+    private static Set<Method> Attachables = new HashSet<Method>();
 
-    /**
-     * Initialize Method class
-     */
-    public Methods() {
-        this._init();
-    }
-
-    /**
-     * Initializes <code>Methods</code> class utilizing a "preferred" payment method check before
-     * returning the first method that was initialized.
-     * 
-     * @param preferred Payment method that is most preferred for this setup.
-     */
-    public Methods(String preferred) {
-        this._init();
-
-        if(this.Dependencies.contains(preferred)) {
-            this.preferred = preferred;
-        }
+    static {
+        _init();
     }
 
     /**
      * Implement all methods along with their respective name & class.
-     *
-     * @see #Methods()
-     * @see #Methods(java.lang.String)
      */
-    private void _init() {
-        this.addMethod("iConomy", new com.garbagemule.register.payment.methods.iCo6());
-        this.addMethod("iConomy", new com.garbagemule.register.payment.methods.iCo5());
-        this.addMethod("iConomy", new com.garbagemule.register.payment.methods.iCo4());
-        this.addMethod("BOSEconomy", new com.garbagemule.register.payment.methods.BOSE6());
-        this.addMethod("BOSEconomy", new com.garbagemule.register.payment.methods.BOSE7());
-        this.addMethod("Essentials", new com.garbagemule.register.payment.methods.EE17());
-        this.addMethod("MultiCurrency", new com.garbagemule.register.payment.methods.MCUR());
+    private static void _init() {
+        addMethod("iConomy", new com.garbagemule.register.payment.methods.iCo6());
+        addMethod("iConomy", new com.garbagemule.register.payment.methods.iCo5());
+        addMethod("iConomy", new com.garbagemule.register.payment.methods.iCo4());
+        addMethod("BOSEconomy", new com.garbagemule.register.payment.methods.BOSE6());
+        addMethod("BOSEconomy", new com.garbagemule.register.payment.methods.BOSE7());
+        addMethod("Essentials", new com.garbagemule.register.payment.methods.EE17());
+        addMethod("Currency", new com.garbagemule.register.payment.methods.MCUR());
+        Dependencies.add("MultiCurrency");
+    }
+
+    /**
+     * Used by the plugin to setup version
+     *
+     * @param v version
+     */
+    public static void setVersion(String v) {
+        version = v;
+    }
+
+    /**
+     * Use to reset methods during disable
+     */
+    public static void reset() {
+        version = null;
+        self = false;
+        Method = null;
+        preferred = "";
+        Attachables.clear();
+    }
+
+    /**
+     * Use to get version of Register plugin
+     * @return version
+     */
+    public static String getVersion() {
+        return version;
     }
 
     /**
@@ -79,7 +87,7 @@ public class Methods {
      * @return <code>Set<String></code> - Array of payment methods that are loaded.
      * @see #setMethod(org.bukkit.plugin.Plugin)
      */
-    public Set<String> getDependencies() {
+    public static Set<String> getDependencies() {
         return Dependencies;
     }
 
@@ -90,18 +98,17 @@ public class Methods {
      * @param plugin Plugin data from bukkit, Internal Class file.
      * @return Method <em>or</em> Null
      */
-    public Method createMethod(Plugin plugin) {
-        for (Method method: Methods) {
+    public static Method createMethod(Plugin plugin) {
+        for (Method method: Methods)
             if (method.isCompatible(plugin)) {
                 method.setPlugin(plugin);
                 return method;
             }
-        }
 
         return null;
     }
 
-    private void addMethod(String name, Method method) {
+    private static void addMethod(String name, Method method) {
         Dependencies.add(name);
         Methods.add(method);
     }
@@ -113,7 +120,7 @@ public class Methods {
      * @see #setMethod(org.bukkit.plugin.Plugin)
      * @see #checkDisabled(org.bukkit.plugin.Plugin)
      */
-    public boolean hasMethod() {
+    public static boolean hasMethod() {
         return (Method != null);
     }
 
@@ -121,62 +128,85 @@ public class Methods {
      * Checks Plugin Class against a multitude of checks to verify it's usability
      * as a payment method.
      *
-     * @param method Plugin data from bukkit, Internal Class file.
+     * @param <code>PluginManager</code> the plugin manager for the server
      * @return <code>boolean</code> True on success, False on failure.
      */
-    public boolean setMethod(Plugin method) {
-        if(hasMethod()) return true;
-        if(self) { self = false; return false; }
+    public static boolean setMethod(PluginManager manager) {
+        if (hasMethod())
+            return true;
+
+        if (self) {
+            self = false;
+            return false;
+        }
 
         int count = 0;
         boolean match = false;
         Plugin plugin = null;
-        PluginManager manager = method.getServer().getPluginManager();
 
-        for(String name: this.getDependencies()) {
-            if(hasMethod()) break;
-            if(method.getDescription().getName().equals(name)) plugin = method; else  plugin = manager.getPlugin(name);
-            if(plugin == null) continue;
+        for (String name : getDependencies()) {
+            if (hasMethod())
+                break;
 
-            Method current = this.createMethod(plugin);
-            if(current == null) continue;
+            plugin = manager.getPlugin(name);
+            if (plugin == null)
+                continue;
 
-            if(this.preferred.isEmpty())
-                this.Method = current;
-            else {
-                this.Attachables.add(current);
-            }
+            Method current = createMethod(plugin);
+            if (current == null)
+                continue;
+
+            if (preferred.isEmpty())
+                Method = current;
+            else
+                Attachables.add(current);
         }
 
-        if(!this.preferred.isEmpty()) {
+        if (!preferred.isEmpty()) {
             do {
-                if(hasMethod()) {
+                if (hasMethod())
                     match = true;
-                } else {
-                    for(Method attached: this.Attachables) {
-                        if(attached == null) continue;
+                else {
+                    for (Method attached : Attachables) {
+                        if (attached == null)
+                            continue;
 
-                        if(hasMethod()) {
+                        if (hasMethod()) {
                             match = true;
                             break;
                         }
 
-                        if(this.preferred.isEmpty()) this.Method = attached;
+                        if (preferred.isEmpty())
+                            Method = attached;
 
-                        if(count == 0) {
-                            if(this.preferred.equalsIgnoreCase(attached.getName()))
-                                this.Method = attached;
-                        } else {
-                            this.Method = attached;
-                        }
+                        if (count == 0)
+                            if (preferred.equalsIgnoreCase(attached.getName()))
+                                Method = attached;
+
+                        else
+                            Method = attached;
                     }
 
                     count++;
                 }
-            } while(!match);
+            } while (!match);
         }
 
         return hasMethod();
+    }
+
+    /**
+     * Sets the preferred economy
+     *
+     * @return <code>boolean</code>
+     */
+    public static boolean setPreferred(String check) {
+        if (getDependencies().contains(check)) {
+            preferred = check;
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -184,7 +214,7 @@ public class Methods {
      *
      * @return <code>Method</code> <em>or</em> <code>Null</code>
      */
-    public Method getMethod() {
+    public static Method getMethod() {
         return Method;
     }
 
@@ -195,9 +225,13 @@ public class Methods {
      * @param method Plugin data from bukkit, Internal Class file.
      * @return <code>boolean</code>
      */
-    public boolean checkDisabled(Plugin method) {
-        if(!hasMethod()) return true;
-        if (Method.isCompatible(method)) Method = null;
+    public static boolean checkDisabled(Plugin method) {
+        if(!hasMethod())
+            return true;
+
+        if (Method.isCompatible(method))
+            Method = null;
+
         return (Method == null);
     }
 }

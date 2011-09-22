@@ -1,6 +1,7 @@
 package com.garbagemule.register.payment.methods;
 
 import com.garbagemule.register.payment.Method;
+
 import cosine.boseconomy.BOSEconomy;
 import org.bukkit.plugin.Plugin;
 
@@ -11,6 +12,7 @@ import org.bukkit.plugin.Plugin;
  * @copyright (c) 2011
  * @license AOL license <http://aol.nexua.org>
  */
+@SuppressWarnings("deprecation")
 public class BOSE6 implements Method {
     private BOSEconomy BOSEconomy;
 
@@ -25,10 +27,17 @@ public class BOSE6 implements Method {
     public String getVersion() {
         return "0.6.2";
     }
+    
+    public int fractionalDigits() {
+    	return 0;
+    }
 
     public String format(double amount) {
         String currency = this.BOSEconomy.getMoneyNamePlural();
-        if(amount == 1) currency = this.BOSEconomy.getMoneyName();
+
+        if(amount == 1) 
+            currency = this.BOSEconomy.getMoneyName();
+
         return amount + " " + currency;
     }
 
@@ -45,25 +54,32 @@ public class BOSE6 implements Method {
     }
 
     public boolean hasBankAccount(String bank, String name) {
-        return this.BOSEconomy.isBankOwner(bank, name) || this.BOSEconomy.isBankMember(bank, name);
+        return this.BOSEconomy.isBankOwner(bank, name)
+            || this.BOSEconomy.isBankMember(bank, name);
     }
 
     public MethodAccount getAccount(String name) {
-        if(!hasAccount(name)) return null;
+        if(!hasAccount(name)) 
+            return null;
+
         return new BOSEAccount(name, this.BOSEconomy);
     }
 
     public MethodBankAccount getBankAccount(String bank, String name) {
-        if(!hasBankAccount(bank, name)) return null;
+        if(!hasBankAccount(bank, name)) 
+            return null;
+
         return new BOSEBankAccount(bank, BOSEconomy);
     }
 
     public boolean isCompatible(Plugin plugin) {
-        return plugin.getDescription().getName().equalsIgnoreCase("boseconomy") && plugin instanceof BOSEconomy && plugin.getDescription().getVersion().equals("0.6.2");
+        return plugin.getDescription().getName().equalsIgnoreCase("boseconomy") 
+            && plugin instanceof BOSEconomy
+            && plugin.getDescription().getVersion().equals("0.6.2");
     }
 
     public void setPlugin(Plugin plugin) {
-        BOSEconomy = (BOSEconomy)plugin;
+        BOSEconomy = (BOSEconomy) plugin;
     }
 
     public class BOSEAccount implements MethodAccount {

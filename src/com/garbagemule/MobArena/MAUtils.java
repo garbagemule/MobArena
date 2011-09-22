@@ -479,7 +479,7 @@ public class MAUtils
             // If this is money, don't add to inventory.
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
             {
-                if (plugin != null && plugin.Methods.hasMethod())
+                if (plugin != null && plugin.Method != null)
                     plugin.Method.getAccount(p.getName()).add(stack.getAmount());
 
                 continue;
@@ -1170,10 +1170,15 @@ public class MAUtils
                 stack = (ItemStack) e;
                 if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID)
                 {
-                    if (plugin.Methods.hasMethod())
+                    if (plugin.Method != null)
                     {
                         buffy.append(plugin.Method.format(stack.getAmount()));
                         buffy.append(", ");
+                    }
+                    else
+                    {
+                        MobArena.warning("Tried to do some money stuff, but no economy plugin was detected!");
+                        return buffy.toString();
                     }
                     continue;
                 }
