@@ -300,7 +300,7 @@ public class Arena
             playerLeave(p);
         
         for (Entity e : monsters)
-            e.remove();
+            if (e != null) e.remove();
         
         if (bossWave != null)
             bossWave.clear();
@@ -465,6 +465,8 @@ public class Arena
                     
                     for (LivingEntity e : new LinkedList<LivingEntity>(explodingSheep))
                     {
+                        if (e == null) continue;
+                        
                         Creature c = (Creature) e;
                         if (c.getTarget() != null && e.getLocation().distanceSquared(c.getTarget().getLocation()) < 8)
                         {
@@ -777,13 +779,13 @@ public class Arena
         if (bossWave != null)
             bossWave.clear();
         for (LivingEntity e : monsters)
-            e.remove();
+            if (e != null) e.remove();
         for (LivingEntity e : explodingSheep)
-            e.remove();
+            if (e != null) e.remove();
         for (LivingEntity e : plaguedPigs)
-            e.remove();
+            if (e != null) e.remove();
         for (LivingEntity e : madCows)
-            e.remove();
+            if (e != null) e.remove();
     }
     
     private void removeBlocks()
@@ -796,6 +798,8 @@ public class Arena
     {
         for (Wolf w : pets)
         {
+            if (w == null) continue;
+            
             w.setOwner(null);
             w.remove();
         }
@@ -805,7 +809,7 @@ public class Arena
     {
         for (Wolf w : pets)
         {
-            if (!((Player) w.getOwner()).getName().equals(p.getName()))
+            if (w == null || !((Player) w.getOwner()).getName().equals(p.getName()))
                 continue;
             
             w.setOwner(null);
@@ -824,7 +828,7 @@ public class Arena
             for (int j = c1.getZ(); j <= c2.getZ(); j++)
                 for (Entity e : world.getChunkAt(i,j).getEntities())
                     if ((e instanceof Item || e instanceof Slime) && inRegion(e.getLocation()))
-                        e.remove();
+                        if (e != null) e.remove();
     }
     
     

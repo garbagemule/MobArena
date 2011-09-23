@@ -65,6 +65,7 @@ public class SwarmWave extends AbstractWave
         for (int i = 0; i < amount; i++)
         {
             LivingEntity e = spawnMonster(monster, spawnpoints.get(i % spawnpointCount));
+            if (e == null) continue;
             
             // Boost health
             int health = (int) Math.min(150D, 1 * getHealthMultiplier());

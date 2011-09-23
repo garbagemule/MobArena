@@ -135,6 +135,8 @@ public class BossWave extends AbstractWave
         cancelAbilityTask();
         getArena().setBossWave(null);
         
+        if (bossCreature == null) return;
+            
         CraftEntity ce = (CraftEntity) bossCreature;
         CraftWorld cw = (CraftWorld) getWorld();
         WorldServer ws = cw.getHandle();

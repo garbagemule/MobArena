@@ -84,8 +84,11 @@ public abstract class AbstractWave implements Wave
      */
     public LivingEntity spawnMonster(MACreature creature, Location loc)
     {
-        // Spawn and add to collection
+        // Spawn
         LivingEntity e = creature.spawn(getArena(), getWorld(), loc);
+        if (e == null) return null;
+        
+        // Add to collection
         getArena().addMonster(e);
         
         // Boost health

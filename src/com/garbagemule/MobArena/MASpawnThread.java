@@ -87,6 +87,8 @@ public class MASpawnThread implements Runnable
         List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
         for (Entity e : tmp)
         {
+            if (e == null) continue;
+            
             if (e.isDead() || !arena.inRegion(e.getLocation()))
             {
                 arena.monsters.remove(e);
@@ -230,6 +232,8 @@ public class MASpawnThread implements Runnable
         Location loc;
         for (Entity e : tmp)
         {
+            if (e == null) continue;
+            
             arena.monsters.remove(e);
             loc = e.getLocation().getBlock().getRelative(0,2,0).getLocation();
             arena.world.createExplosion(loc, 2);
