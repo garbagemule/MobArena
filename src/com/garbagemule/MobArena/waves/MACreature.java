@@ -25,7 +25,8 @@ public enum MACreature
     ZOMBIEPIGMAN(CreatureType.PIG_ZOMBIE),  ZOMBIEPIGMEN(CreatureType.PIG_ZOMBIE),
     POWEREDCREEPER(CreatureType.CREEPER),   POWEREDCREEPERS(CreatureType.CREEPER),
     ANGRYWOLF(CreatureType.WOLF),           ANGRYWOLVES(CreatureType.WOLF),
-    HUMAN(CreatureType.MONSTER),            HUMANS(CreatureType.MONSTER),
+    //HUMAN(CreatureType.MONSTER),            HUMANS(CreatureType.MONSTER), <-- InstantiationException
+    HUMAN(CreatureType.ZOMBIE),             HUMANS(CreatureType.ZOMBIE),
     GIANT(CreatureType.GIANT),              GIANTS(CreatureType.GIANT),
     GHAST(CreatureType.GHAST),              GHASTS(CreatureType.GHAST),
     ENDERMAN(CreatureType.ENDERMAN),        ENDERMEN(CreatureType.ENDERMAN),
