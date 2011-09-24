@@ -1156,7 +1156,10 @@ public class Arena
     public Location getBossSpawnpoint()
     {
         if (spawnpointsBoss.isEmpty())
-            return getSpawnpoints().get(0);
+        {
+            List<Location> points = WaveUtils.getValidSpawnpoints(this, getLivingPlayers());
+            return points.get(MobArena.random.nextInt(points.size()));
+        }
         
         return new ArrayList<Location>(spawnpointsBoss.values()).get(MobArena.random.nextInt(spawnpointsBoss.size()));
     }
