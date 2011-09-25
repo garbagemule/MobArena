@@ -22,6 +22,7 @@ import net.minecraft.server.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -107,6 +108,7 @@ public class Arena
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
     protected Map<Player,Integer> hungerMap = new HashMap<Player,Integer>();
+    protected Map<Player,GameMode> modeMap = new HashMap<Player,GameMode>();
     
     // Logging
     protected ArenaLog log;
@@ -562,6 +564,9 @@ public class Arena
         
         if (!hungerMap.containsKey(p))
             hungerMap.put(p, p.getFoodLevel());
+        
+        if (!modeMap.containsKey(p))
+            modeMap.put(p, p.getGameMode());
     }
     
     public void storeContainerContents()
@@ -632,6 +637,9 @@ public class Arena
         
         if (hungerMap.containsKey(p))
             p.setFoodLevel(hungerMap.remove(p));
+        
+        if (modeMap.containsKey(p))
+            p.setGameMode(modeMap.remove(p));
 
         // Put out fire.
         p.setFireTicks(0);
