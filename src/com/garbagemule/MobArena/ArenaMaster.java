@@ -50,9 +50,10 @@ public class ArenaMaster //implements Master
      */
     public ArenaMaster(MobArena instance)
     {
-        plugin = instance;
-        config = plugin.getConfig();
-        arenas = new LinkedList<Arena>();
+        plugin   = instance;
+        config   = plugin.getConfig();
+        arenas   = new LinkedList<Arena>();
+        arenaMap = new HashMap<Player,Arena>();
     }
     
     
@@ -254,7 +255,6 @@ public class ArenaMaster //implements Master
             arenas.add(arena);
         }
         
-        arenaMap = new HashMap<Player,Arena>();
         selectedArena = arenas.get(0);
     }
     
