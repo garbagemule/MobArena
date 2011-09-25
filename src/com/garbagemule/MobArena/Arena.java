@@ -328,6 +328,7 @@ public class Arena
         }
         p.setHealth(20);
         p.setFoodLevel(20);
+        p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
         
         // Notify listeners.
