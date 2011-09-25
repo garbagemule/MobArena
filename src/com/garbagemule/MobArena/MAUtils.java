@@ -391,6 +391,11 @@ public class MAUtils
     {
         // Grab the items from the MobArena .inv file
         ItemStack[] stacks = getInventoryFile(p);
+        if (stacks == null)
+        {
+            MobArena.warning("Couldn't restore player inventory for '" + p.getName() + "'");
+            return false;
+        }
         
         // If the player isn't online, hack the playerName.dat file
         if (!p.isOnline())
@@ -439,7 +444,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            MobArena.warning("Could not restore inventory for " + p.getName());
+            MobArena.warning("Could not get inventory file for '" + p.getName() + "'");
             return null;
         }
     }

@@ -809,7 +809,7 @@ public class Arena
     {
         for (Wolf w : pets)
         {
-            if (w == null || !((Player) w.getOwner()).getName().equals(p.getName()))
+            if (w == null || !(w.getOwner() instanceof Player) || !((Player) w.getOwner()).getName().equals(p.getName()))
                 continue;
             
             w.setOwner(null);
