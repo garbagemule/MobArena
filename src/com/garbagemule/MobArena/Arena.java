@@ -154,7 +154,7 @@ public class Arena
         
         allowMonsters   = world.getAllowMonsters();
         allowAnimals    = world.getAllowAnimals();
-        spawnMonsters   = ((net.minecraft.server.World) ((CraftWorld) world).getHandle()).spawnMonsters;
+        spawnMonsters   = MAUtils.getSpawnMonsters(world);
         
         eventListener   = new MAListener(this, plugin);
         repairQueue     = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());

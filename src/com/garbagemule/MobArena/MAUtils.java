@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.HttpURLConnection;
 import java.io.File;
@@ -17,8 +18,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.minecraft.server.WorldServer;
 
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -1331,16 +1330,86 @@ public class MAUtils
         }
     }
     
+    public static int getSpawnMonsters(World world)
+    {
+        try
+        {
+            Field f = getSpawnMonstersField(world);
+            net.minecraft.server.World w = (net.minecraft.server.World) ((CraftWorld) world).getHandle();
+            return f.getInt(w);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return 0;
+        }
+        
+        /*
+        Field f = null;
+        
+        try
+        {
+            String[] parts = Bukkit.getVersion().split("-");
+            String version = parts[5].substring(1, 5);
+            int v = (version.matches("[0-9]+")) ? Integer.parseInt(version) : 0;
+            
+            String fieldName = (v >= 1191) ? "difficulty" : "spawnMonsters";
+            f = net.minecraft.server.World.class.getDeclaredField(fieldName);
+            
+            if (f != null)
+                return f.getInt(w);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        return 0;*/
+    }
+    
+    private static Field getSpawnMonstersField(World world)
+    {        
+        try
+        {
+            String[] parts = Bukkit.getVersion().split("-");
+            String version = parts[5].substring(1, 5);
+            int v = (version.matches("[0-9]+")) ? Integer.parseInt(version) : 0;
+            
+            String fieldName = (v >= 1191) ? "difficulty" : "spawnMonsters";
+            return net.minecraft.server.World.class.getDeclaredField(fieldName);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
     public static void setSpawnFlags(MobArena plugin, World world, int spawnMonsters, boolean allowMonsters, boolean allowAnimals)
     {
         for (Arena arena : plugin.getAM().getArenasInWorld(world))
             if (arena.running)
                 return;
         
-        WorldServer ws = ((CraftWorld) world).getHandle();
-        ws.spawnMonsters = spawnMonsters;
-        ws.allowMonsters = allowMonsters;
-        ws.allowAnimals  = allowAnimals;
+        //WorldServer ws = ((CraftWorld) world).getHandle();
+        //ws.spawnMonsters = spawnMonsters;
+        //ws.allowMonsters = allowMonsters;
+        //ws.allowAnimals  = allowAnimals;
+        
+        try
+        {
+            net.minecraft.server.World w = (net.minecraft.server.World) ((CraftWorld) world).getHandle();
+            w.allowMonsters = allowMonsters;
+            w.allowAnimals  = allowAnimals;
+            
+            Field f = getSpawnMonstersField(world);
+            f.setInt(w, spawnMonsters);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
     
     public static String getDuration(long duration)

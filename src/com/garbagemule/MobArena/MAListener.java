@@ -163,9 +163,9 @@ public class MAListener implements ArenaListener
         LivingEntity entity = (LivingEntity) event.getEntity();
         if (arena.running && entity instanceof Slime)
             arena.monsters.add(entity);
-        else
-            // If running == true, setCancelled(false), and vice versa.
-            event.setCancelled(!arena.running);
+        
+        // If running == true, setCancelled(false), and vice versa.
+        event.setCancelled(!arena.running);
     }
     
     public void onEntityExplode(EntityExplodeEvent event)

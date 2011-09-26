@@ -1,6 +1,6 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.94.3.4
+version: 0.94.3.5
 softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
 commands:
     ma:
@@ -18,7 +18,7 @@ commands:
             /mobarena notready  - List of players who aren't ready.
             /mobarena spectate  - Warp to the spectator area.
 permissions:
-    mobarena.use.*:
+    mobarena.use:
         description: Gives access to usage commands
         default: true
         children:
@@ -32,8 +32,8 @@ permissions:
     mobarena.use.leave:
         default: true
     
-    mobarena.admin.*:
-        description: Gives access to admin commands
+    mobarena.admin:
+        description: Gives access to all admin commands
         default: op
         children:
             mobarena.admin.enable: true
@@ -43,20 +43,26 @@ permissions:
             mobarena.admin.force.start: true
             mobarena.admin.config.reload: true
     mobarena.admin.enable:
+        description: Enable and disable MobArena and/or arenas.
         default: false
     mobarena.admin.kick:
+        description: Kick a player from an arena.
         default: false
     mobarena.admin.restore:
+        description: Restore a player's inventory.
         default: false
     mobarena.admin.force.end:
+        description: Force end an arena.
         default: false
     mobarena.admin.force.start:
+        description: Force start an arena.
         default: false
     mobarena.admin.config.reload:
+        description: Reload the config-file.
         default: false
     
-    mobarena.setup.*:
-        description: Gives access to setup commands
+    mobarena.setup:
+        description: Gives access to all setup commands
         default: op
         children:
             mobarena.setup.arena: true
@@ -81,44 +87,65 @@ permissions:
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
     mobarena.setup.arena:
+        description: Check which arena is the currently selected arena.
         default: false
     mobarena.setup.setarena:
+        description: Select a new arena.
         default: false
     mobarena.setup.addarena:
+        description: Add a new arena node.
         default: false
     mobarena.setup.delarena:
+        description: Delete an arena.
         default: false
     mobarena.setup.protect:
+        description: Turn arena protection on/off.
         default: false
     mobarena.setup.editarena:
+        description: Turn editmode on/off.
         default: false
     mobarena.setup.setregion:
+        description: Set region points p1/p2.
         default: false
     mobarena.setup.expandregion:
+        description: Expand arena region.
         default: false
     mobarena.setup.showregion:
+        description: Show arena region.
         default: false
     mobarena.setup.setlobbyregion:
+        description: Set lobby region points l1/l2.
         default: false
     mobarena.setup.expandlobbyregion:
+        description: Expand lobby region.
         default: false
     mobarena.setup.setwarp:
+        description: Set warp points arena/lobby/spectator.
         default: false
     mobarena.setup.spawnpoints:
+        description: List all spawnpoints.
         default: false
     mobarena.setup.addspawn:
+        description: Add a new spawnpoint.
         default: false
     mobarena.setup.delspawn:
+        description: Delete a spawnpoint.
         default: false
     mobarena.setup.containers:
+        description: List all containers.
         default: false
     mobarena.setup.addcontainer:
+        description: Add a new container.
         default: false
     mobarena.setup.delcontainer:
+        description: Delete a container.
         default: false
     mobarena.setup.checkdata:
+        description: Check which points need to be set up.
         default: false
     mobarena.setup.autogenerate:
+        description: Auto-generate an arena.
         default: false
     mobarena.setup.autodegenerate:
+        description: Auto-degenerate an arena.
         default: false
