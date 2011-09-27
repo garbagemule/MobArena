@@ -16,7 +16,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
 
-import com.garbagemule.MobArena.listeners.MagicSpellsBetaListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.spout.Spouty;
 import com.garbagemule.MobArena.util.FileUtils;
@@ -199,11 +198,7 @@ public class MobArena extends JavaPlugin
         
         PluginManager pm = getServer().getPluginManager();
         
-        // Check the version, and make the correct listener. Deprecate as soon as 1.1 is out of beta.
-        if (spells.getDescription().getVersion().equals("1.1"))
-            pm.registerEvent(Event.Type.CUSTOM_EVENT, new MagicSpellsBetaListener(this), Priority.Normal, this);
-        else
-            pm.registerEvent(Event.Type.CUSTOM_EVENT, new MagicSpellsListener(this), Priority.Normal, this);
+        pm.registerEvent(Event.Type.CUSTOM_EVENT, new MagicSpellsListener(this), Priority.Normal, this);
     }
     
     public Configuration getConfig()      { return config; }

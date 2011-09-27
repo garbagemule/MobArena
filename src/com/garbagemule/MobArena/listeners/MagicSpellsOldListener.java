@@ -10,15 +10,15 @@ import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.MobArena.waves.Wave.WaveType;
-import com.nisovin.magicspells.events.SpellCastEvent;
-import com.nisovin.magicspells.events.SpellListener;
+import com.nisovin.MagicSpells.Events.SpellCastEvent;
+import com.nisovin.MagicSpells.Events.SpellListener;
 
-public class MagicSpellsListener extends SpellListener
+public class MagicSpellsOldListener extends SpellListener
 {
     private MobArena plugin;
     private List<String> disabled, disabledOnBoss, disabledOnSwarm;
     
-    public MagicSpellsListener(MobArena plugin)
+    public MagicSpellsOldListener(MobArena plugin)
     {
         this.plugin = plugin;
         
