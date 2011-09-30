@@ -1343,44 +1343,29 @@ public class MAUtils
             e.printStackTrace();
             return 0;
         }
-        
-        /*
-        Field f = null;
-        
-        try
-        {
-            String[] parts = Bukkit.getVersion().split("-");
-            String version = parts[5].substring(1, 5);
-            int v = (version.matches("[0-9]+")) ? Integer.parseInt(version) : 0;
-            
-            String fieldName = (v >= 1191) ? "difficulty" : "spawnMonsters";
-            f = net.minecraft.server.World.class.getDeclaredField(fieldName);
-            
-            if (f != null)
-                return f.getInt(w);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        
-        return 0;*/
     }
     
     private static Field getSpawnMonstersField(World world)
     {        
         try
         {
-            String[] parts = Bukkit.getVersion().split("-");
-            String version = parts[5].substring(1, 5);
-            int v = (version.matches("[0-9]+")) ? Integer.parseInt(version) : 0;
+            int version = 0;
             
-            String fieldName = (v >= 1191) ? "difficulty" : "spawnMonsters";
+            Pattern pattern = Pattern.compile("b([0-9][0-9][0-9][0-9])jnks");
+            Matcher matcher = pattern.matcher(Bukkit.getVersion());
+            if (matcher.find())
+            {
+                String ver = matcher.group(1);
+                version = (ver.matches("[0-9]+")) ? Integer.parseInt(ver) : 0;
+            }
+            
+            String fieldName = (version >= 1191) ? "difficulty" : "spawnMonsters";
             return net.minecraft.server.World.class.getDeclaredField(fieldName);
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            MobArena.error("Your CraftBukkit version is messed up somehow...");
         }
         
         return null;
