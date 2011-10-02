@@ -43,12 +43,12 @@ public class YAML
             String p = entry.getKey().getName();
             ArenaPlayer ap = entry.getValue();
 
-            config.setProperty("player-data." + p + ".last-wave", ap.lastWave);
-            config.setProperty("player-data." + p + ".kills", ap.kills);
-            config.setProperty("player-data." + p + ".damage-done", ap.dmgDone);
-            config.setProperty("player-data." + p + ".damage-taken", ap.dmgTaken);
-            config.setProperty("player-data." + p + ".swings", ap.swings);
-            config.setProperty("player-data." + p + ".hits", ap.hits);
+            config.setProperty("player-data." + p + ".last-wave", ap.getStats().lastWave);
+            config.setProperty("player-data." + p + ".kills", ap.getStats().kills);
+            config.setProperty("player-data." + p + ".damage-done", ap.getStats().dmgDone);
+            config.setProperty("player-data." + p + ".damage-taken", ap.getStats().dmgTaken);
+            config.setProperty("player-data." + p + ".swings", ap.getStats().swings);
+            config.setProperty("player-data." + p + ".hits", ap.getStats().hits);
             for (ItemStack stack : ap.rewards)
             {
                 boolean money = stack.getTypeId() == MobArena.ECONOMY_MONEY_ID;

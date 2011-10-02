@@ -1,6 +1,6 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.94.3.7
+version: 0.94.3.8
 softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
 commands:
     ma:
@@ -83,6 +83,7 @@ permissions:
             mobarena.setup.containers: true
             mobarena.setup.addcontainer: true
             mobarena.setup.delcontainer: true
+            mobarena.setup.leaderboards: true
             mobarena.setup.checkdata: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
@@ -139,6 +140,9 @@ permissions:
         default: false
     mobarena.setup.delcontainer:
         description: Delete a container.
+        default: false
+    mobarena.setup.leaderboards:
+        description: Set up leaderboards.
         default: false
     mobarena.setup.checkdata:
         description: Check which points need to be set up.

@@ -125,6 +125,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.BLOCK_BURN,                blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_PLACE,               blockListener,    Priority.Highest, this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE,              blockListener,    Priority.Highest, this);
+        pm.registerEvent(Event.Type.SIGN_CHANGE,               blockListener,    Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_INTERACT,           playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_DROP_ITEM,          playerListener,   Priority.Normal,  this);
         pm.registerEvent(Event.Type.PLAYER_BUCKET_EMPTY,       playerListener,   Priority.Normal,  this);

@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,6 +47,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
@@ -112,6 +115,8 @@ public class Arena
     
     // Logging
     protected ArenaLog log;
+    protected Map<Player,ArenaPlayer> arenaPlayerMap;
+    protected Leaderboard leaderboard;
     
     protected MAListener eventListener;
     
@@ -148,6 +153,7 @@ public class Arena
         repairables     = new LinkedList<Repairable>();
         containables    = new LinkedList<Repairable>();
         attachments     = new HashMap<Player,PermissionAttachment>();
+        arenaPlayerMap  = new HashMap<Player,ArenaPlayer>();
         
         running         = false;
         edit            = false;
@@ -194,6 +200,7 @@ public class Arena
             p.setHealth(20);
             p.setFoodLevel(20);
             assignClassPermissions(p);
+            arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
         }
         
         // Copy the singleWaves Set for polling.
@@ -212,6 +219,9 @@ public class Arena
         // Start logging
         log = new ArenaLog(plugin, this);
         log.start();
+        
+        // Initialize leaderboards and start displaying info.
+        leaderboard.initialize();
         
         // Announce and notify.
         MAUtils.tellAll(this, Msg.ARENA_START);
@@ -234,6 +244,9 @@ public class Arena
         
         // Set the boolean.
         running = false;
+        
+        // Stop tracking leaderboards
+        leaderboard.update();
         
         // Finish logging
         log.end();
@@ -262,6 +275,7 @@ public class Arena
         // Announce and clear sets.
         MAUtils.tellAll(this, Msg.ARENA_END, true);
         arenaPlayers.clear();
+        arenaPlayerMap.clear();
         lobbyPlayers.clear();
         readyPlayers.clear();
         notifyPlayers.clear();
@@ -321,12 +335,13 @@ public class Arena
     {
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
+        p.setHealth(20);
         if (plugin.getHeroManager() != null)
         {
             Hero hero = plugin.getHeroManager().getHero(p);
             hero.setHealth(hero.getMaxHealth());
+            hero.syncHealth();
         }
-        p.setHealth(20);
         p.setFoodLevel(20);
         p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
@@ -510,7 +525,7 @@ public class Arena
     	if (p == null || log.players.get(p) == null)
     		return;
     	
-        log.players.get(p).kills++;
+    	arenaPlayerMap.get(p).getStats().kills++;
     }
     
     public void restoreInvAndGiveRewardsDelayed(final Player p)
@@ -633,6 +648,7 @@ public class Arena
             {
                 Hero hero = plugin.getHeroManager().getHero(p);
                 hero.setHealth(health * hero.getMaxHealth() / 20);
+                hero.syncHealth();
             }
         }
         
@@ -685,7 +701,7 @@ public class Arena
         else      restoreInvAndGiveRewards(p);
         
         if (log != null && spawnThread != null)
-            log.players.get(p).lastWave = spawnThread.getWave() - 1;
+            arenaPlayerMap.get(p).getStats().lastWave = spawnThread.getWave() - 1;
     }
     
     public void repairBlocks()
@@ -898,6 +914,7 @@ public class Arena
         spawnpoints      = MAUtils.getArenaSpawnpoints(config, world, configName);
         spawnpointsBoss  = MAUtils.getArenaBossSpawnpoints(config, world, configName);
         containers       = MAUtils.getArenaContainers(config, world, configName);
+        leaderboard      = new Leaderboard(plugin, this, config);
         
         // NEW WAVES
         singleWaves      = WaveUtils.getWaves(this, config, WaveBranch.SINGLE);
@@ -1212,6 +1229,22 @@ public class Arena
     public Set<Player> getArenaPlayers()
     {
         return arenaPlayers;
+    }
+    
+    public Collection<ArenaPlayer> getArenaPlayerSet()
+    {
+        return arenaPlayerMap.values();
+    }
+    
+    public List<ArenaPlayerStatistics> getArenaPlayerStatistics(Comparator<ArenaPlayerStatistics> comparator)
+    {
+        List<ArenaPlayerStatistics> list = new ArrayList<ArenaPlayerStatistics>();
+        
+        for (ArenaPlayer ap : arenaPlayerMap.values())
+            list.add(ap.getStats());
+        
+        Collections.sort(list, comparator);
+        return list;
     }
     
     public List<Player> getNonreadyPlayers()

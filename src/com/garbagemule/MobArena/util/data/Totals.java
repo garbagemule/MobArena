@@ -59,12 +59,12 @@ public class Totals
         for (ArenaPlayer ap : log.players.values())
         {
             // Basic values
-            updateInt(totals,"players." + ap.player.getName() + ".games-played", 1,           true);
-            updateInt(totals,"players." + ap.player.getName() + ".kills",        ap.kills,    true);
-            updateInt(totals,"players." + ap.player.getName() + ".damage-done",  ap.dmgDone,  true);
-            updateInt(totals,"players." + ap.player.getName() + ".damage-taken", ap.dmgTaken, true);
-            updateInt(totals,"players." + ap.player.getName() + ".swings",       ap.swings,   true);
-            updateInt(totals,"players." + ap.player.getName() + ".hits",         ap.hits,     true);
+            updateInt(totals,"players." + ap.player.getName() + ".games-played", 1,                      true);
+            updateInt(totals,"players." + ap.player.getName() + ".kills",        ap.getStats().kills,    true);
+            updateInt(totals,"players." + ap.player.getName() + ".damage-done",  ap.getStats().dmgDone,  true);
+            updateInt(totals,"players." + ap.player.getName() + ".damage-taken", ap.getStats().dmgTaken, true);
+            updateInt(totals,"players." + ap.player.getName() + ".swings",       ap.getStats().swings,   true);
+            updateInt(totals,"players." + ap.player.getName() + ".hits",         ap.getStats().hits,     true);
             
             // Class count
             updateInt(totals,"players." + ap.player.getName() + ".classes." + ap.className,1,true);
@@ -131,7 +131,7 @@ public class Totals
     {
         int kills = 0;
         for (ArenaPlayer ap : log.players.values())
-            kills += ap.kills;
+            kills += ap.getStats().kills;
         return kills;
     }
     
@@ -149,9 +149,9 @@ public class Totals
             if (!ap.className.equals(className))
                 continue;
             
-            kills    += ap.kills;
-            dmgDone  += ap.dmgDone;
-            dmgTaken += ap.dmgTaken;
+            kills    += ap.getStats().kills;
+            dmgDone  += ap.getStats().dmgDone;
+            dmgTaken += ap.getStats().dmgTaken;
         }
         return new int[]{kills, dmgDone, dmgTaken};
     }

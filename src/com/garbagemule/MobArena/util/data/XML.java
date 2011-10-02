@@ -48,12 +48,12 @@ public class XML
             Element p = new Element("player").setAttribute(new Attribute("name", entry.getKey().getName()));
             ArenaPlayer ap = entry.getValue();
 
-            p.addContent(new Element("last-wave").addContent(ap.lastWave + ""));
-            p.addContent(new Element("kills").addContent(ap.lastWave + ""));
-            p.addContent(new Element("damage-done").addContent(ap.dmgDone + ""));
-            p.addContent(new Element("damage-taken").addContent(ap.dmgTaken + ""));
-            p.addContent(new Element("swings").addContent(ap.swings + ""));
-            p.addContent(new Element("hits").addContent(ap.hits + ""));
+            p.addContent(new Element("last-wave").addContent(ap.getStats().lastWave + ""));
+            p.addContent(new Element("kills").addContent(ap.getStats().lastWave + ""));
+            p.addContent(new Element("damage-done").addContent(ap.getStats().dmgDone + ""));
+            p.addContent(new Element("damage-taken").addContent(ap.getStats().dmgTaken + ""));
+            p.addContent(new Element("swings").addContent(ap.getStats().swings + ""));
+            p.addContent(new Element("hits").addContent(ap.getStats().hits + ""));
             
             // Rewards
             Element rw = new Element("rewards");

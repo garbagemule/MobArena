@@ -129,11 +129,11 @@ public class PlainText
             buffy.append("- ");
             buffy.append(TextUtils.padRight(name, NAME)); buffy.append(pad);
             buffy.append(TextUtils.padRight(ap.getClassName(), CLASS)); buffy.append(pad);
-            buffy.append(TextUtils.padLeft(ap.lastWave, WAVE)); buffy.append(pad);
-            buffy.append(TextUtils.padLeft(ap.kills, KILLS)); buffy.append(pad);
-            buffy.append(TextUtils.padLeft(ap.dmgDone, DMGDONE)); buffy.append(pad);
-            buffy.append(TextUtils.padLeft(ap.dmgTaken, DMGTAKEN)); buffy.append(pad);
-            buffy.append(TextUtils.padLeft(((ap.swings != 0) ? ap.hits*100/ap.swings : 0), ACCURACY-1)); buffy.append("%"); buffy.append(pad);
+            buffy.append(TextUtils.padLeft(ap.getStats().lastWave, WAVE)); buffy.append(pad);
+            buffy.append(TextUtils.padLeft(ap.getStats().kills, KILLS)); buffy.append(pad);
+            buffy.append(TextUtils.padLeft(ap.getStats().dmgDone, DMGDONE)); buffy.append(pad);
+            buffy.append(TextUtils.padLeft(ap.getStats().dmgTaken, DMGTAKEN)); buffy.append(pad);
+            buffy.append(TextUtils.padLeft(((ap.getStats().swings != 0) ? ap.getStats().hits*100/ap.getStats().swings : 0), ACCURACY-1)); buffy.append("%"); buffy.append(pad);
             buffy.append(MAUtils.listToString(ap.rewards));
             
             result.add(buffy.toString());

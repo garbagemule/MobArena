@@ -16,17 +16,9 @@ public class ArenaPlayer
     public List<ItemStack> rewards;
     public List<Block> blocks;
     
+    private ArenaPlayerStatistics stats;
+    
     protected boolean inArena, inLobby, inSpec, isReady;
-    
-    // Session fields.
-    public int kills, dmgDone, dmgTaken, swings, hits, deaths, lastWave;
-    public int flagCaps, flagAttempts, flagReturns; // BG: Capture the Pumpkin
-    public int baseCaps; // BG: Domination
-    
-    // All-time fields.
-    protected int totalKills, totalDmgDone, totalDmgTaken, totalSwings, totalHits, totalDeaths;
-    protected int totalFlagCaps, totalFlagAttempts, totalFlagReturns; // BG: Capture the Pumpkin
-    protected int totalBaseCaps; // BG: Domination
     
     public ArenaPlayer(Player player, Arena arena, MobArena plugin)
     {
@@ -37,9 +29,12 @@ public class ArenaPlayer
         className   = arena.classMap.get(player);
         rewards     = new LinkedList<ItemStack>();
         blocks      = new LinkedList<Block>();
+        
+        stats = new ArenaPlayerStatistics(this);
     }
     
     public Player getPlayer()    { return player; }
     public Arena getArena()      { return arena;  }
     public String getClassName() { return className; }
+    public ArenaPlayerStatistics getStats() { return stats; }
 }

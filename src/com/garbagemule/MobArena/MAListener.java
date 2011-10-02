@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EndermanPickupEvent;
 import org.bukkit.event.entity.EndermanPlaceEvent;
@@ -49,6 +50,7 @@ import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.repairable.*;
 
 public class MAListener implements ArenaListener
@@ -153,6 +155,13 @@ public class MAListener implements ArenaListener
             default:
                 break;
         }
+    }
+    
+    public void onSignChange(SignChangeEvent event)
+    {
+        arena.leaderboard = new Leaderboard(plugin, arena, event.getBlock().getLocation());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "leaderboard", event.getBlock().getLocation());
+        MAUtils.tellPlayer(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event)
@@ -331,7 +340,7 @@ public class MAListener implements ArenaListener
         
         // Log damage
         if (!event.isCancelled())
-            arena.log.players.get(player).dmgTaken += event.getDamage();
+            arena.arenaPlayerMap.get(player).getStats().dmgTaken += event.getDamage();
     }
     
     private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager)
@@ -352,13 +361,13 @@ public class MAListener implements ArenaListener
                 return;
             }
             
-            arena.log.players.get((Player) damager).dmgDone += event.getDamage();
-            arena.log.players.get((Player) damager).hits++;
+            arena.arenaPlayerMap.get((Player) damager).getStats().dmgDone += event.getDamage();
+            arena.arenaPlayerMap.get((Player) damager).getStats().hits++;
         }
         else if (damager instanceof Wolf && arena.pets.contains(damager))
         {                
             event.setDamage(1);
-            arena.log.players.get((Player) ((Wolf) damager).getOwner()).dmgDone += event.getDamage();
+            arena.arenaPlayerMap.get((Player) ((Wolf) damager).getOwner()).getStats().dmgDone += event.getDamage();
         }
         else if (damager instanceof LivingEntity)
         {
@@ -465,7 +474,7 @@ public class MAListener implements ArenaListener
         if (!arena.running || !arena.arenaPlayers.contains(event.getPlayer()))
             return;
         
-        arena.log.players.get(event.getPlayer()).swings++;
+        arena.arenaPlayerMap.get(event.getPlayer()).getStats().swings++;
     }
 
     public void onPlayerDropItem(PlayerDropItemEvent event)

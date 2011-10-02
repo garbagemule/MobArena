@@ -126,16 +126,16 @@ public class ArenaLog
     
     public void playerKill(Player p)
     {
-        players.get(p).kills++;
+        players.get(p).getStats().kills++;
     }
     
     public void playerDamager(Player p, int damage)
     {
-        players.get(p).dmgDone += damage;
+        players.get(p).getStats().dmgDone += damage;
     }
     
     public void playerDamagee(Player p, int damage)
     {
-        players.get(p).dmgTaken += damage;
+        players.get(p).getStats().dmgTaken += damage;
     }
 }
