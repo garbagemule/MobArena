@@ -66,6 +66,17 @@ public class LeaderboardColumn
         catch (Exception e) { e.printStackTrace(); }
     }
     
+    public void clear()
+    {
+        for (Sign s : signs)
+        {
+            s.setLine(0, "");
+            s.setLine(1, "");
+            s.setLine(2, "");
+            s.setLine(3, "");
+        }
+    }
+    
     public Sign getHeader()
     {
         return header;

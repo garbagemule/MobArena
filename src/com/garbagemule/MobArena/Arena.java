@@ -222,6 +222,7 @@ public class Arena
         
         // Initialize leaderboards and start displaying info.
         leaderboard.initialize();
+        leaderboard.startTracking();
         
         // Announce and notify.
         MAUtils.tellAll(this, Msg.ARENA_START);
@@ -246,6 +247,7 @@ public class Arena
         running = false;
         
         // Stop tracking leaderboards
+        leaderboard.stopTracking();
         leaderboard.update();
         
         // Finish logging

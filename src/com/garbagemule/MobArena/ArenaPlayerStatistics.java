@@ -34,12 +34,21 @@ public class ArenaPlayerStatistics
                 public int compare(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2)
                 {
                     if (s1.kills > s2.kills)
-                        return 1;
-                    else if (s1.kills < s2.kills)
                         return -1;
+                    else if (s1.kills < s2.kills)
+                        return 1;
                     return 0;
                 }
             };
+    }
+    
+    private static int compareKills(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2)
+    {
+        if (s1.kills > s2.kills)
+            return -1;
+        else if (s1.kills < s2.kills)
+            return 1;
+        return 0;
     }
     
     public static Comparator<ArenaPlayerStatistics> waveComparator()
@@ -48,13 +57,21 @@ public class ArenaPlayerStatistics
             {
                 public int compare(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2)
                 {
-                    if (s1.lastWave > s2.lastWave)
-                        return 1;
-                    else if (s1.lastWave < s2.lastWave)
-                        return -1;
-                    return 0;
+                    int result = compareWaves(s1, s2);
+                    if (result != 0) return result;
+                    
+                    return compareKills(s1, s2);
                 }
             };
+    }
+    
+    private static int compareWaves(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2)
+    {
+        if (s1.lastWave > s2.lastWave)
+            return -1;
+        else if (s1.lastWave < s2.lastWave)
+            return 1;
+        return 0;
     }
     
     public static Comparator<ArenaPlayerStatistics> dmgDoneComparator()
@@ -64,9 +81,9 @@ public class ArenaPlayerStatistics
                 public int compare(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2)
                 {
                     if (s1.dmgDone > s2.dmgDone)
-                        return 1;
-                    else if (s1.dmgDone < s2.dmgDone)
                         return -1;
+                    else if (s1.dmgDone < s2.dmgDone)
+                        return 1;
                     return 0;
                 }
             };

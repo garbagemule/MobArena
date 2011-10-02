@@ -99,6 +99,13 @@ public class Leaderboard
         
         initializeBoards();
         initializeStats();
+        clear();
+    }
+    
+    public void clear()
+    {
+        for (LeaderboardColumn column : boards)
+            column.clear();
     }
     
     public void update()

@@ -77,6 +77,9 @@ public class MASpawnThread implements Runnable
         // Find the wave to spawn
         spawnWave(wave);
         
+        // Update stats
+        updateStats(wave);
+        
         wave++;
         if (arena.monsters.isEmpty())
             arena.resetIdleTimer();
@@ -128,6 +131,13 @@ public class MASpawnThread implements Runnable
 
         arena.setWave(w);
         w.spawn(wave);
+    }
+    
+    private void updateStats(int wave)
+    {
+        for (ArenaPlayer ap: arena.getArenaPlayerSet())
+            if (arena.getArenaPlayers().contains(ap.getPlayer()))
+                ap.getStats().lastWave++;
     }
     
     private SortedSet<Wave> getMatchingRecurrentWaves(int wave)
