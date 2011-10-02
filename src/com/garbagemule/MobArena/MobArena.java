@@ -23,7 +23,7 @@ import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
 
 import com.herocraftonline.dev.heroes.Heroes;
-import com.herocraftonline.dev.heroes.persistence.HeroManager;
+import com.herocraftonline.dev.heroes.hero.HeroManager;
 
 /**
  * MobArena
