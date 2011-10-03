@@ -1087,14 +1087,28 @@ public class MAUtils
                 continue;
             }
             
-            double dist = p.getLocation().distanceSquared(e.getLocation());
-            if (dist < current && dist < 256)
+            double dist = distanceSquared(p, e.getLocation());
+            if (dist < current && dist < 256D)
             {
                 current = dist;
                 result = p;
             }
         }
         return result;
+    }
+    
+    public static double distanceSquared(Player p, Location l)
+    {
+        try
+        {
+            return p.getLocation().distanceSquared(l);
+        }
+        catch(Exception e)
+        {
+            p.kickPlayer("Banned for life! No, but stop trying to cheat in MobArena!");
+            MobArena.warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
+            return Double.MAX_VALUE;
+        }
     }
     
     /**

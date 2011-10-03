@@ -30,19 +30,11 @@ public class WaveUtils
         {
             for (Player p : players)
             {
-                try
-                {
-                    if (l.distanceSquared(p.getLocation()) >= MobArena.MIN_PLAYER_DISTANCE_SQUARED)
-                        continue;
-                    
-                    result.add(l);
-                    break;
-                }
-                catch (Exception e)
-                {
-                    p.kickPlayer("Banned for life! No, but stop trying to cheat in MobArena!");
-                    MobArena.warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
-                }
+                if (MAUtils.distanceSquared(p, l) >= MobArena.MIN_PLAYER_DISTANCE_SQUARED)
+                    continue;
+                
+                result.add(l);
+                break;
             }
         }
         

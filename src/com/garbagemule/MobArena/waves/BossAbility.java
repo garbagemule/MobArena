@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import com.garbagemule.MobArena.Arena;
+import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.WaveUtils;
 
@@ -334,7 +335,7 @@ public enum BossAbility
     {
         List<Player> result = new LinkedList<Player>();
         for (Player p : arena.getLivingPlayers())
-            if (p.getLocation().distanceSquared(boss.getLocation()) > x*x)
+            if (MAUtils.distanceSquared(p, boss.getLocation()) > (double) (x*x))
                 result.add(p);
         return result;
     }

@@ -46,8 +46,8 @@ public class MobArena extends JavaPlugin
     // Global variables
     public static PluginDescriptionFile desc;
     public static File dir, arenaDir;
-    public static final double MIN_PLAYER_DISTANCE = 15.0;
-    public static final double MIN_PLAYER_DISTANCE_SQUARED = MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE;
+    public static final double MIN_PLAYER_DISTANCE = 15D;
+    public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
     public static final int ECONOMY_MONEY_ID = -29;
     public static Random random = new Random();
 

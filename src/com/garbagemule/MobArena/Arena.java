@@ -488,7 +488,8 @@ public class Arena
                         if (e == null) continue;
                         
                         Creature c = (Creature) e;
-                        if (c.getTarget() != null && e.getLocation().distanceSquared(c.getTarget().getLocation()) < 8)
+                        LivingEntity target = c.getTarget();
+                        if (target != null && target instanceof Player && MAUtils.distanceSquared((Player) target, e.getLocation()) < 8D)
                         {
                             CraftEntity ce = (CraftEntity) e;
                             CraftWorld cw = (CraftWorld) e.getWorld();
