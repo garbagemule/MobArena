@@ -3,9 +3,6 @@ package com.garbagemule.register.payment.methods;
 import com.garbagemule.register.payment.Method;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.api.Economy;
-import com.earth2me.essentials.api.NoLoanPermittedException;
-import com.earth2me.essentials.api.UserDoesNotExistException;
-
 
 import org.bukkit.plugin.Plugin;
 
@@ -58,6 +55,30 @@ public class EE17 implements Method {
         return false;
     }
 
+    public boolean createAccount(String name) {
+        if(hasAccount(name))
+            return false;
+        
+        Economy.createNPC(name);
+        return true;
+    }
+
+    public boolean createAccount(String name, Double balance) {
+        if(hasAccount(name))
+            return false;
+        
+        Economy.createNPC(name);
+
+        try {
+            Economy.setMoney(name, balance);
+        } catch (Exception ex) {
+            System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
     public MethodAccount getAccount(String name) {
         if(!hasAccount(name)) 
             return null;
@@ -93,8 +114,8 @@ public class EE17 implements Method {
 
             try {
                 balance = Economy.getMoney(this.name);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] Failed to grab balance in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
             }
 
             return balance;
@@ -103,11 +124,8 @@ public class EE17 implements Method {
         public boolean set(double amount) {
             try {
                 Economy.setMoney(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
-                return false;
-            } catch (NoLoanPermittedException ex) {
-                System.out.println("[REGISTER] No loan permitted in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
                 return false;
             }
 
@@ -117,11 +135,8 @@ public class EE17 implements Method {
         public boolean add(double amount) {
             try {
                 Economy.add(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
-                return false;
-            } catch (NoLoanPermittedException ex) {
-                System.out.println("[REGISTER] No loan permitted in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
                 return false;
             }
 
@@ -131,11 +146,8 @@ public class EE17 implements Method {
         public boolean subtract(double amount) {
             try {
                 Economy.subtract(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
-                return false;
-            } catch (NoLoanPermittedException ex) {
-                System.out.println("[REGISTER] No loan permitted in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
                 return false;
             }
 
@@ -145,11 +157,8 @@ public class EE17 implements Method {
         public boolean multiply(double amount) {
             try {
                 Economy.multiply(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
-                return false;
-            } catch (NoLoanPermittedException ex) {
-                System.out.println("[REGISTER] No loan permitted in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
                 return false;
             }
 
@@ -159,11 +168,8 @@ public class EE17 implements Method {
         public boolean divide(double amount) {
             try {
                 Economy.divide(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
-                return false;
-            } catch (NoLoanPermittedException ex) {
-                System.out.println("[REGISTER] No loan permitted in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
                 return false;
             }
 
@@ -173,8 +179,8 @@ public class EE17 implements Method {
         public boolean hasEnough(double amount) {
             try {
                 return Economy.hasEnough(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
             }
 
             return false;
@@ -183,8 +189,8 @@ public class EE17 implements Method {
         public boolean hasOver(double amount) {
             try {
                 return Economy.hasMore(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
             }
 
             return false;
@@ -193,8 +199,8 @@ public class EE17 implements Method {
         public boolean hasUnder(double amount) {
             try {
                 return Economy.hasLess(name, amount);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
             }
 
             return false;
@@ -203,8 +209,8 @@ public class EE17 implements Method {
         public boolean isNegative() {
             try {
                 return Economy.isNegative(name);
-            } catch (UserDoesNotExistException ex) {
-                System.out.println("[REGISTER] User does not exist in Essentials Economy: " + ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println("[REGISTER] Error in Essentials Economy: " + ex.getMessage());
             }
 
             return false;
