@@ -1363,7 +1363,7 @@ public class MAUtils
     {        
         try
         {
-            int version = 0;
+            int version = 1240;
             
             Pattern pattern = Pattern.compile("b([0-9][0-9][0-9][0-9])jnks");
             Matcher matcher = pattern.matcher(Bukkit.getVersion());
