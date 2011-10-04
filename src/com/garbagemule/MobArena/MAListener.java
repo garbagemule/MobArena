@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -577,7 +578,7 @@ public class MAListener implements ArenaListener
             Sign sign = (Sign) event.getClickedBlock().getState();
             
             // Check if the first line of the sign is a class name.
-            String className = sign.getLine(0);
+            String className = ChatColor.stripColor(sign.getLine(0));
             if (!arena.classes.contains(className) && !className.equalsIgnoreCase("random"))
                 return;
             
