@@ -52,6 +52,7 @@ import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.spout.Spouty;
+import com.garbagemule.MobArena.util.Delays;
 import com.garbagemule.MobArena.util.InventoryItem;
 import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
@@ -662,7 +663,7 @@ public class Arena
             p.setGameMode(modeMap.remove(p));
 
         // Put out fire.
-        p.setFireTicks(0);
+        Delays.douse(plugin, p, 3);
         
         // Remove pets.
         removePets(p);
