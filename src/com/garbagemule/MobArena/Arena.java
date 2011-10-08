@@ -674,6 +674,7 @@ public class Arena
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
         classMap.remove(p);
+        arenaPlayerMap.remove(p);
     }
     
     /**
@@ -703,9 +704,10 @@ public class Arena
         
         if (dead) restoreInvAndGiveRewardsDelayed(p);
         else      restoreInvAndGiveRewards(p);
-        
-        if (log != null && spawnThread != null)
-            arenaPlayerMap.get(p).getStats().lastWave = spawnThread.getWave() - 1;
+
+        ArenaPlayer ap = arenaPlayerMap.get(p);
+        if (ap != null)
+            ap.setDead(true);
     }
     
     public void repairBlocks()

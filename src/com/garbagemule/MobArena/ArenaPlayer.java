@@ -18,7 +18,7 @@ public class ArenaPlayer
     
     private ArenaPlayerStatistics stats;
     
-    protected boolean inArena, inLobby, inSpec, isReady;
+    protected boolean isDead, inArena, inLobby, inSpec, isReady;
     
     public ArenaPlayer(Player player, Arena arena, MobArena plugin)
     {
@@ -36,5 +36,24 @@ public class ArenaPlayer
     public Player getPlayer()    { return player; }
     public Arena getArena()      { return arena;  }
     public String getClassName() { return className; }
+    
+    /**
+     * Check if the player is "dead", i.e. died or not.
+     * @return true, if the player is either a spectator or played and died, false otherwise
+     */
+    public boolean isDead()
+    {
+        return isDead;
+    }
+    
+    /**
+     * Set the player's death status.
+     * @param value true, if the player is dead, false otherwise
+     */
+    public void setDead(boolean value)
+    {
+        isDead = value;
+    }
+    
     public ArenaPlayerStatistics getStats() { return stats; }
 }
