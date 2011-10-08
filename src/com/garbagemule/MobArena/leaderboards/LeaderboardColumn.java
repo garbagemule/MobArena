@@ -74,6 +74,7 @@ public class LeaderboardColumn
             s.setLine(1, "");
             s.setLine(2, "");
             s.setLine(3, "");
+            s.update();
         }
     }
     
