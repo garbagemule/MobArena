@@ -678,8 +678,8 @@ public class MAUtils
     /**
      * Create a frame spanned by the two input coordinates.
      * @return An int arry holding x,y,z and the original type IDs of each block.
-     */
-    public static Set<int[]> showRegion(World world, Location p1, Location p2, int id, byte color)
+     */    
+    public static Set<int[]> showRegion(Player p, World world, Location p1, Location p2, int id, byte color)
     {
         Set<int[]> result = new HashSet<int[]>();
 
@@ -692,63 +692,62 @@ public class MAUtils
         {
             buffer = new int[] {i, y1, z1, world.getBlockTypeIdAt(i, y1, z1)};
             result.add(buffer);
-            world.getBlockAt(i, y1, z1).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, i, y1, z1), id, color);
             
             buffer = new int[] {i, y2, z1, world.getBlockTypeIdAt(i, y2, z1)};
             result.add(buffer);
-            world.getBlockAt(i, y2, z1).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, i, y2, z1), id, color);
             
             buffer = new int[] {i, y1, z2, world.getBlockTypeIdAt(i, y1, z2)};
             result.add(buffer);
-            world.getBlockAt(i, y1, z2).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, i, y1, z2), id, color);
             
             buffer = new int[] {i, y2, z2, world.getBlockTypeIdAt(i, y2, z2)};
             result.add(buffer);
-            world.getBlockAt(i, y2, z2).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, i, y2, z2), id, color);
         }
         for (int j = y1+1; j <= y2-1; j++)
         {
             buffer = new int[] {x1, j, z1, world.getBlockTypeIdAt(x1, j, z1)};
             result.add(buffer);
-            world.getBlockAt(x1, j, z1).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x1, j, z1), id, color);
 
             buffer = new int[] {x2, j, z1, world.getBlockTypeIdAt(x2, j, z1)};
             result.add(buffer);
-            world.getBlockAt(x2, j, z1).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x2, j, z1), id, color);
             
             buffer = new int[] {x1, j, z2, world.getBlockTypeIdAt(x1, j, z2)};
             result.add(buffer);
-            world.getBlockAt(x1, j, z2).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x1, j, z2), id, color);
 
             buffer = new int[] {x2, j, z2, world.getBlockTypeIdAt(x2, j, z2)};
             result.add(buffer);
-            world.getBlockAt(x2, j, z2).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x2, j, z2), id, color);
         }
         for (int k = z1+1; k <= z2-1; k++)
         {
             buffer = new int[] {x1, y1, k, world.getBlockTypeIdAt(x1, y1, k)};
             result.add(buffer);
-            world.getBlockAt(x1, y1, k).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x1, y1, k), id, color);
 
             buffer = new int[] {x2, y1, k, world.getBlockTypeIdAt(x2, y1, k)};
             result.add(buffer);
-            world.getBlockAt(x2, y1, k).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x2, y1, k), id, color);
             
             buffer = new int[] {x1, y2, k, world.getBlockTypeIdAt(x1, y2, k)};
             result.add(buffer);
-            world.getBlockAt(x1, y2, k).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x1, y2, k), id, color);
 
             buffer = new int[] {x2, y2, k, world.getBlockTypeIdAt(x2, y2, k)};
             result.add(buffer);
-            world.getBlockAt(x2, y2, k).setTypeIdAndData(id, color, false);
+            p.sendBlockChange(new Location(world, x2, y2, k), id, color);
         }
-        
         return result;
     }
     
-    public static Set<int[]> showRegion(World world, Location p1, Location p2, int id)
+    public static Set<int[]> showRegion(Player p, World world, Location p1, Location p2, int id)
     {
-        return showRegion(world, p1, p2, id, (byte) 0);
+        return showRegion(p, world, p1, p2, id, (byte) 0);
     }
     
     /**

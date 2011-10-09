@@ -7,6 +7,7 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -871,14 +872,19 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
-            if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
+
+            Arena arena = am.getArenaAtLocation(p.getLocation());
+            if (arena == null)
+                arena = am.selectedArena;
+            
+            if (arena.p1 == null || arena.p2 == null)
             {
                 MAUtils.tellPlayer(sender, "The region is not defined for the selected arena.");
                 return true;
             }
-            if (showingRegion || !am.selectedArena.edit)
+            if (showingRegion)
             {
-                MAUtils.tellPlayer(sender, "Must be in edit mode.");
+                MAUtils.tellPlayer(sender, "Already showing region.");
                 return true;
             }
 
@@ -898,8 +904,9 @@ public class MACommands implements CommandExecutor
             showingRegion = true;
             
             // Show the frame.
-            final World world = am.selectedArena.world;
-            final Set<int[]> blocks = MAUtils.showRegion(world, am.selectedArena.p1, am.selectedArena.p2, mat.getId(), color);
+            final World world = arena.world;
+            final Set<int[]> blocks = MAUtils.showRegion(p, world, arena.p1, arena.p2, mat.getId(), color);
+            final Player fp = p;
             
             // And hide the frame.
             plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
@@ -908,7 +915,8 @@ public class MACommands implements CommandExecutor
                     public void run()
                     {
                         for (int[] buffer : blocks)
-                            world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) 0, false);
+                            fp.sendBlockChange(new Location(world, buffer[0], buffer[1], buffer[2]), buffer[3], (byte) 0);
+                            //world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) 0, false);
                         showingRegion = false;
                     }
                 }, 2*20);
