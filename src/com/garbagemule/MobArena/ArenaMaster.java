@@ -22,7 +22,6 @@ public class ArenaMaster //implements Master
     private MobArena plugin;
     private Configuration config;
     protected Arena selectedArena;
-    //protected Lobby masterLobby;
     
     // Settings
     protected boolean enabled, updateNotify;
@@ -51,7 +50,7 @@ public class ArenaMaster //implements Master
     public ArenaMaster(MobArena instance)
     {
         plugin   = instance;
-        config   = plugin.getConfig();
+        config   = plugin.getMAConfig();
         arenas   = new LinkedList<Arena>();
         arenaMap = new HashMap<Player,Arena>();
     }

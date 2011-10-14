@@ -267,7 +267,7 @@ public class MASpawnThread implements Runnable
             c = (Creature) e;
             try { target = c.getTarget(); } catch (ClassCastException cce) { continue; }
             
-            if (target instanceof Player && arena.arenaPlayers.contains(target))
+            if (target instanceof Player && arena.inArena((Player) target))
                 continue;
             
             c.setTarget(MAUtils.getClosestPlayer(e, arena));

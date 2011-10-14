@@ -1590,15 +1590,15 @@ public class MAUtils
         world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);
         
         // Set up the monster points.            
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "p1", new Location(world, x1, ly1, z1));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "p2", new Location(world, x2, y2+1, z2));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, ly1+1, z1+2));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s3", new Location(world, x2-3, y1+2, z1+3));
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s4", new Location(world, x2-3, y1+2, z2-3));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "p1", new Location(world, x1, ly1, z1));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "p2", new Location(world, x2, y2+1, z2));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "lobby", new Location(world, x1+2, ly1+1, z1+2));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s3", new Location(world, x2-3, y1+2, z1+3));
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s4", new Location(world, x2-3, y1+2, z2-3));
         
         am.updateAll();
         return true;
@@ -1632,7 +1632,7 @@ public class MAUtils
             world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
         }
         
-        Configuration config = plugin.getConfig();
+        Configuration config = plugin.getMAConfig();
         config.removeProperty("arenas." + name);
         config.save();
         

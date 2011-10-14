@@ -107,7 +107,7 @@ public class Arena
     protected boolean allowMonsters, allowAnimals;
     
     // Other settings
-    protected int repairDelay, minPlayers, maxPlayers, joinDistance;
+    protected int minPlayers, maxPlayers, joinDistance;
     protected List<String> classes = new LinkedList<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
@@ -900,7 +900,6 @@ public class Arena
         joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
         minPlayers       = config.getInt(arenaPath + "min-players", 0);
         maxPlayers       = config.getInt(arenaPath + "max-players", 0);
-        repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
         specialModulo    = config.getInt(arenaPath + "special-modulo", 4);
@@ -947,7 +946,7 @@ public class Arena
     public void serializeConfig()
     {
         String coords = "arenas." + configName() + ".coords.";
-        Configuration config = plugin.getConfig();
+        Configuration config = plugin.getMAConfig();
         
         config.setProperty("arenas." + configName() + ".settings.enabled", enabled);
         config.setProperty("arenas." + configName() + ".settings.protect", protect);
@@ -968,7 +967,7 @@ public class Arena
     
     public void deserializeConfig()
     {
-        Configuration config = plugin.getConfig();
+        Configuration config = plugin.getMAConfig();
         config.load();
         load(config);
     }
@@ -1111,6 +1110,16 @@ public class Arena
     //      Getters & Misc
     //
     ////////////////////////////////////////////////////////////////////*/
+    
+    public boolean inArena(Player p)
+    {
+        return arenaPlayers.contains(p);
+    }
+    
+    public boolean inLobby(Player p)
+    {
+        return lobbyPlayers.contains(p);
+    }
     
     public boolean isRunning()
     {

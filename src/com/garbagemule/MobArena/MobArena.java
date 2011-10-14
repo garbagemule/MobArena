@@ -202,9 +202,9 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.CUSTOM_EVENT, new MagicSpellsListener(this), Priority.Normal, this);
     }
     
-    public Configuration getConfig()      { return config; }
-    public ArenaMaster   getAM()          { return am; } // More convenient.
-    public ArenaMaster   getArenaMaster() { return am; }
+    public Configuration getMAConfig()      { return config; }
+    public ArenaMaster   getAM()            { return am; } // More convenient.
+    public ArenaMaster   getArenaMaster()   { return am; }
     
     public HeroManager getHeroManager()
     {
