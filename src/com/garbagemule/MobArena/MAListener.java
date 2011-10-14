@@ -644,7 +644,7 @@ public class MAListener implements ArenaListener
         }
         else if (arena.inRegion(to))
         {
-            if (isWarp(from) || to.equals(arena.locations.get(p)))
+            if (isWarp(from) || isWarp(to) || to.equals(arena.locations.get(p)))
                 return;
             
             MAUtils.tellPlayer(p, Msg.WARP_TO_ARENA);
