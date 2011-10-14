@@ -623,8 +623,41 @@ public class MAListener implements ArenaListener
         
         arena.playerLeave(p);
     }
-
+    
     public void onPlayerTeleport(PlayerTeleportEvent event)
+    {
+        if (!arena.enabled || !arena.setup || arena.allowWarp || arena.edit)
+            return;
+
+        Location to   = event.getTo();
+        Location from = event.getFrom();
+        Player   p    = event.getPlayer();
+        
+        if (arena.inRegion(from))
+        {
+            // Covers the case in which both locations are in the arena.
+            if ((arena.inRegion(to) && arena.running) || isWarp(to) || to.equals(arena.locations.get(p)))
+                return;
+
+            MAUtils.tellPlayer(p, Msg.WARP_FROM_ARENA);
+            event.setCancelled(true);
+        }
+        else if (arena.inRegion(to))
+        {
+            if (isWarp(from) || to.equals(arena.locations.get(p)))
+                return;
+            
+            MAUtils.tellPlayer(p, Msg.WARP_TO_ARENA);
+            event.setCancelled(true);
+        }
+    }
+    
+    private boolean isWarp(Location l)
+    {
+        return l.equals(arena.arenaLoc) || l.equals(arena.lobbyLoc) || l.equals(arena.spectatorLoc);
+    }
+
+    /*public void onPlayerTeleport(PlayerTeleportEvent event)
     {
         if (!arena.running || arena.edit || !arena.enabled || !arena.setup || arena.allowWarp)
             return;
@@ -668,7 +701,7 @@ public class MAListener implements ArenaListener
             event.setCancelled(true);
             return;
         }
-    }
+    }*/
 
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
     {
