@@ -102,10 +102,17 @@ public class MACommands implements CommandExecutor
         boolean console = (sender instanceof ConsoleCommandSender);
         
         // Cast the sender to Player if possible.
-        Player p = (player) ? (Player)sender : null;
+        Player p = (player) ? (Player) sender : null;
         
         if (args.length == 0)
-            return false;
+        {
+            List<Arena> arenas = am.getEnabledArenas();
+            if (arenas == null || arenas.isEmpty())
+                MAUtils.tellPlayer(p, "There are no enabled arenas to join!");
+            else
+                MAUtils.tellPlayer(p, "Use /ma join to join an arena.");
+            return true;
+        }
         
         // Grab the command base and any arguments.
         String base = args[0].toLowerCase();

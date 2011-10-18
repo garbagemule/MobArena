@@ -1,22 +1,22 @@
 name: MobArena
 main: com.garbagemule.MobArena.MobArena
-version: 0.94.3.20
+version: 0.94.3.21
 softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
 commands:
     ma:
         description: Base command for MobArena
         usage: |
-            /ma join      - Join the arena.
-            /ma leave     - Leave the arena.
-            /ma notready  - List of players who aren't ready.
-            /ma spectate  - Warp to the spectator area.
+            YOU HAVE AN ERROR!
+            Find the error in your server log, copy it into
+            http://pastebin.com, and then paste the link
+            in the IRC or on the forums.
     mobarena:
         description: Base command for MobArena
         usage: |
-            /mobarena join      - Join the arena.
-            /mobarena leave     - Leave the arena.
-            /mobarena notready  - List of players who aren't ready.
-            /mobarena spectate  - Warp to the spectator area.
+            YOU HAVE AN ERROR!
+            Find the error in your server log, copy it into
+            http://pastebin.com, and then paste the link
+            in the IRC or on the forums.
 permissions:
     mobarena.use:
         description: Gives access to usage commands
