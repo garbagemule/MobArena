@@ -1,12 +1,14 @@
 package com.garbagemule.MobArena;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.leaderboards.Stats;
 
@@ -45,6 +47,21 @@ public class MABlockListener extends BlockListener
     
     public void onSignChange(SignChangeEvent event)
     {
+        if (event.getLine(0).contains("[MA]"))
+        {
+            if (event.getLine(1).contains("[join]") || event.getLine(1).contains("[leave]") || event.getLine(1).contains("[spectate]"))
+            {
+                if (!event.getPlayer().hasPermission("mobarena.setup.signs"))
+                {
+                    event.getBlock().setType(Material.AIR);
+                    event.getPlayer().getWorld().dropItem(event.getPlayer().getLocation(), new ItemStack(Material.SIGN));
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+        
+        
         if (!event.getPlayer().hasPermission("mobarena.setup.leaderboards"))
             return;
         
