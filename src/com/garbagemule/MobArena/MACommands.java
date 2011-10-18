@@ -1122,7 +1122,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("addcontainer"))
         {
-            if (!(player && plugin.has(p, "mobarena.setup.addchest")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.addcontainer")) && !op)
             {
                 MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
