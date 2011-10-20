@@ -55,8 +55,10 @@ import com.garbagemule.MobArena.repairable.*;
 
 public class MAListener implements ArenaListener
 {
+    private MobArenaHandler maHandler = new MobArenaHandler();
     private MobArena plugin;
     private Arena arena;
+    
     
     public MAListener(Arena arena, MobArena plugin)
     {
@@ -505,11 +507,21 @@ public class MAListener implements ArenaListener
             event.getItemDrop().remove();
         }
         
-        // Player is in the spectator area
+        // Player is in the spectator list
         else if (arena.specPlayers.contains(p))
         {
-            MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
-            event.setCancelled(true);
+            // Player walked out of the spectator area without using "/ma leave"
+            if (!maHandler.inRegion(p.getLocation()))
+            {
+                arena.specPlayers.remove(p);
+                arena.locations.remove(p);
+            }
+            // Player is still in an Arena somewhere
+            else
+            {
+                MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+                event.setCancelled(true);
+            }
         }
     }
 
