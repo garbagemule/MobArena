@@ -308,6 +308,8 @@ public class MAListener implements ArenaListener
                 damager = ((Projectile) damager).getShooter();
         }
         
+        event.setCancelled(false);
+        
         // Pet wolf
         if (damagee instanceof Wolf && arena.pets.contains(damagee))
             onPetDamage(event, (Wolf) damagee, damager);

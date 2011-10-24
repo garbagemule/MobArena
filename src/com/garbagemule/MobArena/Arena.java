@@ -41,6 +41,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
@@ -58,8 +60,6 @@ import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
-
-import com.herocraftonline.dev.heroes.hero.Hero;
 
 public class Arena
 {
@@ -193,12 +193,7 @@ public class Arena
         for (Player p : arenaPlayers)
         {
             p.teleport(arenaLoc);
-            if (plugin.getHeroManager() != null)
-            {
-                Hero hero = plugin.getHeroManager().getHero(p);
-                hero.setHealth(hero.getMaxHealth());
-            }
-            p.setHealth(20);
+            setHealth(p, 20);
             p.setFoodLevel(20);
             assignClassPermissions(p);
             arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
@@ -338,13 +333,7 @@ public class Arena
     {
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
-        p.setHealth(20);
-        if (plugin.getHeroManager() != null)
-        {
-            Hero hero = plugin.getHeroManager().getHero(p);
-            hero.setHealth(hero.getMaxHealth());
-            hero.syncHealth();
-        }
+        setHealth(p, 20);
         p.setFoodLevel(20);
         p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
@@ -647,13 +636,7 @@ public class Arena
         if (healthMap.containsKey(p))
         {
             int health = healthMap.remove(p);
-            p.setHealth(health);
-            if (plugin.getHeroManager() != null)
-            {
-                Hero hero = plugin.getHeroManager().getHero(p);
-                hero.setHealth(health * hero.getMaxHealth() / 20);
-                hero.syncHealth();
-            }
+            setHealth(p, health);
         }
         
         if (hungerMap.containsKey(p))
@@ -708,6 +691,20 @@ public class Arena
         ArenaPlayer ap = arenaPlayerMap.get(p);
         if (ap != null)
             ap.setDead(true);
+    }
+    
+    private void setHealth(Player p, int health)
+    {
+        // Grab the current health
+        int current = p.getHealth();
+        
+        // If the health is 20, just leave it at that no matter what.
+        int regain  = health == 20 ? 20 : health - current;
+        
+        // Set the health, and fire off the event.
+        p.setHealth(health);
+        EntityRegainHealthEvent event = new EntityRegainHealthEvent(p, regain, RegainReason.CUSTOM);
+        Bukkit.getPluginManager().callEvent(event);
     }
     
     public void repairBlocks()

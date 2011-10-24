@@ -22,9 +22,6 @@ import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
 
-import com.herocraftonline.dev.heroes.Heroes;
-import com.herocraftonline.dev.heroes.hero.HeroManager;
-
 /**
  * MobArena
  * @author garbagemule
@@ -41,7 +38,7 @@ public class MobArena extends JavaPlugin
     public static boolean hasSpout;
     
     // Heroes stuff
-    private HeroManager heroManager = null;
+    //private HeroManager heroManager = null;
     
     // Global variables
     public static PluginDescriptionFile desc;
@@ -70,7 +67,7 @@ public class MobArena extends JavaPlugin
         // Set up soft dependencies
         setupRegister();
         setupSpout();
-        setupHeroes();
+        //setupHeroes();
         setupMagicSpells();
         
         // Set up the ArenaMaster and the announcements
@@ -184,13 +181,13 @@ public class MobArena extends JavaPlugin
         Spouty.registerEvents(this);
     }
     
-    private void setupHeroes()
+    /*private void setupHeroes()
     {
         Plugin heroes = this.getServer().getPluginManager().getPlugin("Heroes");
         if (heroes == null) return;
         
         heroManager = ((Heroes) heroes).getHeroManager();
-    }
+    }*/
     
     private void setupMagicSpells()
     {
@@ -206,10 +203,10 @@ public class MobArena extends JavaPlugin
     public ArenaMaster   getAM()            { return am; } // More convenient.
     public ArenaMaster   getArenaMaster()   { return am; }
     
-    public HeroManager getHeroManager()
+    /*public HeroManager getHeroManager()
     {
         return heroManager;
-    }
+    }*/
     
     private String getHeader()
     {
