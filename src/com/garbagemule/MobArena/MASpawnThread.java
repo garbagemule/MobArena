@@ -74,6 +74,14 @@ public class MASpawnThread implements Runnable
         // Detonate creepers if needed
         detonateCreepers(arena.detCreepers);
         
+        // Check if this is the final wave, in which case, end instead of spawn
+        if (wave > 1 && wave == arena.finalWave)
+        {
+            for (Player p : arena.arenaPlayers)
+                arena.playerDeath(p);
+            return;
+        }
+        
         // Find the wave to spawn
         spawnWave(wave);
         

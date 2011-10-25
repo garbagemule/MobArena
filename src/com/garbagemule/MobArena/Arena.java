@@ -76,7 +76,7 @@ public class Arena
     protected String logging;
 
     // Wave/reward/entryfee fields
-    protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
+    protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime, finalWave;
     protected MASpawnThread spawnThread;
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<Player,String> classMap;
@@ -901,6 +901,7 @@ public class Arena
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
         specialModulo    = config.getInt(arenaPath + "special-modulo", 4);
         maxIdleTime      = config.getInt(arenaPath + "max-idle-time", 0) * 20;
+        finalWave        = config.getInt(arenaPath + "final-wave", 0);
         
         everyWaveMap     = MAUtils.getArenaRewardMap(config, configName, "every");
         afterWaveMap     = MAUtils.getArenaRewardMap(config, configName, "after");
