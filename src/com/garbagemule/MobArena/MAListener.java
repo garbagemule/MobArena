@@ -146,6 +146,8 @@ public class MAListener implements ArenaListener
                 event.setCancelled(true);
                 break;
             case SPREAD:
+                event.setCancelled(true);
+                break;
             case FLINT_AND_STEEL:
                 if (arena.running)
                     arena.blocks.add(event.getBlock());
