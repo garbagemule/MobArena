@@ -126,7 +126,7 @@ public class XML
             p.addContent(new Element("swings").addContent(totals.getInt("players." + name + ".swings", 1) + ""));
             p.addContent(new Element("hits").addContent(totals.getInt("players." + name + ".hits", 1) + ""));
             
-            Set<String> classes = totals.getConfigurationSection("players." + name + ".classes").getKeys(false);
+            Set<String> classes = MAUtils.getKeys(totals, "players." + name + ".classes");
             Element pcl = new Element("classes");
             if (classes != null)
             {

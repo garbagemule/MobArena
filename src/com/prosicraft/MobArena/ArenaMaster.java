@@ -221,7 +221,7 @@ public class ArenaMaster //implements Master
      */
     public void loadClasses()
     {
-        classes = config.getConfigurationSection("classes").getKeys(false);
+        classes = MAUtils.getKeys(config, "classes");
         if (classes == null)
         {
             config.set("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
@@ -234,7 +234,7 @@ public class ArenaMaster //implements Master
             config.set("classes.Oddjob.armor", "298,299,300,301");
             config.set("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
             config.set("classes.Chef.armor",   "314,315,316,317");
-            classes = config.getConfigurationSection("classes").getKeys(false);
+            classes = MAUtils.getKeys(config, "classes");
         }
         classItems = MAUtils.getClassItems(config, "items");
         classArmor = MAUtils.getClassItems(config, "armor");
@@ -251,24 +251,26 @@ public class ArenaMaster //implements Master
         if (config.getConfigurationSection("arenas") == null)
             createArenaNode("default", Bukkit.getServer().getWorlds().get(0));
 
-        for (String configName : config.getConfigurationSection("arenas").getKeys(false))
-        {
-            String arenaPath = "arenas." + configName + ".";
-            String worldName = config.getString(arenaPath + "settings.world", null);
-            World  world;
-            if (worldName == null || worldName.equals(""))
+        try {
+            for (String configName : MAUtils.getKeys(config, "arenas"))
             {
-                MobArena.warning("Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
-                world = Bukkit.getServer().getWorlds().get(0);
-            }
-            else world = Bukkit.getServer().getWorld(worldName);
+                String arenaPath = "arenas." + configName + ".";
+                String worldName = config.getString(arenaPath + "settings.world", null);
+                World  world;
+                if (worldName == null || worldName.equals(""))
+                {
+                    MobArena.warning("Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
+                    world = Bukkit.getServer().getWorlds().get(0);
+                }
+                else world = Bukkit.getServer().getWorld(worldName);
             
-            Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);            
-                arena.load(config, configfile);            
-            arenas.add(arena);
-        }
-        
-        selectedArena = arenas.get(0);
+                Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);            
+                    arena.load(config, configfile);            
+                arenas.add(arena);
+                selectedArena = arenas.get(0);
+            }
+        } catch (NullPointerException nex) {           
+        }                
     }
     
     public Arena createArenaNode(String configName, World world)
@@ -383,7 +385,12 @@ public class ArenaMaster //implements Master
     public void deserializeArenas()
     {
         // Get only the arenas in the config.
-        Set<String> strings = config.getConfigurationSection("arenas").getKeys(false);
+        Set<String> strings;
+        try {
+            strings = MAUtils.getKeys(config, "arenas");
+        } catch (NullPointerException nex) {
+            return;
+        }
         if (strings == null)
             return;
         

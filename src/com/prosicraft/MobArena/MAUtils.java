@@ -147,8 +147,11 @@ public class MAUtils
         if (config.getConfigurationSection(arenaPath) == null)
             return containers;
         
-        for ( String point : config.getConfigurationSection(arenaPath).getKeys(false) )
-            containers.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        try {
+            for ( String point : getKeys(config, arenaPath) )
+                containers.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        } catch (NullPointerException nex) {            
+        }
         
         return containers;
     }
@@ -163,10 +166,13 @@ public class MAUtils
         
         if (config.getConfigurationSection(arenaPath) == null)
             return spawnpoints;
-        
-        for (String point : config.getConfigurationSection(arenaPath).getKeys(false))
-            if (!point.matches("^(.)*boss(.)*$"))
-                spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+       
+        try {
+            for (String point : getKeys(config, arenaPath))
+                if (!point.matches("^(.)*boss(.)*$"))
+                    spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        } catch (NullPointerException nex) {            
+        }
         
         return spawnpoints;
     }
@@ -179,9 +185,12 @@ public class MAUtils
         if (config.getConfigurationSection(arenaPath) == null)
             return spawnpoints;
         
-        for (String point : config.getConfigurationSection(arenaPath).getKeys(false))
-            if (point.matches("^(.)*boss(.)*$"))
-                spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        try {
+            for (String point : getKeys(config, arenaPath))
+                if (point.matches("^(.)*boss(.)*$"))
+                    spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        } catch (NullPointerException nex) {            
+        }
         
         return spawnpoints;
     }
@@ -193,10 +202,29 @@ public class MAUtils
     {
         Map<String,List<ItemStack>> result = new HashMap<String,List<ItemStack>>();
         
-        for (String className : config.getConfigurationSection("classes").getKeys(false))
-            result.put(className, makeItemStackList(config.getString("classes." + className + "." + type)));
+        try {
+            for (String className : getKeys(config, "classes"))
+                result.put(className, makeItemStackList(config.getString("classes." + className + "." + type)));
+        } catch (NullPointerException nex) {            
+        }
         
         return result;
+    }
+    
+    public static Set<String> getKeys(FileConfiguration config, String path, boolean deep) {
+        try {
+            return config.getConfigurationSection(path).getKeys(deep);
+        } catch (NullPointerException nex) {
+            return null;
+        }
+    }
+    
+    public static Set<String> getKeys(FileConfiguration config, String path) {
+        try {
+            return config.getConfigurationSection(path).getKeys(false);
+        } catch (NullPointerException nex) {
+            return null;
+        }
     }
     
     public static Map<String,Map<String,Boolean>> getClassPerms(FileConfiguration config)
@@ -292,7 +320,7 @@ public class MAUtils
         String arenaPath = "arenas." + arena + ".rewards.waves.";
         Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
         
-        if (config.getConfigurationSection(arenaPath + type).getKeys(false) == null)
+        if (getKeys(config, arenaPath + type) == null)
         {
             if (type.equals("every"))
             {
@@ -308,7 +336,7 @@ public class MAUtils
             }
         }
         
-        Set<String> waves = config.getConfigurationSection(arenaPath + type).getKeys(false);
+        Set<String> waves = getKeys(config, arenaPath + type);
         if (waves == null) return result;
         
         for (String n : waves)

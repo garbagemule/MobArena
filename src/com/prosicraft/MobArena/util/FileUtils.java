@@ -1,5 +1,6 @@
 package com.prosicraft.MobArena.util;
 
+import com.prosicraft.MobArena.MAUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -43,7 +44,7 @@ public class FileUtils
     public static void fetchLibs(FileConfiguration config)
     {
         // Get all arenas
-        Set<String> arenas = config.getKeys(false);
+        Set<String> arenas = MAUtils.getKeys(config, "");
         if (arenas == null) return;
         
         // Add all the logging types

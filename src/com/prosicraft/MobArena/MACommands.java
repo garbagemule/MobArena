@@ -1014,7 +1014,7 @@ public class MACommands implements CommandExecutor
             }
             
             StringBuffer buffy = new StringBuffer();
-            Set<String> spawnpoints = plugin.getConfig().getConfigurationSection("arenas." + am.selectedArena.configName() + ".coords.spawnpoints").getKeys(false);
+            Set<String> spawnpoints = MAUtils.getKeys(plugin.getConfig(), "arenas." + am.selectedArena.configName() + ".coords.spawnpoints");
             
             if (spawnpoints != null)
             {
@@ -1086,7 +1086,7 @@ public class MACommands implements CommandExecutor
             }
             
             StringBuffer buffy = new StringBuffer();
-            Set<String> containers = plugin.getConfig().getConfigurationSection("arenas." + am.selectedArena.configName() + ".coords.containers").getKeys(false);
+            Set<String> containers = MAUtils.getKeys(plugin.getConfig(), "arenas." + am.selectedArena.configName() + ".coords.containers");
             
             if (containers != null)
             {

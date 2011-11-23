@@ -42,7 +42,7 @@ public abstract class NormalWave extends AbstractWave
         
         // Load monsters
         int prob;
-        Set<String> monsters = config.getConfigurationSection(path + "monsters").getKeys(false);
+        Set<String> monsters = MAUtils.getKeys(config, path + "monsters");
         if (monsters != null && !monsters.isEmpty())
         {
             for (String m : config.getConfigurationSection(path + "monsters").getKeys(false))

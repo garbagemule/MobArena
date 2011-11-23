@@ -101,7 +101,7 @@ public class WaveUtils
         String path = "arenas." + arena.configName() + ".waves." + b; // waves.yml, change to either "waves." + b, or simply b
         Set<String> waves = null;
         try {
-            waves = config.getConfigurationSection(path).getKeys(false);
+            waves = MAUtils.getKeys(config, path);
         } catch (NullPointerException nex) { // When configurationSection does not exist
             // blubb (means: the plugin continues here ... :D)
         }
@@ -338,7 +338,7 @@ public class WaveUtils
     private static boolean isNormalWaveWellDefined(FileConfiguration config, String path, boolean wellDefined)
     {
         // OPTIONAL: Monsters
-        Set<String> monsters = config.getConfigurationSection(path + "monsters").getKeys(false);
+        Set<String> monsters = MAUtils.getKeys(config, path + "monsters");
         if (monsters != null)
         {
             for (String monster : monsters)
