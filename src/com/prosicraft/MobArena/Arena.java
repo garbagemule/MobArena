@@ -51,14 +51,16 @@ import com.prosicraft.MobArena.leaderboards.Leaderboard;
 import com.prosicraft.MobArena.repairable.Repairable;
 import com.prosicraft.MobArena.repairable.RepairableComparator;
 import com.prosicraft.MobArena.repairable.RepairableContainer;
-import com.garbagemule.MobArena.spout.Spouty;
-import com.garbagemule.MobArena.util.InventoryItem;
-import com.garbagemule.MobArena.util.WaveUtils;
-import com.garbagemule.MobArena.waves.BossWave;
-import com.garbagemule.MobArena.waves.Wave;
-import com.garbagemule.MobArena.waves.Wave.WaveBranch;
+import com.prosicraft.MobArena.spout.Spouty;
+import com.prosicraft.MobArena.util.InventoryItem;
+import com.prosicraft.MobArena.util.WaveUtils;
+import com.prosicraft.MobArena.waves.BossWave;
+import com.prosicraft.MobArena.waves.Wave;
+import com.prosicraft.MobArena.waves.Wave.WaveBranch;
 
 import com.herocraftonline.dev.heroes.hero.Hero;
+import com.prosicraft.mighty.logger.MLog;
+import java.io.IOException;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class Arena
@@ -108,7 +110,7 @@ public class Arena
     
     // Other settings
     protected int repairDelay, minPlayers, maxPlayers, joinDistance;
-    protected List<String> classes = new LinkedList<String>();
+    protected Set<String> classes = new HashSet<String>();
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
     protected Map<Player,Integer> hungerMap = new HashMap<Player,Integer>();
@@ -868,9 +870,9 @@ public class Arena
     //
     ////////////////////////////////////////////////////////////////////*/
     
-    public void load(Configuration config)
+    public void load(FileConfiguration config, File configfile)
     {
-        config.load();
+        MAUtils.loadFileConfiguration(config, configfile);
         
         String arenaPath = "arenas." + MAUtils.nameArenaToConfig(name) + ".settings.";
         String configName = MAUtils.nameArenaToConfig(name);
@@ -961,14 +963,14 @@ public class Arena
         for (Map.Entry<String,Location> entry : spawnpointsBoss.entrySet())
             config.set(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
         
-        config.save(new File (plugin.dir, "config.yml"));
+        MAUtils.saveFileConfiguration(config, plugin.getConfigFile());
     }
     
     public void deserializeConfig()
     {
-        Configuration config = plugin.getConfig();
-        config.load();
-        load(config);
+        FileConfiguration config = plugin.getConfig();
+        MAUtils.loadFileConfiguration(config, plugin.getConfigFile());
+        load(config, plugin.getConfigFile());
     }
     
     public boolean serializeRegion()
@@ -1165,7 +1167,7 @@ public class Arena
         this.bossWave = bossWave;
     }
     
-    public List<String> getClasses()
+    public Set<String> getClasses()
     {
         return classes;
     }

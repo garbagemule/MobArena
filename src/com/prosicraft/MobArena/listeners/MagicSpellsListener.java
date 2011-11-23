@@ -4,14 +4,15 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.util.config.Configuration;
-
 import com.prosicraft.MobArena.Arena;
 import com.prosicraft.MobArena.MobArena;
-import com.garbagemule.MobArena.util.FileUtils;
-import com.garbagemule.MobArena.waves.Wave.WaveType;
+import com.prosicraft.MobArena.util.FileUtils;
+import com.prosicraft.MobArena.waves.Wave.WaveType;
 import com.nisovin.magicspells.events.SpellCastEvent;
 import com.nisovin.magicspells.events.SpellListener;
+import com.prosicraft.MobArena.MAUtils;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class MagicSpellsListener extends SpellListener
 {
@@ -24,11 +25,11 @@ public class MagicSpellsListener extends SpellListener
         
         // Set up the MagicSpells config-file.
         File spellFile = FileUtils.extractFile(plugin.getDataFolder(), "magicspells.yml");    
-        Configuration spellConfig = new Configuration(spellFile);
-        spellConfig.load();
+        FileConfiguration spellConfig = YamlConfiguration.loadConfiguration(spellFile);        
         setupSpells(spellConfig);
     }
-    
+        
+    @Override
     public void onSpellCast(SpellCastEvent event)
     {
         Arena arena = plugin.getAM().getArenaWithPlayer(event.getCaster());
@@ -43,11 +44,18 @@ public class MagicSpellsListener extends SpellListener
             event.setCancelled(true);
     }
     
-    private void setupSpells(Configuration config)
+    private void setupSpells(FileConfiguration config)
     {
-        this.disabled        = config.getStringList("disabled-spells", new LinkedList<String>());
-        this.disabledOnBoss  = config.getStringList("disabled-only-on-bosses", new LinkedList<String>());
-        this.disabledOnSwarm = config.getStringList("disabled-only-on-swarms", new LinkedList<String>());
+        this.disabled        = getStringList(config, "disabled-spells", new LinkedList<String>());
+        this.disabledOnBoss  = getStringList(config, "disabled-only-on-bosses", new LinkedList<String>());
+        this.disabledOnSwarm = getStringList(config, "disabled-only-on-swarms", new LinkedList<String>());
+    }
+    
+    private static List<String> getStringList(FileConfiguration config, String path, List<String> def) {
+        List<String> res = null;
+        if ( (res = config.getStringList(path)) == null )
+            res = def;
+        return res;
     }
     
     public void disableSpell(String spell)

@@ -1,6 +1,6 @@
 package com.prosicraft.MobArena.leaderboards;
 
-import com.garbagemule.MobArena.util.WaveUtils;
+import com.prosicraft.MobArena.util.WaveUtils;
 
 public enum Stats
 {

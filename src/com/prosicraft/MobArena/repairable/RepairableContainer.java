@@ -5,7 +5,7 @@ import org.bukkit.block.ContainerBlock;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.garbagemule.MobArena.util.InventoryItem;
+import com.prosicraft.MobArena.util.InventoryItem;
 
 public class RepairableContainer extends RepairableBlock
 {

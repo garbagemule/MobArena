@@ -1,6 +1,8 @@
 name: MobArena
-main: com.garbagemule.MobArena.MobArena
-version: 1.0.0.0.0.0.0
+author: prosicraft
+main: com.prosicraft.MobArena.MobArena
+description: Fight against the creeper and his friends.
+version: 0.95
 softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
 commands:
     ma:

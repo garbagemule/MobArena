@@ -16,8 +16,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import com.prosicraft.MobArena.MAMessages.Msg;
-import com.garbagemule.MobArena.util.WaveUtils;
-import com.garbagemule.MobArena.waves.Wave;
+import com.prosicraft.MobArena.util.WaveUtils;
+import com.prosicraft.MobArena.waves.Wave;
 
 /**
  * Core class for handling wave spawning.

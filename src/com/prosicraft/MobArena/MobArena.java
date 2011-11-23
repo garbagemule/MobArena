@@ -3,7 +3,6 @@ package com.prosicraft.MobArena;
 import java.io.File;
 import java.util.Random;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -16,14 +15,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 
 import com.prosicraft.MobArena.listeners.MagicSpellsListener;
-import com.garbagemule.MobArena.spout.Spouty;
-import com.garbagemule.MobArena.util.FileUtils;
-import com.garbagemule.register.payment.Method;
-import com.garbagemule.register.payment.Methods;
+import com.prosicraft.MobArena.spout.Spouty;
 
 import com.herocraftonline.dev.heroes.Heroes;
 import com.herocraftonline.dev.heroes.hero.HeroManager;
+import com.nijikokun.register.payment.Method;
+import com.nijikokun.register.payment.Methods;
 import java.io.IOException;
+import com.prosicraft.MobArena.util.FileUtils;
+import com.prosicraft.mighty.logger.MLog;
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
@@ -34,8 +36,8 @@ import org.bukkit.event.Listener;
  */
 public class MobArena extends JavaPlugin
 {
-    private FileConfiguration config;   // config.yml
-    private FileConfiguration configb;  // arenas.yml
+    private FileConfiguration config;   // config.yml    
+    private File cf;    
     private ArenaMaster am;
     
     // Economy stuff
@@ -68,11 +70,10 @@ public class MobArena extends JavaPlugin
         // Create default files and initialize config-file
         FileUtils.extractDefaults("config.yml");
         
-        config  = loadConfig("config.yml");        
-        configb = loadConfig("arenas.yml");             
+        loadConfig("config.yml");
         
         // Download external libraries if needed.
-        FileUtils.fetchLibs(configb);
+        FileUtils.fetchLibs(config);
         
         // Set up soft dependencies
         setupRegister();
@@ -107,7 +108,7 @@ public class MobArena extends JavaPlugin
         info("disabled.");
     }
     
-    private FileConfiguration loadConfig(String filename)
+    private void loadConfig(String filename)
     {        
         try {
             FileConfiguration cfb = null;
@@ -117,13 +118,15 @@ public class MobArena extends JavaPlugin
             }
             if ( !file.exists() ) throw new IOException ("Plugin configuration file not accessable.");
             cfb = YamlConfiguration.loadConfiguration(file);            
-            cfb.options().header(getHeader());   // does this work? I don't know ^^
-            return cfb;
+            cfb.options().header(getHeader());   // does this work? I don't know :D
+            
+            this.config = cfb;
+            this.cf = file;
         } catch (IOException iex) {
             error ("Can't load " + filename + ": " + iex.getMessage());
             iex.printStackTrace();
-        } return null;                                                
-    }
+        }                                           
+    }        
     
     private void registerListeners()
     {
@@ -176,9 +179,10 @@ public class MobArena extends JavaPlugin
     }
     
     // Console printing
-    public static void info(String msg)    { Bukkit.getServer().getLogger().info("[MobArena] " + msg); }
-    public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
-    public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
+    public static void info(String msg)    { MLog.i(msg); }
+    public static void warning(String msg) { MLog.w(msg); }    
+    public static void error(String msg)   { MLog.e(msg); }
+    public static void debug(String msg)   { MLog.d(msg); }
     
     private void setupRegister()
     {
@@ -220,7 +224,7 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.CUSTOM_EVENT, (Listener)new MagicSpellsListener(this), Priority.Normal, this);
     }        
     
-    public FileConfiguration getConfig()  { return config; }
+    public File getConfigFile()  { return cf; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
     

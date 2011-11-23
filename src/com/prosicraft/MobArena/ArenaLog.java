@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.util.data.PlainText;
-import com.garbagemule.MobArena.util.data.Totals;
-import com.garbagemule.MobArena.util.data.XML;
-import com.garbagemule.MobArena.util.data.YAML;
+import com.prosicraft.MobArena.util.data.PlainText;
+import com.prosicraft.MobArena.util.data.Totals;
+import com.prosicraft.MobArena.util.data.XML;
+import com.prosicraft.MobArena.util.data.YAML;
 
 public class ArenaLog
 {

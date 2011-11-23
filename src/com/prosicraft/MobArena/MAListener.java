@@ -160,7 +160,7 @@ public class MAListener implements ArenaListener
     public void onSignChange(SignChangeEvent event)
     {
         arena.leaderboard = new Leaderboard(plugin, arena, event.getBlock().getLocation());
-        MAUtils.setArenaCoord(plugin.getConfig(), arena, "leaderboard", event.getBlock().getLocation());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "leaderboard", event.getBlock().getLocation(), plugin.getConfigFile());
         MAUtils.tellPlayer(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
     }
 

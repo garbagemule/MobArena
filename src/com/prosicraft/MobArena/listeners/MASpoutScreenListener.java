@@ -7,7 +7,7 @@ import org.getspout.spoutapi.gui.Button;
 
 import com.prosicraft.MobArena.Arena;
 import com.prosicraft.MobArena.MobArena;
-import com.garbagemule.MobArena.spout.ClassButton;
+import com.prosicraft.MobArena.spout.ClassButton;
 
 public class MASpoutScreenListener extends ScreenListener
 {

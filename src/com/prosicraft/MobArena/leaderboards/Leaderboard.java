@@ -10,13 +10,13 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
-import org.bukkit.util.config.Configuration;
 
 import com.prosicraft.MobArena.Arena;
 import com.prosicraft.MobArena.ArenaPlayer;
 import com.prosicraft.MobArena.ArenaPlayerStatistics;
 import com.prosicraft.MobArena.MobArena;
-import com.garbagemule.MobArena.util.ConfigUtils;
+import com.prosicraft.MobArena.util.ConfigUtils;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class Leaderboard
 {
@@ -54,7 +54,7 @@ public class Leaderboard
      * @param arena The arena to which this leaderboard belongs.
      * @param config The config-file in which the location is specified.
      */
-    public Leaderboard(MobArena plugin, Arena arena, Configuration config)
+    public Leaderboard(MobArena plugin, Arena arena, FileConfiguration config)
     {
         this(plugin, arena);
         

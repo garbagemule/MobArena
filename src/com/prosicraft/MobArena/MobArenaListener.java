@@ -3,8 +3,8 @@ package com.prosicraft.MobArena;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.waves.Wave.WaveBranch;
-import com.garbagemule.MobArena.waves.Wave.WaveType;
+import com.prosicraft.MobArena.waves.Wave.WaveBranch;
+import com.prosicraft.MobArena.waves.Wave.WaveType;
 
 public abstract class MobArenaListener
 {
