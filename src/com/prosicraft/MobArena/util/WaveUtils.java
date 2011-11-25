@@ -25,8 +25,11 @@ import com.prosicraft.MobArena.waves.Wave.SwarmAmount;
 import com.prosicraft.MobArena.waves.Wave.WaveBranch;
 import com.prosicraft.MobArena.waves.Wave.WaveGrowth;
 import com.prosicraft.MobArena.waves.Wave.WaveType;
+import com.prosicraft.mighty.logger.MLog;
+import java.io.File;
 import java.util.Set;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class WaveUtils
 {
@@ -124,11 +127,11 @@ public class WaveUtils
         // If there are no waves and the type is 'recurrent', add a couple of auto-generated waves.
         if (branch == WaveBranch.RECURRENT && (result.isEmpty() || waves == null))
         {
-            MobArena.info("No valid recurrent waves detected for arena '" + arena.configName() + "'. Using defaults...");
+            MobArena.info("No valid rec. waves for arena '" + arena.configName() + "'. Using defaults...");
             DefaultWave def  = new DefaultWave(arena, "DEF_WAVE_AUTO", 1, 1, 1, config, path + ".DEF_WAVE_AUTO.");
-            SpecialWave spec = new SpecialWave(arena, "SPEC_WAVE_AUTO", 4, 4, 2, config, path + ".SPEC_WAVE_AUTO.");
+            SpecialWave spec = new SpecialWave(arena, "SPEC_WAVE_AUTO", 4, 4, 2, config, path + ".SPEC_WAVE_AUTO.");            
             result.add(def);
-            result.add(spec);
+            result.add(spec);           
         }
         
         return result;

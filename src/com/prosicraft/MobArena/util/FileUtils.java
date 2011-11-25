@@ -14,6 +14,7 @@ import java.util.Set;
 
 
 import com.prosicraft.MobArena.MobArena;
+import com.prosicraft.mighty.logger.MLog;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class FileUtils
@@ -191,7 +192,10 @@ public class FileUtils
         
         // Skip if there is no resource with that name
         InputStream in = MobArena.class.getResourceAsStream("/res/" + filename);
-        if (in == null) return null;
+        if (in == null) {
+            MLog.e("The plugin seems to be damaged: Missing ressource folder.");
+            return null;
+        }
         
         try
         {

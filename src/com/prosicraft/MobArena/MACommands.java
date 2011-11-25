@@ -207,7 +207,7 @@ public class MACommands implements CommandExecutor
             }
             
             Arena arena = am.arenaMap.get(p);            
-            arena.playerLeave(p);
+            arena.playerLeave(p);            
             MAUtils.tellPlayer(p, Msg.LEAVE_PLAYER_LEFT);
             return true;
         }

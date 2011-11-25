@@ -24,8 +24,7 @@ import com.nijikokun.register.payment.Methods;
 import java.io.IOException;
 import com.prosicraft.MobArena.util.FileUtils;
 import com.prosicraft.mighty.logger.MLog;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ResourceBundle;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
@@ -90,7 +89,7 @@ public class MobArena extends JavaPlugin
         registerListeners();
         
         // Announce enable!
-        info("v" + desc.getVersion() + " enabled.");
+        info("v" + desc.getVersion() + " enabled. (build#" + MAUtils.prependZeros(ResourceBundle.getBundle("version").getString("BUILD"), 3) + " by prosicraft)");
     }
     
     @Override

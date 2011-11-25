@@ -10,7 +10,6 @@ import com.prosicraft.MobArena.util.FileUtils;
 import com.prosicraft.MobArena.waves.Wave.WaveType;
 import com.nisovin.magicspells.events.SpellCastEvent;
 import com.nisovin.magicspells.events.SpellListener;
-import com.prosicraft.MobArena.MAUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 

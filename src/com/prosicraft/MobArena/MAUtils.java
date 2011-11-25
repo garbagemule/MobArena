@@ -1699,4 +1699,9 @@ public class MAUtils
         plugin.getAM().updateAll();
         return true;
     }
+    
+    public static String prependZeros(String number, int num) { 
+        String s= "000000000000"+number;
+        return s.substring(s.length()-num);
+    }
 }

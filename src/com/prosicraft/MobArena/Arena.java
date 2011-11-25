@@ -44,7 +44,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.util.config.Configuration;
 
 import com.prosicraft.MobArena.MAMessages.Msg;
 import com.prosicraft.MobArena.leaderboards.Leaderboard;
@@ -59,8 +58,6 @@ import com.prosicraft.MobArena.waves.Wave;
 import com.prosicraft.MobArena.waves.Wave.WaveBranch;
 
 import com.herocraftonline.dev.heroes.hero.Hero;
-import com.prosicraft.mighty.logger.MLog;
-import java.io.IOException;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class Arena
@@ -933,7 +930,7 @@ public class Arena
         
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
-        lobbySetup       = MAUtils.verifyLobby(this);
+        lobbySetup       = MAUtils.verifyLobby(this);                
     }
     
     public void restoreRegion()
