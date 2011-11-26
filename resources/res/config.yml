@@ -93,9 +93,10 @@ arenas:
                         creepers: 10
                         wolves: 10
                 spec1:
-                    type: special
+                    type: boss
                     priority: 2
-                    frequency: 4
+                    frequency: 2
+                    growth: psycho
                     monsters:
                         powered-creepers: 10
                         zombie-pigmen: 10

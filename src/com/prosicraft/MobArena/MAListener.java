@@ -355,7 +355,7 @@ public class MAListener implements ArenaListener
     {
         if (damager instanceof Player)
         {
-            if (!arena.arenaPlayers.contains(damager))
+            if (!arena.arenaPlayers.contains((Player)damager))
             {
                 event.setCancelled(true);
                 return;
@@ -364,7 +364,7 @@ public class MAListener implements ArenaListener
             arena.arenaPlayerMap.get((Player) damager).getStats().dmgDone += event.getDamage();
             arena.arenaPlayerMap.get((Player) damager).getStats().hits++;
         }
-        else if (damager instanceof Wolf && arena.pets.contains(damager))
+        else if (damager instanceof Wolf && arena.pets.contains((Wolf)damager))
         {                
             event.setDamage(1);
             arena.arenaPlayerMap.get((Player) ((Wolf) damager).getOwner()).getStats().dmgDone += event.getDamage();
@@ -386,7 +386,7 @@ public class MAListener implements ArenaListener
             
             // Subtract boss health, and reset actual entity health
             arena.bossWave.subtractHealth(event.getDamage());
-            arena.bossWave.getEntity().setHealth(100);
+            arena.bossWave.getEntity().setHealth(arena.bossWave.getEntity().getMaxHealth());
             
             // Set damage to 1 for knockback and feedback
             event.setDamage(1);
@@ -397,7 +397,7 @@ public class MAListener implements ArenaListener
                 arena.bossWave.clear();
                 arena.bossWave = null;
             }
-            else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
+            else if (arena.bossWave.getHealth() <= arena.bossWave.getEntity().getMaxHealth() && !arena.bossWave.isLowHealthAnnounced())
             {
                 MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH);
                 arena.bossWave.setLowHealthAnnounced(true);

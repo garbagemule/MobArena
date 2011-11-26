@@ -96,5 +96,6 @@ public abstract class NormalWave extends AbstractWave
         return probabilities;
     }
     
+    @Override
     public abstract void spawn(int wave);
 }

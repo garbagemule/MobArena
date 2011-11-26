@@ -56,10 +56,10 @@ public class BossWave extends AbstractWave
         // Get abilities
         abilityInterval  = config.getInt(path + "ability-interval", 3) * 20;
         abilityAnnounce  = config.getBoolean(path + "ability-announce", true);
-        String abilities = config.getString(path + "abilities");
-        if (abilities != null)
+        String abilitiesb = config.getString(path + "abilities");
+        if (abilitiesb != null)
         {
-            for (String a : abilities.split(","))
+            for (String a : abilitiesb.split(","))
             {
                 String ability = a.trim();
                 addAbility(BossAbility.fromString(ability));
@@ -67,6 +67,7 @@ public class BossWave extends AbstractWave
         }
     }
 
+    @Override
     public void spawn(int wave)
     {
         // Announce spawning
@@ -80,7 +81,7 @@ public class BossWave extends AbstractWave
         getArena().setBossWave(this);
         
         // Set the health stuff
-        bossCreature.setHealth(200);
+        bossCreature.setHealth(bossCreature.getMaxHealth());
         healthAmount = bossHealth.getAmount(getArena().getPlayerCount());
         
         startAbilityTasks();
@@ -99,6 +100,7 @@ public class BossWave extends AbstractWave
             {
                 private int counter = 0;
                 
+            @Override
                 public void run()
                 {
                     // Check to see if the boss is still alive. If not, end this boss wave.
