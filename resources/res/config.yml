@@ -11,7 +11,7 @@
 global-settings:
     enabled: true
     allowed-commands: /list, /pl
-    update-notification: true
+    update-notification: true        
 
 ### CLASS SETUP
 # Items can be written as either their data value (numbers) or their Material
@@ -93,10 +93,9 @@ arenas:
                         creepers: 10
                         wolves: 10
                 spec1:
-                    type: boss
+                    type: special
                     priority: 2
-                    frequency: 2
-                    growth: psycho
+                    frequency: 4
                     monsters:
                         powered-creepers: 10
                         zombie-pigmen: 10
