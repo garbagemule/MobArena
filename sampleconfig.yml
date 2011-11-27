@@ -55,30 +55,57 @@ arenas:
       max-idle-time: 0
     waves:
       recurrent:
-        normalwave:
+        def1:
           type: default
-          frequency: 1
           priority: 1
+          frequency: 1
           monsters:
-            skeletons: 10
-            zombies: 10        
-        abosswave:
-          type: boss
-          priority: 4
-          frequency: 4
-          monster: spider
-          health: high
-          growth: psycho
-          abilities: arrows, fireballs, disorient-target
+            zombies: 10
+            skeletons: 4
+            exploding_sheep: 5
+        def2:
+          type: default
+          priority: 2
+          frequency: 1
+          wave: 5
+          monsters:
+            zombies: 10
+            skeletons: 6
+            creepers: 4
         spec1:
           type: special
-          priority: 2
+          priority: 5
           frequency: 4
           monsters:
-            powered-creepers: 10
-            zombie-pigmen: 10
-            angry-wolves: 10
-            humans: 10
+            powered_creepers: 10
+            angry_wolves: 10
+            zombie_pigmen: 10
+      single:
+        swarm1:
+          type: swarm
+          wave: 7
+          monster: slimes
+          amount: medium
+        boss1:
+          type: boss
+          wave: 9
+          monster: spider
+          health: medium
+          abilities: fire-aura, disorient-target, fireballs, throw-nearby
+          ability-interval: 5
+        boss2:
+          type: boss
+          wave: 13
+          monster: zombie_pigman
+          health: high
+          abilities: root-target, arrows, fetch-distant, fire-aura
+        boss3:
+          type: boss
+          wave: 16
+          monster: wolf
+          health: psycho
+          abilities: warp-to-player, fire-aura, throw-nearby, fireballs, fetch-target, arrows
+          ability-interval: 1
     rewards:
       waves:
         every:
