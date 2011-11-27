@@ -1,0 +1,101 @@
+global-settings:
+  enabled: true
+  allowed-commands: /list, /pl
+  update-notification: true
+classes:
+  Knight:
+    items: diamond_sword, grilled_pork:2
+    armor: 306,307,308,309
+  Tank:
+    items: iron_sword, grilled_pork:3, apple
+    armor: 310,311,312,313
+  Archer:
+    items: wood_sword, bow, arrow:256, grilled_pork, bone
+    armor: 298,299,300,301
+  Chef:
+    items: stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:5
+    armor: 314,315,316,317
+  Oddjob:
+    items: stone_sword, flint_and_steel, netherrack:2, tnt:4, pork:3
+    armor: 298,299,300,301
+  Hellracer:
+    items: diamond_sword, cake:64
+    armor: 310,311,312,313
+arenas:
+  default:
+    settings:
+      world: ''
+      enabled: true
+      protect: true
+      entry-fee: ''
+      logging: true
+      clear-wave-before-next: false
+      detonate-creepers: false
+      detonate-damage: false
+      lightning: true
+      auto-equip-armor: true
+      force-restore: false
+      soft-restore: false
+      soft-restore-drops: false
+      require-empty-inv-join: false
+      require-empty-inv-spec: false
+      hellhounds: false
+      pvp-enabled: false
+      monster-infight: false
+      allow-teleporting: false
+      spectate-on-death: true
+      share-items-in-arena: true
+      min-players: 0
+      max-players: 0
+      max-join-distance: 0
+      repair-delay: 5
+      first-wave-delay: 5
+      wave-interval: 20
+      special-modulo: 4
+      max-idle-time: 0
+    waves:
+      recurrent:
+        normalwave:
+          type: default
+          frequency: 1
+          priority: 1
+          monsters:
+            skeletons: 10
+            zombies: 10        
+        abosswave:
+          type: boss
+          priority: 4
+          frequency: 4
+          monster: spider
+          health: high
+          growth: psycho
+          abilities: arrows, fireballs, disorient-target
+        spec1:
+          type: special
+          priority: 2
+          frequency: 4
+          monsters:
+            powered-creepers: 10
+            zombie-pigmen: 10
+            angry-wolves: 10
+            humans: 10
+    rewards:
+      waves:
+        every:
+          '3': feather, bone, stick
+          '5': dirt:4, gravel:4, stone:4
+          '10': iron_ingot:10, gold_ingot:8
+        after:
+          '7': minecart, storage_minecart, powered_minecart
+          '13': iron_sword, iron_pickaxe, iron_spade
+          '16': diamond_sword
+    coords:
+      l1: -123,74,-721,72.29862,13.199929
+      l2: -120,78,-717,208.34863,21.149902
+      p1: -133,74,-721,72.14857,29.6999
+      p2: -125,77,-710,225.59854,13.349902
+      arena: -130,76,-712,184.04858,6.7499027
+      spectator: -130,76,-712,184.04858,6.7499027
+      spawnpoints:
+        s1: -130,75,-719,1.0484924,6.899899
+      lobby: -121,76,-719,89.84839,11.549894
