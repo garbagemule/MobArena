@@ -1,0 +1,113 @@
+### MobArena Configuration File
+### Please visit the MobArena Wiki here: http://goo.gl/F5TTc for more details
+### on how to set up this file.
+### Note that you CAN'T use tabs in this file! Always use spaces!
+
+### GLOBAL SETTINGS
+# These settings are arena-independent and count in all arenas. Note that if
+# enabled: false in the global settings, MobArena is disabled globally, and
+# arena-specific enabled-values do not matter. If true, however, the per-arena
+# enabled-values count.
+global-settings:
+    enabled: true
+    allowed-commands: /list, /pl
+    update-notification: true        
+
+### CLASS SETUP
+# Items can be written as either their data value (numbers) or their Material
+# type (names); check the Wiki for links to lists of both.
+# The notation is <item>:<amount>. If no amount is given, 1 is assumed. Sub-
+# types can be created 
+# Item SUBTYPES (wool/dye colors) are written as <item>:<subtype>:<amount>,
+# but here, the amount is REQUIRED, even if it is just 1.
+# Note: If you want to specify only one item, but apostrophes around that one
+# item, e.g.: items: '278'
+# Note: For every bone a class has, one PET WOLF will spawn upon arena start,
+# which will assist the player in the arena session.
+classes:
+    Knight:
+        items: diamond_sword, grilled_pork:2
+        armor: 306,307,308,309
+    Tank:
+        items: iron_sword, grilled_pork:3, apple
+        armor: 310,311,312,313
+    Archer:
+        items: wood_sword, bow, arrow:256, grilled_pork, bone
+        armor: 298,299,300,301
+    Chef:
+        items: stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:5
+        armor: 314,315,316,317
+    Oddjob:
+        items: stone_sword, flint_and_steel, netherrack:2, tnt:4, pork:3
+        armor: 298,299,300,301
+
+### ARENA SETUP
+# The arena setup is split into 4 different sections per arena: settings,
+# waves, rewards and coords (not shown until coords are set up).
+# Please refer to the Wiki for descriptions of all these settings.
+# Note: The REWARDS use the same notation as the items in the CLASS SETUP
+# section. However, only -one- item from the list is picked (at random) when
+# the rewards are given.
+arenas:
+    default:
+        settings:
+            world: ''
+            enabled: true
+            protect: true
+            entry-fee: ''
+            logging: true
+            clear-wave-before-next: false
+            detonate-creepers: false
+            detonate-damage: false
+            lightning: true
+            auto-equip-armor: true
+            force-restore: false
+            soft-restore: false
+            soft-restore-drops: false
+            require-empty-inv-join: false
+            require-empty-inv-spec: false
+            hellhounds: false
+            pvp-enabled: false
+            monster-infight: false
+            allow-teleporting: false
+            spectate-on-death: true
+            share-items-in-arena: true
+            min-players: 0
+            max-players: 0
+            max-join-distance: 0
+            repair-delay: 5
+            first-wave-delay: 5
+            wave-interval: 20
+            special-modulo: 4
+            max-idle-time: 0
+        waves:
+            recurrent:
+                def1:
+                    type: default
+                    priority: 1
+                    frequency: 1
+                    monsters:
+                        zombies: 10
+                        skeletons: 10
+                        spiders: 10
+                        creepers: 10
+                        wolves: 10
+                spec1:
+                    type: special
+                    priority: 2
+                    frequency: 4
+                    monsters:
+                        powered-creepers: 10
+                        zombie-pigmen: 10
+                        angry-wolves: 10
+                        humans: 10
+        rewards:
+            waves:
+                every:
+                    '3': feather, bone, stick
+                    '5': dirt:4, gravel:4, stone:4
+                    '10': iron_ingot:10, gold_ingot:8
+                after:
+                    '7': minecart, storage_minecart, powered_minecart
+                    '13': iron_sword, iron_pickaxe, iron_spade
+                    '16': diamond_sword
