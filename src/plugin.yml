@@ -1,6 +1,6 @@
 name: MobArena
-author: prosicraft
-main: com.prosicraft.MobArena.MobArena
+author: garbagemule
+main: com.garbagemule.MobArena.MobArena
 description: Fight against the creeper and his friends. Originally by garbagemule
 version: 0.95
 softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
