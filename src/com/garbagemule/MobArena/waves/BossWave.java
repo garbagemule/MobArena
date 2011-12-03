@@ -80,7 +80,7 @@ public class BossWave extends AbstractWave
         getArena().setBossWave(this);
         
         // Set the health stuff
-        bossCreature.setHealth(200);
+        bossCreature.setHealth(bossCreature.getMaxHealth());
         healthAmount = bossHealth.getAmount(getArena().getPlayerCount());
         
         startAbilityTasks();

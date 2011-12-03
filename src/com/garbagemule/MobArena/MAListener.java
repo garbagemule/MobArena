@@ -390,7 +390,7 @@ public class MAListener implements ArenaListener
             
             // Subtract boss health, and reset actual entity health
             arena.bossWave.subtractHealth(event.getDamage());
-            arena.bossWave.getEntity().setHealth(100);
+            arena.bossWave.getEntity().setHealth(arena.bossWave.getEntity().getMaxHealth());
             
             // Set damage to 1 for knockback and feedback
             event.setDamage(1);
