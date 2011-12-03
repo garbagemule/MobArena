@@ -63,7 +63,6 @@ public class SpecialWave extends NormalWave
                 case ZOMBIEPIGMEN:
                 case ANGRYWOLVES:       amount = playerCount * 2; break;
                 case SLIMES:            amount = playerCount * 4; break;
-                case HUMANS:            amount = playerCount + 2; break;
                 case GIANTS:
                 case GHASTS:            amount = 2;
                 default:                amount = playerCount + 1; break;

@@ -72,8 +72,7 @@ public abstract class NormalWave extends AbstractWave
                 probabilities.put(20, MACreature.ANGRYWOLVES);
                 probabilities.put(30, MACreature.ZOMBIEPIGMEN);
                 probabilities.put(40, MACreature.SLIMES);
-                probabilities.put(50, MACreature.HUMANS);
-                totalProbability = 50;
+                totalProbability = 40;
             }
         }
         
