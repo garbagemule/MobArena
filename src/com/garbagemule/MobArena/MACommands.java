@@ -166,9 +166,8 @@ public class MACommands implements CommandExecutor
             if (p.isInsideVehicle())
                 p.leaveVehicle();
             
-            // Take entry fee and store inventory
+            // Take entry fee 
             arena.takeFee(p);
-            if (!arena.emptyInvJoin) MAUtils.storeInventory(p);
             
             // If player is in a bed, unbed!
             if (p.isSleeping())
@@ -179,6 +178,9 @@ public class MACommands implements CommandExecutor
             
             // Join the arena!
             arena.playerJoin(p, p.getLocation());
+            
+            // Store inventory
+            if (!arena.emptyInvJoin) MAUtils.storeInventory(p);
             
             MAUtils.tellPlayer(p, Msg.JOIN_PLAYER_JOINED);
             if (!arena.entryFee.isEmpty())
