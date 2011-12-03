@@ -602,13 +602,12 @@ public class MAUtils
                 DyeColor dye = (data.matches("[0-9]+")) ?
                     DyeColor.getByData((byte) Math.abs(offset - Integer.parseInt(data))) :
                     DyeColor.valueOf(data.toUpperCase());
-                    
-                //return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
-                return new ItemStack(material, amount, (byte) Math.abs(offset - dye.getData()));
+                
+                return new ItemStack(material, amount, (short) Math.abs(offset - dye.getData()));
             }
             else
             {
-                return new ItemStack(material, amount, (byte) Integer.parseInt(data));
+                return new ItemStack(material, amount, (short) Integer.parseInt(data));
             }
         }
         catch (Exception e)
