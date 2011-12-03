@@ -194,7 +194,7 @@ public class Arena
         {
             p.teleport(arenaLoc);
             setHealth(p, 20);
-            p.setFoodLevel(20);
+            p.setFoodLevel(10);
             assignClassPermissions(p);
             arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
         }
@@ -334,7 +334,7 @@ public class Arena
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
         setHealth(p, 20);
-        p.setFoodLevel(20);
+        p.setFoodLevel(10);
         p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
         
