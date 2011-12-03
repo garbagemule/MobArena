@@ -1,6 +1,6 @@
-package com.nijikokun.register.payment.methods;
+package com.garbagemule.register.payment.methods;
 
-import com.nijikokun.register.payment.Method;
+import com.garbagemule.register.payment.Method;
 
 import me.ashtheking.currency.Currency;
 import me.ashtheking.currency.CurrencyList;

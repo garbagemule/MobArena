@@ -19,8 +19,8 @@ import com.garbagemule.MobArena.spout.Spouty;
 
 import com.herocraftonline.dev.heroes.Heroes;
 import com.herocraftonline.dev.heroes.hero.HeroManager;
-import com.nijikokun.register.payment.Method;
-import com.nijikokun.register.payment.Methods;
+import com.garbagemule.register.payment.Method;
+import com.garbagemule.register.payment.Methods;
 import java.io.IOException;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.prosicraft.mighty.logger.MLog;

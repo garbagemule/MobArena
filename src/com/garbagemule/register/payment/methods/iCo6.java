@@ -1,6 +1,6 @@
-package com.nijikokun.register.payment.methods;
+package com.garbagemule.register.payment.methods;
 
-import com.nijikokun.register.payment.Method;
+import com.garbagemule.register.payment.Method;
 import com.iCo6.iConomy;
 import com.iCo6.system.Account;
 import com.iCo6.system.Accounts;
