@@ -597,12 +597,19 @@ public class MAUtils
             if (material == Material.INK_SACK)
                 offset = 15;
                 
-            DyeColor dye = (data.matches("[0-9]+")) ?
-                DyeColor.getByData((byte) Math.abs(offset - Integer.parseInt(data))) :
-                DyeColor.valueOf(data.toUpperCase());
-                
-            //return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
-            return new ItemStack(material, amount, (byte) Math.abs(offset - dye.getData()));
+            if (material == Material.INK_SACK || material == Material.WOOL)
+            {
+                DyeColor dye = (data.matches("[0-9]+")) ?
+                    DyeColor.getByData((byte) Math.abs(offset - Integer.parseInt(data))) :
+                    DyeColor.valueOf(data.toUpperCase());
+                    
+                //return new ItemStack(material, amount, (byte) Math.abs((offset - dye.getData())));
+                return new ItemStack(material, amount, (byte) Math.abs(offset - dye.getData()));
+            }
+            else
+            {
+                return new ItemStack(material, amount, (byte) Integer.parseInt(data));
+            }
         }
         catch (Exception e)
         {
