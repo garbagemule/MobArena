@@ -41,6 +41,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
@@ -51,15 +53,19 @@ import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.spout.Spouty;
+import com.garbagemule.MobArena.util.Delays;
 import com.garbagemule.MobArena.util.InventoryItem;
 import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 
+<<<<<<< HEAD
 import com.herocraftonline.dev.heroes.hero.Hero;
 import org.bukkit.configuration.file.FileConfiguration;
 
+=======
+>>>>>>> upstream/master
 public class Arena
 {
     private MobArena plugin;
@@ -75,7 +81,7 @@ public class Arena
     protected String logging;
 
     // Wave/reward/entryfee fields
-    protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime;
+    protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime, finalWave;
     protected MASpawnThread spawnThread;
     protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     protected Map<Player,String> classMap;
@@ -106,8 +112,13 @@ public class Arena
     protected boolean allowMonsters, allowAnimals;
     
     // Other settings
+<<<<<<< HEAD
     protected int repairDelay, minPlayers, maxPlayers, joinDistance;
     protected Set<String> classes = new HashSet<String>();
+=======
+    protected int minPlayers, maxPlayers, joinDistance;
+    protected List<String> classes = new LinkedList<String>();
+>>>>>>> upstream/master
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
     protected Map<Player,Integer> hungerMap = new HashMap<Player,Integer>();
@@ -192,13 +203,8 @@ public class Arena
         for (Player p : arenaPlayers)
         {
             p.teleport(arenaLoc);
-            if (plugin.getHeroManager() != null)
-            {
-                Hero hero = plugin.getHeroManager().getHero(p);
-                hero.setHealth(hero.getMaxHealth());
-            }
-            p.setHealth(20);
-            p.setFoodLevel(20);
+            setHealth(p, 20);
+            p.setFoodLevel(10);
             assignClassPermissions(p);
             arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
         }
@@ -337,14 +343,8 @@ public class Arena
     {
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
-        p.setHealth(20);
-        if (plugin.getHeroManager() != null)
-        {
-            Hero hero = plugin.getHeroManager().getHero(p);
-            hero.setHealth(hero.getMaxHealth());
-            hero.syncHealth();
-        }
-        p.setFoodLevel(20);
+        setHealth(p, 20);
+        p.setFoodLevel(10);
         p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
         
@@ -646,13 +646,7 @@ public class Arena
         if (healthMap.containsKey(p))
         {
             int health = healthMap.remove(p);
-            p.setHealth(health);
-            if (plugin.getHeroManager() != null)
-            {
-                Hero hero = plugin.getHeroManager().getHero(p);
-                hero.setHealth(health * hero.getMaxHealth() / 20);
-                hero.syncHealth();
-            }
+            setHealth(p, health);
         }
         
         if (hungerMap.containsKey(p))
@@ -662,7 +656,7 @@ public class Arena
             p.setGameMode(modeMap.remove(p));
 
         // Put out fire.
-        p.setFireTicks(0);
+        Delays.douse(plugin, p, 3);
         
         // Remove pets.
         removePets(p);
@@ -673,6 +667,7 @@ public class Arena
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
         classMap.remove(p);
+        arenaPlayerMap.remove(p);
     }
     
     /**
@@ -702,9 +697,24 @@ public class Arena
         
         if (dead) restoreInvAndGiveRewardsDelayed(p);
         else      restoreInvAndGiveRewards(p);
+
+        ArenaPlayer ap = arenaPlayerMap.get(p);
+        if (ap != null)
+            ap.setDead(true);
+    }
+    
+    private void setHealth(Player p, int health)
+    {
+        // Grab the current health
+        int current = p.getHealth();
         
-        if (log != null && spawnThread != null)
-            arenaPlayerMap.get(p).getStats().lastWave = spawnThread.getWave() - 1;
+        // If the health is 20, just leave it at that no matter what.
+        int regain  = health == 20 ? 20 : health - current;
+        
+        // Set the health, and fire off the event.
+        p.setHealth(health);
+        EntityRegainHealthEvent event = new EntityRegainHealthEvent(p, regain, RegainReason.CUSTOM);
+        Bukkit.getPluginManager().callEvent(event);
     }
     
     public void repairBlocks()
@@ -897,11 +907,11 @@ public class Arena
         joinDistance     = config.getInt(arenaPath + "max-join-distance", 0);
         minPlayers       = config.getInt(arenaPath + "min-players", 0);
         maxPlayers       = config.getInt(arenaPath + "max-players", 0);
-        repairDelay      = config.getInt(arenaPath + "repair-delay", 5);
         waveDelay        = config.getInt(arenaPath + "first-wave-delay", 5) * 20;
         waveInterval     = config.getInt(arenaPath + "wave-interval", 20) * 20;
         specialModulo    = config.getInt(arenaPath + "special-modulo", 4);
         maxIdleTime      = config.getInt(arenaPath + "max-idle-time", 0) * 20;
+        finalWave        = config.getInt(arenaPath + "final-wave", 0);
         
         everyWaveMap     = MAUtils.getArenaRewardMap(config, configName, "every");
         afterWaveMap     = MAUtils.getArenaRewardMap(config, configName, "after");
@@ -944,6 +954,7 @@ public class Arena
     public void serializeConfig()
     {
         String coords = "arenas." + configName() + ".coords.";
+<<<<<<< HEAD
         FileConfiguration config = plugin.getConfig();
         
         config.set("arenas." + configName() + ".settings.enabled", enabled);
@@ -955,6 +966,19 @@ public class Arena
         if (arenaLoc != null)     config.set(coords + "arena",     MAUtils.makeCoord(arenaLoc));
         if (lobbyLoc != null)     config.set(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
         if (spectatorLoc != null) config.set(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
+=======
+        Configuration config = plugin.getMAConfig();
+        
+        config.setProperty("arenas." + configName() + ".settings.enabled", enabled);
+        config.setProperty("arenas." + configName() + ".settings.protect", protect);
+        if (p1 != null)           config.setProperty(coords + "p1",        MAUtils.makeCoord(p1));
+        if (p2 != null)           config.setProperty(coords + "p2",        MAUtils.makeCoord(p2));
+        if (l1 != null)           config.setProperty(coords + "l1",        MAUtils.makeCoord(l1));
+        if (l2 != null)           config.setProperty(coords + "l2",        MAUtils.makeCoord(l2));
+        if (arenaLoc != null)     config.setProperty(coords + "arena",     MAUtils.makeCoord(arenaLoc));
+        if (lobbyLoc != null)     config.setProperty(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
+        if (spectatorLoc != null) config.setProperty(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
+>>>>>>> upstream/master
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
             config.set(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
         for (Map.Entry<String,Location> entry : spawnpointsBoss.entrySet())
@@ -965,9 +989,15 @@ public class Arena
     
     public void deserializeConfig()
     {
+<<<<<<< HEAD
         FileConfiguration config = plugin.getConfig();
         MAUtils.loadFileConfiguration(config, plugin.getConfigFile());
         load(config, plugin.getConfigFile());
+=======
+        Configuration config = plugin.getMAConfig();
+        config.load();
+        load(config);
+>>>>>>> upstream/master
     }
     
     public boolean serializeRegion()
@@ -1108,6 +1138,16 @@ public class Arena
     //      Getters & Misc
     //
     ////////////////////////////////////////////////////////////////////*/
+    
+    public boolean inArena(Player p)
+    {
+        return arenaPlayers.contains(p);
+    }
+    
+    public boolean inLobby(Player p)
+    {
+        return lobbyPlayers.contains(p);
+    }
     
     public boolean isRunning()
     {

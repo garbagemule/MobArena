@@ -39,4 +39,18 @@ public class TextUtils
     public static String padLeft(String s, int length) { return padLeft(s, length, ' '); }
     public static String padLeft(int s, int length) { return padLeft(Integer.toString(s), length, ' '); }
     public static String padLeft(double s, int length) { return padLeft(Double.toString(s), length, ' '); }
+    
+    /**
+     * Truncate the input string to be at most the input length
+     * @param s The string to truncate
+     * @param length The maximum length
+     * @return A truncated string with length 15, or the input string
+     */
+    public static String truncate(String s, int length)
+    {
+        if (s.length() <= length)
+            return s;
+        return s.substring(0, length);
+    }
+    public static String truncate(String s) { return truncate(s, 15); }
 }

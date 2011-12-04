@@ -1,6 +1,10 @@
 package com.garbagemule.MobArena;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -116,11 +120,12 @@ public class MAListener implements ArenaListener
     
     public void onBlockPlace(BlockPlaceEvent event)
     {
-        if (!arena.inRegion(event.getBlock().getLocation()) || arena.edit)
+        Block b = event.getBlock();
+        
+        if (!arena.inRegion(b.getLocation()) || arena.edit)
             return;
         
-        Block b = event.getBlock();
-        if (arena.running && arena.arenaPlayers.contains(event.getPlayer()))
+        if (arena.running && arena.inArena(event.getPlayer()))
         {
             arena.blocks.add(b);
             Material mat = b.getType();
@@ -160,7 +165,11 @@ public class MAListener implements ArenaListener
     public void onSignChange(SignChangeEvent event)
     {
         arena.leaderboard = new Leaderboard(plugin, arena, event.getBlock().getLocation());
+<<<<<<< HEAD
         MAUtils.setArenaCoord(plugin.getConfig(), arena, "leaderboard", event.getBlock().getLocation(), plugin.getConfigFile());
+=======
+        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "leaderboard", event.getBlock().getLocation());
+>>>>>>> upstream/master
         MAUtils.tellPlayer(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
     }
 
@@ -182,11 +191,10 @@ public class MAListener implements ArenaListener
         if (!arena.monsters.contains(event.getEntity()) && !arena.inRegionRadius(event.getLocation(), 10))
             return;
         
-        event.setYield(0);
         arena.monsters.remove(event.getEntity());
         
-        // Cancel if the arena isn't running or if the repair delay is 0
-        if (!arena.running || arena.repairDelay == 0)
+        // Cancel if the arena isn't running
+        if (!arena.running)
         {
             event.setCancelled(true);
             return;
@@ -194,6 +202,17 @@ public class MAListener implements ArenaListener
         
         // Uncancel, just in case.
         event.setCancelled(false);
+        
+        // If the arena isn't destructible, just clear the blocklist.
+        if (!arena.softRestore && arena.protect)
+        {
+            List<Block> blocks = new LinkedList<Block>(arena.blocks);
+            event.blockList().retainAll(blocks);
+            return;
+        }
+        
+        if (!arena.softRestoreDrops)
+            event.setYield(0);
         
         // Handle all the blocks in the block list.
         for (Block b : event.blockList())
@@ -231,20 +250,6 @@ public class MAListener implements ArenaListener
             else
                 arena.queueRepairable(r);
         }
-        
-        // If the arena isn't protected, or soft-restore is on, return.
-        if (!arena.protect || arena.softRestore)
-            return;
-        
-        // Otherwise, schedule repairs!
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable()
-            {
-                public void run()
-                {
-                    arena.repairBlocks();
-                }
-            }, arena.repairDelay);
     }
 
     
@@ -265,7 +270,7 @@ public class MAListener implements ArenaListener
     
     private void onPlayerDeath(EntityDeathEvent event, Player player)
     {
-        if (arena.arenaPlayers.contains(player) || arena.lobbyPlayers.contains(player))
+        if (arena.inArena(player) || arena.lobbyPlayers.contains(player))
         {
             event.getDrops().clear();
             arena.playerDeath(player);
@@ -307,6 +312,8 @@ public class MAListener implements ArenaListener
                 damager = ((Projectile) damager).getShooter();
         }
         
+        event.setCancelled(false);
+        
         // Pet wolf
         if (damagee instanceof Wolf && arena.pets.contains(damagee))
             onPetDamage(event, (Wolf) damagee, damager);
@@ -327,7 +334,7 @@ public class MAListener implements ArenaListener
             event.setCancelled(true);
         
         // If not in the lobby or the arena, return
-        else if (!arena.arenaPlayers.contains(player))
+        else if (!arena.inArena(player))
             return;
         
         // Cancel block explosion damage if detonate-damage: false
@@ -355,14 +362,19 @@ public class MAListener implements ArenaListener
     {
         if (damager instanceof Player)
         {
+<<<<<<< HEAD
             if (!arena.arenaPlayers.contains((Player)damager))
+=======
+            Player p = (Player) damager;
+            if (!arena.inArena(p))
+>>>>>>> upstream/master
             {
                 event.setCancelled(true);
                 return;
             }
             
-            arena.arenaPlayerMap.get((Player) damager).getStats().dmgDone += event.getDamage();
-            arena.arenaPlayerMap.get((Player) damager).getStats().hits++;
+            arena.arenaPlayerMap.get(p).getStats().dmgDone += event.getDamage();
+            arena.arenaPlayerMap.get(p).getStats().hits++;
         }
         else if (damager instanceof Wolf && arena.pets.contains((Wolf)damager))
         {                
@@ -441,7 +453,7 @@ public class MAListener implements ArenaListener
                     event.setCancelled(true);
             
             else if (event.getReason() == TargetReason.CLOSEST_PLAYER)
-                if (!arena.arenaPlayers.contains(event.getTarget()))
+                if (!arena.inArena((Player) event.getTarget()))
                     event.setCancelled(true);
         }
     }
@@ -462,7 +474,7 @@ public class MAListener implements ArenaListener
     {
         if (!arena.running) return;
         
-        if (!(event.getEntity() instanceof Player) || !arena.arenaPlayers.contains((Player)event.getEntity()))
+        if (!(event.getEntity() instanceof Player) || !arena.inArena((Player)event.getEntity()))
             return;
         
         if (event.getRegainReason() == RegainReason.REGEN)
@@ -471,7 +483,7 @@ public class MAListener implements ArenaListener
     
     public void onPlayerAnimation(PlayerAnimationEvent event)
     {
-        if (!arena.running || !arena.arenaPlayers.contains(event.getPlayer()))
+        if (!arena.running || !arena.inArena(event.getPlayer()))
             return;
         
         arena.arenaPlayerMap.get(event.getPlayer()).getStats().swings++;
@@ -482,14 +494,14 @@ public class MAListener implements ArenaListener
         Player p = event.getPlayer();
         
         // Player is in the lobby
-        if (arena.lobbyPlayers.contains(p))
+        if (arena.inLobby(p))
         {
             MAUtils.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
         }
         
         // Player is in the arena
-        else if (arena.arenaPlayers.contains(p))
+        else if (arena.inArena(p))
         {
             if (!arena.shareInArena)
             {
@@ -515,7 +527,7 @@ public class MAListener implements ArenaListener
 
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event)
     {
-        if (!arena.readyPlayers.contains(event.getPlayer()) && !arena.arenaPlayers.contains(event.getPlayer()))
+        if (!arena.readyPlayers.contains(event.getPlayer()) && !arena.inArena(event.getPlayer()))
             return;
         
         if (!arena.running)
@@ -531,77 +543,83 @@ public class MAListener implements ArenaListener
 
     public void onPlayerInteract(PlayerInteractEvent event)
     {
-        if (!arena.arenaPlayers.contains(event.getPlayer()) && !arena.lobbyPlayers.contains(event.getPlayer()))
-            return;
-        
-        if (arena.running)
-        {
-            if (event.hasBlock() && event.getClickedBlock().getType() == Material.SAPLING)
-                arena.addTrunkAndLeaves(event.getClickedBlock());
-            return;
-        }
-        
-        Action a = event.getAction();
         Player p = event.getPlayer();
+        if (arena.inArena(p) || !arena.inLobby(p))
+            return;
+        
+        // Player is in the lobby, so disallow using items.
+        Action a = event.getAction();
         if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
-        {            
+        {
             event.setUseItemInHand(Result.DENY);
             event.setCancelled(true);
         }
         
+        // If there's no block involved, just return.
+        if (!event.hasBlock())
+            return;
+        
         // Iron block
-        if (event.hasBlock() && event.getClickedBlock().getTypeId() == 42)
+        if (event.getClickedBlock().getTypeId() == 42)
+            handleReadyBlock(p);
+        
+        // Sign
+        else if (event.getClickedBlock().getState() instanceof Sign)
         {
-            if (arena.classMap.containsKey(p))
-            {
-                MAUtils.tellPlayer(p, Msg.LOBBY_PLAYER_READY);
-                arena.playerReady(p);
-            }
-            else
-            {
-                MAUtils.tellPlayer(p, Msg.LOBBY_PICK_CLASS);
-            }
+            Sign sign = (Sign) event.getClickedBlock().getState();
+            handleSign(sign, p);
+        }
+    }
+    
+    private void handleReadyBlock(Player p)
+    {
+        if (arena.classMap.containsKey(p))
+        {
+            MAUtils.tellPlayer(p, Msg.LOBBY_PLAYER_READY);
+            arena.playerReady(p);
+        }
+        else MAUtils.tellPlayer(p, Msg.LOBBY_PICK_CLASS);
+    }
+    
+    private void handleSign(Sign sign, Player p)
+    {
+        // Check if the first line is a class name.
+        String className = ChatColor.stripColor(sign.getLine(0));
+        if (!arena.classes.contains(className) && !className.equalsIgnoreCase("random"))
+            return;
+
+        // Check for permission.
+        if (!plugin.has(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
+        {
+            MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
         
-        // Sign
-        if (event.hasBlock() && event.getClickedBlock().getState() instanceof Sign)
-        {
-            if (a == Action.RIGHT_CLICK_BLOCK)
+        // Delay the inventory stuff to ensure that right-clicking works.
+        delayAssignClass(p, className);
+    }
+    
+    private void delayAssignClass(final Player p, final String className)
+    {
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
+            new Runnable()
             {
-                MAUtils.tellPlayer(p, Msg.LOBBY_RIGHT_CLICK);
-                return;
-            }
-            
-            // Cast the block to a sign to get the text on it.
-            Sign sign = (Sign) event.getClickedBlock().getState();
-            
-            // Check if the first line of the sign is a class name.
-            String className = sign.getLine(0);
-            if (!arena.classes.contains(className) && !className.equalsIgnoreCase("random"))
-                return;
-            
-            if (!plugin.has(p, "mobarena.classes." + className) && !className.equalsIgnoreCase("random"))
-            {
-                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PERMISSION);
-                return;
-            }
-
-            // Set the player's class.
-            arena.assignClass(p, className);
-            if (!className.equalsIgnoreCase("random"))
-                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className, arena.classItems.get(className).get(0).getType());
-            else
-                MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
-                
-            return;
-        }
+                public void run()
+                {
+                    arena.assignClass(p, className);
+                    
+                    if (!className.equalsIgnoreCase("random"))
+                        MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className, arena.classItems.get(className).get(0).getType());
+                    else
+                        MAUtils.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
+                }
+            });
     }
 
     public void onPlayerQuit(PlayerQuitEvent event)
     {
         Player p = event.getPlayer();
-        if (!arena.enabled || (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p)))
+        if (!arena.enabled || (!arena.inArena(p) && !arena.inLobby(p)))
             return;
         
         arena.playerLeave(p);
@@ -610,26 +628,60 @@ public class MAListener implements ArenaListener
     public void onPlayerKick(PlayerKickEvent event)
     {
         Player p = event.getPlayer();
-        if (!arena.enabled || (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p)))
+        if (!arena.enabled || (!arena.inArena(p) && !arena.inLobby(p)))
             return;
         
         arena.playerLeave(p);
     }
-
+    
     public void onPlayerTeleport(PlayerTeleportEvent event)
+    {
+        if (!arena.enabled || !arena.setup || arena.allowWarp || arena.edit)
+            return;
+
+        Location to   = event.getTo();
+        Location from = event.getFrom();
+        Player   p    = event.getPlayer();
+        
+        if (arena.inRegion(from))
+        {
+            // Covers the case in which both locations are in the arena.
+            if ((arena.inRegion(to) && arena.running) || isWarp(to) || to.equals(arena.locations.get(p)))
+                return;
+
+            MAUtils.tellPlayer(p, Msg.WARP_FROM_ARENA);
+            event.setCancelled(true);
+        }
+        else if (arena.inRegion(to))
+        {
+            if (isWarp(from) || isWarp(to) || to.equals(arena.locations.get(p)))
+                return;
+            
+            MAUtils.tellPlayer(p, Msg.WARP_TO_ARENA);
+            event.setCancelled(true);
+        }
+    }
+    
+    private boolean isWarp(Location l)
+    {
+        return l.equals(arena.arenaLoc) || l.equals(arena.lobbyLoc) || l.equals(arena.spectatorLoc);
+    }
+
+    /*public void onPlayerTeleport(PlayerTeleportEvent event)
     {
         if (!arena.running || arena.edit || !arena.enabled || !arena.setup || arena.allowWarp)
             return;
-        
-        if (!arena.inRegion(event.getTo()) && !arena.inRegion(event.getFrom()))
-            return;
 
-        Player   p    = event.getPlayer();
-        Location old  = arena.locations.get(p);
         Location to   = event.getTo();
         Location from = event.getFrom();
         
-        if (arena.arenaPlayers.contains(p) || arena.lobbyPlayers.contains(p) || arena.specPlayers.contains(p))
+        if (!arena.inRegion(to) && !arena.inRegion(from))
+            return;
+
+        Player   p   = event.getPlayer();
+        Location old = arena.locations.get(p);
+        
+        if (arena.inArena(p) || arena.inLobby(p) || arena.specPlayers.contains(p))
         {
             if (arena.inRegion(from))
             {
@@ -659,13 +711,13 @@ public class MAListener implements ArenaListener
             event.setCancelled(true);
             return;
         }
-    }
+    }*/
 
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
     {
         Player p = event.getPlayer();
         
-        if (!arena.arenaPlayers.contains(p) && !arena.lobbyPlayers.contains(p))
+        if (!arena.inArena(p) && !arena.inLobby(p))
             return;
         
         String[] args = event.getMessage().split(" ");

@@ -1,12 +1,6 @@
 name: MobArena
-author: garbagemule
-main: com.garbagemule.MobArena.MobArena
-<<<<<<< HEAD
-description: Fight against the creeper and his friends. Originally by garbagemule
-version: 0.95
-=======
+main: garbagemule.mobarena.MobArenaPlugin
 version: 0.94.3.24
->>>>>>> upstream/master
 softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
 commands:
     ma:

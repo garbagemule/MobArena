@@ -17,6 +17,7 @@ import org.bukkit.plugin.PluginManager;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.spout.Spouty;
 
+<<<<<<< HEAD
 import com.herocraftonline.dev.heroes.Heroes;
 import com.herocraftonline.dev.heroes.hero.HeroManager;
 import com.garbagemule.register.payment.Method;
@@ -29,6 +30,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 
+=======
+>>>>>>> upstream/master
 /**
  * MobArena
  * @author prosicraft, after garbagecollect
@@ -46,7 +49,7 @@ public class MobArena extends JavaPlugin
     public static boolean hasSpout;
     
     // Heroes stuff
-    private HeroManager heroManager = null;
+    //private HeroManager heroManager = null;
     
     // Global variables
     public static PluginDescriptionFile desc;
@@ -77,7 +80,7 @@ public class MobArena extends JavaPlugin
         // Set up soft dependencies
         setupRegister();
         setupSpout();
-        setupHeroes();
+        //setupHeroes();
         setupMagicSpells();
         
         // Set up the ArenaMaster and the announcements
@@ -205,13 +208,13 @@ public class MobArena extends JavaPlugin
         Spouty.registerEvents(this);
     }
     
-    private void setupHeroes()
+    /*private void setupHeroes()
     {
         Plugin heroes = this.getServer().getPluginManager().getPlugin("Heroes");
         if (heroes == null) return;
         
         heroManager = ((Heroes) heroes).getHeroManager();
-    }
+    }*/
     
     private void setupMagicSpells()
     {
@@ -223,14 +226,20 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.CUSTOM_EVENT, (Listener)new MagicSpellsListener(this), Priority.Normal, this);
     }        
     
+<<<<<<< HEAD
     public File getConfigFile()  { return cf; }
     public ArenaMaster   getAM()          { return am; } // More convenient.
     public ArenaMaster   getArenaMaster() { return am; }
+=======
+    public Configuration getMAConfig()      { return config; }
+    public ArenaMaster   getAM()            { return am; } // More convenient.
+    public ArenaMaster   getArenaMaster()   { return am; }
+>>>>>>> upstream/master
     
-    public HeroManager getHeroManager()
+    /*public HeroManager getHeroManager()
     {
         return heroManager;
-    }
+    }*/
     
     private String getHeader()
     {

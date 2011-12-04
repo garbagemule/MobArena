@@ -7,6 +7,7 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -78,7 +79,11 @@ public class MACommands implements CommandExecutor
         this.am          = am;
         server           = Bukkit.getServer();
         meanAdmins       = (server.getPluginManager().getPlugin("Mean Admins") != null);
+<<<<<<< HEAD
         ALLOWED_COMMANDS = MAUtils.getAllowedCommands(plugin.getConfig(), plugin.getConfigFile());
+=======
+        ALLOWED_COMMANDS = MAUtils.getAllowedCommands(plugin.getMAConfig());
+>>>>>>> upstream/master
     }
     
     /**
@@ -101,10 +106,17 @@ public class MACommands implements CommandExecutor
         boolean console = (sender instanceof ConsoleCommandSender);
         
         // Cast the sender to Player if possible.
-        Player p = (player) ? (Player)sender : null;
+        Player p = (player) ? (Player) sender : null;
         
         if (args.length == 0)
-            return false;
+        {
+            List<Arena> arenas = am.getEnabledArenas();
+            if (arenas == null || arenas.isEmpty())
+                MAUtils.tellPlayer(p, "There are no enabled arenas to join!");
+            else
+                MAUtils.tellPlayer(p, "Use /ma join to join an arena.");
+            return true;
+        }
         
         // Grab the command base and any arguments.
         String base = args[0].toLowerCase();
@@ -808,7 +820,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
+<<<<<<< HEAD
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation(), plugin.getConfigFile());
+=======
+            MAUtils.setArenaCoord(plugin.getMAConfig(), am.selectedArena, arg1, p.getLocation());
+>>>>>>> upstream/master
             MAUtils.tellPlayer(sender, "Set region point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
             return true;
         }
@@ -856,11 +872,19 @@ public class MACommands implements CommandExecutor
             }
             
             // In case of a "negative" region, fix it!
+<<<<<<< HEAD
             MAUtils.fixRegion(plugin.getConfig(), am.selectedArena.world, am.selectedArena, plugin.getConfigFile());
             
             MAUtils.tellPlayer(sender, "Region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
             am.selectedArena.serializeConfig();
             am.selectedArena.load(plugin.getConfig(), plugin.getConfigFile());
+=======
+            MAUtils.fixRegion(plugin.getMAConfig(), am.selectedArena.world, am.selectedArena);
+            
+            MAUtils.tellPlayer(sender, "Region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
+            am.selectedArena.serializeConfig();
+            am.selectedArena.load(plugin.getMAConfig());
+>>>>>>> upstream/master
             return true;
         }
         
@@ -871,14 +895,19 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
-            if (am.selectedArena.p1 == null || am.selectedArena.p2 == null)
+
+            Arena arena = am.getArenaAtLocation(p.getLocation());
+            if (arena == null)
+                arena = am.selectedArena;
+            
+            if (arena.p1 == null || arena.p2 == null)
             {
                 MAUtils.tellPlayer(sender, "The region is not defined for the selected arena.");
                 return true;
             }
-            if (showingRegion || !am.selectedArena.edit)
+            if (showingRegion)
             {
-                MAUtils.tellPlayer(sender, "Must be in edit mode.");
+                MAUtils.tellPlayer(sender, "Already showing region.");
                 return true;
             }
 
@@ -898,8 +927,9 @@ public class MACommands implements CommandExecutor
             showingRegion = true;
             
             // Show the frame.
-            final World world = am.selectedArena.world;
-            final Set<int[]> blocks = MAUtils.showRegion(world, am.selectedArena.p1, am.selectedArena.p2, mat.getId(), color);
+            final World world = arena.world;
+            final Set<int[]> blocks = MAUtils.showRegion(p, world, arena.p1, arena.p2, mat.getId(), color);
+            final Player fp = p;
             
             // And hide the frame.
             plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
@@ -908,7 +938,8 @@ public class MACommands implements CommandExecutor
                     public void run()
                     {
                         for (int[] buffer : blocks)
-                            world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) 0, false);
+                            fp.sendBlockChange(new Location(world, buffer[0], buffer[1], buffer[2]), buffer[3], (byte) 0);
+                            //world.getBlockAt(buffer[0], buffer[1], buffer[2]).setTypeIdAndData(buffer[3], (byte) 0, false);
                         showingRegion = false;
                     }
                 }, 2*20);
@@ -930,7 +961,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
+<<<<<<< HEAD
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation(), plugin.getConfigFile());
+=======
+            MAUtils.setArenaCoord(plugin.getMAConfig(), am.selectedArena, arg1, p.getLocation());
+>>>>>>> upstream/master
             MAUtils.tellPlayer(sender, "Set lobby point " + arg1 + " for arena '" + am.selectedArena.configName() + "'");
             return true;
         }
@@ -976,7 +1011,11 @@ public class MACommands implements CommandExecutor
             
             MAUtils.tellPlayer(sender, "Lobby region for '" + am.selectedArena.configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
             am.selectedArena.serializeConfig();
+<<<<<<< HEAD
             am.selectedArena.load(plugin.getConfig(), plugin.getConfigFile());
+=======
+            am.selectedArena.load(plugin.getMAConfig());
+>>>>>>> upstream/master
             return true;
         }
         
@@ -996,7 +1035,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
+<<<<<<< HEAD
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, arg1, p.getLocation(), plugin.getConfigFile());
+=======
+            MAUtils.setArenaCoord(plugin.getMAConfig(), am.selectedArena, arg1, p.getLocation());
+>>>>>>> upstream/master
             MAUtils.tellPlayer(sender, "Warp point " + arg1 + " was set for arena '" + am.selectedArena.configName() + "'");
             MAUtils.tellPlayer(sender, "Type /ma checkdata to see if you're missing anything...");
             return true;
@@ -1014,7 +1057,11 @@ public class MACommands implements CommandExecutor
             }
             
             StringBuffer buffy = new StringBuffer();
+<<<<<<< HEAD
             Set<String> spawnpoints = MAUtils.getKeys(plugin.getConfig(), "arenas." + am.selectedArena.configName() + ".coords.spawnpoints");
+=======
+            List<String> spawnpoints = plugin.getMAConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.spawnpoints");
+>>>>>>> upstream/master
             
             if (spawnpoints != null)
             {
@@ -1049,7 +1096,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
+<<<<<<< HEAD
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1, p.getLocation(), plugin.getConfigFile());
+=======
+            MAUtils.setArenaCoord(plugin.getMAConfig(), am.selectedArena, "spawnpoints." + arg1, p.getLocation());
+>>>>>>> upstream/master
             MAUtils.tellPlayer(sender, "Spawnpoint " + arg1 + " added for arena \"" + am.selectedArena.configName() + "\"");
             return true;
         }
@@ -1070,7 +1121,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
 
+<<<<<<< HEAD
             if (MAUtils.delArenaCoord(plugin.getConfig(), am.selectedArena, "spawnpoints." + arg1, plugin.getConfigFile()))
+=======
+            if (MAUtils.delArenaCoord(plugin.getMAConfig(), am.selectedArena, "spawnpoints." + arg1))
+>>>>>>> upstream/master
                 MAUtils.tellPlayer(sender, "Spawnpoint " + arg1 + " deleted for arena '" + am.selectedArena.configName() + "'");
             else
                 MAUtils.tellPlayer(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.selectedArena.configName() + "'");
@@ -1086,7 +1141,11 @@ public class MACommands implements CommandExecutor
             }
             
             StringBuffer buffy = new StringBuffer();
+<<<<<<< HEAD
             Set<String> containers = MAUtils.getKeys(plugin.getConfig(), "arenas." + am.selectedArena.configName() + ".coords.containers");
+=======
+            List<String> containers = plugin.getMAConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.containers");
+>>>>>>> upstream/master
             
             if (containers != null)
             {
@@ -1107,7 +1166,7 @@ public class MACommands implements CommandExecutor
         
         if (base.equals("addcontainer"))
         {
-            if (!(player && plugin.has(p, "mobarena.setup.addchest")) && !op)
+            if (!(player && plugin.has(p, "mobarena.setup.addcontainer")) && !op)
             {
                 MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
@@ -1123,7 +1182,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
+<<<<<<< HEAD
             MAUtils.setArenaCoord(plugin.getConfig(), am.selectedArena, "containers." + arg1, p.getTargetBlock(null, 50).getLocation(), plugin.getConfigFile());
+=======
+            MAUtils.setArenaCoord(plugin.getMAConfig(), am.selectedArena, "containers." + arg1, p.getTargetBlock(null, 50).getLocation());
+>>>>>>> upstream/master
             MAUtils.tellPlayer(sender, "Container '" + arg1 + "' added for arena \"" + am.selectedArena.configName() + "\"");
             return true;
         }
@@ -1141,7 +1204,11 @@ public class MACommands implements CommandExecutor
                 return true;
             }
 
+<<<<<<< HEAD
             if (MAUtils.delArenaCoord(plugin.getConfig(), am.selectedArena, "containers." + arg1, plugin.getConfigFile()))
+=======
+            if (MAUtils.delArenaCoord(plugin.getMAConfig(), am.selectedArena, "containers." + arg1))
+>>>>>>> upstream/master
                 MAUtils.tellPlayer(sender, "Container '" + arg1 + "' deleted for arena '" + am.selectedArena.configName() + "'");
             else
                 MAUtils.tellPlayer(sender, "Could not find the container '" + arg1 + "' for arena '" + am.selectedArena.configName() + "'");
