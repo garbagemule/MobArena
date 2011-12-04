@@ -60,12 +60,10 @@ import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 
-<<<<<<< HEAD
+
 import com.herocraftonline.dev.heroes.hero.Hero;
 import org.bukkit.configuration.file.FileConfiguration;
 
-=======
->>>>>>> upstream/master
 public class Arena
 {
     private MobArena plugin;
@@ -112,13 +110,8 @@ public class Arena
     protected boolean allowMonsters, allowAnimals;
     
     // Other settings
-<<<<<<< HEAD
-    protected int repairDelay, minPlayers, maxPlayers, joinDistance;
-    protected Set<String> classes = new HashSet<String>();
-=======
     protected int minPlayers, maxPlayers, joinDistance;
     protected List<String> classes = new LinkedList<String>();
->>>>>>> upstream/master
     protected Map<Player,Location> locations = new HashMap<Player,Location>();
     protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
     protected Map<Player,Integer> hungerMap = new HashMap<Player,Integer>();
@@ -954,7 +947,6 @@ public class Arena
     public void serializeConfig()
     {
         String coords = "arenas." + configName() + ".coords.";
-<<<<<<< HEAD
         FileConfiguration config = plugin.getConfig();
         
         config.set("arenas." + configName() + ".settings.enabled", enabled);
@@ -965,20 +957,7 @@ public class Arena
         if (l2 != null)           config.set(coords + "l2",        MAUtils.makeCoord(l2));
         if (arenaLoc != null)     config.set(coords + "arena",     MAUtils.makeCoord(arenaLoc));
         if (lobbyLoc != null)     config.set(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
-        if (spectatorLoc != null) config.set(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
-=======
-        Configuration config = plugin.getMAConfig();
-        
-        config.setProperty("arenas." + configName() + ".settings.enabled", enabled);
-        config.setProperty("arenas." + configName() + ".settings.protect", protect);
-        if (p1 != null)           config.setProperty(coords + "p1",        MAUtils.makeCoord(p1));
-        if (p2 != null)           config.setProperty(coords + "p2",        MAUtils.makeCoord(p2));
-        if (l1 != null)           config.setProperty(coords + "l1",        MAUtils.makeCoord(l1));
-        if (l2 != null)           config.setProperty(coords + "l2",        MAUtils.makeCoord(l2));
-        if (arenaLoc != null)     config.setProperty(coords + "arena",     MAUtils.makeCoord(arenaLoc));
-        if (lobbyLoc != null)     config.setProperty(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
-        if (spectatorLoc != null) config.setProperty(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
->>>>>>> upstream/master
+        if (spectatorLoc != null) config.set(coords + "spectator", MAUtils.makeCoord(spectatorLoc));        
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
             config.set(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
         for (Map.Entry<String,Location> entry : spawnpointsBoss.entrySet())
@@ -989,15 +968,9 @@ public class Arena
     
     public void deserializeConfig()
     {
-<<<<<<< HEAD
         FileConfiguration config = plugin.getConfig();
         MAUtils.loadFileConfiguration(config, plugin.getConfigFile());
         load(config, plugin.getConfigFile());
-=======
-        Configuration config = plugin.getMAConfig();
-        config.load();
-        load(config);
->>>>>>> upstream/master
     }
     
     public boolean serializeRegion()
@@ -1204,7 +1177,7 @@ public class Arena
         this.bossWave = bossWave;
     }
     
-    public Set<String> getClasses()
+    public List<String> getClasses()
     {
         return classes;
     }
