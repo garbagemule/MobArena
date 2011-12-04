@@ -1,14 +1,13 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.util.WaveUtils;
+import java.util.Set;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public abstract class NormalWave extends AbstractWave
 {
@@ -16,13 +15,13 @@ public abstract class NormalWave extends AbstractWave
     private Map<Integer,MACreature> probabilities = new TreeMap<Integer,MACreature>();
     
     // Recurrent
-    public NormalWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
+    public NormalWave(Arena arena, String name, int wave, int frequency, int priority, FileConfiguration config, String path)
     {
         super(arena, name, wave, frequency, priority);
     }
     
     // Single
-    public NormalWave(Arena arena, String name, int wave, Configuration config, String path)
+    public NormalWave(Arena arena, String name, int wave, FileConfiguration config, String path)
     {
         super(arena, name, wave);
     }
@@ -34,7 +33,7 @@ public abstract class NormalWave extends AbstractWave
      * @param path The absolute path of the wave
      * @param type DEFAULT or SPECIAL
      */
-    public void load(Configuration config, String path, WaveType type)
+    public void load(FileConfiguration config, String path, WaveType type)
     {
         // Set type and (for DEFAULT) growth.
         setType(type);
@@ -43,10 +42,10 @@ public abstract class NormalWave extends AbstractWave
         
         // Load monsters
         int prob;
-        List<String> monsters = config.getKeys(path + "monsters");
+        Set<String> monsters = MAUtils.getKeys(config, path + "monsters");
         if (monsters != null && !monsters.isEmpty())
         {
-            for (String m : config.getKeys(path + "monsters"))
+            for (String m : config.getConfigurationSection(path + "monsters").getKeys(false))
             {
                 prob = config.getInt(path + "monsters." + m, 1);
                 if (prob == 0) continue;
@@ -97,5 +96,6 @@ public abstract class NormalWave extends AbstractWave
         return probabilities;
     }
     
+    @Override
     public abstract void spawn(int wave);
 }

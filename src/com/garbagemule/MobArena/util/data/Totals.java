@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.util.data;
 import java.io.File;
 
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.ArenaLog;
@@ -11,6 +10,9 @@ import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.FileUtils;
+import com.garbagemule.MobArena.util.configLoader;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class Totals
 {
@@ -23,8 +25,10 @@ public class Totals
     public static void updateArenaTotals(ArenaLog log)
     {
         // Grab the configuration
-        Configuration totals = getArenaTotals(log.arena);
-        totals.load();
+        configLoader ld = getArenaTotals(log.arena);
+        FileConfiguration totals = ld.getConfig();
+        File file = ld.getAssociatedFile();
+        MAUtils.loadFileConfiguration(totals, file);
         
         // General data
         updateInt(totals, "general-info.total-games-played",            1, true);
@@ -71,7 +75,7 @@ public class Totals
         }
         
         // Save everything
-        totals.save();
+        MAUtils.saveFileConfiguration(totals, file);
     }
     
     /**
@@ -79,7 +83,7 @@ public class Totals
      * @param arena Arena to get or create a Configuration for
      * @return Configuration from the arena's totals-file
      */
-    public static Configuration getArenaTotals(Arena arena)
+    public static configLoader getArenaTotals(Arena arena)
     {
         // Create the folder if it doesn't exist.
         File dir = new File(MobArena.arenaDir, arena.configName());
@@ -87,9 +91,10 @@ public class Totals
         
         File file = new File(dir, totals_yml);
         if (!file.exists()) FileUtils.extractFile(dir, totals_yml);
-        
+                
         // Grab the totals-file and return the Configuration
-        return new Configuration(file);
+        FileConfiguration res = YamlConfiguration.loadConfiguration(file);
+        return new configLoader (res, file);
     }
     
     /**
@@ -99,12 +104,12 @@ public class Totals
      * @param b Integer for comparison
      * @param increment If true, the node will be incremented by b, otherwise overwritten if greater
      */
-    private static void updateInt(Configuration totals, String node, int b, boolean increment)
+    private static void updateInt(FileConfiguration totals, String node, int b, boolean increment)
     {
         int a = totals.getInt(node, 0);
         
-        if (increment)  totals.setProperty(node, a+b);
-        else if (b > a) totals.setProperty(node, b);
+        if (increment)  totals.set(node, a+b);
+        else if (b > a) totals.set(node, b);
     }
     
     /**
@@ -114,12 +119,12 @@ public class Totals
      * @param b Duration for comparison. This is a java.sql.Timestamp.getTime() long
      * @param increment If true, the node will be incremented by b, otherwise overwritten if greater
      */
-    private static void updateDuration(Configuration totals, String node, long b, boolean increment)
+    private static void updateDuration(FileConfiguration totals, String node, long b, boolean increment)
     {
         long a = MAUtils.parseDuration(totals.getString(node, "0:00:00"));
         
-        if (increment)  totals.setProperty(node, MAUtils.getDuration(a+b));
-        else if (b > a) totals.setProperty(node, MAUtils.getDuration(b));
+        if (increment)  totals.set(node, MAUtils.getDuration(a+b));
+        else if (b > a) totals.set(node, MAUtils.getDuration(b));
     }
     
     /**

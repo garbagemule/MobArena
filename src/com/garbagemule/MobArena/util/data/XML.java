@@ -2,12 +2,10 @@ package com.garbagemule.MobArena.util.data;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.List;
 import java.util.Map;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.config.Configuration;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -16,7 +14,11 @@ import org.jdom.output.XMLOutputter;
 
 import com.garbagemule.MobArena.ArenaLog;
 import com.garbagemule.MobArena.ArenaPlayer;
+import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.util.configLoader;
+import java.util.Set;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class XML
 {
@@ -80,8 +82,10 @@ public class XML
     
     public static void updateArenaTotals(ArenaLog log)
     {
-        Configuration totals = Totals.getArenaTotals(log.arena);
-        totals.load();
+        configLoader ld = Totals.getArenaTotals(log.arena);
+        FileConfiguration totals = ld.getConfig();
+        File file = ld.getAssociatedFile();
+        MAUtils.loadFileConfiguration(totals, file);
 
         // General data
         Element gd = new Element("general-info");
@@ -122,7 +126,7 @@ public class XML
             p.addContent(new Element("swings").addContent(totals.getInt("players." + name + ".swings", 1) + ""));
             p.addContent(new Element("hits").addContent(totals.getInt("players." + name + ".hits", 1) + ""));
             
-            List<String> classes = totals.getKeys("players." + name + ".classes");
+            Set<String> classes = MAUtils.getKeys(totals, "players." + name + ".classes");
             Element pcl = new Element("classes");
             if (classes != null)
             {

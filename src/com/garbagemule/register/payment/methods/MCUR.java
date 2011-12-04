@@ -53,16 +53,6 @@ public class MCUR implements Method {
         return false;
     }
 
-    public boolean createAccount(String name) {
-        CurrencyList.setValue((String) CurrencyList.maxCurrency(name)[0], name, 0);
-        return true;
-    }
-
-    public boolean createAccount(String name, Double balance) {
-        CurrencyList.setValue((String) CurrencyList.maxCurrency(name)[0], name, balance);
-        return true;
-    }
-
     public MethodAccount getAccount(String name) {
         return new MCurrencyAccount(name);
     }

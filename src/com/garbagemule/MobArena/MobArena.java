@@ -3,7 +3,6 @@ package com.garbagemule.MobArena;
 import java.io.File;
 import java.util.Random;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -14,21 +13,28 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.spout.Spouty;
-import com.garbagemule.MobArena.util.FileUtils;
+
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
+import java.io.IOException;
+import com.garbagemule.MobArena.util.FileUtils;
+import com.prosicraft.mighty.logger.MLog;
+import java.util.ResourceBundle;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.Listener;
 
 /**
  * MobArena
- * @author garbagemule
+ * @author prosicraft, after garbagecollect
  */
 public class MobArena extends JavaPlugin
 {
-    private Configuration config;
+    private FileConfiguration config;   // config.yml    
+    private File cf;    
     private ArenaMaster am;
     
     // Economy stuff
@@ -48,6 +54,7 @@ public class MobArena extends JavaPlugin
     public static final int ECONOMY_MONEY_ID = -29;
     public static Random random = new Random();
 
+    @Override
     public void onEnable()
     {
         // Description file and data folders
@@ -59,7 +66,8 @@ public class MobArena extends JavaPlugin
         
         // Create default files and initialize config-file
         FileUtils.extractDefaults("config.yml");
-        loadConfig();
+        
+        loadConfig("config.yml");
         
         // Download external libraries if needed.
         FileUtils.fetchLibs(config);
@@ -79,9 +87,10 @@ public class MobArena extends JavaPlugin
         registerListeners();
         
         // Announce enable!
-        info("v" + desc.getVersion() + " enabled.");
+        info("v" + desc.getVersion() + " enabled. (build#" + MAUtils.prependZeros(ResourceBundle.getBundle("version").getString("BUILD"), 3) + " by prosicraft)");
     }
     
+    @Override
     public void onDisable()
     {
         // Disable Spout features.
@@ -96,13 +105,25 @@ public class MobArena extends JavaPlugin
         info("disabled.");
     }
     
-    private void loadConfig()
-    {
-        File file = new File(dir, "config.yml");
-        config = new Configuration(file);
-        config.load();
-        config.setHeader(getHeader());
-    }
+    private void loadConfig(String filename)
+    {        
+        try {
+            FileConfiguration cfb = null;
+            File file = new File(dir, filename);            
+            if ( !file.exists() ) {
+                file.createNewFile();
+            }
+            if ( !file.exists() ) throw new IOException ("Plugin configuration file not accessable.");
+            cfb = YamlConfiguration.loadConfiguration(file);            
+            cfb.options().header(getHeader());   // does this work? I don't know :D
+            
+            this.config = cfb;
+            this.cf = file;
+        } catch (IOException iex) {
+            error ("Can't load " + filename + ": " + iex.getMessage());
+            iex.printStackTrace();
+        }                                           
+    }        
     
     private void registerListeners()
     {
@@ -155,9 +176,10 @@ public class MobArena extends JavaPlugin
     }
     
     // Console printing
-    public static void info(String msg)    { Bukkit.getServer().getLogger().info("[MobArena] " + msg); }
-    public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
-    public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
+    public static void info(String msg)    { MLog.i(msg); }
+    public static void warning(String msg) { MLog.w(msg); }    
+    public static void error(String msg)   { MLog.e(msg); }
+    public static void debug(String msg)   { MLog.d(msg); }
     
     private void setupRegister()
     {
@@ -196,12 +218,12 @@ public class MobArena extends JavaPlugin
         
         PluginManager pm = getServer().getPluginManager();
         
-        pm.registerEvent(Event.Type.CUSTOM_EVENT, new MagicSpellsListener(this), Priority.Normal, this);
-    }
+        pm.registerEvent(Event.Type.CUSTOM_EVENT, (Listener)new MagicSpellsListener(this), Priority.Normal, this);
+    }        
     
-    public Configuration getMAConfig()      { return config; }
-    public ArenaMaster   getAM()            { return am; } // More convenient.
-    public ArenaMaster   getArenaMaster()   { return am; }
+    public File getConfigFile()  { return cf; }
+    public ArenaMaster   getAM()          { return am; } // More convenient.
+    public ArenaMaster   getArenaMaster() { return am; }
     
     /*public HeroManager getHeroManager()
     {

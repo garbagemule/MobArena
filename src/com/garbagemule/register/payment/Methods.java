@@ -149,7 +149,7 @@ public class Methods {
                 break;
 
             plugin = manager.getPlugin(name);
-            if (plugin == null || !plugin.isEnabled())
+            if (plugin == null)
                 continue;
 
             Method current = createMethod(plugin);
@@ -172,7 +172,8 @@ public class Methods {
                             continue;
 
                         if (hasMethod()) {
-                            match = true; break;
+                            match = true;
+                            break;
                         }
 
                         if (preferred.isEmpty())

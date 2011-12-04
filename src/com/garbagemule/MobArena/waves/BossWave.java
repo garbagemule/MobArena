@@ -12,12 +12,12 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class BossWave extends AbstractWave
 {
@@ -30,20 +30,20 @@ public class BossWave extends AbstractWave
     private boolean lowHealthAnnounced = false, abilityAnnounce;
     
     // Recurrent
-    public BossWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
+    public BossWave(Arena arena, String name, int wave, int frequency, int priority, FileConfiguration config, String path)
     {
         super(arena, name, wave, frequency, priority);
         load(config, path);
     }
     
     // Single
-    public BossWave(Arena arena, String name, int wave, Configuration config, String path)
+    public BossWave(Arena arena, String name, int wave, FileConfiguration config, String path)
     {
         super(arena, name, wave);
         load(config, path);
     }
     
-    private void load(Configuration config, String path)
+    private void load(FileConfiguration config, String path)
     {
         setType(WaveType.BOSS);
         abilityTask  = -1;
@@ -56,10 +56,10 @@ public class BossWave extends AbstractWave
         // Get abilities
         abilityInterval  = config.getInt(path + "ability-interval", 3) * 20;
         abilityAnnounce  = config.getBoolean(path + "ability-announce", true);
-        String abilities = config.getString(path + "abilities");
-        if (abilities != null)
+        String abilitiesb = config.getString(path + "abilities");
+        if (abilitiesb != null)
         {
-            for (String a : abilities.split(","))
+            for (String a : abilitiesb.split(","))
             {
                 String ability = a.trim();
                 addAbility(BossAbility.fromString(ability));
@@ -67,6 +67,7 @@ public class BossWave extends AbstractWave
         }
     }
 
+    @Override
     public void spawn(int wave)
     {
         // Announce spawning
@@ -80,7 +81,7 @@ public class BossWave extends AbstractWave
         getArena().setBossWave(this);
         
         // Set the health stuff
-        bossCreature.setHealth(200);
+        bossCreature.setHealth(bossCreature.getMaxHealth());
         healthAmount = bossHealth.getAmount(getArena().getPlayerCount());
         
         startAbilityTasks();
@@ -99,6 +100,7 @@ public class BossWave extends AbstractWave
             {
                 private int counter = 0;
                 
+            @Override
                 public void run()
                 {
                     // Check to see if the boss is still alive. If not, end this boss wave.

@@ -6,24 +6,24 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Location;
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class DefaultWave extends NormalWave
 {    
     // Recurrent
-    public DefaultWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
+    public DefaultWave(Arena arena, String name, int wave, int frequency, int priority, FileConfiguration config, String path)
     {
         super(arena, name, wave, frequency, priority, config, path);
         load(config, path, WaveType.DEFAULT);
     }
     
     // Single
-    public DefaultWave(Arena arena, String name, int wave, Configuration config, String path)
+    public DefaultWave(Arena arena, String name, int wave, FileConfiguration config, String path)
     {
         super(arena, name, wave, config, path);
         load(config, path, WaveType.DEFAULT);

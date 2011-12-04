@@ -1,5 +1,8 @@
 package com.garbagemule.MobArena;
 
+import com.prosicraft.mighty.logger.MLog;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,17 +13,19 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.config.Configuration;
 
 //import com.garbagemule.ArenaPlugin.Master;
 
 public class ArenaMaster //implements Master
 {
     private MobArena plugin;
-    private Configuration config;
+    private FileConfiguration config;
+    private File configfile;
     protected Arena selectedArena;
     
     // Settings
@@ -49,10 +54,11 @@ public class ArenaMaster //implements Master
      */
     public ArenaMaster(MobArena instance)
     {
-        plugin   = instance;
-        config   = plugin.getMAConfig();
-        arenas   = new LinkedList<Arena>();
-        arenaMap = new HashMap<Player,Arena>();
+        plugin      = instance;
+        config      = plugin.getConfig();
+        configfile  = plugin.getConfigFile();
+        arenas      = new LinkedList<Arena>();
+        arenaMap    = new HashMap<Player,Arena>();
     }
     
     
@@ -180,11 +186,18 @@ public class ArenaMaster //implements Master
     
     public void initialize()
     {
-        config.load();
+        try {
+            config.load(configfile);
+        } catch (IOException iex) {
+            MLog.e("Can't load configuration file at " + ((configfile != null) ? configfile.getAbsolutePath() : "not given configuration file!"));            
+        } catch (InvalidConfigurationException icex) {
+            MLog.e("Loaded invalid configuration file at " + ((configfile != null) ? configfile.getAbsolutePath() : "not given configuration file!"));
+        }
+        
         loadSettings();
         loadClasses();
         loadArenas();
-        config.save();
+        MAUtils.saveFileConfiguration(config, configfile);
     }
 
     /**
@@ -192,10 +205,10 @@ public class ArenaMaster //implements Master
      */
     public void loadSettings()
     {
-        if (config.getKeys("global-settings") == null)
+        if (config.getConfigurationSection("global-settings") == null)
         {
-            config.setProperty("global-settings.enabled", true);
-            config.setProperty("global-settings.update-notification", true);
+            config.set("global-settings.enabled", true);
+            config.set("global-settings.update-notification", true);
         }
         
         enabled      = config.getBoolean("global-settings.enabled", true);
@@ -207,20 +220,20 @@ public class ArenaMaster //implements Master
      */
     public void loadClasses()
     {
-        classes = config.getKeys("classes");
+        classes = MAUtils.getKeysList(config, "classes");
         if (classes == null)
         {
-            config.setProperty("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
-            config.setProperty("classes.Archer.armor", "298,299,300,301");
-            config.setProperty("classes.Knight.items", "diamond_sword, grilled_pork:2");
-            config.setProperty("classes.Knight.armor", "306,307,308,309");
-            config.setProperty("classes.Tank.items",   "iron_sword, grilled_pork:3, apple");
-            config.setProperty("classes.Tank.armor",   "310,311,312,313");
-            config.setProperty("classes.Oddjob.items", "stone_sword, flint_and_steel, netherrack:2, wood_pickaxe, tnt:4, fishing_rod, apple, grilled_pork:3");
-            config.setProperty("classes.Oddjob.armor", "298,299,300,301");
-            config.setProperty("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
-            config.setProperty("classes.Chef.armor",   "314,315,316,317");
-            classes = config.getKeys("classes");
+            config.set("classes.Archer.items", "wood_sword, bow, arrow:128, grilled_pork");
+            config.set("classes.Archer.armor", "298,299,300,301");
+            config.set("classes.Knight.items", "diamond_sword, grilled_pork:2");
+            config.set("classes.Knight.armor", "306,307,308,309");
+            config.set("classes.Tank.items",   "iron_sword, grilled_pork:3, apple");
+            config.set("classes.Tank.armor",   "310,311,312,313");
+            config.set("classes.Oddjob.items", "stone_sword, flint_and_steel, netherrack:2, wood_pickaxe, tnt:4, fishing_rod, apple, grilled_pork:3");
+            config.set("classes.Oddjob.armor", "298,299,300,301");
+            config.set("classes.Chef.items",   "stone_sword, bread:6, grilled_pork:4, mushroom_soup, cake:3, cookie:12");
+            config.set("classes.Chef.armor",   "314,315,316,317");
+            classes = MAUtils.getKeysList(config, "classes");
         }
         classItems = MAUtils.getClassItems(config, "items");
         classArmor = MAUtils.getClassItems(config, "armor");
@@ -234,83 +247,85 @@ public class ArenaMaster //implements Master
     {
         arenas = new LinkedList<Arena>();
         
-        if (config.getKeys("arenas") == null)
+        if (config.getConfigurationSection("arenas") == null)
             createArenaNode("default", Bukkit.getServer().getWorlds().get(0));
 
-        for (String configName : config.getKeys("arenas"))
-        {
-            String arenaPath = "arenas." + configName + ".";
-            String worldName = config.getString(arenaPath + "settings.world", null);
-            World  world;
-            if (worldName == null || worldName.equals(""))
+        try {
+            for (String configName : MAUtils.getKeys(config, "arenas"))
             {
-                MobArena.warning("Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
-                world = Bukkit.getServer().getWorlds().get(0);
-            }
-            else world = Bukkit.getServer().getWorld(worldName);
+                String arenaPath = "arenas." + configName + ".";
+                String worldName = config.getString(arenaPath + "settings.world", null);
+                World  world;
+                if (worldName == null || worldName.equals(""))
+                {
+                    MobArena.warning("Could not find the world for arena '" + configName + "'. Using default world! Check the config-file!");
+                    world = Bukkit.getServer().getWorlds().get(0);
+                }
+                else world = Bukkit.getServer().getWorld(worldName);
             
-            Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
-            arena.load(config);
-            arenas.add(arena);
-        }
-        
-        selectedArena = arenas.get(0);
+                Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);            
+                    arena.load(config, configfile);            
+                arenas.add(arena);
+                selectedArena = arenas.get(0);
+            }
+        } catch (NullPointerException nex) {           
+        }                
     }
     
     public Arena createArenaNode(String configName, World world)
     {
-        config.setProperty("arenas." + configName + ".settings.world", world.getName());
-        config.save();
-        config.load();
-        config.setProperty("arenas." + configName + ".settings.enabled", true);
-        config.save();
-        config.load();
-        config.setProperty("arenas." + configName + ".settings.protect", true);
-        config.save();
-        config.load();
-        config.setProperty("arenas." + configName + ".settings.entry-fee", "");
-        config.save();
-        config.load();
-        config.setProperty("arenas." + configName + ".settings.logging", false);
-        config.setProperty("arenas." + configName + ".settings.clear-wave-before-next", false);
-        config.setProperty("arenas." + configName + ".settings.detonate-creepers", false);
-        config.setProperty("arenas." + configName + ".settings.detonate-damage", false);
-        config.setProperty("arenas." + configName + ".settings.lightning", true);
-        config.setProperty("arenas." + configName + ".settings.auto-equip-armor", true);
-        config.setProperty("arenas." + configName + ".settings.force-restore", false);
-        config.setProperty("arenas." + configName + ".settings.soft-restore", false);
-        config.setProperty("arenas." + configName + ".settings.soft-restore-drops", false);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inv-join", true);
-        config.setProperty("arenas." + configName + ".settings.require-empty-inv-spec", true);
-        config.setProperty("arenas." + configName + ".settings.hellhounds", false);
-        config.setProperty("arenas." + configName + ".settings.pvp-enabled", false);
-        config.setProperty("arenas." + configName + ".settings.monster-infight", false);
-        config.setProperty("arenas." + configName + ".settings.allow-teleporting", false);
-        config.setProperty("arenas." + configName + ".settings.spectate-on-death", true);
-        config.setProperty("arenas." + configName + ".settings.share-items-in-arena", true);
-        config.save();
-        config.load();
-        config.setProperty("arenas." + configName + ".settings.player-limit", 0);
-        config.setProperty("arenas." + configName + ".settings.max-join-distance", 0);
-        config.save();
-        config.load();
-        config.setProperty("arenas." + configName + ".settings.repair-delay", 5);
-        config.setProperty("arenas." + configName + ".settings.first-wave-delay", 5);
-        config.setProperty("arenas." + configName + ".settings.wave-interval", 20);
-        config.setProperty("arenas." + configName + ".settings.special-modulo", 4);
-        config.setProperty("arenas." + configName + ".settings.max-idle-time", 0);
-        config.save();
-        config.load();
+        config.set("arenas." + configName + ".settings.world", world.getName());
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
+        config.set("arenas." + configName + ".settings.enabled", true);
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
+        config.set("arenas." + configName + ".settings.protect", true);
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
+        config.set("arenas." + configName + ".settings.entry-fee", "");
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
+        config.set("arenas." + configName + ".settings.logging", false);
+        config.set("arenas." + configName + ".settings.clear-wave-before-next", false);
+        config.set("arenas." + configName + ".settings.detonate-creepers", false);
+        config.set("arenas." + configName + ".settings.detonate-damage", false);
+        config.set("arenas." + configName + ".settings.lightning", true);
+        config.set("arenas." + configName + ".settings.auto-equip-armor", true);
+        config.set("arenas." + configName + ".settings.force-restore", false);
+        config.set("arenas." + configName + ".settings.soft-restore", false);
+        config.set("arenas." + configName + ".settings.soft-restore-drops", false);
+        config.set("arenas." + configName + ".settings.require-empty-inv-join", true);
+        config.set("arenas." + configName + ".settings.require-empty-inv-spec", true);
+        config.set("arenas." + configName + ".settings.hellhounds", false);
+        config.set("arenas." + configName + ".settings.pvp-enabled", false);
+        config.set("arenas." + configName + ".settings.monster-infight", false);
+        config.set("arenas." + configName + ".settings.allow-teleporting", false);
+        config.set("arenas." + configName + ".settings.spectate-on-death", true);
+        config.set("arenas." + configName + ".settings.share-items-in-arena", true);
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
+        config.set("arenas." + configName + ".settings.player-limit", 0);
+        config.set("arenas." + configName + ".settings.max-join-distance", 0);
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
+        config.set("arenas." + configName + ".settings.repair-delay", 5);
+        config.set("arenas." + configName + ".settings.first-wave-delay", 5);
+        config.set("arenas." + configName + ".settings.wave-interval", 20);
+        config.set("arenas." + configName + ".settings.special-modulo", 4);
+        config.set("arenas." + configName + ".settings.max-idle-time", 0);
+        MAUtils.saveFileConfiguration(config, configfile);
+        MAUtils.loadFileConfiguration(config, configfile);
 
         Arena arena = new Arena(MAUtils.nameConfigToArena(configName), world);
-        arena.load(config);
+        arena.load(config, configfile);
         return arena;
     }
     
     public void removeArenaNode(String configName)
     {
-        config.removeProperty("arenas." + configName);
-        config.save();
+        config.set("arenas." + configName, null);
+        MAUtils.saveFileConfiguration(config, configfile);
     }
     
     
@@ -333,11 +348,11 @@ public class ArenaMaster //implements Master
         for (Arena arena : arenas)
             arena.forceEnd();
         
-        config.load();
+        MAUtils.loadFileConfiguration(config, configfile);
         if (settings)  loadSettings();
         if (classes)   loadClasses();
         if (arenalist) deserializeArenas();
-        config.save();
+        MAUtils.loadFileConfiguration(config, configfile);
         
         enabled = tmp;
     }
@@ -348,8 +363,8 @@ public class ArenaMaster //implements Master
     public void serializeSettings()
     {        
         String settings = "global-settings.";
-        config.setProperty(settings + "enabled", enabled);
-        config.save();
+        config.set(settings + "enabled", enabled);
+        MAUtils.saveFileConfiguration(config, configfile);
     }
     
     /**
@@ -369,7 +384,12 @@ public class ArenaMaster //implements Master
     public void deserializeArenas()
     {
         // Get only the arenas in the config.
-        List<String> strings = config.getKeys("arenas");
+        Set<String> strings;
+        try {
+            strings = MAUtils.getKeys(config, "arenas");
+        } catch (NullPointerException nex) {
+            return;
+        }
         if (strings == null)
             return;
         

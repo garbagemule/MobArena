@@ -46,7 +46,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
@@ -60,6 +59,10 @@ import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.BossWave;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.Wave.WaveBranch;
+
+
+import com.herocraftonline.dev.heroes.hero.Hero;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class Arena
 {
@@ -867,9 +870,9 @@ public class Arena
     //
     ////////////////////////////////////////////////////////////////////*/
     
-    public void load(Configuration config)
+    public void load(FileConfiguration config, File configfile)
     {
-        config.load();
+        MAUtils.loadFileConfiguration(config, configfile);
         
         String arenaPath = "arenas." + MAUtils.nameArenaToConfig(name) + ".settings.";
         String configName = MAUtils.nameArenaToConfig(name);
@@ -930,7 +933,7 @@ public class Arena
         
         // Determine if the arena is properly set up. Then add the to arena list.
         setup            = MAUtils.verifyData(this);
-        lobbySetup       = MAUtils.verifyLobby(this);
+        lobbySetup       = MAUtils.verifyLobby(this);                
     }
     
     public void restoreRegion()
@@ -944,30 +947,30 @@ public class Arena
     public void serializeConfig()
     {
         String coords = "arenas." + configName() + ".coords.";
-        Configuration config = plugin.getMAConfig();
+        FileConfiguration config = plugin.getConfig();
         
-        config.setProperty("arenas." + configName() + ".settings.enabled", enabled);
-        config.setProperty("arenas." + configName() + ".settings.protect", protect);
-        if (p1 != null)           config.setProperty(coords + "p1",        MAUtils.makeCoord(p1));
-        if (p2 != null)           config.setProperty(coords + "p2",        MAUtils.makeCoord(p2));
-        if (l1 != null)           config.setProperty(coords + "l1",        MAUtils.makeCoord(l1));
-        if (l2 != null)           config.setProperty(coords + "l2",        MAUtils.makeCoord(l2));
-        if (arenaLoc != null)     config.setProperty(coords + "arena",     MAUtils.makeCoord(arenaLoc));
-        if (lobbyLoc != null)     config.setProperty(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
-        if (spectatorLoc != null) config.setProperty(coords + "spectator", MAUtils.makeCoord(spectatorLoc));
+        config.set("arenas." + configName() + ".settings.enabled", enabled);
+        config.set("arenas." + configName() + ".settings.protect", protect);
+        if (p1 != null)           config.set(coords + "p1",        MAUtils.makeCoord(p1));
+        if (p2 != null)           config.set(coords + "p2",        MAUtils.makeCoord(p2));
+        if (l1 != null)           config.set(coords + "l1",        MAUtils.makeCoord(l1));
+        if (l2 != null)           config.set(coords + "l2",        MAUtils.makeCoord(l2));
+        if (arenaLoc != null)     config.set(coords + "arena",     MAUtils.makeCoord(arenaLoc));
+        if (lobbyLoc != null)     config.set(coords + "lobby",     MAUtils.makeCoord(lobbyLoc));
+        if (spectatorLoc != null) config.set(coords + "spectator", MAUtils.makeCoord(spectatorLoc));        
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet())
-            config.setProperty(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
+            config.set(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
         for (Map.Entry<String,Location> entry : spawnpointsBoss.entrySet())
-            config.setProperty(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
+            config.set(coords + "spawnpoints." + entry.getKey(), MAUtils.makeCoord(entry.getValue()));
         
-        config.save();
+        MAUtils.saveFileConfiguration(config, plugin.getConfigFile());
     }
     
     public void deserializeConfig()
     {
-        Configuration config = plugin.getMAConfig();
-        config.load();
-        load(config);
+        FileConfiguration config = plugin.getConfig();
+        MAUtils.loadFileConfiguration(config, plugin.getConfigFile());
+        load(config, plugin.getConfigFile());
     }
     
     public boolean serializeRegion()

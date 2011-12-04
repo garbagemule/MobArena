@@ -9,13 +9,27 @@ import java.util.TreeSet;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.waves.*;
-import com.garbagemule.MobArena.waves.Wave.*;
+import com.garbagemule.MobArena.waves.BossAbility;
+import com.garbagemule.MobArena.waves.BossWave;
+import com.garbagemule.MobArena.waves.DefaultWave;
+import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.SpecialWave;
+import com.garbagemule.MobArena.waves.SwarmWave;
+import com.garbagemule.MobArena.waves.Wave;
+import com.garbagemule.MobArena.waves.Wave.BossHealth;
+import com.garbagemule.MobArena.waves.Wave.SwarmAmount;
+import com.garbagemule.MobArena.waves.Wave.WaveBranch;
+import com.garbagemule.MobArena.waves.Wave.WaveGrowth;
+import com.garbagemule.MobArena.waves.Wave.WaveType;
+import com.prosicraft.mighty.logger.MLog;
+import java.io.File;
+import java.util.Set;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class WaveUtils
 {
@@ -80,7 +94,7 @@ public class WaveUtils
     /**
      * Grab and process all the waves in the config-file for the arena.
      */
-    public static TreeSet<Wave> getWaves(Arena arena, Configuration config, WaveBranch branch)
+    public static TreeSet<Wave> getWaves(Arena arena, FileConfiguration config, WaveBranch branch)
     {
         // Determine the branch type of the wave, and grab the appropriate comparator
         String b = branch.toString().toLowerCase();
@@ -88,7 +102,12 @@ public class WaveUtils
         
         // Grab the waves from the config-file
         String path = "arenas." + arena.configName() + ".waves." + b; // waves.yml, change to either "waves." + b, or simply b
-        List<String> waves = config.getKeys(path);
+        Set<String> waves = null;
+        try {
+            waves = MAUtils.getKeys(config, path);
+        } catch (NullPointerException nex) { // When configurationSection does not exist
+            // blubb (means: the plugin continues here ... :D)
+        }
         
         // If there are any waves, process them
         if (waves != null)
@@ -108,11 +127,11 @@ public class WaveUtils
         // If there are no waves and the type is 'recurrent', add a couple of auto-generated waves.
         if (branch == WaveBranch.RECURRENT && (result.isEmpty() || waves == null))
         {
-            MobArena.info("No valid recurrent waves detected for arena '" + arena.configName() + "'. Using defaults...");
+            MobArena.info("No valid rec. waves for arena '" + arena.configName() + "'. Using defaults...");
             DefaultWave def  = new DefaultWave(arena, "DEF_WAVE_AUTO", 1, 1, 1, config, path + ".DEF_WAVE_AUTO.");
-            SpecialWave spec = new SpecialWave(arena, "SPEC_WAVE_AUTO", 4, 4, 2, config, path + ".SPEC_WAVE_AUTO.");
+            SpecialWave spec = new SpecialWave(arena, "SPEC_WAVE_AUTO", 4, 4, 2, config, path + ".SPEC_WAVE_AUTO.");            
             result.add(def);
-            result.add(spec);
+            result.add(spec);           
         }
         
         return result;
@@ -122,7 +141,7 @@ public class WaveUtils
      * Get a single wave based on the config-file, the path, and branch
      * @return A Wave object if it is well defined, null otherwise.
      */
-    private static Wave getWave(Arena arena, Configuration config, String path, String name, WaveBranch branch)
+    private static Wave getWave(Arena arena, FileConfiguration config, String path, String name, WaveBranch branch)
     {
         // Grab the wave type, if null or not well defined, return null
         WaveType type = WaveType.fromString(config.getString(path + "type"));
@@ -183,7 +202,7 @@ public class WaveUtils
      * @param type The wave type
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isWaveWellDefined(Configuration config, String path, WaveBranch branch, WaveType type)
+    private static boolean isWaveWellDefined(FileConfiguration config, String path, WaveBranch branch, WaveType type)
     {
         // This boolean is used in the "leaf methods" 
         boolean wellDefined = true;
@@ -260,7 +279,7 @@ public class WaveUtils
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isTypeWellDefined(Configuration config, String path, WaveType type, boolean wellDefined)
+    private static boolean isTypeWellDefined(FileConfiguration config, String path, WaveType type, boolean wellDefined)
     {
         if (type == WaveType.DEFAULT)
             return isDefaultWaveWellDefined(config, path, wellDefined);
@@ -283,7 +302,7 @@ public class WaveUtils
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isDefaultWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isDefaultWaveWellDefined(FileConfiguration config, String path, boolean wellDefined)
     {
         // OPTIONAL: Wave growth
         String growth = config.getString(path + "growth");
@@ -304,7 +323,7 @@ public class WaveUtils
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isSpecialWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isSpecialWaveWellDefined(FileConfiguration config, String path, boolean wellDefined)
     {
         return isNormalWaveWellDefined(config, path, wellDefined);
     }
@@ -319,10 +338,10 @@ public class WaveUtils
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, wellDefined is true.
      */
-    private static boolean isNormalWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isNormalWaveWellDefined(FileConfiguration config, String path, boolean wellDefined)
     {
         // OPTIONAL: Monsters
-        List<String> monsters = config.getKeys(path + "monsters");
+        Set<String> monsters = MAUtils.getKeys(config, path + "monsters");
         if (monsters != null)
         {
             for (String monster : monsters)
@@ -346,7 +365,7 @@ public class WaveUtils
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, wellDefined is true.
      */
-    private static boolean isSwarmWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isSwarmWaveWellDefined(FileConfiguration config, String path, boolean wellDefined)
     {
         // REQUIRED: Monster type
         String monster = config.getString(path + "monster");
@@ -379,7 +398,7 @@ public class WaveUtils
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, wellDefined is true.
      */
-    private static boolean isBossWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isBossWaveWellDefined(FileConfiguration config, String path, boolean wellDefined)
     {
         // REQUIRED: Monster type
         String monster = config.getString(path + "monster");

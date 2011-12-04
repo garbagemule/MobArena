@@ -165,7 +165,7 @@ public class MAListener implements ArenaListener
     public void onSignChange(SignChangeEvent event)
     {
         arena.leaderboard = new Leaderboard(plugin, arena, event.getBlock().getLocation());
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "leaderboard", event.getBlock().getLocation());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "leaderboard", event.getBlock().getLocation(), plugin.getConfigFile());
         MAUtils.tellPlayer(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
     }
 
@@ -368,7 +368,7 @@ public class MAListener implements ArenaListener
             arena.arenaPlayerMap.get(p).getStats().dmgDone += event.getDamage();
             arena.arenaPlayerMap.get(p).getStats().hits++;
         }
-        else if (damager instanceof Wolf && arena.pets.contains(damager))
+        else if (damager instanceof Wolf && arena.pets.contains((Wolf)damager))
         {                
             event.setDamage(1);
             arena.arenaPlayerMap.get((Player) ((Wolf) damager).getOwner()).getStats().dmgDone += event.getDamage();
@@ -390,7 +390,7 @@ public class MAListener implements ArenaListener
             
             // Subtract boss health, and reset actual entity health
             arena.bossWave.subtractHealth(event.getDamage());
-            arena.bossWave.getEntity().setHealth(100);
+            arena.bossWave.getEntity().setHealth(arena.bossWave.getEntity().getMaxHealth());
             
             // Set damage to 1 for knockback and feedback
             event.setDamage(1);
@@ -401,7 +401,7 @@ public class MAListener implements ArenaListener
                 arena.bossWave.clear();
                 arena.bossWave = null;
             }
-            else if (arena.bossWave.getHealth() <= 100 && !arena.bossWave.isLowHealthAnnounced())
+            else if (arena.bossWave.getHealth() <= arena.bossWave.getEntity().getMaxHealth() && !arena.bossWave.isLowHealthAnnounced())
             {
                 MAUtils.tellAll(arena, Msg.WAVE_BOSS_LOW_HEALTH);
                 arena.bossWave.setLowHealthAnnounced(true);

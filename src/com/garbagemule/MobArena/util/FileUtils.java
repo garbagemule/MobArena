@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.util;
 
+import com.garbagemule.MobArena.MAUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -9,12 +10,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MobArena;
+import com.prosicraft.mighty.logger.MLog;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class FileUtils
 {
@@ -39,19 +40,19 @@ public class FileUtils
     
     /**
      * Download all necessary libraries.
-     * @param config The MobArena config-file
+     * @param config The MobArena config-file !arenas.yml!
      */
-    public static void fetchLibs(Configuration config)
+    public static void fetchLibs(FileConfiguration config)
     {
         // Get all arenas
-        List<String> arenas = config.getKeys("arenas");
+        Set<String> arenas = MAUtils.getKeys(config, "");
         if (arenas == null) return;
         
         // Add all the logging types
         Set<Library> libs = new HashSet<Library>();
         for (String a : arenas)
         {
-            String type = config.getString("arenas." + a + ".settings.logging", "").toLowerCase();
+            String type = config.getString(a + ".settings.logging", "").toLowerCase();
             
             Library lib = Library.fromString(type.toUpperCase());
             if (lib != null)
@@ -191,7 +192,10 @@ public class FileUtils
         
         // Skip if there is no resource with that name
         InputStream in = MobArena.class.getResourceAsStream("/res/" + filename);
-        if (in == null) return null;
+        if (in == null) {
+            MLog.e("The plugin seems to be damaged: Missing ressource folder.");
+            return null;
+        }
         
         try
         {

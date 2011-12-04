@@ -33,13 +33,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.config.Configuration;
 import org.getspout.spoutapi.SpoutManager;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.InventoryItem;
+import com.prosicraft.mighty.logger.MLog;
+import java.io.IOException;
+import java.util.ArrayList;
+import javax.security.auth.login.Configuration;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class MAUtils
 {         
@@ -136,16 +141,19 @@ public class MAUtils
     
     // ///////////////////////////////////////////////////////////////////// */
     
-    public static Map<String,Location> getArenaContainers(Configuration config, World world, String arena)
+    public static Map<String,Location> getArenaContainers(FileConfiguration config, World world, String arena)
     {
         Map<String,Location> containers = new HashMap<String,Location>();
         String arenaPath = "arenas." + arena + ".coords.containers";
-        
-        if (config.getKeys(arenaPath) == null)
+               
+        if (config.getConfigurationSection(arenaPath) == null)
             return containers;
         
-        for (String point : config.getKeys(arenaPath))
-            containers.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        try {
+            for ( String point : getKeys(config, arenaPath) )
+                containers.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        } catch (NullPointerException nex) {            
+        }
         
         return containers;
     }
@@ -153,32 +161,38 @@ public class MAUtils
     /**
      * Grab all the spawnpoints for a specific arena.
      */
-    public static Map<String,Location> getArenaSpawnpoints(Configuration config, World world, String arena)
+    public static Map<String,Location> getArenaSpawnpoints(FileConfiguration config, World world, String arena)
     {
         Map<String,Location> spawnpoints = new HashMap<String,Location>();
         String arenaPath = "arenas." + arena + ".coords.spawnpoints";
         
-        if (config.getKeys(arenaPath) == null)
+        if (config.getConfigurationSection(arenaPath) == null)
             return spawnpoints;
-        
-        for (String point : config.getKeys(arenaPath))
-            if (!point.matches("^(.)*boss(.)*$"))
-                spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+       
+        try {
+            for (String point : getKeys(config, arenaPath))
+                if (!point.matches("^(.)*boss(.)*$"))
+                    spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        } catch (NullPointerException nex) {            
+        }
         
         return spawnpoints;
     }
     
-    public static Map<String,Location> getArenaBossSpawnpoints(Configuration config, World world, String arena)
+    public static Map<String,Location> getArenaBossSpawnpoints(FileConfiguration config, World world, String arena)
     {
         Map<String,Location> spawnpoints = new HashMap<String,Location>();
         String arenaPath = "arenas." + arena + ".coords.spawnpoints";
         
-        if (config.getKeys(arenaPath) == null)
+        if (config.getConfigurationSection(arenaPath) == null)
             return spawnpoints;
         
-        for (String point : config.getKeys(arenaPath))
-            if (point.matches("^(.)*boss(.)*$"))
-                spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        try {
+            for (String point : getKeys(config, arenaPath))
+                if (point.matches("^(.)*boss(.)*$"))
+                    spawnpoints.put(point, makeLocation(world, config.getString(arenaPath + "." + point)));
+        } catch (NullPointerException nex) {            
+        }
         
         return spawnpoints;
     }
@@ -186,28 +200,63 @@ public class MAUtils
     /**
      * Returns a map of classnames mapped to lists of ItemStacks.
      */
-    public static Map<String,List<ItemStack>> getClassItems(Configuration config, String type)
+    public static Map<String,List<ItemStack>> getClassItems(FileConfiguration config, String type)
     {
         Map<String,List<ItemStack>> result = new HashMap<String,List<ItemStack>>();
         
-        for (String className : config.getKeys("classes"))
-            result.put(className, makeItemStackList(config.getString("classes." + className + "." + type)));
+        try {
+            for (String className : getKeys(config, "classes"))
+                result.put(className, makeItemStackList(config.getString("classes." + className + "." + type)));
+        } catch (NullPointerException nex) {            
+        }
         
         return result;
     }
     
-    public static Map<String,Map<String,Boolean>> getClassPerms(Configuration config)
+    public static Set<String> getKeys(FileConfiguration config, String path, boolean deep) {
+        try {
+            return config.getConfigurationSection(path).getKeys(deep);
+        } catch (NullPointerException nex) {
+            return null;
+        }
+    }
+    
+    public static Set<String> getKeys(FileConfiguration config, String path) {
+        try {
+            return config.getConfigurationSection(path).getKeys(false);
+        } catch (NullPointerException nex) {
+            return null;
+        }
+    }
+    
+    public static List<String> getKeysList(FileConfiguration config, String path) {
+        try {
+            return new ArrayList <String>(config.getConfigurationSection(path).getKeys(false));
+        } catch (NullPointerException nex) {
+            return null;
+        }
+    }
+    
+    public static Map<String,Map<String,Boolean>> getClassPerms(FileConfiguration config)
     {
         Map<String, Map<String,Boolean>> result = new HashMap<String, Map<String,Boolean>>();
         
-        List<String> classes = config.getKeys("classes");
+        Set<String> classes = config.getConfigurationSection("classes").getKeys(false);
         if (classes == null) return result;
         
         for (String c : classes)
         {            
             // Get all the permissions for the class and return if empty.
-            List<String> keys = config.getStringList("classes." + c + ".permissions", new LinkedList<String>());
-            if (keys.isEmpty()) continue;
+            List<String> keys;
+            
+            try {
+                if ((keys = config.getStringList("classes." + c + ".permissions")) == null)
+                    keys = new LinkedList<String>();
+            } catch (NullPointerException nex) {    // Caught when there are no perms. Bukkit missed it at MemorySection.java:456 :D
+                continue;
+            }
+            
+            if (keys == null || keys.isEmpty()) continue;
             
             // If the string starts with a hyphen (-), use false.
             Map<String,Boolean> perms = new HashMap<String,Boolean>();
@@ -224,7 +273,7 @@ public class MAUtils
         return result;
     }
     
-    public static List<ItemStack> getEntryFee(Configuration config, String arena)
+    public static List<ItemStack> getEntryFee(FileConfiguration config, String arena)
     {
         return makeItemStackList(config.getString("arenas." + arena + ".settings.entry-fee", null));
     }
@@ -276,28 +325,28 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */    
-    public static Map<Integer,List<ItemStack>> getArenaRewardMap(Configuration config, String arena, String type)
+    public static Map<Integer,List<ItemStack>> getArenaRewardMap(FileConfiguration config, String arena, String type)
     {
         String arenaPath = "arenas." + arena + ".rewards.waves.";
         Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
         
-        if (config.getKeys(arenaPath + type) == null)
+        if (getKeys(config, arenaPath + type) == null)
         {
             if (type.equals("every"))
             {
-                config.setProperty(arenaPath + "every.3", "feather, bone, stick");
-                config.setProperty(arenaPath + "every.5", "dirt:4, gravel:4, stone:4");
-                config.setProperty(arenaPath + "every.10", "iron_ingot:10, gold_ingot:8");
+                config.set(arenaPath + "every.3", "feather, bone, stick");
+                config.set(arenaPath + "every.5", "dirt:4, gravel:4, stone:4");
+                config.set(arenaPath + "every.10", "iron_ingot:10, gold_ingot:8");
             }
             else if (type.equals("after"))
             {
-                config.setProperty(arenaPath + "after.7", "minecart, storage_minecart, powered_minecart");
-                config.setProperty(arenaPath + "after.13", "iron_sword, iron_pickaxe, iron_spade");
-                config.setProperty(arenaPath + "after.16", "diamond_sword");
+                config.set(arenaPath + "after.7", "minecart, storage_minecart, powered_minecart");
+                config.set(arenaPath + "after.13", "iron_sword, iron_pickaxe, iron_spade");
+                config.set(arenaPath + "after.16", "diamond_sword");
             }
         }
         
-        List<String> waves = config.getKeys(arenaPath + type);
+        Set<String> waves = getKeys(config, arenaPath + type);
         if (waves == null) return result;
         
         for (String n : waves)
@@ -313,19 +362,36 @@ public class MAUtils
         return result;
     }
     
-    public static List<String> getAllowedCommands(Configuration config)
+    public static List<String> getAllowedCommands(FileConfiguration config, File configfile)
     {
         String commands = config.getString("global-settings.allowed-commands");
         if (commands == null)
         {
-            config.setProperty("global-settings.allowed-commands", "/list, /pl");
-            config.save();
+            config.set("global-settings.allowed-commands", "/list, /pl");            
+            saveFileConfiguration(config, configfile);
             commands = config.getString("global-settings.allowed-commands");
         }
         
         return stringToList(commands);
     }
 
+    public static void saveFileConfiguration (FileConfiguration config, File configurationfile) {
+        try {
+                config.save(configurationfile);
+        } catch (IOException iex) {
+                MLog.e("Can't save Mobarena configuration at " + ((configurationfile != null) ? configurationfile.getAbsolutePath() : "not given configuration file."));
+        }
+    }   
+    
+    public static void loadFileConfiguration (FileConfiguration config, File configurationfile) {
+        try {
+            config.load(configurationfile);
+        } catch (IOException ex) {
+            MLog.e("Can't load configuration file at " + ((configurationfile != null) ? configurationfile.getAbsolutePath() : "not given configuration file!"));
+        } catch (InvalidConfigurationException icex) {
+            MLog.e("Loaded invalid configuration file at " + ((configurationfile != null) ? configurationfile.getAbsolutePath() : "not given configuration file!"));
+        }
+    }
     
     
     /* ///////////////////////////////////////////////////////////////////// //
@@ -762,7 +828,7 @@ public class MAUtils
     /**
      * Create a Location object from the config-file.
      */
-    public static Location getArenaCoord(Configuration config, World world, String arena, String coord)
+    public static Location getArenaCoord(FileConfiguration config, World world, String arena, String coord)
     {
         //config.load();
         String str = config.getString("arenas." + arena + ".coords." + coord);
@@ -774,33 +840,34 @@ public class MAUtils
     /**
      * Save an arena location to the Configuration.
      */    
-    public static void setArenaCoord(Configuration config, Arena arena, String coord, Location loc)
+    public static void setArenaCoord(FileConfiguration config, Arena arena, String coord, Location loc, File configfile)
     {
         if (coord.equals("arena") || coord.equals("lobby") || coord.equals("spectator"))
             loc.setY(loc.getY() + 1);
         
-        config.setProperty("arenas." + arena.configName() + ".coords." + coord, makeCoord(loc));
-        config.save();
-        arena.load(config);
+        config.set("arenas." + arena.configName() + ".coords." + coord, makeCoord(loc));
+        saveFileConfiguration (config, configfile);
+        arena.load(config, configfile);
         
         if (coord.equals("p1") || coord.equals("p2"))
-            fixRegion(config, loc.getWorld(), arena);
+            fixRegion(config, loc.getWorld(), arena, configfile);
         if (coord.equals("l1") || coord.equals("l2"))
-            fixLobby(config, loc.getWorld(), arena);
+            fixLobby(config,/* loc.getWorld(),*/ arena, configfile);
     }
     
-    public static boolean delArenaCoord(Configuration config, Arena arena, String coord)
+    public static boolean delArenaCoord(FileConfiguration config, Arena arena, String coord, File configfile)
     {
         if (config.getString("arenas." + arena.configName() + ".coords." + coord) == null)
             return false;
         
-        config.removeProperty("arenas." + arena.configName() + ".coords." + coord);
-        config.save();
-        arena.load(config);
+        config.set("arenas." + arena.configName() + ".coords." + coord, null);  // null will remove this
+        saveFileConfiguration (config, configfile);        
+        arena.load(config, configfile);
+        
         return true;
     }
     
-    public static void fixRegion(Configuration config, World world, Arena arena)
+    public static void fixRegion(FileConfiguration config, World world, Arena arena, File configfile)
     {
         if (arena.p1 == null || arena.p2 == null)
             return;
@@ -830,10 +897,10 @@ public class MAUtils
             arena.world = world;
         
         arena.serializeConfig();
-        arena.load(config);
+        arena.load(config, configfile);
     }
     
-    private static void fixLobby(Configuration config, World world, Arena arena)
+    private static void fixLobby(FileConfiguration config,/* World world,*/ Arena arena, File configfile)
     {
         if (arena.l1 == null || arena.l2 == null)
             return;
@@ -859,7 +926,7 @@ public class MAUtils
             arena.l2.setY(tmp);
         }
         arena.serializeConfig();
-        arena.load(config);
+        arena.load(config, configfile);
     }
     
     /**
@@ -926,14 +993,14 @@ public class MAUtils
         return false;
     }
     
-    public static double getDouble(Configuration config, String path)
+    public static double getDouble(FileConfiguration config, String path)
     {
         return getDouble(config, path, 0D);
     }
     
-    public static double getDouble(Configuration config, String path, double def)
+    public static double getDouble(FileConfiguration config, String path, double def)
     {
-        Object o = config.getProperty(path);
+        Object o = config.get(path);
         if (o instanceof Double)
             return (Double) o;
         else if (o instanceof Number)
@@ -941,14 +1008,14 @@ public class MAUtils
         return def;
     }
     
-    public static int getInt(Configuration config, String path)
+    public static int getInt(FileConfiguration config, String path)
     {
         return getInt(config, path, 0);
     }
     
-    public static int getInt(Configuration config, String path, int def)
+    public static int getInt(FileConfiguration config, String path, int def)
     {
-        Object o = config.getProperty(path);
+        Object o = config.get(path);
         if (o instanceof Integer)
             return (Integer) o;
         return def;
@@ -1430,7 +1497,7 @@ public class MAUtils
     }
     
     /**
-     * Stand back, I'm going to try science!
+     * Stand back, I'm going to try science!  Okay.. seems like you had fun with it :D
      */
     public static boolean doooooItHippieMonster(Location loc, int radius, String name, MobArena plugin)
     {
@@ -1590,15 +1657,15 @@ public class MAUtils
         world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);
         
         // Set up the monster points.            
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "p1", new Location(world, x1, ly1, z1));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "p2", new Location(world, x2, y2+1, z2));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "lobby", new Location(world, x1+2, ly1+1, z1+2));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s3", new Location(world, x2-3, y1+2, z1+3));
-        MAUtils.setArenaCoord(plugin.getMAConfig(), arena, "spawnpoints.s4", new Location(world, x2-3, y1+2, z2-3));
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "p1", new Location(world, x1, ly1, z1), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "p2", new Location(world, x2, y2+1, z2), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "arena", new Location(world, loc.getX(), y1+1, loc.getZ()), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "lobby", new Location(world, x1+2, ly1+1, z1+2), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spectator", new Location(world, loc.getX(), y2+1, loc.getZ()), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s1", new Location(world, x1+3, y1+2, z1+3), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s2", new Location(world, x1+3, y1+2, z2-3), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s3", new Location(world, x2-3, y1+2, z1+3), plugin.getConfigFile());
+        MAUtils.setArenaCoord(plugin.getConfig(), arena, "spawnpoints.s4", new Location(world, x2-3, y1+2, z2-3), plugin.getConfigFile());
         
         am.updateAll();
         return true;
@@ -1631,14 +1698,19 @@ public class MAUtils
         {
             world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
         }
-        
-        Configuration config = plugin.getMAConfig();
-        config.removeProperty("arenas." + name);
-        config.save();
+       
+        FileConfiguration config = plugin.getConfig();
+        config.set("arenas." + name, null);
+        saveFileConfiguration (plugin.getConfig(), plugin.getConfigFile());
         
         file.delete();
         
         plugin.getAM().updateAll();
         return true;
+    }
+    
+    public static String prependZeros(String number, int num) { 
+        String s= "000000000000"+number;
+        return s.substring(s.length()-num);
     }
 }
