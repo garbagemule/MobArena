@@ -4,11 +4,12 @@ import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.util.Config;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public class SwarmWave extends AbstractWave
@@ -17,20 +18,20 @@ public class SwarmWave extends AbstractWave
     private SwarmAmount amount;
     
     // Recurrent
-    public SwarmWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
+    public SwarmWave(Arena arena, String name, int wave, int frequency, int priority, Config config, String path)
     {
         super(arena, name, wave, frequency, priority);
         load(config, path);
     }
     
     // Single
-    public SwarmWave(Arena arena, String name, int wave, Configuration config, String path)
+    public SwarmWave(Arena arena, String name, int wave, Config config, String path)
     {
         super(arena, name, wave);
         load(config, path);
     }
     
-    private void load(Configuration config, String path)
+    private void load(Config config, String path)
     {
         // Set the wave type
         setType(WaveType.SWARM);

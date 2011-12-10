@@ -33,11 +33,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 import org.getspout.spoutapi.SpoutManager;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.util.Config;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.InventoryItem;
 
@@ -136,7 +137,7 @@ public class MAUtils
     
     // ///////////////////////////////////////////////////////////////////// */
     
-    public static Map<String,Location> getArenaContainers(Configuration config, World world, String arena)
+    public static Map<String,Location> getArenaContainers(Config config, World world, String arena)
     {
         Map<String,Location> containers = new HashMap<String,Location>();
         String arenaPath = "arenas." + arena + ".coords.containers";
@@ -153,7 +154,7 @@ public class MAUtils
     /**
      * Grab all the spawnpoints for a specific arena.
      */
-    public static Map<String,Location> getArenaSpawnpoints(Configuration config, World world, String arena)
+    public static Map<String,Location> getArenaSpawnpoints(Config config, World world, String arena)
     {
         Map<String,Location> spawnpoints = new HashMap<String,Location>();
         String arenaPath = "arenas." + arena + ".coords.spawnpoints";
@@ -168,7 +169,7 @@ public class MAUtils
         return spawnpoints;
     }
     
-    public static Map<String,Location> getArenaBossSpawnpoints(Configuration config, World world, String arena)
+    public static Map<String,Location> getArenaBossSpawnpoints(Config config, World world, String arena)
     {
         Map<String,Location> spawnpoints = new HashMap<String,Location>();
         String arenaPath = "arenas." + arena + ".coords.spawnpoints";
@@ -186,7 +187,7 @@ public class MAUtils
     /**
      * Returns a map of classnames mapped to lists of ItemStacks.
      */
-    public static Map<String,List<ItemStack>> getClassItems(Configuration config, String type)
+    public static Map<String,List<ItemStack>> getClassItems(Config config, String type)
     {
         Map<String,List<ItemStack>> result = new HashMap<String,List<ItemStack>>();
         
@@ -196,11 +197,11 @@ public class MAUtils
         return result;
     }
     
-    public static Map<String,Map<String,Boolean>> getClassPerms(Configuration config)
+    public static Map<String,Map<String,Boolean>> getClassPerms(Config config)
     {
         Map<String, Map<String,Boolean>> result = new HashMap<String, Map<String,Boolean>>();
         
-        List<String> classes = config.getKeys("classes");
+        Set<String> classes = config.getKeys("classes");
         if (classes == null) return result;
         
         for (String c : classes)
@@ -224,7 +225,7 @@ public class MAUtils
         return result;
     }
     
-    public static List<ItemStack> getEntryFee(Configuration config, String arena)
+    public static List<ItemStack> getEntryFee(Config config, String arena)
     {
         return makeItemStackList(config.getString("arenas." + arena + ".settings.entry-fee", null));
     }
@@ -276,7 +277,7 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */    
-    public static Map<Integer,List<ItemStack>> getArenaRewardMap(Configuration config, String arena, String type)
+    public static Map<Integer,List<ItemStack>> getArenaRewardMap(Config config, String arena, String type)
     {
         String arenaPath = "arenas." + arena + ".rewards.waves.";
         Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
@@ -297,7 +298,7 @@ public class MAUtils
             }
         }
         
-        List<String> waves = config.getKeys(arenaPath + type);
+        Set<String> waves = config.getKeys(arenaPath + type);
         if (waves == null) return result;
         
         for (String n : waves)
@@ -313,7 +314,7 @@ public class MAUtils
         return result;
     }
     
-    public static List<String> getAllowedCommands(Configuration config)
+    public static List<String> getAllowedCommands(Config config)
     {
         String commands = config.getString("global-settings.allowed-commands");
         if (commands == null)
@@ -768,7 +769,7 @@ public class MAUtils
     /**
      * Create a Location object from the config-file.
      */
-    public static Location getArenaCoord(Configuration config, World world, String arena, String coord)
+    public static Location getArenaCoord(Config config, World world, String arena, String coord)
     {
         //config.load();
         String str = config.getString("arenas." + arena + ".coords." + coord);
@@ -778,9 +779,9 @@ public class MAUtils
     }
     
     /**
-     * Save an arena location to the Configuration.
+     * Save an arena location to the Config.
      */    
-    public static void setArenaCoord(Configuration config, Arena arena, String coord, Location loc)
+    public static void setArenaCoord(Config config, Arena arena, String coord, Location loc)
     {
         if (coord.equals("arena") || coord.equals("lobby") || coord.equals("spectator"))
             loc.setY(loc.getY() + 1);
@@ -795,7 +796,7 @@ public class MAUtils
             fixLobby(config, loc.getWorld(), arena);
     }
     
-    public static boolean delArenaCoord(Configuration config, Arena arena, String coord)
+    public static boolean delArenaCoord(Config config, Arena arena, String coord)
     {
         if (config.getString("arenas." + arena.configName() + ".coords." + coord) == null)
             return false;
@@ -806,7 +807,7 @@ public class MAUtils
         return true;
     }
     
-    public static void fixRegion(Configuration config, World world, Arena arena)
+    public static void fixRegion(Config config, World world, Arena arena)
     {
         if (arena.p1 == null || arena.p2 == null)
             return;
@@ -839,7 +840,7 @@ public class MAUtils
         arena.load(config);
     }
     
-    private static void fixLobby(Configuration config, World world, Arena arena)
+    private static void fixLobby(Config config, World world, Arena arena)
     {
         if (arena.l1 == null || arena.l2 == null)
             return;
@@ -932,12 +933,12 @@ public class MAUtils
         return false;
     }
     
-    public static double getDouble(Configuration config, String path)
+    public static double getDouble(Config config, String path)
     {
         return getDouble(config, path, 0D);
     }
     
-    public static double getDouble(Configuration config, String path, double def)
+    public static double getDouble(Config config, String path, double def)
     {
         Object o = config.getProperty(path);
         if (o instanceof Double)
@@ -947,12 +948,12 @@ public class MAUtils
         return def;
     }
     
-    public static int getInt(Configuration config, String path)
+    public static int getInt(Config config, String path)
     {
         return getInt(config, path, 0);
     }
     
-    public static int getInt(Configuration config, String path, int def)
+    public static int getInt(Config config, String path, int def)
     {
         Object o = config.getProperty(path);
         if (o instanceof Integer)
@@ -1638,7 +1639,7 @@ public class MAUtils
             world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
         }
         
-        Configuration config = plugin.getMAConfig();
+        Config config = plugin.getMAConfig();
         config.removeProperty("arenas." + name);
         config.save();
         

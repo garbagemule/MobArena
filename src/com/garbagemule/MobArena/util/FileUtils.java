@@ -9,10 +9,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MobArena;
 
@@ -41,10 +40,10 @@ public class FileUtils
      * Download all necessary libraries.
      * @param config The MobArena config-file
      */
-    public static void fetchLibs(Configuration config)
+    public static void fetchLibs(Config config)
     {
         // Get all arenas
-        List<String> arenas = config.getKeys("arenas");
+        Set<String> arenas = config.getKeys("arenas");
         if (arenas == null) return;
         
         // Add all the logging types

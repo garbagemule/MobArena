@@ -14,10 +14,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.spout.Spouty;
+import com.garbagemule.MobArena.util.Config;
 import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.register.payment.Method;
 import com.garbagemule.register.payment.Methods;
@@ -26,9 +27,10 @@ import com.garbagemule.register.payment.Methods;
  * MobArena
  * @author garbagemule
  */
-public class MobArena extends JavaPlugin
+public class MobArena extends JavaPlugin implements MobArenaPlugin
 {
-    private Configuration config;
+    //private Configuration config;
+    private Config config;
     private ArenaMaster am;
     
     // Economy stuff
@@ -54,7 +56,7 @@ public class MobArena extends JavaPlugin
         desc     = getDescription();
         dir      = getDataFolder();
         arenaDir = new File(dir, "arenas"); 
-        if (!dir.exists()) dir.mkdir();
+        if (!dir.exists()) dir.mkdirs();
         if (!arenaDir.exists()) arenaDir.mkdir();
         
         // Create default files and initialize config-file
@@ -71,8 +73,9 @@ public class MobArena extends JavaPlugin
         setupMagicSpells();
         
         // Set up the ArenaMaster and the announcements
-        am = new ArenaMaster(this);
+        am = new ArenaMasterStandard(this);
         am.initialize();
+        System.out.println(am.arenas);
         MAMessages.init(this);
         
         // Register event listeners
@@ -99,7 +102,7 @@ public class MobArena extends JavaPlugin
     private void loadConfig()
     {
         File file = new File(dir, "config.yml");
-        config = new Configuration(file);
+        config = new Config(file);
         config.load();
         config.setHeader(getHeader());
     }
@@ -199,8 +202,10 @@ public class MobArena extends JavaPlugin
         pm.registerEvent(Event.Type.CUSTOM_EVENT, new MagicSpellsListener(this), Priority.Normal, this);
     }
     
-    public Configuration getMAConfig()      { return config; }
-    public ArenaMaster   getAM()            { return am; } // More convenient.
+    public Config      getMAConfig()      { return config; }
+    public ArenaMaster getAM()            { return am; } // More convenient.
+    
+    @Override
     public ArenaMaster   getArenaMaster()   { return am; }
     
     /*public HeroManager getHeroManager()

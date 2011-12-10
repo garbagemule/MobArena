@@ -73,6 +73,11 @@ public class MACommands implements CommandExecutor
     private MobArena plugin;
     private ArenaMaster am;
     
+    public MACommands()
+    {
+
+    }
+    
     public MACommands(MobArena plugin, ArenaMaster am)
     {
         this.plugin      = plugin;
@@ -1029,7 +1034,7 @@ public class MACommands implements CommandExecutor
             }
             
             StringBuffer buffy = new StringBuffer();
-            List<String> spawnpoints = plugin.getMAConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.spawnpoints");
+            Set<String> spawnpoints = plugin.getMAConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.spawnpoints");
             
             if (spawnpoints != null)
             {
@@ -1101,7 +1106,7 @@ public class MACommands implements CommandExecutor
             }
             
             StringBuffer buffy = new StringBuffer();
-            List<String> containers = plugin.getMAConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.containers");
+            Set<String> containers = plugin.getMAConfig().getKeys("arenas." + am.selectedArena.configName() + ".coords.containers");
             
             if (containers != null)
             {

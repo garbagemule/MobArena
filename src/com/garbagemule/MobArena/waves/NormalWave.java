@@ -1,13 +1,14 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.util.Config;
 import com.garbagemule.MobArena.util.WaveUtils;
 
 public abstract class NormalWave extends AbstractWave
@@ -16,13 +17,13 @@ public abstract class NormalWave extends AbstractWave
     private Map<Integer,MACreature> probabilities = new TreeMap<Integer,MACreature>();
     
     // Recurrent
-    public NormalWave(Arena arena, String name, int wave, int frequency, int priority, Configuration config, String path)
+    public NormalWave(Arena arena, String name, int wave, int frequency, int priority, Config config, String path)
     {
         super(arena, name, wave, frequency, priority);
     }
     
     // Single
-    public NormalWave(Arena arena, String name, int wave, Configuration config, String path)
+    public NormalWave(Arena arena, String name, int wave, Config config, String path)
     {
         super(arena, name, wave);
     }
@@ -34,7 +35,7 @@ public abstract class NormalWave extends AbstractWave
      * @param path The absolute path of the wave
      * @param type DEFAULT or SPECIAL
      */
-    public void load(Configuration config, String path, WaveType type)
+    public void load(Config config, String path, WaveType type)
     {
         // Set type and (for DEFAULT) growth.
         setType(type);
@@ -43,7 +44,7 @@ public abstract class NormalWave extends AbstractWave
         
         // Load monsters
         int prob;
-        List<String> monsters = config.getKeys(path + "monsters");
+        Set<String> monsters = config.getKeys(path + "monsters");
         if (monsters != null && !monsters.isEmpty())
         {
             for (String m : config.getKeys(path + "monsters"))

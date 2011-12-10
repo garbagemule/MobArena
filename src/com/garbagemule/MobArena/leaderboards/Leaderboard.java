@@ -10,13 +10,13 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.util.ConfigUtils;
+import com.garbagemule.MobArena.util.Config;
 
 public class Leaderboard
 {
@@ -54,7 +54,7 @@ public class Leaderboard
      * @param arena The arena to which this leaderboard belongs.
      * @param config The config-file in which the location is specified.
      */
-    public Leaderboard(MobArena plugin, Arena arena, Configuration config)
+    public Leaderboard(MobArena plugin, Arena arena, Config config)
     {
         this(plugin, arena);
         
@@ -64,7 +64,7 @@ public class Leaderboard
         if (coords != null)
         {
             // Grab the top left sign.
-            topLeft = ConfigUtils.parseLocation(arena.getWorld(), coords);
+            topLeft = Config.parseLocation(arena.getWorld(), coords);
 
             // If it is a sign, validate.
             if (topLeft.getBlock().getState() instanceof Sign)

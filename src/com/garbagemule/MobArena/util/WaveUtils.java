@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.config.Configuration;
+//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
@@ -80,7 +81,7 @@ public class WaveUtils
     /**
      * Grab and process all the waves in the config-file for the arena.
      */
-    public static TreeSet<Wave> getWaves(Arena arena, Configuration config, WaveBranch branch)
+    public static TreeSet<Wave> getWaves(Arena arena, Config config, WaveBranch branch)
     {
         // Determine the branch type of the wave, and grab the appropriate comparator
         String b = branch.toString().toLowerCase();
@@ -88,7 +89,7 @@ public class WaveUtils
         
         // Grab the waves from the config-file
         String path = "arenas." + arena.configName() + ".waves." + b; // waves.yml, change to either "waves." + b, or simply b
-        List<String> waves = config.getKeys(path);
+        Set<String> waves = config.getKeys(path);
         
         // If there are any waves, process them
         if (waves != null)
@@ -122,7 +123,7 @@ public class WaveUtils
      * Get a single wave based on the config-file, the path, and branch
      * @return A Wave object if it is well defined, null otherwise.
      */
-    private static Wave getWave(Arena arena, Configuration config, String path, String name, WaveBranch branch)
+    private static Wave getWave(Arena arena, Config config, String path, String name, WaveBranch branch)
     {
         // Grab the wave type, if null or not well defined, return null
         WaveType type = WaveType.fromString(config.getString(path + "type"));
@@ -177,13 +178,13 @@ public class WaveUtils
      * the node 'wave'.
      * Any other requirements are type-specific, and thus we check if the
      * type is well-defined.
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param branch The branch of the wave
      * @param type The wave type
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isWaveWellDefined(Configuration config, String path, WaveBranch branch, WaveType type)
+    private static boolean isWaveWellDefined(Config config, String path, WaveBranch branch, WaveType type)
     {
         // This boolean is used in the "leaf methods" 
         boolean wellDefined = true;
@@ -254,13 +255,13 @@ public class WaveUtils
      * Check if a wave type in the config-file is well-defined.
      * The method calls the appropriate sub-method to check if the type
      * is well-defined.
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param type The wave type
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isTypeWellDefined(Configuration config, String path, WaveType type, boolean wellDefined)
+    private static boolean isTypeWellDefined(Config config, String path, WaveType type, boolean wellDefined)
     {
         if (type == WaveType.DEFAULT)
             return isDefaultWaveWellDefined(config, path, wellDefined);
@@ -278,12 +279,12 @@ public class WaveUtils
      * Check if a default wave is well-defined.
      * The default waves have an optional wave growth node. Otherwise,
      * they share nodes with special waves.
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isDefaultWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isDefaultWaveWellDefined(Config config, String path, boolean wellDefined)
     {
         // OPTIONAL: Wave growth
         String growth = config.getString(path + "growth");
@@ -299,12 +300,12 @@ public class WaveUtils
     /**
      * Check if a special wave is well-defined.
      * The special waves have no unique nodes.
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, only if the entire wave-node is well-defined.
      */
-    private static boolean isSpecialWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isSpecialWaveWellDefined(Config config, String path, boolean wellDefined)
     {
         return isNormalWaveWellDefined(config, path, wellDefined);
     }
@@ -314,15 +315,15 @@ public class WaveUtils
      * There are no REQUIRED nodes for default or special wave types, besides
      * the ones for the branch they belong to.
      * The only OPTIONAL node is (currently) 'monsters'
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, wellDefined is true.
      */
-    private static boolean isNormalWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isNormalWaveWellDefined(Config config, String path, boolean wellDefined)
     {
         // OPTIONAL: Monsters
-        List<String> monsters = config.getKeys(path + "monsters");
+        Set<String> monsters = config.getKeys(path + "monsters");
         if (monsters != null)
         {
             for (String monster : monsters)
@@ -341,12 +342,12 @@ public class WaveUtils
     
     /**
      * Check if a swarm wave is well defined
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, wellDefined is true.
      */
-    private static boolean isSwarmWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isSwarmWaveWellDefined(Config config, String path, boolean wellDefined)
     {
         // REQUIRED: Monster type
         String monster = config.getString(path + "monster");
@@ -374,12 +375,12 @@ public class WaveUtils
     
     /**
      * Check if a boss wave is well defined.
-     * @param config Config-file Configuration
+     * @param config Config-file Config
      * @param path The absolute path of the wave
      * @param wellDefined Pass-through boolean for "leaf methods".
      * @return true, wellDefined is true.
      */
-    private static boolean isBossWaveWellDefined(Configuration config, String path, boolean wellDefined)
+    private static boolean isBossWaveWellDefined(Config config, String path, boolean wellDefined)
     {
         // REQUIRED: Monster type
         String monster = config.getString(path + "monster");
