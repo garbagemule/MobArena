@@ -25,6 +25,7 @@ permissions:
             mobarena.use.join: true
             mobarena.use.spec: true
             mobarena.use.leave: true
+            mobarena.use.signs: true
     mobarena.use.join:
         default: true
     mobarena.use.spec:
@@ -84,6 +85,7 @@ permissions:
             mobarena.setup.addcontainer: true
             mobarena.setup.delcontainer: true
             mobarena.setup.leaderboards: true
+            mobarena.setup.signs: true
             mobarena.setup.checkdata: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true

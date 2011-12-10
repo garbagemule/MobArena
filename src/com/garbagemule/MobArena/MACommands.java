@@ -149,49 +149,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            List<Arena> arenas = am.getEnabledArenas();
-            if (!am.enabled || arenas.size() < 1)
-            {
-                MAUtils.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
-                return true;
-            }
-            
-            // Grab the arena to join
-            Arena arena = arenas.size() == 1 ? arenas.get(0) : am.getArenaWithName(arg1);
-            
-            // Run a couple of basic sanity checks
-            if (!sanityChecks(p, arena, arg1, arenas))
-                return true;
-            
-            // Run a bunch of per-arena sanity checks
-            if (!arena.canJoin(p))
-                return true;
-            
-            // If player is in a boat/minecart, eject!
-            if (p.isInsideVehicle())
-                p.leaveVehicle();
-            
-            // Take entry fee and store inventory
-            arena.takeFee(p);
-            if (!arena.emptyInvJoin) MAUtils.storeInventory(p);
-            
-            // If player is in a bed, unbed!
-            if (p.isSleeping())
-            {
-                p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
-                return true;
-            }
-            
-            // Join the arena!
-            arena.playerJoin(p, p.getLocation());
-            
-            MAUtils.tellPlayer(p, Msg.JOIN_PLAYER_JOINED);
-            if (!arena.entryFee.isEmpty())
-                MAUtils.tellPlayer(p, Msg.JOIN_FEE_PAID.get(MAUtils.listToString(arena.entryFee, plugin)));
-            if (arena.hasPaid.contains(p))
-                arena.hasPaid.remove(p);
-            
-            return true;
+            return am.joinArena(p, arg1);
         }
         
         /*
@@ -205,24 +163,7 @@ public class MACommands implements CommandExecutor
                 return true;
             }
             
-            if (!am.arenaMap.containsKey(p))
-            {
-                Arena arena = am.getArenaWithSpectator(p);
-                if (arena != null)
-                {            
-                    arena.playerLeave(p);
-                    MAUtils.tellPlayer(p, Msg.LEAVE_PLAYER_LEFT);
-                    return true;
-                }
-                
-                MAUtils.tellPlayer(p, Msg.LEAVE_NOT_PLAYING);
-                return true;
-            }
-            
-            Arena arena = am.arenaMap.get(p);            
-            arena.playerLeave(p);
-            MAUtils.tellPlayer(p, Msg.LEAVE_PLAYER_LEFT);
-            return true;
+            return am.leaveArena(p);
         }
         
         /*
@@ -235,40 +176,8 @@ public class MACommands implements CommandExecutor
                 MAUtils.tellPlayer(sender, Msg.MISC_NO_ACCESS);
                 return true;
             }
-            List<Arena> arenas = am.getEnabledArenas();
-            if (!am.enabled || arenas.size() < 1)
-            {
-                MAUtils.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
-                return true;
-            }
-
-            // Grab the arena to join
-            Arena arena = arenas.size() == 1 ? arenas.get(0) : am.getArenaWithName(arg1);
-
-            // Run a couple of basic sanity checks
-            if (!sanityChecks(p, arena, arg1, arenas))
-                return true;
-
-            // Run a bunch of arena-specific sanity-checks
-            if (!arena.canSpec(p))
-                return true;
             
-            // If player is in a boat/minecart, eject!
-            if (p.isInsideVehicle())
-                p.leaveVehicle();
-            
-            // If player is in a bed, unbed!
-            if (p.isSleeping())
-            {
-                p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
-                return true;
-            }
-            
-            // Spectate the arena!
-            arena.playerSpec(p, p.getLocation());
-            
-            MAUtils.tellPlayer(p, Msg.SPEC_PLAYER_SPECTATE);
-            return true;
+            return am.spectateArena(p, arg1);
         }
         
         /*
@@ -1293,19 +1202,5 @@ public class MACommands implements CommandExecutor
         
         MAUtils.tellPlayer(sender, "Command not found.");
         return true;
-    }
-    
-    private boolean sanityChecks(Player p, Arena arena, String arg1, List<Arena> arenas)
-    {
-        if (arenas.size() > 1 && arg1.isEmpty())
-            MAUtils.tellPlayer(p, Msg.JOIN_ARG_NEEDED);
-        else if (arena == null)
-            MAUtils.tellPlayer(p, Msg.ARENA_DOES_NOT_EXIST);
-        else if (am.arenaMap.containsKey(p) && (am.arenaMap.get(p).arenaPlayers.contains(p) || am.arenaMap.get(p).lobbyPlayers.contains(p)))
-            MAUtils.tellPlayer(p, Msg.JOIN_IN_OTHER_ARENA);
-        else
-            return true;
-        
-        return false;
     }
 }
