@@ -21,28 +21,46 @@ public class JoinCommand implements MACommand
 
     @Override
     public boolean execute(MobArenaPlugin plugin, Player sender, String... args) {
-        // Grab the arena master
-        ArenaMaster am = plugin.getArenaMaster();
+        // Grab the arena master and get the argument.
+        ArenaMaster   am = plugin.getArenaMaster();
+        String arenaName = (args.length == 1) ? args[0] : null;
         
-        // Get all enabled arenas.
-        List<Arena> arenas = am.getEnabledArenas();
+        // Get all arenas this player is eligible for.
+        List<Arena> arenas = am.getEnabledAndPermittedArenas(sender);
         
-        // If no arena was specified, and multiple arenas are available, notify.
-        if (args.length < 1 && arenas.size() > 1) {
-            sender.sendMessage("There are more than one arena. Pick one, damnit!");
-            return false;
-        }
-
-        // If only one arena, pick it no matter what, otherwise, look for name.
-        Arena arena = arenas.size() == 1 ? arenas.get(0) : am.getArenaWithName(args[0]);
-        
-        // If null, no arena was found.
-        if (arena == null) {
-            sender.sendMessage("The arena '" + args[0] + "' does not exist.");
+        // If no arenas found, just tell the player it's not enabled.
+        if (arenas.size() == 0) {
+            plugin.tell(sender, Msg.JOIN_ARENA_NOT_ENABLED);
             return false;
         }
         
-        sender.sendMessage("You've joined arena '" + arena.configName() + "'!");
+        // Require an argument in case of multiple arenas.
+        if (arenaName == null && arenas.size() > 1) {
+            plugin.tell(sender, Msg.JOIN_ARG_NEEDED);
+            return false;
+        }
+        
+        /* At this point in time, if there was no argument, there must be only
+         * a single arena in the list. If there was an argument, we can safely
+         * get the arena with that name, because canJoin() will do the rest of
+         * the sanity checks. */
+        Arena a = (arenaName == null) ? arenas.get(0) : am.getArenaWithName(arenaName);
+        
+        // If the arena is null, it doesn't exist.
+        if (a == null) {
+            plugin.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+            return false;
+        }
+        
+        // Let the arena itself do the rest of the sanity checking.
+        if (!a.canJoin(sender)) {
+            return false;
+        }
+        
+        // If no problems, let the guy join and notify.
+        a.playerJoin(sender, sender.getLocation());
+        plugin.tell(sender, Msg.JOIN_PLAYER_JOINED);
+        
         return true;
     }
 

@@ -48,7 +48,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 //import org.bukkit.util.config.Configuration;
 
-import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
@@ -65,65 +64,6 @@ import com.garbagemule.MobArena.waves.Wave.WaveBranch;
 public class ArenaStandard extends Arena
 {
     private MobArena plugin;
-    /*
-    // Setup fields
-    protected String name;
-    protected World world;
-    protected boolean enabled, protect, running, setup, lobbySetup, autoEquip, forceRestore, softRestore, softRestoreDrops, emptyInvJoin, emptyInvSpec, pvp, monsterInfight, allowWarp;
-
-    protected boolean edit, waveClear, detCreepers, detDamage, lightning, hellhounds, specOnDeath, shareInArena, spoutSelect;
-    protected Location p1, p2, l1, l2, arenaLoc, lobbyLoc, spectatorLoc;
-    protected Map<String,Location> spawnpoints, spawnpointsBoss, containers;
-    protected String logging;
-
-    // Wave/reward/entryfee fields
-    protected int spawnTaskId, sheepTaskId, waveDelay, waveInterval, specialModulo, spawnMonstersInt, maxIdleTime, finalWave;
-    protected MASpawnThread spawnThread;
-    protected Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
-    protected Map<Player,String> classMap;
-    protected Map<String,List<ItemStack>>  classItems, classArmor;
-    protected Map<String,Map<String,Boolean>> classPerms;
-    protected Map<Player,PermissionAttachment> attachments;
-    protected List<ItemStack> entryFee;
-
-    // Player sets
-    protected Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers;
-    
-    // Wave stuff
-    protected TreeSet<Wave> singleWaves, singleWavesInstance;
-    protected TreeSet<Wave> recurrentWaves;
-    protected BossWave bossWave;
-    protected Wave currentWave;
-    
-    // Arena sets/maps
-    protected Set<Player>            hasPaid, rewardedPlayers, notifyPlayers, randoms;
-    protected Set<LivingEntity>      monsters, explodingSheep, plaguedPigs, madCows;
-    protected Set<Block>             blocks;
-    protected Set<Wolf>              pets;
-    protected Map<Player,Integer>    petMap;
-    protected LinkedList<Repairable> repairables, containables;
-    
-    // Spawn overriding
-    protected int spawnMonsters;
-    protected boolean allowMonsters, allowAnimals;
-    
-    // Other settings
-    protected int minPlayers, maxPlayers, joinDistance;
-    protected List<String> classes = new LinkedList<String>();
-    protected Map<Player,Location> locations = new HashMap<Player,Location>();
-    protected Map<Player,Integer> healthMap = new HashMap<Player,Integer>();
-    protected Map<Player,Integer> hungerMap = new HashMap<Player,Integer>();
-    protected Map<Player,GameMode> modeMap = new HashMap<Player,GameMode>();
-    
-    // Logging
-    protected ArenaLog log;
-    protected Map<Player,ArenaPlayer> arenaPlayerMap;
-    protected Leaderboard leaderboard;
-    
-    protected MAListener eventListener;
-    
-    protected PriorityBlockingQueue<Repairable> repairQueue;
-    */
     
     /**
      * Primary constructor. Requires a name and a world.
@@ -1119,6 +1059,10 @@ public class ArenaStandard extends Arena
     public boolean inLobby(Player p)
     {
         return lobbyPlayers.contains(p);
+    }
+    
+    public boolean isEnabled() {
+        return enabled;
     }
     
     public boolean isRunning()

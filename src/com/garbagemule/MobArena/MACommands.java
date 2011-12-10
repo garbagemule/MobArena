@@ -18,8 +18,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.ConsoleCommandSender;
 
-import com.garbagemule.MobArena.MAMessages.Msg;
-
 public class MACommands implements CommandExecutor
 {
     public static List<String> ALLOWED_COMMANDS = new LinkedList<String>();
@@ -187,7 +185,7 @@ public class MACommands implements CommandExecutor
             
             MAUtils.tellPlayer(p, Msg.JOIN_PLAYER_JOINED);
             if (!arena.entryFee.isEmpty())
-                MAUtils.tellPlayer(p, Msg.JOIN_FEE_PAID.get(MAUtils.listToString(arena.entryFee, plugin)));
+                MAUtils.tellPlayer(p, Msg.JOIN_FEE_PAID.toString(MAUtils.listToString(arena.entryFee, plugin)));
             if (arena.hasPaid.contains(p))
                 arena.hasPaid.remove(p);
             
@@ -277,7 +275,7 @@ public class MACommands implements CommandExecutor
         if (base.equals("arenas"))
         {            
             String list = MAUtils.listToString(player ? am.getPermittedArenas(p) : am.arenas, plugin);
-            MAUtils.tellPlayer(sender, Msg.MISC_LIST_ARENAS.get(list));
+            MAUtils.tellPlayer(sender, Msg.MISC_LIST_ARENAS.toString(list));
             return true;
         }
         
@@ -296,7 +294,7 @@ public class MACommands implements CommandExecutor
                 }
                 
                 String list = MAUtils.listToString(arena.getLivingPlayers(), plugin);
-                MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.get(list));
+                MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(list));
             }
             else
             {
@@ -305,7 +303,7 @@ public class MACommands implements CommandExecutor
                 for (Arena arena : am.arenas)
                     players.addAll(arena.getLivingPlayers());
                 buffy.append(MAUtils.listToString(players, plugin));
-                MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.get(buffy.toString()));
+                MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(buffy.toString()));
             }
             return true;
         }
@@ -341,7 +339,7 @@ public class MACommands implements CommandExecutor
             }
             
             String list = MAUtils.listToString(arena.getNonreadyPlayers(), plugin);
-            MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.get(list));
+            MAUtils.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(list));
             return true;
         }
 

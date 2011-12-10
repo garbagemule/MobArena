@@ -37,7 +37,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.getspout.spoutapi.SpoutManager;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
-import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.Config;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.InventoryItem;
@@ -977,7 +976,7 @@ public class MAUtils
         if (msg.hasSpoutMsg() && sp != null && sp.isSpoutCraftEnabled())
         {
             // Grab the message text.
-            String text = msg.getSpout(s);
+            String text = msg.toSpoutString(s);
             
             // If more than 26 characters, truncate.
             if (text.length() > 26)
@@ -991,7 +990,7 @@ public class MAUtils
             sp.sendNotification("MobArena", text, logo, (short) 0, 2000);
             return true;
         }
-        else return tellPlayer(p, msg.get(s));
+        else return tellPlayer(p, msg.toString(s));
     }
     
     public static boolean tellSpoutPlayer(Player p, Msg msg, Material logo)
@@ -1025,7 +1024,7 @@ public class MAUtils
         if (spout && p instanceof Player)
             return tellSpoutPlayer((Player) p, msg, s, logo);
         
-        return tellPlayer(p, msg.get(s));
+        return tellPlayer(p, msg.toString(s));
     }
     
     public static boolean tellPlayer(CommandSender p, Msg msg, String s, Material logo)
@@ -1168,7 +1167,7 @@ public class MAUtils
         if (list == null || list.isEmpty())
         {
             if (none)
-                return Msg.MISC_NONE.get();
+                return Msg.MISC_NONE.toString();
             else
                 return "";
         }

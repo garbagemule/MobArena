@@ -53,7 +53,6 @@ import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
 
-import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.repairable.*;
 

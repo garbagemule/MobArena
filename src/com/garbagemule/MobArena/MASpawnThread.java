@@ -15,7 +15,6 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-import com.garbagemule.MobArena.MAMessages.Msg;
 import com.garbagemule.MobArena.util.WaveUtils;
 import com.garbagemule.MobArena.waves.Wave;
 

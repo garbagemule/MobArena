@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +52,8 @@ public abstract class ArenaMaster //implements Master
     
     public abstract List<Arena> getPermittedArenas(Player p);
     
+    public abstract List<Arena> getEnabledAndPermittedArenas(Player p);
+    
     public abstract Arena getArenaAtLocation(Location loc);
     
     public abstract List<Arena> getArenasInWorld(World world);
@@ -74,6 +77,8 @@ public abstract class ArenaMaster //implements Master
     public abstract Arena getArenaWithPet(Entity e);
     
     public abstract Arena getArenaWithName(String configName);
+    
+    public abstract Arena getArenaWithName(Collection<Arena> arenas, String configName);
     
     
     

@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,37 +11,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-//import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.util.Config;
-
-//import com.garbagemule.ArenaPlugin.Master;
 
 public class ArenaMasterStandard extends ArenaMaster
 {
     private MobArena plugin;
-    //private Configuration config;
     private Config config;
-    //protected Arena selectedArena;
-    
-    // Settings
-    //protected boolean enabled, updateNotify;
-    
-    // Classes
-    //protected Set<String> classes;
-    //protected Map<String,List<ItemStack>>  classItems, classArmor;
-    //protected Map<String,Map<String,Boolean>> classPerms;
-    //protected Map<Integer,Map<Player,List<ItemStack>>> classBonuses;
-    //protected Map<Player,Arena> arenaMap;
-    
-    // Location map
-    //protected Map<Player,Location> locations = new HashMap<Player,Location>();
-    
-    // Arena list
-    //protected List<Arena> arenas;
-    
-    // Listeners
-    //protected Set<MobArenaListener> listeners = new HashSet<MobArenaListener>();
     
     
     
@@ -77,6 +54,15 @@ public class ArenaMasterStandard extends ArenaMaster
         List<Arena> result = new LinkedList<Arena>();
         for (Arena arena : arenas)
             if (plugin.has(p, "mobarena.arenas." + arena.configName()))
+                result.add(arena);
+        return result;
+    }
+    
+    public List<Arena> getEnabledAndPermittedArenas(Player p)
+    {
+        List<Arena> result = new LinkedList<Arena>();
+        for (Arena arena : arenas)
+            if (arena.enabled && plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
         return result;
     }
@@ -163,6 +149,11 @@ public class ArenaMasterStandard extends ArenaMaster
     }
     
     public Arena getArenaWithName(String configName)
+    {
+        return getArenaWithName(this.arenas, configName);
+    }
+    
+    public Arena getArenaWithName(Collection<Arena> arenas, String configName)
     {
         for (Arena arena : arenas)
             if (arena.configName().equals(configName))

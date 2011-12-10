@@ -21,33 +21,34 @@ public class ArenaListCommand implements MACommand
 
     @Override
     public boolean execute(MobArenaPlugin plugin, Player sender, String... args) {
-        // Grab the arena master.
+        // Grab the arena master and the args.
         ArenaMaster am = plugin.getArenaMaster();
         
         // Get the arenas.
-        List<Arena> arenas = am.getEnabledArenas();
+        List<Arena> arenas = am.getEnabledAndPermittedArenas(sender);
         
-        String msg = "Available arenas: ";
-        if (arenas.size() == 0) {
-            sender.sendMessage(msg + "<none>");
-            return true;
-        }
+        // Turn the list into a string.
+        String msg = Msg.MISC_LIST_ARENAS.toString(listToString(arenas));
         
-        // Enumerate arenas.
-        for (Arena a : arenas) {
-            msg += a.configName() + ", ";
-        }
-        
-        // Trim off the trailing comma.
-        msg = msg.substring(0, msg.length() - 2);
-        
-        // Send the message!
-        sender.sendMessage(msg);
+        plugin.tell(sender, msg);
         return true;
     }
 
     @Override
     public boolean executeFromConsole(MobArenaPlugin plugin, CommandSender sender, String... args) {
         return false;
+    }
+    
+    private <E> String listToString(List<E> list) {
+        String result = "";
+        
+        for (E e : list) {
+            result += e + ", ";
+        }
+        
+        if (result.equals(""))
+            return Msg.MISC_NONE.toString();
+        
+        return result.substring(0, result.length() - 2);
     }
 }

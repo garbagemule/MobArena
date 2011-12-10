@@ -30,7 +30,7 @@ public class CommandHandler implements CommandExecutor
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("You need arguments, pal!");
+            plugin.tell(sender, Msg.MISC_NONE);
             return true;
         }
         

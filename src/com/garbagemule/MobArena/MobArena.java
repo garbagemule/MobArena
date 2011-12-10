@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -39,9 +41,6 @@ public class MobArena extends JavaPlugin implements MobArenaPlugin
     // Spout stuff
     public static boolean hasSpout;
     
-    // Heroes stuff
-    //private HeroManager heroManager = null;
-    
     // Global variables
     public static PluginDescriptionFile desc;
     public static File dir, arenaDir;
@@ -69,7 +68,6 @@ public class MobArena extends JavaPlugin implements MobArenaPlugin
         // Set up soft dependencies
         setupRegister();
         setupSpout();
-        //setupHeroes();
         setupMagicSpells();
         
         // Set up the ArenaMaster and the announcements
@@ -162,6 +160,19 @@ public class MobArena extends JavaPlugin implements MobArenaPlugin
     public static void warning(String msg) { Bukkit.getServer().getLogger().warning("[MobArena] " + msg); }    
     public static void error(String msg)   { Bukkit.getServer().getLogger().severe("[MobArena] " + msg); }
     
+    @Override
+    public void tell(CommandSender sender, String msg) {
+        if (sender == null || msg.equals("") || msg.equals(" "))
+            return;
+        
+        sender.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.WHITE + msg);
+    }
+    
+    @Override
+    public void tell(CommandSender sender, Msg msg) {
+        tell(sender, msg.toString());
+    }
+    
     private void setupRegister()
     {
         Methods.setMethod(getServer().getPluginManager());
@@ -184,14 +195,6 @@ public class MobArena extends JavaPlugin implements MobArenaPlugin
         Spouty.registerEvents(this);
     }
     
-    /*private void setupHeroes()
-    {
-        Plugin heroes = this.getServer().getPluginManager().getPlugin("Heroes");
-        if (heroes == null) return;
-        
-        heroManager = ((Heroes) heroes).getHeroManager();
-    }*/
-    
     private void setupMagicSpells()
     {
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
@@ -207,11 +210,6 @@ public class MobArena extends JavaPlugin implements MobArenaPlugin
     
     @Override
     public ArenaMaster   getArenaMaster()   { return am; }
-    
-    /*public HeroManager getHeroManager()
-    {
-        return heroManager;
-    }*/
     
     private String getHeader()
     {

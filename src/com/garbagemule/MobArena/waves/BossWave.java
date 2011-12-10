@@ -16,7 +16,7 @@ import org.bukkit.entity.LivingEntity;
 
 import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MAMessages.Msg;
+import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.util.Config;
 import com.garbagemule.MobArena.util.WaveUtils;
 

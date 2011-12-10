@@ -232,6 +232,8 @@ public abstract class Arena
     
     public abstract boolean inLobby(Player p);
     
+    public abstract boolean isEnabled();
+    
     public abstract boolean isRunning();
     
     public abstract boolean isPvpEnabled();
