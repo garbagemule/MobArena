@@ -720,6 +720,8 @@ public class ArenaStandard extends Arena
         attachments.put(p,pa);
         for (Map.Entry<String,Boolean> entry : perms.entrySet())
             pa.setPermission(entry.getKey(), entry.getValue());
+        
+        p.recalculatePermissions();
     }
     
     public void removeClassPermissions(Player p)
@@ -728,6 +730,8 @@ public class ArenaStandard extends Arena
         
         for (PermissionAttachment pa : attachments.values())
             if (pa != null) pa.remove();
+        
+        p.recalculatePermissions();
     }
     
     private void cleanup()
