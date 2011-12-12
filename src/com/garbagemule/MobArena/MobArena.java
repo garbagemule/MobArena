@@ -73,7 +73,7 @@ public class MobArena extends JavaPlugin implements MobArenaPlugin
         // Set up the ArenaMaster and the announcements
         am = new ArenaMasterStandard(this);
         am.initialize();
-        System.out.println(am.arenas);
+        
         MAMessages.init(this);
         
         // Register event listeners

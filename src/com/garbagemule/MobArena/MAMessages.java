@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 
 public class MAMessages
 {
-    public static void init(MobArena plugin) {
+    public static void init(MobArenaPlugin plugin) {
         // Grab the file
         File msgFile = new File(MobArena.dir, "anouncements.properties");
         
