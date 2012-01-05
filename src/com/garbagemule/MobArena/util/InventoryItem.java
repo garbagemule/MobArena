@@ -3,7 +3,11 @@ package com.garbagemule.MobArena.util;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
@@ -14,6 +18,7 @@ public class InventoryItem implements Serializable
     private int amount;
     private Byte data;
     private short durability;
+    private HashMap<Integer, Integer> enchantments;
     
     /**
      * Default constructor.
@@ -47,6 +52,13 @@ public class InventoryItem implements Serializable
         
         data = stack.getData() == null ? null : stack.getData().getData();
         durability = stack.getDurability();
+        
+        // Enchantments
+        enchantments = new HashMap<Integer, Integer>();
+        Map<Enchantment, Integer> stack_ench = stack.getEnchantments();
+        for(Enchantment ench : stack_ench.keySet()) {
+        	enchantments.put(ench.getId(), stack_ench.get(ench));
+        }
     }
     
     /**
@@ -263,6 +275,10 @@ public class InventoryItem implements Serializable
         
         if (data != null)
             stack.setData(getData());
+        
+        for(int e : enchantments.keySet()) {
+        	stack.addEnchantment(Enchantment.getById(e), enchantments.get(e));
+        }
         
         return stack;
     }
