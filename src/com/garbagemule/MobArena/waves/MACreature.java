@@ -2,15 +2,15 @@ package com.garbagemule.MobArena.waves;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 
-import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.util.WaveUtils;
+import com.garbagemule.MobArena.framework.Arena;
 
 public enum MACreature
 {
@@ -65,29 +65,25 @@ public enum MACreature
     
     private CreatureType type;
     
-    private MACreature(CreatureType type)
-    {
+    private MACreature(CreatureType type) {
         this.type = type;
     }
     
-    public CreatureType getType()
-    {
+    public CreatureType getType() {
         return type;
     }
     
-    public static MACreature fromString(String string)
-    {
+    public static MACreature fromString(String string) {
         return WaveUtils.getEnumFromString(MACreature.class, string.replaceAll("[-_\\.]", ""));
     }
     
-    public LivingEntity spawn(Arena arena, World world, Location loc)
-    {
+    public LivingEntity spawn(Arena arena, World world, Location loc) {
         LivingEntity e = world.spawnCreature(loc, type);
         
         switch (this)
         {
             case EXPLODINGSHEEP:
-                arena.addExplodingSheep(e);
+                arena.getMonsterManager().addExplodingSheep(e);
                 break;
             case POWEREDCREEPERS:
                 ((Creeper) e).setPowered(true);
@@ -127,6 +123,11 @@ public enum MACreature
                 break;
             default:
                 break;
+        }
+        
+        if (e instanceof Creature) {
+            Creature c = (Creature) e;
+            c.setTarget(WaveUtils.getClosestPlayer(arena, e));
         }
         
         return e;

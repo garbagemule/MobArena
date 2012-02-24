@@ -53,6 +53,8 @@ public enum Msg
     WAVE_DEFAULT("Wave #%!", "Wave #%!", Material.YELLOW_FLOWER),
     WAVE_SPECIAL("Wave #%! [SPECIAL]", "Wave #%! [SPECIAL]", Material.RED_ROSE),
     WAVE_SWARM("Wave #%! [SWARM]", "Wave #%! [SWARM]", Material.LONG_GRASS),
+    WAVE_SUPPLY("Wave #%! [SUPPLY]", "Wave #%! [SUPPLY]", Material.BREAD),
+    WAVE_UPGRADE("Wave #%! [UPGRADE]", "Wave #%! [UPGRADE]", Material.DIAMOND), 
     WAVE_BOSS("Wave #%! [BOSS]", "Wave #%! [BOSS]", Material.FIRE),
     WAVE_BOSS_ABILITY("Boss used ability: %!", "Boss: %", Material.FIRE),
     WAVE_BOSS_LOW_HEALTH("Boss is almost dead!", "Boss almost dead!", Material.FIRE),
@@ -61,6 +63,10 @@ public enum Msg
     MISC_LIST_ARENAS("Available arenas: %"),
     MISC_COMMAND_NOT_ALLOWED("You can't use that command in the arena!"),
     MISC_NO_ACCESS("You don't have access to this command."),
+    MISC_NOT_FROM_CONSOLE("You can't use this command from the console."),
+    MISC_HELP("For a list of commands, type /ma help"),
+    MISC_MULTIPLE_MATCHES("Did you mean one of these commands?"),
+    MISC_NO_MATCHES("Command not found. Type /ma help"),
     MISC_NONE("<none>");
     
     private String msg, spoutMsg;

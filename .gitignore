@@ -1,0 +1,18 @@
+# We don't want to add the Eclipse files.
+.project
+.classpath
+
+# We can also do without .class files.
+*.class
+
+# And we definitely don't need OS files.
+.DS_Store*
+Thumbs.db
+
+# Exclude some folders
+bin/
+build/
+misc/
+lib/
+test/
+.settings/

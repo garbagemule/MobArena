@@ -1,11 +1,11 @@
 package com.garbagemule.MobArena.waves;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Creature;
@@ -15,10 +15,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.util.WaveUtils;
+import com.garbagemule.MobArena.framework.Arena;
 
 
 public enum BossAbility
@@ -37,6 +36,7 @@ public enum BossAbility
             Location bLoc = boss.getLocation();
             Location loc = bLoc.add(bLoc.getDirection().normalize().multiply(2).toLocation(boss.getWorld(), bLoc.getYaw(), bLoc.getPitch()));
             Fireball fireball = boss.getWorld().spawn(loc, Fireball.class);
+            fireball.setFireTicks(100);
             fireball.setIsIncendiary(false);
         }
     },
@@ -45,7 +45,7 @@ public enum BossAbility
         public void run(Arena arena, LivingEntity boss)
         {
             for (Player p : getNearbyPlayers(arena, boss, 5))
-                    p.setFireTicks(20);
+                p.setFireTicks(20);
         }
     },
     LIGHTNINGAURA("Lightning Aura")
@@ -66,8 +66,7 @@ public enum BossAbility
     },
     LIVINGBOMB("Living Bomb")
     {
-        public void run(final Arena arena, LivingEntity boss)
-        {
+        public void run(final Arena arena, LivingEntity boss) {
             final LivingEntity target = getTarget(boss);
             if (target == null) return;
             
@@ -75,19 +74,24 @@ public enum BossAbility
             target.setFireTicks(60);
             
             // Create an explosion after 3 seconds
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
-                new Runnable()
-                {
-                    public void run()
-                    {
-                        if (!arena.getLivingPlayers().contains(target))
+            arena.getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
+                new Runnable() {
+                    public void run() {
+                        if (!arena.inArena((Player) target)) {
                             return;
+                        }
+                        
+                        // If the player put out the fire, don't explode.
+                        if (target.getFireTicks() <= 0) {
+                            return;
+                        }
                         
                         arena.getWorld().createExplosion(target.getLocation(), 2F);
-                        for(Player p : getNearbyPlayers(arena, target, 3))
+                        for (Player p : getNearbyPlayers(arena, target, 3)) {
                             p.setFireTicks(40);
+                        }
                     }
-                }, 61);
+                }, 59);
         }
     },
     CHAINLIGHTNING("Chain Lightning")
@@ -102,12 +106,12 @@ public enum BossAbility
         
         private void strikeLightning(final Arena arena, final Player p, final List<Player> done)
         {
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
+            arena.getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
                 new Runnable()
                 {
                     public void run()
                     {
-                        if (!arena.getLivingPlayers().contains(p))
+                        if (!arena.getPlayersInArena().contains(p))
                             return;
                         
                         // Smite the target
@@ -135,8 +139,30 @@ public enum BossAbility
             if (target == null) return;
 
             Location loc = target.getLocation();
-            loc.setYaw(target.getLocation().getYaw() + 45 + MobArena.random.nextInt(270));
+            loc.setYaw(loc.getYaw() + 45 + MobArena.random.nextInt(270));
             target.teleport(loc);
+        }
+    },
+    DISORIENTNEARBY("Disorient Nearby")
+    {
+        public void run(Arena arena, LivingEntity boss)
+        {
+            for (Player p : getNearbyPlayers(arena, boss, 5)) {
+                Location loc = p.getLocation();
+                loc.setYaw(loc.getYaw() + 45 + MobArena.random.nextInt(270));
+                p.teleport(loc);
+            }
+        }
+    },
+    DISORIENTDISTANT("Disorient Distant")
+    {
+        public void run(Arena arena, LivingEntity boss)
+        {
+            for (Player p : getDistantPlayers(arena, boss, 8)) {
+                Location loc = p.getLocation();
+                loc.setYaw(loc.getYaw() + 45 + MobArena.random.nextInt(270));
+                p.teleport(loc);
+            }
         }
     },
     ROOTTARGET("Root Target")
@@ -147,22 +173,22 @@ public enum BossAbility
             if (target == null) return;
             
             final Location loc = target.getLocation();
-            final int freezeTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(arena.getPlugin(),
+            final int freezeTaskId = arena.getPlugin().getServer().getScheduler().scheduleSyncRepeatingTask(arena.getPlugin(),
                 new Runnable()
                 {
                     public void run()
                     {
-                        if (arena.getLivingPlayers().contains(target))
+                        if (arena.getPlayersInArena().contains(target))
                             target.teleport(loc);
                     }
                 }, 3, 3);
             
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
+            arena.getPlugin().getServer().getScheduler().scheduleSyncDelayedTask(arena.getPlugin(),
                 new Runnable()
                 {
                     public void run()
                     {
-                        Bukkit.getServer().getScheduler().cancelTask(freezeTaskId);
+                        arena.getPlugin().getServer().getScheduler().cancelTask(freezeTaskId);
                     }
                 }, 45);
         }
@@ -171,7 +197,7 @@ public enum BossAbility
     {
         public void run(Arena arena, LivingEntity boss)
         {
-            List<Player> list = arena.getLivingPlayers();
+            List<Player> list = new ArrayList<Player>(arena.getPlayersInArena());
             boss.teleport(list.get((new Random()).nextInt(list.size())));
         }
     },
@@ -180,7 +206,7 @@ public enum BossAbility
         public void run(Arena arena, LivingEntity boss)
         {
             // Grab the players and add the boss
-            List<LivingEntity> entities = new LinkedList<LivingEntity>(arena.getArenaPlayers());
+            List<LivingEntity> entities = new ArrayList<LivingEntity>(arena.getPlayersInArena());
             entities.add(boss);
             
             // Grab the locations
@@ -198,7 +224,7 @@ public enum BossAbility
     {
         public void run(Arena arena, LivingEntity boss)
         {
-            List<Player> players = arena.getLivingPlayers();
+            List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
             Block block = players.get(MobArena.random.nextInt(players.size())).getLocation().getBlock();
             if (block.getTypeId() == 0)
             {
@@ -319,7 +345,7 @@ public enum BossAbility
     {
         List<Player> result = new LinkedList<Player>();
         for (Entity e : boss.getNearbyEntities(x, x, x))
-            if (arena.getLivingPlayers().contains(e))
+            if (arena.getPlayersInArena().contains(e))
                 result.add((Player) e);
         return result;
     }
@@ -334,19 +360,17 @@ public enum BossAbility
     protected List<Player> getDistantPlayers(Arena arena, Entity boss, int x)
     {
         List<Player> result = new LinkedList<Player>();
-        for (Player p : arena.getLivingPlayers())
-            if (MAUtils.distanceSquared(p, boss.getLocation()) > (double) (x*x))
+        for (Player p : arena.getPlayersInArena())
+            if (MAUtils.distanceSquared(arena.getPlugin(), p, boss.getLocation()) > (double) (x*x))
                 result.add(p);
         return result;
     }
     
-    public static BossAbility fromString(String string)
-    {
+    public static BossAbility fromString(String string) {
         return WaveUtils.getEnumFromString(BossAbility.class, string.replaceAll("[-_\\.]", ""));
     }
     
-    public String toString()
-    {
+    public String toString() {
         return name;
     }
 }

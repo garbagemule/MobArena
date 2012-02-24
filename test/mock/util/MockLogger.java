@@ -3,18 +3,38 @@ package mock.util;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.garbagemule.MobArena.Msg;
 
-public class MockLogger
+public class MockLogger extends Logger
 {
-    private TreeMap<Timestamp,String> entries;
+    private static Map<String,MockLogger> loggers = new TreeMap<String,MockLogger>();
+    private TreeMap<Timestamp,String> entries     = new TreeMap<Timestamp,String>();
     
-    public MockLogger() {
+    /**
+     * Private constructor to ensure that all MockLoggers exist within this class as singletons.
+     */
+    /*private MockLogger() {
         this.entries = new TreeMap<Timestamp,String>();
+    }*/
+    protected MockLogger(String name, String resourceBundleName) {
+        super(name, resourceBundleName);
+    }
+    
+    /**
+     * All MockLogger objects are singletons.
+     * @param name the name of a MockLogger
+     * @return the MockLogger with the input name, or a new MockLogger if it didn't already exist.
+     */
+    public static MockLogger getLogger(String name) {
+        if (!loggers.containsKey(name))
+            loggers.put(name, new MockLogger(name, null));
+        
+        return loggers.get(name);
     }
     
     public void log(String msg) {

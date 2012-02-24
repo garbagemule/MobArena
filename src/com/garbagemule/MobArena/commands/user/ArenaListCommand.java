@@ -4,51 +4,34 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import com.garbagemule.MobArena.commands.*;
-import com.garbagemule.MobArena.*;
 
-public class ArenaListCommand implements MACommand
+import com.garbagemule.MobArena.*;
+import com.garbagemule.MobArena.commands.*;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
+
+@CommandInfo(
+    name    = "arenalist",
+    pattern = "arenas|arenal.*|lista.*",
+    usage   = "/ma arenas",
+    desc    = "lists all available arenas",
+    permission = "mobarena.use.arenalist"
+)
+public class ArenaListCommand implements Command
 {
     @Override
-    public String[] getNames() {
-        return new String[] { "arenas" , "list" };
-    }
-
-    @Override
-    public String getPermission() {
-        return "mobarena.use.arenalist";
-    }
-
-    @Override
-    public boolean execute(MobArenaPlugin plugin, Player sender, String... args) {
-        // Grab the arena master and the args.
-        ArenaMaster am = plugin.getArenaMaster();
+    public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
+        List<Arena> arenas;
         
-        // Get the arenas.
-        List<Arena> arenas = am.getEnabledAndPermittedArenas(sender);
-        
-        // Turn the list into a string.
-        String msg = Msg.MISC_LIST_ARENAS.toString(listToString(arenas));
-        
-        plugin.tell(sender, msg);
-        return true;
-    }
-
-    @Override
-    public boolean executeFromConsole(MobArenaPlugin plugin, CommandSender sender, String... args) {
-        return false;
-    }
-    
-    private <E> String listToString(List<E> list) {
-        String result = "";
-        
-        for (E e : list) {
-            result += e + ", ";
+        if (Commands.isPlayer(sender)) {
+            Player p = (Player) sender;
+            arenas = am.getPermittedArenas(p); 
+        } else {
+            arenas = am.getArenas();
         }
         
-        if (result.equals(""))
-            return Msg.MISC_NONE.toString();
-        
-        return result.substring(0, result.length() - 2);
+        String list = MAUtils.listToString(arenas, am.getPlugin());
+        Messenger.tellPlayer(sender, Msg.MISC_LIST_ARENAS.toString(list));
+        return true;
     }
 }

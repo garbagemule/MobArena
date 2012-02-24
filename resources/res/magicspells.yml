@@ -1,17 +1,16 @@
-﻿# MobArena disabled MagicSpells spells
+# MobArena disabled MagicSpells spells
 # Use this file to disable the MagicSpells spells you don't want your players
 # to use during arena sessions. Make sure to put a hyphen (-) before every
 # spell, and try to keep the indentation proper.
-
 # Spells that will be disabled for the entire arena session.
 disabled-spells:
     - carpet
     - blink
 
 # Spells that will be disabled only while a boss is present.
-disabled-only-on-bosses:
+disabled-on-bosses:
     - purge
 
 # Spells that will be disabled only during swarm waves.
-disabled-only-on-swarms:
+disabled-on-swarms:
     - purge

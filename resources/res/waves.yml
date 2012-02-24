@@ -1,0 +1,32 @@
+recurrent:
+    def1:
+        type: default
+        priority: 1
+        frequency: 1
+        monsters:
+            zombies: 10
+            skeletons: 10
+            spiders: 10
+            creepers: 10
+            wolves: 10
+    spec1:
+        type: special
+        priority: 2
+        frequency: 4
+        monsters:
+            powered-creepers: 10
+            zombie-pigmen: 10
+            angry-wolves: 10
+            blazes: 10
+single:
+    swarm1:
+        type: swarm
+        wave: 6
+        monster: slime
+        amount: low
+    boss1:
+        type: boss
+        wave: 10
+        monster: cave_spider
+        health: high
+        abilities: arrows, root-target, throw-nearby

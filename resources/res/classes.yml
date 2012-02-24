@@ -1,0 +1,15 @@
+Knight:
+    items: diamond_sword, potion:8197:3
+    armor: 306,307,308,309
+Tank:
+    items: iron_sword, potion:8229:2
+    armor: 310,311,312,313
+Archer:
+    items: wood_sword, bow, arrow:256, potion:8197:3, bone
+    armor: 298,299,300,301
+Chemist:
+    items: stone_sword, potion:16428:30, potion:16388:8, potion:16389:20, potion:8197:3, potion:8226:1
+    armor: 314,315,316,317
+Oddjob:
+    items: stone_sword, flint_and_steel, netherrack:2, tnt:4, potion:8197:3
+    armor: 298,299,300,301

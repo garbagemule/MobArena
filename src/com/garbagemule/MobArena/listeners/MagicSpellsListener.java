@@ -4,16 +4,18 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.util.config.Configuration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 
-import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.FileUtils;
-import com.garbagemule.MobArena.waves.Wave.WaveType;
+import com.garbagemule.MobArena.util.config.Config;
+import com.garbagemule.MobArena.waves.enums.*;
+import com.garbagemule.MobArena.MobArena;
 import com.nisovin.magicspells.events.SpellCastEvent;
-import com.nisovin.magicspells.events.SpellListener;
 
-public class MagicSpellsListener extends SpellListener
+public class MagicSpellsListener implements Listener
 {
     private MobArena plugin;
     private List<String> disabled, disabledOnBoss, disabledOnSwarm;
@@ -23,40 +25,32 @@ public class MagicSpellsListener extends SpellListener
         this.plugin = plugin;
         
         // Set up the MagicSpells config-file.
-        File spellFile = FileUtils.extractFile(plugin.getDataFolder(), "magicspells.yml");    
-        Configuration spellConfig = new Configuration(spellFile);
+        File spellFile = FileUtils.extractFile(plugin, plugin.getDataFolder(), "magicspells.yml");
+        Config spellConfig = new Config(spellFile);
         spellConfig.load();
         setupSpells(spellConfig);
     }
     
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onSpellCast(SpellCastEvent event)
     {
-        Arena arena = plugin.getAM().getArenaWithPlayer(event.getCaster());
+        Arena arena = plugin.getArenaMaster().getArenaWithPlayer(event.getCaster());
         if (arena == null || !arena.isRunning()) return;
         
         String spell = event.getSpell().getName();
         WaveType type = (arena.getWave() != null) ? arena.getWave().getType() : null;
         
         if (disabled.contains(spell) ||
-            (type == WaveType.BOSS && disabledOnBoss.contains(spell)) ||
-            (type == WaveType.SWARM && disabledOnSwarm.contains(spell)))
+           (type == WaveType.BOSS && disabledOnBoss.contains(spell)) ||
+           (type == WaveType.SWARM && disabledOnSwarm.contains(spell))) {
             event.setCancelled(true);
+        }
     }
     
-    private void setupSpells(Configuration config)
+    private void setupSpells(Config config)
     {
         this.disabled        = config.getStringList("disabled-spells", new LinkedList<String>());
-        this.disabledOnBoss  = config.getStringList("disabled-only-on-bosses", new LinkedList<String>());
-        this.disabledOnSwarm = config.getStringList("disabled-only-on-swarms", new LinkedList<String>());
-    }
-    
-    public void disableSpell(String spell)
-    {
-        disabled.add(spell);
-    }
-    
-    public void disableSpellOnBoss(String spell)
-    {
-        disabledOnBoss.add(spell);
+        this.disabledOnBoss  = config.getStringList("disabled-on-bosses", new LinkedList<String>());
+        this.disabledOnSwarm = config.getStringList("disabled-on-swarms", new LinkedList<String>());
     }
 }

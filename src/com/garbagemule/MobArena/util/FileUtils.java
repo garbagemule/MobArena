@@ -11,9 +11,14 @@ import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
+
 //import org.bukkit.util.config.Configuration;
 
 import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.util.config.Config;
+import com.garbagemule.MobArena.waves.WaveUtils;
 
 public class FileUtils
 {
@@ -40,7 +45,7 @@ public class FileUtils
      * Download all necessary libraries.
      * @param config The MobArena config-file
      */
-    public static void fetchLibs(Config config)
+    public static void fetchLibs(MobArena plugin, Config config)
     {
         // Get all arenas
         Set<String> arenas = config.getKeys("arenas");
@@ -59,17 +64,17 @@ public class FileUtils
         
         // Download all libraries
         for (Library lib : libs)
-            if (!libraryExists(lib))
-                fetchLib(lib);
+            if (!libraryExists(plugin, lib))
+                fetchLib(plugin, lib);
     }
     
     /**
      * Download a given library.
      * @param lib The Library to download
      */
-    private static synchronized void fetchLib(Library lib)
+    private static synchronized void fetchLib(MobArena plugin, Library lib)
     {        
-        MobArena.info("Downloading library '" + lib.filename + "' for log-method '" + lib.name().toLowerCase() + "'...");
+        plugin.info("Downloading library '" + lib.filename + "' for log-method '" + lib.name().toLowerCase() + "'...");
         
         URLConnection con = null;
         InputStream  in   = null;
@@ -87,7 +92,7 @@ public class FileUtils
             if (lib.backup == null)
             {
                 e.printStackTrace();
-                System.out.println("Connection issues");
+                plugin.warning("Connection issues");
                 return;
             }
 
@@ -100,14 +105,14 @@ public class FileUtils
             catch (Exception e2)
             {
                 e2.printStackTrace();
-                System.out.println("Connection issues");
+                plugin.warning("Connection issues");
                 return;
             }
         }
         
         try
         {
-            File libdir = new File(MobArena.dir, "lib");
+            File libdir = new File(plugin.getDataFolder(), "lib");
             libdir.mkdir();
             File file = new File(libdir, lib.filename);
 
@@ -126,14 +131,14 @@ public class FileUtils
                 out.write(buffer, 0, length);
             
             // Announce successful download
-            MobArena.info(lib.filename + " downloaded in " + ((System.currentTimeMillis()-startTime)/1000.0) + " seconds.");
+            plugin.info(lib.filename + " downloaded in " + ((System.currentTimeMillis()-startTime)/1000.0) + " seconds.");
             
             addLibraryToClassLoader(file);
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            MobArena.warning("Couldn't download library: " + lib.filename);
+            plugin.warning("Couldn't download library: " + lib.filename);
         }
         finally
         {
@@ -149,15 +154,12 @@ public class FileUtils
         }
     }
     
-    private static boolean libraryExists(Library lib)
-    {
-        return new File(MobArena.dir + File.separator + "lib", lib.filename).exists();
+    private static boolean libraryExists(JavaPlugin plugin, Library lib) {
+        return new File(plugin.getDataFolder() + File.separator + "lib", lib.filename).exists();
     }
     
-    private static void addLibraryToClassLoader(File file)
-    {
-        try
-        {
+    private static void addLibraryToClassLoader(File file) {
+        try {
             // Grab the class loader and its addURL method
             URLClassLoader cl = (URLClassLoader) ClassLoader.getSystemClassLoader();
             Method addURL = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{ URL.class });
@@ -166,8 +168,7 @@ public class FileUtils
             // Add the library
             addURL.invoke(cl, new Object[]{file.toURI().toURL()});
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -176,14 +177,15 @@ public class FileUtils
      * Create default files from the res/ directory, if they exist.
      * @param filenames Files to be created.
      */
-    public static void extractDefaults(String... filenames)
-    {
+    public static void extractDefaults(MobArena plugin, String... filenames) {
+        File dir = plugin.getDataFolder();
+        if (!dir.exists()) dir.mkdir();
+        
         for (String filename : filenames)
-            extractFile(MobArena.dir, filename);
+            extractFile(plugin, dir, filename);
     }
     
-    public static File extractFile(File dir, String filename)
-    {
+    public static File extractFile(MobArena plugin, File dir, String filename) {
         // Skip if file exists
         File file = new File(dir, filename);
         if (file.exists()) return file;
@@ -192,8 +194,7 @@ public class FileUtils
         InputStream in = MobArena.class.getResourceAsStream("/res/" + filename);
         if (in == null) return null;
         
-        try
-        {
+        try {
             // Set up an output stream
             FileOutputStream out = new FileOutputStream(file);
             byte[] buffer = new byte[8192];
@@ -208,10 +209,30 @@ public class FileUtils
             
             return file;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
-            MobArena.warning("Problem creating file '" + filename + "'!");
+            plugin.warning("Problem creating file '" + filename + "'!");
+        }
+        
+        return null;
+    }
+    
+    public static YamlConfiguration getConfig(MobArena plugin, String filename) {
+        InputStream in = MobArena.class.getResourceAsStream("/res/" + filename);
+        if (in == null) {
+            plugin.error("Failed to load '" + filename + "', the server must be restarted!");
+            return null;
+        }
+
+        try {
+            YamlConfiguration result = new YamlConfiguration();
+            result.load(in);
+            
+            return result;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            plugin.warning("Couldn't load '" + filename + "' as stream!");
         }
         
         return null;

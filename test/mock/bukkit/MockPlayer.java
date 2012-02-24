@@ -9,10 +9,13 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.*;
 import org.bukkit.map.MapView;
 import org.bukkit.permissions.*;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class MockPlayer implements Player
@@ -969,6 +972,138 @@ public class MockPlayer implements Player
     @Override
     public void updateInventory()
     {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Player getKiller()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean teleport(Location arg0, TeleportCause arg1)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean teleport(Entity arg0, TeleportCause arg1)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public long getFirstPlayed()
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public long getLastPlayed()
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public boolean hasPlayedBefore()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void playEffect(EntityEffect arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Set<String> getListeningPluginChannels() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void sendPluginMessage(Plugin arg0, String arg1, byte[] arg2) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    //@Override
+    public boolean getAllowFlight() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    //@Override
+    public void setAllowFlight(boolean arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    //@Override
+    public void setBedSpawnLocation(Location arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean addPotionEffect(PotionEffect arg0) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean addPotionEffect(PotionEffect arg0, boolean arg1) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean addPotionEffects(Collection<PotionEffect> arg0) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Collection<PotionEffect> getActivePotionEffects() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean hasPotionEffect(PotionEffectType arg0) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void removePotionEffect(PotionEffectType arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean canSee(Player arg0) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void hidePlayer(Player arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void showPlayer(Player arg0) {
         // TODO Auto-generated method stub
         
     }

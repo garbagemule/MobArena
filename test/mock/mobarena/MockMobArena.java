@@ -1,39 +1,47 @@
 package mock.mobarena;
 
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
+import mock.util.MockLogger;
 
-import com.garbagemule.MobArena.ArenaMaster;
-import com.garbagemule.MobArena.MobArenaPlugin;
-import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.util.config.Config;
 
-public class MockMobArena implements MobArenaPlugin
+public class MockMobArena //extends MobArena //implements MobArenaPlugin
 {
     private ArenaMaster arenaMaster;
+    private MockLogger log;
+    private Config config;
     
     public MockMobArena() {
-        this.arenaMaster = new MockArenaMaster(this);
+        //this.arenaMaster = new MockArenaMaster(this);
+        this.log = MockLogger.getLogger("MobArenaTest");
+    }
+
+    //@Override
+    public void onEnable() {
+        //this.config = new Config(new File(getDataFolder(), "config.yml"));
+        //this.arenaMaster = new ArenaMasterImpl(this);
+        this.log.log("MockMobArena enabled.");
+    }
+
+    //@Override
+    public void onDisable() {
+        log.log("MockMobArena disabled.");
+    }
+
+    //@Override
+    public Config getMAConfig() {
+        return config;
     }
     
-    public MockMobArena(ArenaMaster arenaMaster) {
-        this.arenaMaster = arenaMaster;
-    }
-    
-    @Override
+    //@Override
     public ArenaMaster getArenaMaster() {
         return arenaMaster;
     }
-
-    @Override
-    public void tell(CommandSender sender, String msg) {
-        if (sender == null || msg.equals("") || msg.equals(" "))
-            return;
-        
-        sender.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.WHITE + msg);
-    }
-
-    @Override
-    public void tell(CommandSender sender, Msg msg) {
-        tell(sender, msg.toString());
-    }
+    
+    //@Override
+    public void info(String msg)    { log.log("[MobArena] " + msg); }
+    //@Override
+    public void warning(String msg) { log.log("[MobArena] " + msg); }
+    //@Override
+    public void error(String msg)   { log.log("[MobArena] " + msg); }
 }

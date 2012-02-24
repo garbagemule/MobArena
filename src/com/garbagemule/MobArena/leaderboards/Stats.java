@@ -1,49 +1,44 @@
 package com.garbagemule.MobArena.leaderboards;
 
-import com.garbagemule.MobArena.util.WaveUtils;
-
 public enum Stats
 {
-    players("Players", "playerName"),
-    className("Class", "className"),
-    kills("Kills", "kills"),
-    dmgDone("Damage Done", "dmgDone"),
-    dmgTaken("Damage Taken", "dmgTaken"),
-    swings("Swings", "swings"),
-    hits("Hits", "hits"),
-    lastWave("Last Wave", "lastWave");
+    PLAYER_NAME("Players", "playerName"),
+    CLASS_NAME("Class", "class"),
+    KILLS("Kills", "kills"),
+    DAMAGE_DONE("Damage Done", "dmgDone"),
+    DAMAGE_TAKEN("Damage Taken", "dmgTaken"),
+    SWINGS("Swings", "swings"),
+    HITS("Hits", "hits"),
+    LAST_WAVE("Last Wave", "lastWave");
     
     private String name, shortName;
     
-    private Stats(String name, String shortName)
-    {
+    private Stats(String name, String shortName) {
         this.name      = name;
         this.shortName = shortName;
     }
     
-    public String getShortName()
-    {
+    public String getShortName() {
         return shortName;
     }
     
-    public String getFullName()
-    {
+    public String getFullName() {
         return name;
     }
     
-    public static Stats fromString(String name)
-    {
-        if (name.equals("class"))
-            return Stats.className;
-        return WaveUtils.getEnumFromStringCaseSensitive(Stats.class, name);
-    }
-    
-    public static Stats getByFullName(String name)
-    {
-        
+    public static Stats getByFullName(String name) {
         for (Stats s : Stats.values())
             if (s.name.equals(name))
                 return s;
+        return null;
+    }
+    
+    public static Stats getByShortName(String name) {
+        for (Stats s : Stats.values()) {
+            if (s.shortName.equalsIgnoreCase(name)) {
+                return s;
+            }
+        }
         return null;
     }
 }

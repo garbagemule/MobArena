@@ -1,283 +1,341 @@
 package com.garbagemule.MobArena;
 
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Creeper;
+import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-import com.garbagemule.MobArena.util.WaveUtils;
-import com.garbagemule.MobArena.waves.Wave;
+import com.garbagemule.MobArena.ArenaPlayer;
+import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.events.NewWaveEvent;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.waves.*;
+import com.garbagemule.MobArena.waves.enums.WaveType;
+import com.garbagemule.MobArena.waves.types.BossWave;
+import com.garbagemule.MobArena.waves.types.SupplyWave;
+import com.garbagemule.MobArena.waves.types.UpgradeWave;
 
-/**
- * Core class for handling wave spawning.
- * Currently, every 4th wave is a special wave, and all other waves
- * are default waves. The distribution coefficients are used to spread
- * out the distribution of each default monster however the server
- * host chooses. It is possible to create default waves that consist of
- * only one type of monster, or ones that have no creepers, for example.
- */
 public class MASpawnThread implements Runnable
 {
     private MobArena plugin;
     private Arena arena;
-    private int wave, taskId, previousSize, playerCount;
-    
-    // NEW WAVES
-    private Wave defaultWave;
-    private TreeSet<Wave> recurrentWaves;
-    private TreeSet<Wave> singleWaves;
-    
-    public MASpawnThread(MobArena plugin, Arena arena)
-    {
-    	// WAVES
-        defaultWave    = arena.recurrentWaves.first();
-    	recurrentWaves = arena.recurrentWaves;
-    	singleWaves    = new TreeSet<Wave>(arena.singleWaves);
-    	
-        this.plugin  = plugin;
-        this.arena   = arena;
-        wave         = 1;
-        playerCount  = arena.arenaPlayers.size();
-    }
-    
-    public void run()
-    {
-        // Clear out all dead monsters in the monster set.
-        removeDeadMonsters();
-        
-        // If there are no players in the arena, return.
-        if (arena.arenaPlayers.isEmpty())
-            return;
+    private ArenaRegion region;
+    private RewardManager rewardManager;
+    private WaveManager waveManager;
+    private MonsterManager monsterManager;
 
-        // Check if wave needs to be cleared first. If so, return!
-        if (arena.waveClear && wave > 1 && !arena.monsters.isEmpty())
-            return;
-        
-        // Check if we're on a boss wave
-        if (!arena.waveClear && arena.bossWave != null)
-            return;
-        
-        // Grant rewards (if any) for this wave
-        grantRewards(wave);
-        
-        // Detonate creepers if needed
-        detonateCreepers(arena.detCreepers);
-        
-        // Check if this is the final wave, in which case, end instead of spawn
-        if (wave > 1 && wave == arena.finalWave)
-        {
-            for (Player p : arena.arenaPlayers)
-                arena.playerDeath(p);
+    private int playerCount, monsterLimit;
+    private boolean waveClear, bossClear;
+
+    /**
+     * Create a new monster spawner for the input arena.
+     * Note that the arena's WaveManager is reset
+     * @param plugin a MobArena instance
+     * @param arena an arena
+     */
+    public MASpawnThread(MobArena plugin, Arena arena) {
+        this.plugin = plugin;
+        this.arena = arena;
+        this.region = arena.getRegion();
+        this.rewardManager = arena.getRewardManager();
+        this.waveManager = arena.getWaveManager();
+        this.monsterManager = arena.getMonsterManager();
+
+        reset();
+    }
+
+    /**
+     * Reset the spawner, so all systems and settings are
+     * ready for a new session.
+     */
+    public void reset() {
+        waveManager.reset();
+        playerCount = arena.getPlayersInArena().size();
+        monsterLimit = arena.getSettings().getInt("monster-limit", 100);
+        waveClear = arena.getSettings().getBoolean("clear-wave-before-next", false);
+        bossClear = arena.getSettings().getBoolean("clear-boss-before-next", false);
+    }
+
+    public void run() {
+        // If the arena isn't running or if there are no players in it.
+        if (!arena.isRunning() || arena.getPlayersInArena().isEmpty()) {
             return;
         }
-        
-        // Find the wave to spawn
-        spawnWave(wave);
-        
+
+        // Clear out all dead monsters in the monster set.
+        removeDeadMonsters();
+        removeCheatingPlayers();
+
+        // In case some players were removed, check again.
+        if (!arena.isRunning()) {
+            return;
+        }
+
+        // Grab the wave number.
+        int nextWave = waveManager.getWaveNumber() + 1;
+
+        // Check if wave needs to be cleared first. If so, return!
+        if (!isWaveClear()) {
+            arena.scheduleTask(this, 60);
+            return;
+        }
+
+        // Fire off the event. If cancelled, try again in 3 seconds.
+        NewWaveEvent event = new NewWaveEvent(arena, waveManager.getNext(), nextWave);
+        plugin.getServer().getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            arena.scheduleTask(this, 60);
+            return;
+        }
+
+        // Grant rewards (if any) for the wave about to spawn
+        grantRewards(nextWave);
+
+        // Check if this is the final wave, in which case, end instead of spawn
+        if (nextWave > 1 && (nextWave - 1) == waveManager.getFinalWave()) {
+            List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+            for (Player p : players) {
+                arena.playerLeave(p);
+            }
+
+            return;
+        }
+
+        // Spawn the next wave.
+        spawnWave(nextWave);
+
         // Update stats
-        updateStats(wave);
-        
-        wave++;
-        if (arena.monsters.isEmpty())
-            arena.resetIdleTimer();
+        updateStats(nextWave);
+
+        // Reschedule the spawner for the next wave.
+        arena.scheduleTask(this, arena.getSettings().getInt("wave-interval", 3) * 20);
     }
-    
-    private void removeDeadMonsters()
-    {
-        List<Entity> tmp = new LinkedList<Entity>(arena.monsters);
-        for (Entity e : tmp)
-        {
-            if (e == null) continue;
-            
-            if (e.isDead() || !arena.inRegion(e.getLocation()))
-            {
-                arena.monsters.remove(e);
+
+    private void spawnWave(int wave) {
+        Wave w = waveManager.next();
+
+        w.announce(arena, wave);
+
+        if (w.getType() == WaveType.UPGRADE) {
+            handleUpgradeWave(w);
+            return;
+        }
+
+        Map<MACreature, Integer> monsters = w.getMonstersToSpawn(wave, playerCount, arena);
+        List<Location> spawnpoints = w.getSpawnpoints(arena);
+
+        World world = arena.getWorld();
+        int totalSpawnpoints = spawnpoints.size();
+        int index = 0;
+        double mul = w.getHealthMultiplier();
+
+        for (Map.Entry<MACreature, Integer> entry : monsters.entrySet()) {
+            for (int i = 0; i < entry.getValue(); i++, index++) {
+                // Check if monster limit has been reached.
+                if (monsterManager.getMonsters().size() >= monsterLimit) {
+                    return;
+                }
+
+                // Grab a spawnpoint
+                Location spawnpoint = spawnpoints.get(index % totalSpawnpoints);
+
+                // Spawn the monster
+                LivingEntity e = entry.getKey().spawn(arena, world, spawnpoint);
+
+                // Add it to the arena.
+                monsterManager.addMonster(e);
+
+                // Set the health.
+                int health = (int) Math.max(1D, e.getMaxHealth() * mul);
+                e.setHealth(Math.min(health, e.getMaxHealth()));
+
+                // Switch on the type.
+                switch (w.getType()){
+                    case BOSS:
+                        BossWave bw = (BossWave) w;
+                        int maxHealth = bw.getMaxHealth(playerCount);
+                        MABoss boss = monsterManager.addBoss(e, maxHealth);
+                        bw.addMABoss(boss);
+                        bw.activateAbilities(arena);
+                        break;
+                    case SWARM:
+                        health = (int) (mul < 1D ? e.getMaxHealth() * mul : 1);
+                        health = Math.max(1, health);
+                        e.setHealth(Math.min(health, e.getMaxHealth()));
+                        break;
+                    case SUPPLY:
+                        SupplyWave sw = (SupplyWave) w;
+                        monsterManager.addSupplier(e, sw.getDropList());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    private void handleUpgradeWave(Wave w) {
+        UpgradeWave uw = (UpgradeWave) w;
+
+        for (Player p : arena.getPlayersInArena()) {
+            String className = arena.getArenaPlayer(p).getArenaClass().getName();
+            //String className = arena.getClassOfPlayer(p);
+            uw.grantItems(p, className);
+            uw.grantItems(p, "All");
+        }
+    }
+
+    /**
+     * Check if the wave is clear for new spawns.
+     * If clear-boss-before-next: true, bosses must be dead.
+     * If clear-wave-before-next: true, all monsters must be dead.
+     * @param wave the next wave number
+     * @return true, if the wave is "clear" for new spawns.
+     */
+    private boolean isWaveClear() {
+        // Check for monster limit
+        if (monsterManager.getMonsters().size() >= monsterLimit) {
+            return false;
+        }
+
+        // Check for boss clear
+        if (bossClear && !monsterManager.getBossMonsters().isEmpty()) {
+            return false;
+        }
+
+        // Check for wave clear
+        if (waveClear && !monsterManager.getMonsters().isEmpty()) {
+            return false;
+        }
+
+        // Check for final wave
+        if (!monsterManager.getMonsters().isEmpty() && waveManager.getWaveNumber() == waveManager.getFinalWave()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void removeDeadMonsters() {
+        List<Entity> tmp = new ArrayList<Entity>(monsterManager.getMonsters());
+        for (Entity e : tmp) {
+            if (e == null) {
+                continue;
+            }
+
+            if (e.isDead() || !region.contains(e.getLocation())) {
+                monsterManager.removeMonster(e);
                 e.remove();
             }
         }
     }
-    
-    private void grantRewards(int wave)
-    {
-        for (Map.Entry<Integer,List<ItemStack>> entry : arena.everyWaveMap.entrySet())
-            if (wave % entry.getKey() == 0)
+
+    private void removeCheatingPlayers() {
+        List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+        for (Player p : players) {
+            if (region.contains(p.getLocation())) {
+                continue;
+            }
+
+            Messenger.tellPlayer(p, "Leaving so soon?");
+            p.getInventory().clear();
+            arena.playerLeave(p);
+        }
+    }
+
+    private void grantRewards(int wave) {
+        for (Map.Entry<Integer, List<ItemStack>> entry : arena.getEveryWaveEntrySet()) {
+            if (wave % entry.getKey() == 0) {
                 addReward(entry.getValue());
-
-        if (arena.afterWaveMap.containsKey(wave))
-            addReward(arena.afterWaveMap.get(wave));
-    }
-    
-    private void spawnWave(int wave)
-    {    	
-        Wave w = null;
-        
-        // Check the first element of the single waves.
-        if (!singleWaves.isEmpty() && singleWaves.first().matches(wave))
-        {
-            w = singleWaves.pollFirst();
+            }
         }
-        else
-        {
-            SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
-            w = matches.isEmpty() ? defaultWave : matches.last();
-        }
-        
-        // Notify listeners.
-        for (MobArenaListener listener : plugin.getAM().listeners)
-            listener.onWave(arena, wave, w.getName(), w.getBranch(), w.getType());
 
-        arena.setWave(w);
-        w.spawn(wave);
-    }
-    
-    private void updateStats(int wave)
-    {
-        for (ArenaPlayer ap: arena.getArenaPlayerSet())
-            if (arena.getArenaPlayers().contains(ap.getPlayer()))
-                ap.getStats().lastWave++;
-    }
-    
-    private SortedSet<Wave> getMatchingRecurrentWaves(int wave)
-    {
-        TreeSet<Wave> result = new TreeSet<Wave>(WaveUtils.getRecurrentComparator());
-        
-        for (Wave w : recurrentWaves)
-        {
-            if (w.matches(wave))
-                result.add(w);
+        List<ItemStack> after = arena.getAfterWaveReward(wave);
+        if (after != null) {
+            addReward(after);
         }
-        
-        return result;
     }
-    
 
-    
-    /*////////////////////////////////////////////////////////////////////
-    //
-    //      Getters/setters
-    //
-    ////////////////////////////////////////////////////////////////////*/
-    
-    public int getWave()
-    {
-        return wave;
+    private void updateStats(int wave) {
+        for (ArenaPlayer ap : arena.getArenaPlayerSet()) {
+            if (arena.getPlayersInArena().contains(ap.getPlayer())) {
+                ap.getStats().inc("lastWave");
+            }
+        }
     }
-    
-    public int getTaskId()
-    {
-        return taskId;
-    }
-    
-    public int getPreviousSize()
-    {
-        return previousSize;
-    }
-    
-    public int getPlayerCount()
-    {
+
+    /*
+     * ////////////////////////////////////////////////////////////////////
+     * //
+     * // Getters/setters
+     * //
+     * ////////////////////////////////////////////////////////////////////
+     */
+
+    public int getPlayerCount() {
         return playerCount;
     }
-    
-    public void setTaskId(int taskId)
-    {
-        this.taskId = taskId;
-    }
-    
-    public void setPreviousSize(int previousSize)
-    {
-        this.previousSize = previousSize;
-    }
-    
+
     /**
      * Rewards all players with an item from the input String.
      */
-    private void addReward(List<ItemStack> rewards)
-    {
-        for (Player p : arena.arenaPlayers)
-        {
-            if (arena.log.players.get(p) == null)
-                continue;
-            
+    private void addReward(List<ItemStack> rewards) {
+        for (Player p : arena.getPlayersInArena()) {
             ItemStack reward = MAUtils.getRandomReward(rewards);
-            arena.log.players.get(p).rewards.add(reward);
-            
-            if (reward == null)
-            {
-                MAUtils.tellPlayer(p, "ERROR! Problem with economy rewards. Notify server host!");
-                MobArena.warning("Could not add null reward. Please check the config-file!");
-            }
-            else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID)
-            {
-                if (plugin.Method != null)
-                    MAUtils.tellPlayer(p, Msg.WAVE_REWARD, plugin.Method.format(reward.getAmount()));
-                else MobArena.warning("Tried to add money, but no economy plugin detected!");
-            }
-            else
-            {
-                MAUtils.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount(), reward.getType());
-            }
-        }
-    }
-    
-    /**
-     * "Detonates" all the Creepers in the monsterSet.
-     */
-    public void detonateCreepers(boolean really)
-    {
-        if (!really)
-            return;
-        
-        Set<Entity> tmp = new HashSet<Entity>();
-        for (Entity e : arena.monsters)
-        {
-            if (!(e instanceof Creeper) || e.isDead())
-                continue;
-            
-            tmp.add(e);
-        }
+            rewardManager.addReward(p, reward);
 
-        Location loc;
-        for (Entity e : tmp)
-        {
-            if (e == null) continue;
-            
-            arena.monsters.remove(e);
-            loc = e.getLocation().getBlock().getRelative(0,2,0).getLocation();
-            arena.world.createExplosion(loc, 2);
-            e.remove();
+            if (reward == null) {
+                Messenger.tellPlayer(p, "ERROR! Problem with rewards. Notify server host!");
+                plugin.warning("Could not add null reward. Please check the config-file!");
+            }
+            else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
+                if (plugin.giveMoney(p, reward.getAmount())) {
+                    Messenger.tellPlayer(p, Msg.WAVE_REWARD, plugin.economyFormat(reward.getAmount()));
+                }
+                else {
+                    plugin.warning("Tried to add money, but no economy plugin detected!");
+                }
+            }
+            else {
+                Messenger.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount(), reward.getType());
+            }
         }
     }
-    
+
     /**
      * Update the targets of all monsters, if their targets aren't alive.
      */
-    public void updateTargets()
-    {
+    public void updateTargets() {
         Creature c;
         Entity target;
-        for (Entity e : arena.monsters)
-        {
+        for (Entity e : monsterManager.getMonsters()) {
             if (!(e instanceof Creature))
-                continue; 
+                continue;
 
             // TODO: Remove the try-catch when Bukkit API is fixed.
             c = (Creature) e;
-            try { target = c.getTarget(); } catch (ClassCastException cce) { continue; }
-            
-            if (target instanceof Player && arena.inArena((Player) target))
+            try {
+                target = c.getTarget();
+            }
+            catch (ClassCastException cce) {
                 continue;
-            
-            c.setTarget(MAUtils.getClosestPlayer(e, arena));
+            }
+
+            if (target instanceof Player && arena.getPlayersInArena().contains((Player) target)) {
+                continue;
+            }
+
+            c.setTarget(MAUtils.getClosestPlayer(plugin, e, arena));
         }
     }
 }

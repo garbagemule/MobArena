@@ -1,7 +1,8 @@
 name: MobArena
+author: garbagemule
 main: com.garbagemule.MobArena.MobArena
-version: 0.94.4.4
-softdepend: [Spout,Permissions,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells]
+version: 0.94.4.49
+softdepend: [Spout,MultiVerse,XcraftGate,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:
         description: Base command for MobArena
@@ -18,18 +19,20 @@ commands:
             http://pastebin.com, and then paste the link
             in the IRC or on the forums.
 permissions:
-    mobarena.use:
-        description: Gives access to usage commands
-        default: true
-        children:
-            mobarena.use.join: true
-            mobarena.use.spec: true
-            mobarena.use.leave: true
     mobarena.use.join:
+        description: Join command
         default: true
     mobarena.use.spec:
+        description: Spec command
         default: true
     mobarena.use.leave:
+        description: Leave command
+        default: true
+    mobarena.use.arenalist:
+        description: Arena list command
+        default: true
+    mobarena.use.playerlist:
+        description: Arena list command
         default: true
     
     mobarena.admin:
@@ -39,9 +42,8 @@ permissions:
             mobarena.admin.enable: true
             mobarena.admin.kick: true
             mobarena.admin.restore: true
-            mobarena.admin.force.end: true
-            mobarena.admin.force.start: true
-            mobarena.admin.config.reload: true
+            mobarena.admin.force: true
+            mobarena.admin.teleport: true
     mobarena.admin.enable:
         description: Enable and disable MobArena and/or arenas.
         default: false
@@ -51,14 +53,11 @@ permissions:
     mobarena.admin.restore:
         description: Restore a player's inventory.
         default: false
-    mobarena.admin.force.end:
-        description: Force end an arena.
+    mobarena.admin.force:
+        description: Force start or end an arena.
         default: false
-    mobarena.admin.force.start:
-        description: Force start an arena.
-        default: false
-    mobarena.admin.config.reload:
-        description: Reload the config-file.
+    mobarena.admin.teleport:
+        description: Immune to teleport blocking rules.
         default: false
     
     mobarena.setup:
@@ -68,7 +67,7 @@ permissions:
             mobarena.setup.arena: true
             mobarena.setup.setarena: true
             mobarena.setup.addarena: true
-            mobarena.setup.delarena: true
+            mobarena.setup.removearena: true
             mobarena.setup.protect: true
             mobarena.setup.editarena: true
             mobarena.setup.setregion: true
@@ -78,13 +77,11 @@ permissions:
             mobarena.setup.expandlobbyregion: true
             mobarena.setup.setwarp: true
             mobarena.setup.spawnpoints: true
-            mobarena.setup.addspawn: true
-            mobarena.setup.delspawn: true
             mobarena.setup.containers: true
-            mobarena.setup.addcontainer: true
-            mobarena.setup.delcontainer: true
             mobarena.setup.leaderboards: true
             mobarena.setup.checkdata: true
+            mobarena.setup.classes: true
+            mobarena.setup.config: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
     mobarena.setup.arena:
@@ -96,8 +93,8 @@ permissions:
     mobarena.setup.addarena:
         description: Add a new arena node.
         default: false
-    mobarena.setup.delarena:
-        description: Delete an arena.
+    mobarena.setup.removearena:
+        description: Remove an arena.
         default: false
     mobarena.setup.protect:
         description: Turn arena protection on/off.
@@ -126,26 +123,20 @@ permissions:
     mobarena.setup.spawnpoints:
         description: List all spawnpoints.
         default: false
-    mobarena.setup.addspawn:
-        description: Add a new spawnpoint.
-        default: false
-    mobarena.setup.delspawn:
-        description: Delete a spawnpoint.
-        default: false
     mobarena.setup.containers:
         description: List all containers.
-        default: false
-    mobarena.setup.addcontainer:
-        description: Add a new container.
-        default: false
-    mobarena.setup.delcontainer:
-        description: Delete a container.
         default: false
     mobarena.setup.leaderboards:
         description: Set up leaderboards.
         default: false
     mobarena.setup.checkdata:
         description: Check which points need to be set up.
+        default: false
+    mobarena.setup.classes:
+        description: Allows setting up classes from in-game
+        default: false
+    mobarena.setup.config:
+        description: Save or reload the config-file
         default: false
     mobarena.setup.autogenerate:
         description: Auto-generate an arena.

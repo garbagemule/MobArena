@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MobArena" default="dist" basedir=".">
+    <property name="pluginname" value="MobArena" />
+    <property name="server" location="D:\General\Java\Minecraft\Minecraft Server\plugins" />
+
+    <property name="src"  location="src" />
+    <property name="test" location="test" />
+    <property name="bin"  location="build" />
+    <property name="lib"  location="lib" />
+    <property name="res"  location="resources" />
+
+    <path id="classpath">
+        <fileset dir="${lib}" includes="**/*.jar" />
+        <fileset dir="${res}" includes="**/*.*" />
+        <pathelement location="${bin}" />
+    </path>
+
+    <target name="clean">
+        <delete dir="${bin}" />
+    </target>
+
+    <target name="prepare">
+        <mkdir dir="${bin}" />
+    </target>
+
+    <!-- Compile the source and put in the bin-folder -->
+    <target name="build-src" depends="prepare">
+        <javac target="1.6" source="1.6"
+            srcdir="${src}" destdir="${bin}"
+            debug="on" debuglevel="lines,vars,source"
+            includeantruntime="no"
+            classpathref="classpath"/>
+    </target>
+    
+    <target name="build-src-with-deprecation-check" depends="prepare">
+        <javac target="1.6" source="1.6"
+            srcdir="${src}" destdir="${bin}"
+            debug="on" debuglevel="lines,vars,source"
+            includeantruntime="no"
+            classpathref="classpath">
+            <compilerarg value="-Xlint:deprecation"/>
+        </javac>
+    </target>
+
+    <target name="build-test" depends="build-src">
+        <javac target="1.6" source="1.6"
+            srcdir="${test}" destdir="${bin}"
+            debug="on" debuglevel="lines,vars,source"
+            includeantruntime="no" classpathref="classpath" />
+    </target>
+
+    <!-- Build a .jar and copy to server's plugins-folder -->
+    <target name="dist" depends="build-src">
+        <delete file="${pluginname}.jar" />
+        <jar jarfile="${pluginname}.jar">
+            <!-- Include the class-files (bin) and the resources (res) -->
+            <fileset dir="${bin}" />
+            <fileset dir="${res}" />
+            <!-- Set up the classpath so MobArena can find JDOM if needed -->
+            <manifest>
+                <attribute name="Main-Class" value="com.garbagemule.MobArena.MobArena" />
+                <attribute name="Class-Path" value="plugins/MobArena/lib/jdom.jar MobArena/lib/jdom.jar" />
+            </manifest>
+        </jar>
+        <!-- Copy to server and clean up -->
+        <copy file="${pluginname}.jar" tofile="${server}/${pluginname}.jar" />
+        <!--<delete dir="${bin}"/>-->
+    </target>
+
+    <target name="test-config" depends="build-test">
+        <java classname="org.junit.runner.JUnitCore">
+            <arg value="garbagemule.mobarena.standard.config.TestNewConfigVsOldConfig" />
+            <arg value="garbagemule.mobarena.standard.config.TestAdditionalConfigMethods" />
+            <arg value="garbagemule.mobarena.standard.config.TestConfigCorrectness" />
+            <classpath refid="classpath" />
+        </java>
+    </target>
+
+    <target name="test-commands" depends="build-test">
+        <java classname="org.junit.runner.JUnitCore">
+            <arg value="garbagemule.mobarena.standard.TestUserCommands" />
+            <classpath refid="classpath" />
+        </java>
+    </target>
+    
+    <target name="test" depends="test-config,
+                                 test-commands" />
+</project>

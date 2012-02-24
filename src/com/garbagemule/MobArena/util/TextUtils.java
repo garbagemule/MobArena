@@ -53,4 +53,12 @@ public class TextUtils
         return s.substring(0, length);
     }
     public static String truncate(String s) { return truncate(s, 15); }
+    
+    public static String camelCase(String s) {
+        if (s == null || s.length() < 2)
+            return null;
+        
+        String firstLetter = s.substring(0,1).toUpperCase();
+        return firstLetter + s.substring(1).toLowerCase();
+    }
 }

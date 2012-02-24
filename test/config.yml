@@ -76,7 +76,10 @@ arenas:
                     priority: 1
                     frequency: 1
                     monsters:
-                        mushroom_cows: 10
+                        zombies: 30
+                        skeletons: 18
+                        spiders: 5
+                        mushroom_cows: 1
                     wave: 1
                 boss1:
                     type: boss

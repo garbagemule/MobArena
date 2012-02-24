@@ -23,6 +23,10 @@ public class ClassPopup extends GenericPopup
         int buttonsX      = (screenWidth - 100) / 2;
         int buttonsY      = (screenHeight - buttonsHeight) / 2 + 20;
         
+        // Apparently Spout complains if these aren't set
+        arenaTitle.setWidth(30);
+        arenaTitle.setHeight(10);
+        
         arenaTitle.setText("Choose your class!");
         arenaTitle.setAlign(WidgetAnchor.CENTER_CENTER);
         arenaTitle.setX((screenWidth - arenaTitle.getWidth()) / 2).setY(buttonsY - 20);

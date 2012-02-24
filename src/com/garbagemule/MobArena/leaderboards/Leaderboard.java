@@ -4,19 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
-//import org.bukkit.util.config.Configuration;
 
-import com.garbagemule.MobArena.Arena;
 import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.util.Config;
+import com.garbagemule.MobArena.framework.Arena;
 
 public class Leaderboard
 {
@@ -34,42 +31,17 @@ public class Leaderboard
     private boolean isValid;
     
     /**
-     * Default constructor.
+     * Private constructor.
      * Creates a new leaderboard with no signs or locations or anything.
      * @param plugin MobArena instance.
      * @param arena The arena to which this leaderboard belongs.
      */
-    public Leaderboard(MobArena plugin, Arena arena)
+    private Leaderboard(MobArena plugin, Arena arena)
     {
         this.plugin = plugin;
         this.arena  = arena;
         this.boards = new ArrayList<LeaderboardColumn>();
         this.stats  = new ArrayList<ArenaPlayerStatistics>();
-    }
-    
-    /**
-     * Config constructor.
-     * Used to create a leaderboard from the location persisted in the config-file.
-     * @param plugin MobArena instance.
-     * @param arena The arena to which this leaderboard belongs.
-     * @param config The config-file in which the location is specified.
-     */
-    public Leaderboard(MobArena plugin, Arena arena, Config config)
-    {
-        this(plugin, arena);
-        
-        // Grab the coords from the config-file.
-        String coords = config.getString("arenas." + arena.configName() + ".coords.leaderboard", null);
-        
-        if (coords != null)
-        {
-            // Grab the top left sign.
-            topLeft = Config.parseLocation(arena.getWorld(), coords);
-
-            // If it is a sign, validate.
-            if (topLeft.getBlock().getState() instanceof Sign)
-                isValid = isGridWellFormed();
-        }
     }
     
     /**
@@ -82,6 +54,10 @@ public class Leaderboard
     public Leaderboard(MobArena plugin, Arena arena, Location topLeft)
     {
         this(plugin, arena);
+        
+        if (topLeft == null) {
+            return;
+        }
         
         if (!(topLeft.getBlock().getState() instanceof Sign))
             throw new IllegalArgumentException("Block must be a sign!");
@@ -118,7 +94,7 @@ public class Leaderboard
     
     public void startTracking()
     {
-        trackingId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
+        trackingId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
             new Runnable()
             {
                 public void run()
@@ -130,7 +106,7 @@ public class Leaderboard
     
     public void stopTracking()
     {
-        Bukkit.getServer().getScheduler().cancelTask(trackingId);
+        plugin.getServer().getScheduler().cancelTask(trackingId);
     }
     
     /**
@@ -146,7 +122,7 @@ public class Leaderboard
         
         if (!(state instanceof Sign))
         {
-            MobArena.error("Leaderboards for '" + arena.configName() + "' could not be established!");
+            plugin.error("Leaderboards for '" + arena.configName() + "' could not be established!");
             return false;
         }
         
@@ -212,8 +188,21 @@ public class Leaderboard
             }
             
             // Create the column.
-            LeaderboardColumn column = LeaderboardColumn.create(stat.getShortName(), header, signs);
-            if (column == null) continue;
+            LeaderboardColumn column = null;
+            
+            // Switch on the type of stat
+            switch (stat) {
+                case PLAYER_NAME:
+                    column = new PlayerLeaderboardColumn(stat.getShortName(), header, signs);
+                    break;
+                case CLASS_NAME:
+                    column = new ClassLeaderboardColumn(stat.getShortName(), header, signs);
+                    break;
+                default:
+                    column = new IntLeaderboardColumn(stat.getShortName(), header, signs);
+                    break;
+            }
+            
             this.boards.add(column);
         }
         while ((header = getAdjacentSign(header, direction)) != null);

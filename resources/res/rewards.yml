@@ -1,0 +1,9 @@
+waves:
+    every:
+        '3': feather, bone, stick
+        '5': dirt:4, gravel:4, stone:4
+        '10': iron_ingot:10, gold_ingot:8
+    after:
+        '7': minecart, storage_minecart, powered_minecart
+        '13': iron_sword, iron_pickaxe, iron_spade
+        '16': diamond_sword

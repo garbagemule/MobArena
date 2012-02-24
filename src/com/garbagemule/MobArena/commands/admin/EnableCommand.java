@@ -1,30 +1,55 @@
 package com.garbagemule.MobArena.commands.admin;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import com.garbagemule.MobArena.*;
 import com.garbagemule.MobArena.commands.*;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 
-public class EnableCommand implements MACommand
+@CommandInfo(
+    name    = "enable",
+    pattern = "enable|on",
+    usage   = "/ma enable",
+    desc    = "enable MobArena or individual arenas",
+    permission = "mobarena.admin.enable"
+)
+public class EnableCommand implements Command
 {
     @Override
-    public String[] getNames() {
-        return new String[] { "enable" };
-    }
+    public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
+        // Grab the argument, if any.
+        String arg1 = (args.length > 0 ? args[0] : "");
+        
+        if (arg1.equals("all")) {
+            for (Arena arena : am.getArenas()) {
+                enable(arena, sender);
+            }
+            return true;
+        }
+        
+        if (!arg1.equals("")) {
+            Arena arena = am.getArenaWithName(arg1);
+            if (arena == null) {
+                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                return false;
+            }
 
-    @Override
-    public String getPermission() {
-        return "mobarena.admin.enable";
+            enable(arena, sender);
+            return true;
+        }
+        
+        am.setEnabled(true);
+        am.saveConfig();
+        Messenger.tellPlayer(sender, "MobArena " + ChatColor.GREEN + "enabled");
+        
+        return true;
     }
     
-    @Override
-    public boolean execute(MobArenaPlugin plugin, Player sender, String... args) {
-        return false;
-    }
-
-    @Override
-    public boolean executeFromConsole(MobArenaPlugin plugin, CommandSender sender, String... args) {
-        return false;
+    private void enable(Arena arena, CommandSender sender) {
+        arena.setEnabled(true);
+        arena.getSettings().getParent().save();
+        Messenger.tellPlayer(sender, "Arena '" + arena.configName() + "' " + ChatColor.GREEN + "enabled");
     }
 }

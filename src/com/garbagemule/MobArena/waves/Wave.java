@@ -1,137 +1,123 @@
 package com.garbagemule.MobArena.waves;
 
-import com.garbagemule.MobArena.Arena;
-import com.garbagemule.MobArena.util.WaveUtils;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.Location;
+
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.enums.*;
 
 public interface Wave
 {
-    public enum WaveBranch
-    {
-        SINGLE, RECURRENT;
-    }
-    
-    public enum WaveType
-    {
-        DEFAULT, SPECIAL, SWARM, BOSS;
-
-        public static WaveType fromString(String string)
-        {
-            return WaveUtils.getEnumFromString(WaveType.class, string);
-        }
-    }
-    
-    public enum WaveGrowth
-    {
-        OLD(0), SLOW(0.5), MEDIUM(0.65), FAST(0.8), PSYCHO(1.2);
-        private double exp;
-        
-        private WaveGrowth(double exp)
-        {
-            this.exp = exp;
-        }
-        
-        public static WaveGrowth fromString(String string)
-        {
-            return WaveUtils.getEnumFromString(WaveGrowth.class, string, OLD); 
-        }
-        
-        public int getAmount(int wave, int playerCount)
-        {
-            if (this == OLD) return wave + playerCount;
-            
-            double pc = (double) playerCount;
-            double w  = (double) wave;
-            
-            double base = Math.min(Math.ceil(pc/2) + 1, 13);
-            return (int) ( base * Math.pow(w, exp) );
-        }
-    }
-
-    public enum BossHealth
-    {
-        LOW(8), MEDIUM(15), HIGH(25), PSYCHO(40);
-        private int multiplier;
-        
-        private BossHealth(int multiplier)
-        {
-            this.multiplier = multiplier;
-        }
-        
-        public int getAmount(int playerCount)
-        {
-            return (playerCount + 1) * 20 * multiplier;
-        }
-        
-        public static BossHealth fromString(String string)
-        {
-            return WaveUtils.getEnumFromString(BossHealth.class, string);
-        }
-    }
-    
-    public enum SwarmAmount
-    {
-        LOW(10), MEDIUM(20), HIGH(30), PSYCHO(60);
-        private int multiplier;
-        
-        private SwarmAmount(int multiplier)
-        {
-            this.multiplier = multiplier;
-        }
-        
-        public int getAmount(int playerCount)
-        {
-            return Math.max(1, playerCount / 2) * multiplier;
-        }
-        
-        public static SwarmAmount fromString(String string)
-        {
-            return WaveUtils.getEnumFromString(SwarmAmount.class, string);
-        }
-    }
-
     /**
-     * The spawn() method must spawn one or more monsters in
-     * the arena. The monster count, damage, health, etc. can
-     * be modified by the wave parameter.
-     * @param wave Wave number
+     * Populate a map of which monsters and how many of each this
+     * wave should spawn, given the wave number, player count and
+     * an arena object.
+     * @param wave the current wave number
+     * @param playerCount the amount of players
+     * @param arena an Arena
+     * @return a collection of MACreatures and how many of each to spawn
      */
-    public void spawn(int wave);
+    public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena);
     
     /**
-     * Get the type of wave.
-     * @return The WaveType of this Wave.
+     * Get a list of spawnpoints upon which the monsters of this
+     * wave may be spawned. Note that it is expected that the
+     * getMonstersToSpawn() method is called first, and that each
+     * monster is then spawned on a location given in the list
+     * from this method.
+     * @param arena an Arena
+     * @return a list of valid spawnpoints
      */
-    public WaveType getType();
+    public List<Location> getSpawnpoints(Arena arena);
+    
+    /**
+     * Set the list of spawnpoints on which the monsters of this
+     * wave may be spawned. If the value is null, all spawnpoints
+     * of the arena region will be considered.
+     * @param spawnpoints a list of spawnpoints
+     */
+    public void setSpawnpoints(List<Location> spawnpoints);
+    
+    /**
+     * Announce to all players that this wave is spawning.
+     * @param arena an arena
+     * @param wave a wave number
+     */
+    public void announce(Arena arena, int wave);
+    
+    /**
+     * Get the wave's name.
+     * @return The name
+     */
+    public String getName();
+
+    /**
+     * Set the name of this wave.
+     * @param name a name
+     */
+    public void setName(String name);
 
     /**
      * Get the branch type.
      * @return The WaveBranch of this Wave.
      */
     public WaveBranch getBranch();
+
+    /**
+     * Set the type of branch
+     * @param branch recurrent or single
+     */
+    public void setBranch(WaveBranch branch);
     
     /**
-     * Get the growth rate of this wave.
-     * @return The growth rate
+     * Get the type of wave.
+     * @return a WaveType
      */
-    public WaveGrowth getGrowth();
+    public WaveType getType();
+
+    /**
+     * Set the type of wave.
+     * @param type a WaveType
+     */
+    public void setType(WaveType type);
     
     /**
-     * Get the first wave number for this wave
-     * @return The wave number
+     * Get the first wave this Wave instance may spawn on.
+     * @return a wave number
      */
-    public int getWave();
+    public int getFirstWave();
+
+    /**
+     * Set the first wave this Wave instance may spawn on.
+     * @param firstWave a wave number
+     */
+    public void setFirstWave(int firstWave);
     
     /**
      * Get the wave's frequency, i.e. wave number "modulo"
-     * @return The wave's frequency
+     * @return a frequency
      */
     public int getFrequency();
     
     /**
+     * Set the wave's frequency
+     * @param frequency a frequency
+     */
+    public void setFrequency(int frequency);
+    
+    /**
      * Get the wave's priority value.
-     * @return The priority
+     * @return a priority
      */
     public int getPriority();
+    
+    /**
+     * Set the wave's priority.
+     * @param priority a priority
+     */
+    public void setPriority(int priority);
     
     /**
      * Get the wave's health multiplier.
@@ -140,28 +126,22 @@ public interface Wave
     public double getHealthMultiplier();
     
     /**
+     * Get the wave's health multiplier.
+     * @param healthMultiplier a double in the range ]0;1]
+     */
+    public void setHealthMultiplier(double healthMultiplier);
+    
+    /**
      * Get the wave's amount multiplier.
      * @return The amount multiplier
      */
     public double getAmountMultiplier();
     
     /**
-     * Get the wave's name.
-     * @return The name
+     * Set the wave's amount multiplier.
+     * @param amountMultiplier a positive double
      */
-    public String getName();
-    
-    /**
-     * Get the arena of this wave.
-     * @return The arena
-     */
-    public Arena getArena();
-
-    /**
-     * Set the wave's growth
-     * @param growth How fast the wave will grow
-     */
-    public void setGrowth(WaveGrowth growth);
+    public void setAmountMultiplier(double amountMultiplier);
     
     /**
      * Check if this wave matches the wave number.
