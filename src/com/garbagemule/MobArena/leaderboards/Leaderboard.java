@@ -12,6 +12,7 @@ import org.bukkit.block.Sign;
 
 import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 
@@ -122,7 +123,7 @@ public class Leaderboard
         
         if (!(state instanceof Sign))
         {
-            plugin.error("Leaderboards for '" + arena.configName() + "' could not be established!");
+            Messenger.severe("Leaderboards for '" + arena.configName() + "' could not be established!");
             return false;
         }
         

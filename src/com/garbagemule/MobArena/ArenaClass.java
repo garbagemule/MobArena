@@ -211,8 +211,8 @@ public class ArenaClass
                 String perm   = entry.getKey() + ":" + entry.getValue();
                 String player = p.getName();
                 
-                plugin.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.name
-                               + "'.\nPlease verify that your class permissions are well-formed.");
+                Messenger.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.name
+                                + "'.\nPlease verify that your class permissions are well-formed.");
             }
         }
         return pa;

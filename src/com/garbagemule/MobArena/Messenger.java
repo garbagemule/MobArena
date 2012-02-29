@@ -2,6 +2,7 @@ package com.garbagemule.MobArena;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -14,6 +15,12 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class Messenger
 {
+    private static final Logger log = Logger.getLogger("Minecraft");
+    
+    private static final String prefix = "[MobArena] ";
+    
+    private Messenger() {}
+    
     public static boolean tellSpoutPlayer(Player p, Msg msg, String s, Material logo) {
         // Grab the SpoutPlayer.
         SpoutPlayer sp = MobArena.hasSpout ? SpoutManager.getPlayer(p) : null;
@@ -99,5 +106,17 @@ public class Messenger
 
     public static void tellAll(Arena arena, Msg msg) {
         tellAll(arena, msg, null, false);
+    }
+    
+    public static void info(String msg) {
+        log.info(prefix + msg);
+    }
+    
+    public static void warning(String msg) {
+        log.warning(prefix + msg);
+    }
+    
+    public static void severe(String msg) {
+        log.severe(prefix + msg);
     }
 }

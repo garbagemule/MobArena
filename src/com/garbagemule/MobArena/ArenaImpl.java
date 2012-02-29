@@ -13,8 +13,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.ContainerBlock;
-import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.Entity;
+//import org.bukkit.entity.EntityType; TODO USE THIS
+import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -93,7 +94,7 @@ public class ArenaImpl implements Arena
     private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     
     // Misc
-    private ArenaListenerImpl eventListener;
+    private ArenaListener eventListener;
     private List<ItemStack> entryFee;
     //private ArenaLog log;
     private TimeStrategy timeStrategy;
@@ -150,7 +151,7 @@ public class ArenaImpl implements Arena
         this.afterWaveMap = MAUtils.getArenaRewardMap(plugin, config, name, "after");
         
         // Misc
-        this.eventListener = new ArenaListenerImpl(this, plugin);
+        this.eventListener = new ArenaListener(this, plugin);
         this.entryFee      = ItemParser.parseItems(settings.getString("entry-fee", ""));
         this.allowMonsters = world.getAllowMonsters();
         this.allowAnimals  = world.getAllowAnimals();
@@ -295,7 +296,7 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    public ArenaListenerImpl getEventListener() {
+    public ArenaListener getEventListener() {
         return eventListener;
     }
 
@@ -669,6 +670,7 @@ public class ArenaImpl implements Arena
             p.getInventory().removeItem(new ItemStack(Material.BONE, petAmount));
             
             for (int i = 0; i < petAmount; i++) {
+                //Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), EntityType.WOLF); TODO USE THIS
                 Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
                 wolf.setTamed(true);
                 wolf.setOwner(p);
@@ -937,7 +939,7 @@ public class ArenaImpl implements Arena
         {
             if (classes.isEmpty())
             {
-                plugin.info("Player '" + p.getName() + "' has no class permissions!");
+                Messenger.info("Player '" + p.getName() + "' has no class permissions!");
                 playerLeave(p);
                 return;
             }
@@ -972,8 +974,8 @@ public class ArenaImpl implements Arena
                 String perm = entry.getKey() + ":" + entry.getValue();
                 String name = p.getName();
 
-                plugin.warning("[PERM01] Failed to remove permission attachment '" + perm + "' from player '" + name
-                               + "'.\nThis should not be a big issue, but please verify that the player doesn't have any permissions they shouldn't have.");
+                Messenger.warning("[PERM01] Failed to remove permission attachment '" + perm + "' from player '" + name
+                                  + "'.\nThis should not be a big issue, but please verify that the player doesn't have any permissions they shouldn't have.");
             }
         }
         p.recalculatePermissions();

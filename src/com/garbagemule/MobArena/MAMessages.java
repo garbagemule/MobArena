@@ -49,7 +49,7 @@ public class MAMessages
             return true;
         }
         catch (Exception e) {
-            plugin.warning("Couldn't initialize announcements-file. Using defaults.");
+            Messenger.warning("Couldn't initialize announcements-file. Using defaults.");
             return false;
         }
     }
@@ -74,7 +74,7 @@ public class MAMessages
         }
         catch (Exception e) {
             e.printStackTrace();
-            plugin.warning("Problem with announcements-file. Using defaults.");
+            Messenger.warning("Problem with announcements-file. Using defaults.");
             return;
         }
     }
@@ -92,7 +92,7 @@ public class MAMessages
         // Split the string by the equals-sign.
         String[] split = s.split("=");
         if (split.length != 2) {
-            plugin.warning("Couldn't parse \"" + s + "\". Check announcements-file.");
+            Messenger.warning("Couldn't parse \"" + s + "\". Check announcements-file.");
             return;
         }
 
@@ -110,7 +110,7 @@ public class MAMessages
             msg.setSpout(spoutVal);
         }
         catch (Exception e) {
-            plugin.warning(key + " is not a valid key. Check announcements-file.");
+            Messenger.warning(key + " is not a valid key. Check announcements-file.");
             return;
         }
     }

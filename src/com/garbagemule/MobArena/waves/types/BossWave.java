@@ -7,14 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
-import com.garbagemule.MobArena.waves.BossAbility;
 import com.garbagemule.MobArena.waves.BossAbilityThread;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.ability.Ability;
+import com.garbagemule.MobArena.waves.ability.AbilityInfo;
 import com.garbagemule.MobArena.waves.enums.*;
-import com.garbagemule.MobArena.MobArena;
 
 public class BossWave extends AbstractWave
 {
@@ -22,7 +24,7 @@ public class BossWave extends AbstractWave
     private Set<MABoss> bosses;
     private BossHealth health;
     
-    private List<BossAbility> abilities;
+    private List<Ability> abilities;
     private boolean activated;
     
     private int abilityInterval;
@@ -30,7 +32,7 @@ public class BossWave extends AbstractWave
     public BossWave(MACreature monster) {
         this.monster   = monster;
         this.bosses    = new HashSet<MABoss>();
-        this.abilities = new ArrayList<BossAbility>();
+        this.abilities = new ArrayList<Ability>();
         this.activated = false;
         this.setType(WaveType.BOSS);
     }
@@ -64,7 +66,7 @@ public class BossWave extends AbstractWave
         return result;
     }
     
-    public void addBossAbility(BossAbility ability) {
+    public void addBossAbility(Ability ability) {
         abilities.add(ability);
     }
     
@@ -82,16 +84,12 @@ public class BossWave extends AbstractWave
         }
         
         BossAbilityThread bat = new BossAbilityThread(this, abilities, arena);
-        scheduleTask(arena, bat, 100);
+        arena.scheduleTask(bat, 100);
         activated = true;
     }
     
-    public void scheduleTask(Arena arena, Runnable r, int delay) {
-        MobArena plugin = arena.getPlugin();
-        
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(
-                plugin,
-                r,
-                delay);
+    public void announceAbility(Ability ability, MABoss boss, Arena arena) {
+        AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
+        Messenger.tellAll(arena, Msg.WAVE_BOSS_ABILITY, info.name());
     }
 }

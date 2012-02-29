@@ -9,8 +9,6 @@ import com.garbagemule.MobArena.waves.Wave;
 
 public class NewWaveEvent extends Event implements Cancellable
 {
-    private static final long serialVersionUID = -8743818273565357180L;
-    
     private static final HandlerList handlers = new HandlerList();
     private Arena arena;
     private boolean cancelled;

@@ -1,88 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="MobArena" default="dist" basedir=".">
     <property name="pluginname" value="MobArena" />
-    <property name="server" location="D:\General\Java\Minecraft\Minecraft Server\plugins" />
 
-    <property name="src"  location="src" />
-    <property name="test" location="test" />
-    <property name="bin"  location="build" />
-    <property name="lib"  location="lib" />
-    <property name="res"  location="resources" />
+    <!-- Folders -->
+    <property name="src" location="src" />
+    <property name="bin" location="build" />
+    <property name="lib" location="lib" />
+    <property name="res" location="resources" />
+    <property name="server" location="D:\General\Java\Minecraft\Minecraft Server\plugins" />
+    
+    <property name="ability-src"  location="abilities" />
+    <property name="ability-dest" location="${res}/res/abilities" />
+    
+    <!-- Dependency variables -->
+    <property name="cbver" value="1.1-R4" />
+    <property name="cbjar" value="craftbukkit-${cbver}.jar" />
+    <property name="cburl" value="http://repo.bukkit.org/content/repositories/releases/org/bukkit/craftbukkit/${cbver}/${cbjar}" />
+    
+    <property name="vltver" value="1.2.10" />
+    <property name="vltjar" value="Vault-${vltver}-SNAPSHOT.jar" />
+    <property name="vlturl" value="http://ci.milkbowl.net/job/Vault/Recommended%20Build/artifact/target/${vltjar}" />
+    
+    <property name="herojar" value="Heroes.jar" />
+    <property name="herourl" value="http://ci.milkbowl.net/job/Heroes/Heroic%20Build/artifact/build/${herojar}" />
+    
+    <property name="sptjar" value="SpoutPluginAPI.jar" />
+    <property name="spturl" value="http://ci.spout.org/job/SpoutPluginAPI/Recommended/artifact/target/${sptjar}" />
+    
+    <property name="msjar" value="MagicSpells.jar" />
+    <property name="msurl" value="http://dev.bukkit.org/media/files/575/866/${msjar}" />
 
     <path id="classpath">
-        <fileset dir="${lib}" includes="**/*.jar" />
-        <fileset dir="${res}" includes="**/*.*" />
+        <fileset dir="${lib}" includes="*.jar" />
+        <!--<fileset dir="${res}" includes="**/*.*" />-->
         <pathelement location="${bin}" />
     </path>
+    
+    <fileset id="" dir="${src}">
+    </fileset>
 
     <target name="clean">
         <delete dir="${bin}" />
     </target>
 
-    <target name="prepare">
+    <target name="prepare-bin">
         <mkdir dir="${bin}" />
+    </target>
+    
+    <target name="prepare-lib">
+        <mkdir dir="${lib}" />
+    </target>
+    
+    <target name="copy-abilities">
+        <mkdir dir="${ability-dest}" />
+        <copy toDir="${ability-dest}">
+            <fileset dir="${ability-src}" />
+        </copy>
+    </target>
+    
+    <target name="cleanup-abilities">
+        <delete dir="${ability-dest}" />
     </target>
 
     <!-- Compile the source and put in the bin-folder -->
-    <target name="build-src" depends="prepare">
+    <target name="build-src" depends="prepare-bin">
         <javac target="1.6" source="1.6"
             srcdir="${src}" destdir="${bin}"
             debug="on" debuglevel="lines,vars,source"
-            includeantruntime="no"
-            classpathref="classpath"/>
+            includeantruntime="no">
+            <compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+        </javac>
     </target>
     
-    <target name="build-src-with-deprecation-check" depends="prepare">
+    <target name="build-src-with-deprecation-check" depends="prepare-bin">
         <javac target="1.6" source="1.6"
             srcdir="${src}" destdir="${bin}"
             debug="on" debuglevel="lines,vars,source"
-            includeantruntime="no"
-            classpathref="classpath">
+            includeantruntime="no">
             <compilerarg value="-Xlint:deprecation"/>
+            <compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
         </javac>
     </target>
 
-    <target name="build-test" depends="build-src">
-        <javac target="1.6" source="1.6"
-            srcdir="${test}" destdir="${bin}"
-            debug="on" debuglevel="lines,vars,source"
-            includeantruntime="no" classpathref="classpath" />
-    </target>
-
     <!-- Build a .jar and copy to server's plugins-folder -->
-    <target name="dist" depends="build-src">
+    <target name="dist" depends="build-src-with-deprecation-check, copy-abilities">
         <delete file="${pluginname}.jar" />
         <jar jarfile="${pluginname}.jar">
             <!-- Include the class-files (bin) and the resources (res) -->
             <fileset dir="${bin}" />
             <fileset dir="${res}" />
-            <!-- Set up the classpath so MobArena can find JDOM if needed -->
-            <manifest>
-                <attribute name="Main-Class" value="com.garbagemule.MobArena.MobArena" />
-                <attribute name="Class-Path" value="plugins/MobArena/lib/jdom.jar MobArena/lib/jdom.jar" />
-            </manifest>
         </jar>
-        <!-- Copy to server and clean up -->
+        <!-- Copy to server -->
         <copy file="${pluginname}.jar" tofile="${server}/${pluginname}.jar" />
-        <!--<delete dir="${bin}"/>-->
-    </target>
-
-    <target name="test-config" depends="build-test">
-        <java classname="org.junit.runner.JUnitCore">
-            <arg value="garbagemule.mobarena.standard.config.TestNewConfigVsOldConfig" />
-            <arg value="garbagemule.mobarena.standard.config.TestAdditionalConfigMethods" />
-            <arg value="garbagemule.mobarena.standard.config.TestConfigCorrectness" />
-            <classpath refid="classpath" />
-        </java>
-    </target>
-
-    <target name="test-commands" depends="build-test">
-        <java classname="org.junit.runner.JUnitCore">
-            <arg value="garbagemule.mobarena.standard.TestUserCommands" />
-            <classpath refid="classpath" />
-        </java>
+        <delete dir="${ability-dest}" />
     </target>
     
-    <target name="test" depends="test-config,
-                                 test-commands" />
+    <!-- Download all dependency jars from the given URLs -->
+    <target name="download-dependencies" depends="prepare-lib">
+        <get src="${cburl}"
+             dest="${lib}/${cbjar}"
+             usetimestamp="true"
+             skipexisting="true" />
+        <get src="${vlturl}"
+             dest="${lib}/${vltjar}"
+             usetimestamp="true"
+             skipexisting="true" />
+        <get src="${herourl}"
+             dest="${lib}/${herojar}"
+             usetimestamp="true"
+             skipexisting="true" />
+        <get src="${spturl}"
+             dest="${lib}/${sptjar}"
+             usetimestamp="true"
+             skipexisting="true" />
+        <get src="${msurl}"
+             dest="${lib}/${msjar}"
+             usetimestamp="true"
+             skipexisting="true" />
+    </target>
 </project>

@@ -294,7 +294,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // If the section doesn't exist, the class doesn't either.
         if (section == null) {
-            plugin.error("Failed to load class '" + TextUtils.camelCase(className) + "'.");
+            Messenger.severe("Failed to load class '" + TextUtils.camelCase(className) + "'.");
             return null;
         }
 
@@ -489,14 +489,14 @@ public class ArenaMasterImpl implements ArenaMaster
             world = plugin.getServer().getWorld(worldName);
 
             if (world == null) {
-                plugin.error("The world '" + worldName + "' for arena '" + arenaName + "' does not exist!");
+                Messenger.severe("The world '" + worldName + "' for arena '" + arenaName + "' does not exist!");
                 return null;
             }
         }
         // Otherwise, use the default world.
         else {
             world = plugin.getServer().getWorlds().get(0);
-            plugin.warning("Could not find the world for arena '" + arenaName + "'. Using default world ('" + world.getName() + "')! Check the config-file!");
+            Messenger.warning("Could not find the world for arena '" + arenaName + "'. Using default world ('" + world.getName() + "')! Check the config-file!");
         }
 
         // Assert all settings nodes.

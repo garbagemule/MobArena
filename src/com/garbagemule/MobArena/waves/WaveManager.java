@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.waves;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigSection;
@@ -55,7 +56,7 @@ public class WaveManager
         finalWave = config.getInt("arenas." + arena.configName() + ".settings.final-wave", 0);
         
         if (recurrentWaves.isEmpty()) {
-            arena.getPlugin().warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));
+            Messenger.warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));
             
             Wave def = WaveParser.createDefaultWave();
             recurrentWaves.add(def);

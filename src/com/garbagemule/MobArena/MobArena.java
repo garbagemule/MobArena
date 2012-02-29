@@ -33,6 +33,7 @@ import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
+import com.garbagemule.MobArena.waves.ability.AbilityManager;
 
 /**
  * MobArena
@@ -62,11 +63,11 @@ public class MobArena extends JavaPlugin
 
     public void onEnable() {
         // Create default files and initialize config-file
-        FileUtils.extractDefaults(this, "config.yml");
+        FileUtils.extractResource(this.getDataFolder(), "config.yml");
         loadConfigFile();
         
-        // Download external libraries if needed.
-        FileUtils.fetchLibs(this, config);
+        // Load boss abilities
+        loadAbilities();
         
         // Set up soft dependencies
         setupVault();
@@ -89,7 +90,7 @@ public class MobArena extends JavaPlugin
         registerListeners();
         
         // Announce enable!
-        info("v" + this.getDescription().getVersion() + " enabled.");
+        Messenger.info("v" + this.getDescription().getVersion() + " enabled.");
     }
     
     public void onDisable() {
@@ -103,7 +104,7 @@ public class MobArena extends JavaPlugin
         }
         arenaMaster.resetArenaMap();
         
-        info("disabled.");
+        Messenger.info("disabled.");
     }
     
     private void loadConfigFile() {
@@ -145,15 +146,10 @@ public class MobArena extends JavaPlugin
         return has((Player) sender, s);
     }
     
-    // Console printing
-    public void info(String msg)    { getServer().getLogger().info("[MobArena] " + msg); }
-    public void warning(String msg) { getServer().getLogger().warning("[MobArena] " + msg); }    
-    public void error(String msg)   { getServer().getLogger().severe("[MobArena] " + msg); }
-    
     private void setupVault() {
         Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
         if (vaultPlugin == null) {
-            warning("Vault was not found. Economy rewards will not work!");
+            Messenger.warning("Vault was not found. Economy rewards will not work!");
             return;
         }
         
@@ -163,7 +159,7 @@ public class MobArena extends JavaPlugin
         if (e != null) {
             economy = e.getProvider();
         } else {
-            warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
+            Messenger.warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
         }
     }
     
@@ -190,6 +186,13 @@ public class MobArena extends JavaPlugin
     
     private void setupStrategies() {
         healthStrategy = (hasHeroes ? new HealthStrategyHeroes() : new HealthStrategyStandard());
+    }
+    
+    private void loadAbilities() {
+        File dir = new File(this.getDataFolder(), "abilities");
+        if (!dir.exists()) dir.mkdir();
+        
+        AbilityManager.loadAbilities(dir);
     }
     
     public HealthStrategy getHealthStrategy() {

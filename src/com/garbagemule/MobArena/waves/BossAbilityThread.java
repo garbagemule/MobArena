@@ -4,16 +4,17 @@ import java.util.List;
 import java.util.Set;
 
 import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.types.BossWave;
 
 public class BossAbilityThread implements Runnable
 {
     private BossWave wave;
-    private List<BossAbility> abilities;
+    private List<Ability> abilities;
     private Arena arena;
     private int counter;
     
-    public BossAbilityThread(BossWave wave, List<BossAbility> abilities, Arena arena) {
+    public BossAbilityThread(BossWave wave, List<Ability> abilities, Arena arena) {
         this.wave      = wave;
         this.abilities = abilities;
         this.arena     = arena;
@@ -39,14 +40,15 @@ public class BossAbilityThread implements Runnable
         }
         
         // Get the next ability in the list.
-        BossAbility ability = abilities.get(counter++ % abilities.size());
+        Ability ability = abilities.get(counter++ % abilities.size());
         
         // And make each boss in this boss wave use it!
         for (MABoss boss : bosses) {
-            ability.run(arena, boss.getEntity());
+            wave.announceAbility(ability, boss, arena);
+            ability.execute(arena, boss);
         }
         
         // Schedule for another run!
-        wave.scheduleTask(arena, this, wave.getAbilityInterval());
+        arena.scheduleTask(this, wave.getAbilityInterval());
     }
 }

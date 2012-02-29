@@ -9,8 +9,6 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class ArenaPlayerLeaveEvent extends Event implements Cancellable
 {
-    private static final long serialVersionUID = -8942511403871825734L;
-    
     private static final HandlerList handlers = new HandlerList();
     private Player player;
     private Arena arena;

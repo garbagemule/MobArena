@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.ArenaListenerImpl;
+import com.garbagemule.MobArena.ArenaListener;
 import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.MASpawnThread;
 import com.garbagemule.MobArena.MobArena;
@@ -75,7 +75,7 @@ public interface Arena
     
     public Location getPlayerEntry(Player p);
     
-    public ArenaListenerImpl getEventListener();
+    public ArenaListener getEventListener();
     
     public void setLeaderboard(Leaderboard leaderboard);
     

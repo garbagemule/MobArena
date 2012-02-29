@@ -157,7 +157,7 @@ public class MAUtils
         //for (Player p : arena.livePlayers)
         for (Player p : arena.getPlayersInArena()) {
             if (!arena.getWorld().equals(p.getWorld())) {
-                plugin.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 Messenger.tellPlayer(p, "You warped out of the arena world.");
                 continue;
@@ -179,7 +179,7 @@ public class MAUtils
         catch (Exception e) {
             p.kickPlayer("Banned for life! No, but stop trying to cheat in MobArena!");
             if (plugin != null) {
-                plugin.warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
+                Messenger.warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
             }
             return Double.MAX_VALUE;
         }
@@ -247,7 +247,7 @@ public class MAUtils
                         buffy.append(", ");
                     }
                     else {
-                        plugin.warning("Tried to do some money stuff, but no economy plugin was detected!");
+                        Messenger.warning("Tried to do some money stuff, but no economy plugin was detected!");
                         return buffy.toString();
                     }
                     continue;
@@ -343,7 +343,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            plugin.warning("Couldn't create backup file. Aborting auto-generate...");
+            Messenger.warning("Couldn't create backup file. Aborting auto-generate...");
             return false;
         }
         
@@ -481,7 +481,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            if (error) plugin.warning("Couldn't find backup file for arena '" + name + "'");
+            if (error) Messenger.warning("Couldn't find backup file for arena '" + name + "'");
             return false;
         }
         

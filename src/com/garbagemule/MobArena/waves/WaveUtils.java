@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.*;
 import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 
 public class WaveUtils
@@ -41,7 +42,7 @@ public class WaveUtils
         
         // If no spawnpoints in range, just return all of them.
         if (result.isEmpty()) {
-            plugin.warning("Spawnpoints of arena '" + arena.configName() + "' may be too far apart!");
+            Messenger.warning("Spawnpoints of arena '" + arena.configName() + "' may be too far apart!");
             return spawnpoints;
         }
         return result;
@@ -49,7 +50,6 @@ public class WaveUtils
     
     public static Player getClosestPlayer(Arena arena, Entity e)
     {
-        MobArena plugin = arena.getPlugin();
         // Set up the comparison variable and the result.
         double dist    = 0;
         double current = Double.POSITIVE_INFINITY;
@@ -61,7 +61,7 @@ public class WaveUtils
         {
             if (!arena.getWorld().equals(p.getWorld()))
             {
-                plugin.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 continue;
             }

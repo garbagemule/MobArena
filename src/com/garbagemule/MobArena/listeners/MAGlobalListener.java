@@ -13,7 +13,6 @@ import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.framework.ArenaListener.TeleportResponse;
 import com.garbagemule.MobArena.leaderboards.Stats;
 import com.garbagemule.MobArena.util.VersionChecker;
 
@@ -250,6 +249,10 @@ public class MAGlobalListener implements Listener
         
         plugin.restoreInventory(event.getPlayer());
     }
+    
+    public enum TeleportResponse {
+        ALLOW, REJECT, IDGAF
+    }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerTeleport(PlayerTeleportEvent event) {
@@ -273,6 +276,13 @@ public class MAGlobalListener implements Listener
         // Only cancel if at least one arena has rejected the teleport.
         if (!allow) {
             event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void playerPreLogin(PlayerPreLoginEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onPlayerPreLogin(event);
         }
     }
 }

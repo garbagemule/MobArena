@@ -8,8 +8,6 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class ArenaPlayerDeathEvent extends Event
 {
-    private static final long serialVersionUID = 8945689670354700831L;
-    
     private static final HandlerList handlers = new HandlerList();
     private Player player;
     private Arena arena;
