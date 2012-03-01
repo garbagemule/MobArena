@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -18,20 +22,50 @@ public class FileUtils
      * Note that even if the resources have different paths, they will all
      * be extracted to the given directory.
      * @param dir a directory
-     * @param resources an array of resources to extract
+     * @param resources a list of resources to extract
      * @return a list of all the files that were written
      */
-    public static List<File> extractResources(File dir, String... resources) {
+    public static List<File> extractResources(File dir, List<String> resources) {
+        return extractResources(dir, "", resources);
+    }
+    
+    public static List<File> extractResources(File dir, String path, List<String> filenames) {
         List<File> files = new ArrayList<File>();
         
-        for (String resource : resources) {
-            File file = extractResource(dir, resource);
+        // If the path is empty, just forget about it.
+        if (!path.equals("")) {
+            // We want no leading slashes
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            
+            // But we do want trailing slashes
+            if (!path.endsWith("/")) {
+                path = path + "/";
+            }
+        }
+        
+        // Extract each resource
+        for (String filename : filenames) {
+            File file = extractResource(dir, path + filename);
             
             if (file != null) {
                 files.add(file);
             }
         }
         return files;
+    }
+
+    /**
+     * Extracts all of the given resources to the given directory.
+     * Convenience method, used if one is too lazy to create a new list for
+     * the resource names.
+     * @param dir a directory
+     * @param resources an array of resources to extract
+     * @return a list of all the files that were written
+     */
+    public static List<File> extractResources(File dir, String... resources) {
+        return extractResources(dir, Arrays.asList(resources));
     }
     
     /**
@@ -75,6 +109,53 @@ public class FileUtils
         catch (Exception e) {}
         
         return null;
+    }
+    
+    /**
+     * Lists all files in the MobArena jar file that exist on the given path.
+     * The resulting list contains only filenames (with extensions)
+     * @param path the path of the jar file to list files from
+     * @param ext the file extension of the file type, can be null or the empty string
+     * @return a list of file names
+     */
+    public static List<String> listFilesOnPath(String path, String ext) {
+        try {
+            // If the jar can't be found for some odd reason, escape.
+            File file = new File("plugins" + File.separator + "MobArena.jar");
+            if (file == null || !file.exists()) return null;
+            
+            // Create a JarFile out of the.. jar file
+            JarFile jarFile = new JarFile(file);
+            List<String> result = new ArrayList<String>();
+            
+            // JarEntry names never start with /
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            
+            // If null, replace with the empty string.
+            if (ext == null) {
+                ext = "";
+            }
+            // Require that extensions start with a period
+            else if (!ext.startsWith(".")) {
+                ext = "." + ext;
+            }
+            
+            // Loop through all entries, add the ones that match the path and extension
+            for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
+                String name = entries.nextElement().getName();
+                
+                if (name.startsWith(path) && name.endsWith(ext)) {
+                    result.add(getFilename(name));
+                }
+            }
+            return result;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<String>(1);
+        }
     }
     
     private static String getFilename(String resource) {

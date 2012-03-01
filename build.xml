@@ -30,14 +30,11 @@
     <property name="msjar" value="MagicSpells.jar" />
     <property name="msurl" value="http://dev.bukkit.org/media/files/575/866/${msjar}" />
 
+    
     <path id="classpath">
         <fileset dir="${lib}" includes="*.jar" />
-        <!--<fileset dir="${res}" includes="**/*.*" />-->
         <pathelement location="${bin}" />
     </path>
-    
-    <fileset id="" dir="${src}">
-    </fileset>
 
     <target name="clean">
         <delete dir="${bin}" />
@@ -51,18 +48,22 @@
         <mkdir dir="${lib}" />
     </target>
     
-    <target name="copy-abilities">
+    <target name="prepare-abilities">
+        <mkdir dir="${ability-dest}" />
+    </target>
+    
+    <!--<target name="copy-abilities">
         <mkdir dir="${ability-dest}" />
         <copy toDir="${ability-dest}">
             <fileset dir="${ability-src}" />
         </copy>
-    </target>
+    </target>-->
     
     <target name="cleanup-abilities">
         <delete dir="${ability-dest}" />
     </target>
-
-    <!-- Compile the source and put in the bin-folder -->
+    
+    <!-- Builds the source code -->
     <target name="build-src" depends="prepare-bin">
         <javac target="1.6" source="1.6"
             srcdir="${src}" destdir="${bin}"
@@ -72,6 +73,7 @@
         </javac>
     </target>
     
+    <!-- Builds the source code and shows deprecation issues -->
     <target name="build-src-with-deprecation-check" depends="prepare-bin">
         <javac target="1.6" source="1.6"
             srcdir="${src}" destdir="${bin}"
@@ -81,9 +83,19 @@
             <compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
         </javac>
     </target>
+    
+    <!-- Builds the ability source code and places it in the resources folder -->
+    <target name="build-abilities" depends="prepare-abilities">
+        <javac target="1.6" source="1.6"
+            srcdir="${ability-src}" destdir="${ability-dest}"
+            debug="on" debuglevel="lines,vars,source"
+            includeantruntime="no">
+            <compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+        </javac>
+    </target>
 
     <!-- Build a .jar and copy to server's plugins-folder -->
-    <target name="dist" depends="build-src-with-deprecation-check, copy-abilities">
+    <target name="dist" depends="build-src-with-deprecation-check, build-abilities">
         <delete file="${pluginname}.jar" />
         <jar jarfile="${pluginname}.jar">
             <!-- Include the class-files (bin) and the resources (res) -->

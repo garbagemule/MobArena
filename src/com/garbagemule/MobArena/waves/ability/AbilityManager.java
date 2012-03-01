@@ -41,52 +41,47 @@ public class AbilityManager
     public static void loadAbilities(File classDir) {
         abilities = new HashMap<String,Ability>();
         
-        // Extract all of the source files.
+        // Grab the source directory.
         File javaDir = new File(classDir, "src");
-        extractSourceFiles(javaDir);
         
-        // The custom abilities to compile will be in the 'src'-dir
-        compileAbilities(javaDir, classDir);
+        /* If the source directory exists, we need to verify that the system
+         * has a java compiler before attempting anything. If not, we need to
+         * skip the compiling step and just go straight to loading in the
+         * existing class files. */
+        if (javaDir.exists()) {
+            if (ToolProvider.getSystemJavaCompiler() != null) {
+                compileAbilities(javaDir, classDir);
+            } else {
+                Messenger.warning("Found plugins/MobArena/abilites/src/ folder, but no Java compiler. The source files will not be compiled!");
+            }
+        }
+        
+        /* If there is only one file in the directory, make sure it isn't the
+         * src/ folder, in which case there will be no .class files to load.
+         * In the case of no .class files, extract the defaults. */
+        String[] files = classDir.list();
+        if (files.length == 0 || (files.length == 1 && files[0].equals("src"))) {
+            Messenger.info("No boss abilities found. Extracting defaults...");
+            extractDefaultAbilities(classDir);
+        }
         
         // Load all the custom abilities.
         loadClasses(classDir);
     }
     
-    private static void extractSourceFiles(File javaDir) {
-        // Only extract the files if the folder doesn't exist.
-        if (javaDir.exists()) return;
+    private static void extractDefaultAbilities(File classDir) {
+        // Grab a list of all the class files.
+        List<String> resources = FileUtils.listFilesOnPath("res/abilities/", ".class");
         
-        String path = "abilities/";
+        // Check that there is stuff to extract.
+        if (resources == null || resources.isEmpty()) {
+            Messenger.severe("Couldn't extract the default boss abilities!");
+            return;
+        }
         
-        List<String> files = new ArrayList<String>();
-
-        files.add(path + "ChainLightning.java");
-        files.add(path + "LivingBomb.java");
-        files.add(path + "ObsidianBomb.java");
-        files.add(path + "Flood.java");
-        files.add(path + "WarpToPlayer.java");
-        files.add(path + "RootTarget.java");
-        files.add(path + "ShufflePositions.java");
-
-        files.add(path + "ShootArrow.java");
-        files.add(path + "ShootFireball.java");
-        
-        files.add(path + "FireAura.java");
-        files.add(path + "LightningAura.java");
-        
-        files.add(path + "DisorientDistant.java");
-        files.add(path + "DisorientNearby.java");
-        files.add(path + "DisorientTarget.java");
-        
-        files.add(path + "PullDistant.java");
-        files.add(path + "PullNearby.java");
-        files.add(path + "PullTarget.java");
-        
-        files.add(path + "ThrowDistant.java");
-        files.add(path + "ThrowNearby.java");
-        files.add(path + "ThrowTarget.java");
-        
-        FileUtils.extractResources(javaDir, files.toArray(new String[0]));
+        // Extract everything.
+        List<File> files = FileUtils.extractResources(classDir, "abilities/", resources);
+        Messenger.info("Extracted abilities: " + fileListToString(files, "$"));
     }
     
     private static void compileAbilities(File javaDir, File classDir) {
@@ -100,27 +95,33 @@ public class AbilityManager
             return;
         }
         
-        // Get the compiler and the file manager
+        // Notify the console.
+        Messenger.info("Compiling abilities: " + fileListToString(toCompile));
+        
+        // Get the compiler
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         
         // Generate some JavaFileObjects
-        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(toCompile);
-        
-        // Include the MobArena.jar on the classpath, and set the destination folder.
-        List<String> options = Arrays.asList("-classpath", classpath, "-d", classDir.getPath());
-        
-        // Set up the compilation task.
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, options, null, compilationUnits);
-        
-        // Call the task.
-        task.call();
-        
-        // And close the file manager.
         try {
+            Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(toCompile);
+            
+            // Include the MobArena.jar on the classpath, and set the destination folder.
+            List<String> options = Arrays.asList("-classpath", classpath, "-d", classDir.getPath());
+            
+            // Set up the compilation task.
+            JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, options, null, compilationUnits);
+            
+            // Call the task.
+            task.call();
+            
+            // And close the file manager.
             fileManager.close();
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            Messenger.severe("Compilation step failed...");
+            e.printStackTrace();
+        }
     }
     
     private static List<File> getSourceFilesToCompile(File javaDir, File classDir) {
@@ -264,16 +265,27 @@ public class AbilityManager
         return null;
     }
     
-    /**
-     * Turn an array of aliases into a comma-separated string of aliases.
-     * @param aliases an array of Strings
-     * @return a comma-separated String
-     */
-    /*private static String aliasString(String[] aliases) {
+    private static String fileListToString(List<File> list) {
+        return fileListToString(list, null);
+    }
+    
+    private static String fileListToString(List<File> list, String exclude) {
+        if (list.isEmpty()) return "";
+        
         StringBuffer buffy = new StringBuffer();
-        for (String a : aliases) {
-            buffy.append(a + ", ");
+        
+        for (File file : list) {
+            String name = file.getName();
+            int dot = name.lastIndexOf(".");
+            
+            if (exclude != null && name.contains(exclude)) {
+                continue;
+            }
+            
+            buffy.append(", " + name.substring(0, dot));
         }
-        return buffy.substring(0, buffy.length() - 2);
-    }*/
+        
+        // Trim off the first ", ".
+        return buffy.substring(2);
+    }
 }
