@@ -12,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -53,6 +52,7 @@ import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
@@ -148,7 +148,7 @@ public class ArenaListener
             BlockState state = b.getState();
 
             Repairable r = null;
-            if (state instanceof ContainerBlock)
+            if (state instanceof InventoryHolder)
                 r = new RepairableContainer(state);
             else if (state instanceof Sign)
                 r = new RepairableSign(state);
@@ -289,7 +289,7 @@ public class ArenaListener
 
             // Create a Repairable from the block.
             Repairable r = null;
-            if (state instanceof ContainerBlock)
+            if (state instanceof InventoryHolder)
                 r = new RepairableContainer(state);
             else if (state instanceof Sign)
                 r = new RepairableSign(state);

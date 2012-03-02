@@ -12,7 +12,6 @@ public class ShootArrow implements Ability
 {
     @Override
     public void execute(Arena arena, MABoss boss) {
-        //boss.getEntity().launchProjectile(Arrow.class);
-        boss.getEntity().shootArrow();
+        boss.getEntity().launchProjectile(Arrow.class);
     }
 }

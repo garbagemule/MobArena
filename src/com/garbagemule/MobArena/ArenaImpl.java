@@ -12,16 +12,15 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.entity.Entity;
-//import org.bukkit.entity.EntityType; TODO USE THIS
-import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Wolf;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
@@ -670,8 +669,8 @@ public class ArenaImpl implements Arena
             p.getInventory().removeItem(new ItemStack(Material.BONE, petAmount));
             
             for (int i = 0; i < petAmount; i++) {
-                //Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), EntityType.WOLF); TODO USE THIS
-                Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
+                Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), EntityType.WOLF);
+                //Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
                 wolf.setTamed(true);
                 wolf.setOwner(p);
                 wolf.setHealth(wolf.getMaxHealth());
@@ -775,7 +774,7 @@ public class ArenaImpl implements Arena
                 public void run() {
                     for (Location loc : region.getContainers()) {
                         BlockState state = world.getBlockAt(loc).getState();
-                        if (state instanceof ContainerBlock) {
+                        if (state instanceof InventoryHolder) {
                             containables.add(new RepairableContainer(state, false));
                         }
                     }

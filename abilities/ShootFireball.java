@@ -12,7 +12,6 @@ public class ShootFireball implements Ability
 {
     @Override
     public void execute(Arena arena, MABoss boss) {
-        //boss.getEntity().launchProjectile(Fireball.class);
-        boss.getEntity().throwEgg();
+        boss.getEntity().launchProjectile(Fireball.class);
     }
 }

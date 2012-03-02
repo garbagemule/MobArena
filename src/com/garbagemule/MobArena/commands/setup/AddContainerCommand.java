@@ -1,8 +1,8 @@
 package com.garbagemule.MobArena.commands.setup;
 
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
 import com.garbagemule.MobArena.*;
 import com.garbagemule.MobArena.commands.*;
@@ -35,7 +35,7 @@ public class AddContainerCommand implements Command
             return false;
         }
         
-        if (!(p.getTargetBlock(null, 50).getState() instanceof ContainerBlock)) {
+        if (!(p.getTargetBlock(null, 50).getState() instanceof InventoryHolder)) {
             Messenger.tellPlayer(sender, "You must look at container.");
             return false;
         }

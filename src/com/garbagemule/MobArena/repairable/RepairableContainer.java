@@ -1,8 +1,8 @@
 package com.garbagemule.MobArena.repairable;
 
 import org.bukkit.block.BlockState;
-import org.bukkit.block.ContainerBlock;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 import com.garbagemule.MobArena.util.inventory.SerializableInventory;
 
@@ -14,7 +14,7 @@ public class RepairableContainer extends RepairableBlock
         super(state);
 
         // Grab the inventory of the block
-        Inventory inv = ((ContainerBlock) state).getInventory();
+        Inventory inv = ((InventoryHolder) state).getInventory();
         
         // Make a SerializableInventory
         this.inv = new SerializableInventory(inv);
@@ -34,7 +34,7 @@ public class RepairableContainer extends RepairableBlock
         super.repair();
         
         // Grab the inventory
-        ContainerBlock cb = (ContainerBlock) getWorld().getBlockAt(getX(),getY(),getZ()).getState();
+        InventoryHolder cb = (InventoryHolder) getWorld().getBlockAt(getX(),getY(),getZ()).getState();
         Inventory chestInv = cb.getInventory();
         
         SerializableInventory.loadContents(chestInv, this.inv);

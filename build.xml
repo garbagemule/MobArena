@@ -13,11 +13,11 @@
     <property name="ability-dest" location="${res}/res/abilities" />
     
     <!-- Dependency variables -->
-    <property name="cbver" value="1.1-R4" />
+    <property name="cbver" value="1.1-R6" />
     <property name="cbjar" value="craftbukkit-${cbver}.jar" />
     <property name="cburl" value="http://repo.bukkit.org/content/repositories/releases/org/bukkit/craftbukkit/${cbver}/${cbjar}" />
     
-    <property name="vltver" value="1.2.10" />
+    <property name="vltver" value="1.2.12" />
     <property name="vltjar" value="Vault-${vltver}-SNAPSHOT.jar" />
     <property name="vlturl" value="http://ci.milkbowl.net/job/Vault/Recommended%20Build/artifact/target/${vltjar}" />
     
@@ -28,7 +28,7 @@
     <property name="spturl" value="http://ci.spout.org/job/SpoutPluginAPI/Recommended/artifact/target/${sptjar}" />
     
     <property name="msjar" value="MagicSpells.jar" />
-    <property name="msurl" value="http://dev.bukkit.org/media/files/575/866/${msjar}" />
+    <property name="msurl" value="http://dev.bukkit.org/media/files/577/281/${msjar}" />
 
     
     <path id="classpath">
