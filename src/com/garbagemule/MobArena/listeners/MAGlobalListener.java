@@ -172,6 +172,13 @@ public class MAGlobalListener implements Listener
         }
     }
     
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void potionSplash(PotionSplashEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onPotionSplash(event);
+        }
+    }
+    
     
     
     ///////////////////////////////////////////////////////////////////////////

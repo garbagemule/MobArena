@@ -18,6 +18,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
@@ -40,6 +41,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -59,6 +61,8 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
@@ -542,6 +546,24 @@ public class ArenaListener
     public void onEntityTeleport(EntityTeleportEvent event) {
         if (region.contains(event.getFrom()) || region.contains(event.getTo())) {
             event.setCancelled(true);
+        }
+    }
+    
+    public void onPotionSplash(PotionSplashEvent event) {
+        ThrownPotion potion = event.getPotion();
+        if (!region.contains(potion.getLocation()) || pvpEnabled) {
+            return;
+        }
+
+        // If a potion has harmful effects, remove all players.
+        for (PotionEffect effect : potion.getEffects()) {
+            PotionEffectType type = effect.getType();
+            if (type.equals(PotionEffectType.HARM) || type.equals(PotionEffectType.POISON)) {
+                for (Player p : arena.getPlayersInArena()) {
+                    event.setIntensity(p, 0D);
+                }
+                break;
+            }
         }
     }
 
