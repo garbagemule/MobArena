@@ -165,6 +165,13 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onEntityTarget(event);
     }
     
+    @EventHandler(priority = EventPriority.HIGH)
+    public void entityTeleport(EntityTeleportEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onEntityTeleport(event);
+        }
+    }
+    
     
     
     ///////////////////////////////////////////////////////////////////////////

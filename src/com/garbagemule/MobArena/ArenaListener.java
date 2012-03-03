@@ -38,6 +38,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
@@ -535,6 +536,12 @@ public class ArenaListener
                 else if (event.getReason() == TargetReason.CLOSEST_PLAYER)
                     if (!arena.inArena((Player) event.getTarget()))
                         event.setCancelled(true);
+        }
+    }
+    
+    public void onEntityTeleport(EntityTeleportEvent event) {
+        if (region.contains(event.getFrom()) || region.contains(event.getTo())) {
+            event.setCancelled(true);
         }
     }
 
