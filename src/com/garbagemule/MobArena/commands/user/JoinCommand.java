@@ -1,7 +1,5 @@
 package com.garbagemule.MobArena.commands.user;
 
-import java.util.List;
-
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -26,46 +24,22 @@ public class JoinCommand implements Command
             return false;
         }
         
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+        // Cast the sender, grab the argument, if any.
+        Player p    = (Player) sender;
+        String arg1 = (args.length > 0 ? args[0] : null);
         
-        // Cast the sender.
-        Player p = (Player) sender;
-        
-        List<Arena> arenas = am.getEnabledArenas();
-        if (!am.isEnabled() || arenas.size() < 1) {
-            Messenger.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
-            return true;
+        // Run some rough sanity checks, and grab the arena to join.
+        Arena arena = Commands.getArenaToJoinOrSpec(am, p, arg1);
+        if (arena == null) {
+            return false;
         }
         
-        // Grab the arena to join
-        Arena arena = arenas.size() == 1 ? arenas.get(0) : am.getArenaWithName(arg1);
-        
-        // Run a couple of basic sanity checks
-        if (!Commands.sanityChecks(p, am, arena, arg1, arenas)) {
-            return true;
-        }
-        
-        // Run a bunch of per-arena sanity checks
+        // Per-arena sanity checks
         if (!arena.canJoin(p)) {
             return false;
         }
         
-        // If player is in a boat/minecart, eject!
-        if (p.isInsideVehicle())
-            p.leaveVehicle();
-        
-        // If player is in a bed, unbed!
-        if (p.isSleeping()) {
-            p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
-            return false;
-        }
-        
         // Join the arena!
-        if (!arena.playerJoin(p, p.getLocation())) {
-            return false;
-        }
-        
-        return true;
+        return arena.playerJoin(p, p.getLocation());
     }
 }

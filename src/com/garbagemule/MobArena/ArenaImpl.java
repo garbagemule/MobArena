@@ -191,6 +191,7 @@ public class ArenaImpl implements Arena
     @Override
     public void setEnabled(boolean value) {
         enabled = value;
+        settings.set("enabled", enabled);
     }
 
     @Override
@@ -647,15 +648,15 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    public void playerSpec(Player p, Location loc)
-    {
+    public void playerSpec(Player p, Location loc) {
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
         movePlayerToSpec(p);
+        
+        Messenger.tellPlayer(p, Msg.SPEC_PLAYER_SPECTATE);
     }
 
-    private void spawnPets()
-    {
+    private void spawnPets() {
         for (Map.Entry<Player,ArenaPlayer> entry : arenaPlayerMap.entrySet()) {
             ArenaClass arenaClass = entry.getValue().getArenaClass();
             int petAmount = arenaClass.getPetAmount();
@@ -687,8 +688,7 @@ public class ArenaImpl implements Arena
         }
     }
     
-    private void startSpawner()
-    {
+    private void startSpawner() {
         // Set the spawn flags to enable monster spawning.
         world.setSpawnFlags(true, true);
         //world.setDifficulty(Difficulty.NORMAL);

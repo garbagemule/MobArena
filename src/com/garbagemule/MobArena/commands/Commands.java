@@ -9,6 +9,7 @@ import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.util.TextUtils;
 
 public class Commands
 {
@@ -16,16 +17,63 @@ public class Commands
         return (sender instanceof Player);
     }
     
-    public static boolean sanityChecks(Player p, ArenaMaster am, Arena arena, String arg1, List<Arena> arenas) {
-        if (arenas.size() > 1 && arg1.isEmpty())
-            Messenger.tellPlayer(p, Msg.JOIN_ARG_NEEDED);
-        else if (arena == null)
-            Messenger.tellPlayer(p, Msg.ARENA_DOES_NOT_EXIST);
-        else if (am.getArenaWithPlayer(p) != null && !arena.equals(am.getArenaWithPlayer(p)))
-            Messenger.tellPlayer(p, Msg.JOIN_IN_OTHER_ARENA);
-        else
-            return true;
+    public static Arena getArenaToJoinOrSpec(ArenaMaster am, Player p, String arg1) {
+        // Check if MobArena is enabled first.
+        if (!am.isEnabled()) {
+            Messenger.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
+            return null;
+        }
+
+        // Then check if we have permission at all.
+        List<Arena> arenas = am.getPermittedArenas(p);
+        if (arenas.isEmpty()) {
+            Messenger.tellPlayer(p, Msg.JOIN_NO_PERMISSION);
+            return null;
+        }
         
-        return false;
+        // Then check if we have any enabled arenas.
+        arenas = am.getEnabledArenas(arenas);
+        if (arenas.isEmpty()) {
+            Messenger.tellPlayer(p, Msg.JOIN_NOT_ENABLED);
+            return null;
+        }
+        
+        // The arena to join.
+        Arena arena = null;
+        
+        // Branch on whether there's an argument or not.
+        if (arg1 != null) {
+            arena = am.getArenaWithName(arg1);
+            if (arena == null) {
+                Messenger.tellPlayer(p, Msg.ARENA_DOES_NOT_EXIST);
+                return null;
+            }
+            
+            if (!arenas.contains(arena)) {
+                Messenger.tellPlayer(p, Msg.JOIN_ARENA_NOT_ENABLED);
+                return null;
+            }
+        }
+        else {
+            if (arenas.size() > 1) {
+                Messenger.tellPlayer(p, Msg.JOIN_ARG_NEEDED);
+                Messenger.tellPlayer(p, Msg.MISC_LIST_ARENAS.toString(TextUtils.listToString(arenas)));
+                return null;
+            }
+            arena = arenas.get(0);
+        }
+        
+        // If player is in a boat/minecart, eject!
+        if (p.isInsideVehicle()) {
+            p.leaveVehicle();
+        }
+        
+        // If player is in a bed, unbed!
+        if (p.isSleeping()) {
+            p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
+            return null;
+        }
+        
+        return arena;
     }
 }

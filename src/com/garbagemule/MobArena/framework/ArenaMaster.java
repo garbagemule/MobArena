@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.framework;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +56,8 @@ public interface ArenaMaster
 
     public List<Arena> getEnabledArenas();
     
+    public List<Arena> getEnabledArenas(List<Arena> arenas);
+    
     public List<Arena> getPermittedArenas(Player p);
     
     public List<Arena> getEnabledAndPermittedArenas(Player p);
@@ -82,6 +85,8 @@ public interface ArenaMaster
     public Arena getArenaWithPet(Entity e);
     
     public Arena getArenaWithName(String configName);
+    
+    public Arena getArenaWithName(Collection<Arena> arenas, String configName);
     
     public boolean isAllowed(String command);
     

@@ -40,7 +40,7 @@ public class DisableCommand implements Command
             return true;
         }
         
-        am.setEnabled(true);
+        am.setEnabled(false);
         am.saveConfig();
         Messenger.tellPlayer(sender, "MobArena " + ChatColor.RED + "disabled");
         

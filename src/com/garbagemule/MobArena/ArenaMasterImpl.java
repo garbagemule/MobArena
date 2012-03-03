@@ -24,7 +24,6 @@ import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.util.ItemParser;
-import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -41,6 +40,8 @@ public class ArenaMasterImpl implements ArenaMaster
     private Map<String, ArenaClass> classes;
 
     private Set<String> allowedCommands;
+    
+    private boolean enabled;
 
     /**
      * Default constructor.
@@ -55,6 +56,8 @@ public class ArenaMasterImpl implements ArenaMaster
         this.classes = new HashMap<String, ArenaClass>();
 
         this.allowedCommands = new HashSet<String>();
+        
+        this.enabled = config.getBoolean("global-settings.enabled", true);
     }
 
     /*
@@ -68,11 +71,12 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public boolean isEnabled() {
-        return config.getBoolean("global-settings.enabled", true);
+        return enabled;
     }
 
     public void setEnabled(boolean value) {
-        config.set("global-settings.enabled", value);
+        enabled = value;
+        config.set("global-settings.enabled", enabled);
     }
 
     public boolean notifyOnUpdates() {
@@ -118,9 +122,13 @@ public class ArenaMasterImpl implements ArenaMaster
      */
 
     public List<Arena> getEnabledArenas() {
+        return getEnabledArenas(arenas);
+    }
+    
+    public List<Arena> getEnabledArenas(List<Arena> arenas) {
         List<Arena> result = new LinkedList<Arena>();
         for (Arena arena : arenas)
-            if (arena.isEnabled())
+            if (arena.isEnabled()) 
                 result.add(arena);
         return result;
     }
@@ -416,7 +424,6 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     private boolean addRemoveClassPermission(String classname, String perm, boolean add) {
-        String lowercase = classname.toLowerCase();
         String path = "classes." + classname;
         if (config.getConfigSection(path) == null)
             return false;

@@ -1,5 +1,11 @@
 package com.garbagemule.MobArena.util;
 
+import java.util.Collection;
+
+import org.bukkit.entity.Player;
+
+import com.garbagemule.MobArena.Msg;
+
 public class TextUtils
 {
     /**
@@ -60,5 +66,29 @@ public class TextUtils
         
         String firstLetter = s.substring(0,1).toUpperCase();
         return firstLetter + s.substring(1).toLowerCase();
+    }
+    
+    public static String playerListToString(Collection<? extends Player> list) {
+        if (list.isEmpty()) {
+            return Msg.MISC_NONE.toString();
+        }
+        
+        StringBuffer buffy = new StringBuffer();
+        for (Player p : list) {
+            buffy.append(", " + p.getName());
+        }
+        return buffy.substring(2);
+    }
+    
+    public static String listToString(Collection<? extends Object> list) {
+        if (list.isEmpty()) {
+            return Msg.MISC_NONE.toString();
+        }
+        
+        StringBuffer buffy = new StringBuffer();
+        for (Object o : list) {
+            buffy.append(", " + o.toString());
+        }
+        return buffy.substring(2);
     }
 }
