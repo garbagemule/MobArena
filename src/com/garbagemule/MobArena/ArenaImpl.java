@@ -684,7 +684,7 @@ public class ArenaImpl implements Arena
     
     private void removePotionEffects(Player p) {
         for (PotionEffect effect : p.getActivePotionEffects()) {
-            p.removePotionEffect(effect.getType());
+            p.addPotionEffect(new PotionEffect(effect.getType(), 0, 0), true);
         }
     }
     
