@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -29,6 +30,11 @@ import org.bukkit.potion.PotionEffect;
 import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
+import com.garbagemule.MobArena.log.ArenaLog;
+import com.garbagemule.MobArena.log.LogSessionBuilder;
+import com.garbagemule.MobArena.log.LogTotalsBuilder;
+import com.garbagemule.MobArena.log.YMLSessionBuilder;
+import com.garbagemule.MobArena.log.YMLTotalsBuilder;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.*;
 import com.garbagemule.MobArena.spout.Spouty;
@@ -49,6 +55,7 @@ public class ArenaImpl implements Arena
     private MobArena plugin;
     private String name;
     private World world;
+    private File dir;
     
     // Settings section of the config-file for this arena.
     private ConfigSection settings;
@@ -92,10 +99,14 @@ public class ArenaImpl implements Arena
     private SheepBouncer  sheepBouncer;
     private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     
+    // Logging
+    private ArenaLog log;
+    private LogSessionBuilder sessionBuilder;
+    private LogTotalsBuilder  totalsBuilder;
+    
     // Misc
     private ArenaListener eventListener;
     private List<ItemStack> entryFee;
-    //private ArenaLog log;
     private TimeStrategy timeStrategy;
     
     /**
@@ -158,6 +169,12 @@ public class ArenaImpl implements Arena
         String timeString = settings.getString("player-time-in-arena", "world");
         Time time = Enums.getEnumFromString(Time.class, timeString);
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
+        
+        this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
+        this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
+        this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
+        
+        this.log = new ArenaLog(this, sessionBuilder, totalsBuilder);
     }
     
     
@@ -284,11 +301,6 @@ public class ArenaImpl implements Arena
         return waveManager;
     }
 
-    /*@Override
-    public ArenaLog getLog() {
-        return log;
-    }*/
-
     @Override
     public Location getPlayerEntry(Player p) {
         PlayerData mp = playerData.get(p);
@@ -355,6 +367,11 @@ public class ArenaImpl implements Arena
         return monsterManager;
     }
     
+    @Override
+    public ArenaLog getLog() {
+        return log;
+    }
+    
     
     
     
@@ -419,8 +436,7 @@ public class ArenaImpl implements Arena
         
         // Start logging
         rewardManager.reset();
-        //log = new ArenaLog(plugin, this);
-        //log.start();
+        log.start();
         
         // Initialize leaderboards and start displaying info.
         leaderboard.initialize();
@@ -455,12 +471,7 @@ public class ArenaImpl implements Arena
         leaderboard.update();
         
         // Finish logging
-        //log.end();
-        /*if (logging != null) { TODO: FIX LOGGING!
-            log.saveSessionData();
-            log.updateArenaTotals();
-        }*/
-        //log.clearSessionData();
+        log.end();
         
         // Stop spawning.
         stopSpawner();
@@ -568,6 +579,9 @@ public class ArenaImpl implements Arena
         removeClassPermissions(p);
         removePotionEffects(p);
         
+        ArenaPlayer ap = arenaPlayerMap.get(p);
+        if (ap != null) log.playerLeave(ap);
+        
         if (inLobby(p) || inArena(p)) {
             inventoryManager.clearInventory(p);
             inventoryManager.restoreInventory(p);
@@ -593,6 +607,9 @@ public class ArenaImpl implements Arena
         // Fire the event
         ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this);
         plugin.getServer().getPluginManager().callEvent(event);
+        
+        ArenaPlayer ap = arenaPlayerMap.get(p);
+        if (ap != null) log.playerLeave(ap);
         
         arenaPlayers.remove(p);
         

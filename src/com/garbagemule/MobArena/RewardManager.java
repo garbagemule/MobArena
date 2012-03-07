@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,11 @@ public class RewardManager
             players.put(p, new ArrayList<ItemStack>());
         }
         players.get(p).add(stack);
+    }
+    
+    public List<ItemStack> getRewards(Player p) {
+        List<ItemStack> rewards = players.get(p);
+        return (rewards == null ? new ArrayList<ItemStack>(1) : Collections.unmodifiableList(rewards));
     }
     
     public void grantRewards(Player p) {

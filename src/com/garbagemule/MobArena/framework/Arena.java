@@ -18,6 +18,7 @@ import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.MonsterManager;
 import com.garbagemule.MobArena.RewardManager;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
+import com.garbagemule.MobArena.log.ArenaLog;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.util.config.ConfigSection;
@@ -100,6 +101,8 @@ public interface Arena
     public MonsterManager getMonsterManager();
 
     public void revivePlayer(Player p);
+    
+    public ArenaLog getLog();
     
     
     
