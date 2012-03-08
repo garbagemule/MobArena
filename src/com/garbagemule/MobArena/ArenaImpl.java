@@ -580,7 +580,7 @@ public class ArenaImpl implements Arena
         removePotionEffects(p);
         
         ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (ap != null) log.playerLeave(ap);
+        if (ap != null && running) log.playerDeath(ap);
         
         if (inLobby(p) || inArena(p)) {
             inventoryManager.clearInventory(p);
@@ -609,7 +609,7 @@ public class ArenaImpl implements Arena
         plugin.getServer().getPluginManager().callEvent(event);
         
         ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (ap != null) log.playerLeave(ap);
+        if (ap != null) log.playerDeath(ap);
         
         arenaPlayers.remove(p);
         

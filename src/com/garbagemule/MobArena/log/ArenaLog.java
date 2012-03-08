@@ -55,7 +55,7 @@ public class ArenaLog
         totalsBuilder.finish();
     }
     
-    public void playerLeave(ArenaPlayer ap) {
+    public void playerDeath(ArenaPlayer ap) {
         ArenaLogPlayerEntry entry = ArenaLogPlayerEntry.create(ap);
         sessionBuilder.buildPlayerEntry(entry, arena.getRewardManager().getRewards(ap.getPlayer()));
         totalsBuilder.updatePlayerEntry(entry);
