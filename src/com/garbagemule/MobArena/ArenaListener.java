@@ -18,6 +18,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
@@ -94,7 +95,8 @@ public class ArenaListener
             lockFoodLevel;
     private boolean allowTeleport,
             canShare,
-            allowMonsters;
+            allowMonsters,
+            autoIgniteTNT;
 
     private Set<Player> banned;
 
@@ -111,16 +113,17 @@ public class ArenaListener
          * Uglier code
          */
         ConfigSection s = arena.getSettings();
-        this.softRestore = s.getBoolean("soft-restore", false);
-        this.softRestoreDrops = s.getBoolean("soft-restore-drops", false);
-        this.protect = s.getBoolean("protect", true);
-        this.monsterExp = s.getBoolean("monster-exp", false);
-        this.monsterInfight = s.getBoolean("monster-infight", false);
-        this.pvpEnabled = s.getBoolean("pvp-enabled", false);
-        this.foodRegen = s.getBoolean("food-regen", false);
-        this.lockFoodLevel = s.getBoolean("lock-food-level", true);
-        this.allowTeleport = s.getBoolean("allow-teleporting", false);
-        this.canShare = s.getBoolean("share-items-in-arena", true);
+        this.softRestore      = s.getBoolean("soft-restore",         false);
+        this.softRestoreDrops = s.getBoolean("soft-restore-drops",   false);
+        this.protect          = s.getBoolean("protect",              true);
+        this.monsterExp       = s.getBoolean("monster-exp",          false);
+        this.monsterInfight   = s.getBoolean("monster-infight",      false);
+        this.pvpEnabled       = s.getBoolean("pvp-enabled",          false);
+        this.foodRegen        = s.getBoolean("food-regen",           false);
+        this.lockFoodLevel    = s.getBoolean("lock-food-level",      true);
+        this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
+        this.canShare         = s.getBoolean("share-items-in-arena", true);
+        this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
 
         this.allowMonsters = arena.getWorld().getAllowMonsters();
 
@@ -184,6 +187,14 @@ public class ArenaListener
         // If the arena isn't running, or if the player isn't in the arena, cancel.
         if (!arena.isRunning() || !arena.inArena(event.getPlayer())) {
             event.setCancelled(true);
+            return;
+        }
+        
+        // If the block is TNT, replace with a TNTPrimed
+        if (autoIgniteTNT && b.getType() == Material.TNT) {
+            event.setCancelled(true);
+            event.getPlayer().getInventory().removeItem(new ItemStack(Material.TNT, 1));
+            b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
             return;
         }
 
