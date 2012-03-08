@@ -1,11 +1,16 @@
 package com.garbagemule.MobArena.waves;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 
@@ -62,6 +67,7 @@ public enum MACreature
     MAGMACUBEBIG(EntityType.MAGMA_CUBE),  MAGMACUBESBIG(EntityType.MAGMA_CUBE),
     MAGMACUBEHUGE(EntityType.MAGMA_CUBE), MAGMACUBESHUGE(EntityType.MAGMA_CUBE);
     
+    private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private EntityType type;
     
     private MACreature(EntityType type) {
@@ -79,10 +85,13 @@ public enum MACreature
     public LivingEntity spawn(Arena arena, World world, Location loc) {
         LivingEntity e = world.spawnCreature(loc, type);
         
-        switch (this)
-        {
+        switch (this) {
+            case SHEEP:
+                ((Sheep) e).setColor(colors.get(MobArena.random.nextInt(colors.size())));
+                break;
             case EXPLODINGSHEEP:
                 arena.getMonsterManager().addExplodingSheep(e);
+                ((Sheep) e).setColor(DyeColor.RED);
                 break;
             case POWEREDCREEPERS:
                 ((Creeper) e).setPowered(true);
