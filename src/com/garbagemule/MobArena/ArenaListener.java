@@ -248,9 +248,6 @@ public class ArenaListener
 
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         if (!arena.getRegion().contains(event.getLocation())) {
-            if (!event.isCancelled()) {
-                event.setCancelled(!allowMonsters);
-            }
             return;
         }
 
