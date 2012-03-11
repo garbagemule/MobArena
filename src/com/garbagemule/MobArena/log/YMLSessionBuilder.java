@@ -85,6 +85,8 @@ public class YMLSessionBuilder implements LogSessionBuilder
         Map<String,MutableInt> summed = new HashMap<String,MutableInt>();
         
         for (ItemStack stack : rewards) {
+            if (stack == null) continue;
+            
             String type = (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID ? "money" : stack.getType().toString().toLowerCase());
             if (!summed.containsKey(type)) {
                 summed.put(type, new MutableInt());
