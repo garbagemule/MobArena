@@ -42,6 +42,7 @@ public class WaveManager
     }
     
     public void reset() {
+        reloadWaves();
         wave = 0;
         singleWavesInstance = new TreeSet<Wave>(singleWaves);
     }

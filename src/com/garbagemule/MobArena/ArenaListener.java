@@ -388,9 +388,15 @@ public class ArenaListener
                 }
             }
         }
+        
+        MABoss boss = monsters.removeBoss(event.getEntity());
+        if (boss != null) {
+            boss.setDead(true);
+        }
 
-        if (!monsterExp)
+        if (!monsterExp) {
             event.setDroppedExp(0);
+        }
 
         event.getDrops().clear();
 

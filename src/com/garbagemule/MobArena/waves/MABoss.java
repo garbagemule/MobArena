@@ -94,4 +94,14 @@ public class MABoss
     public boolean isDead() {
         return dead;
     }
+    
+    /**
+     * Set the death status of a boss.
+     * This is used by the ArenaListener to force kill bosses that die due to
+     * unhandled damage events (Bukkit issues).
+     * @param dead death status
+     */
+    public void setDead(boolean dead) {
+        this.dead = dead;
+    }
 }
