@@ -33,6 +33,8 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityCombustByBlockEvent;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -521,8 +523,12 @@ public class ArenaListener
     }
 
     public void onEntityCombust(EntityCombustEvent event) {
-        if (monsters.getMonsters().contains(event.getEntity()))
+        if (monsters.getMonsters().contains(event.getEntity())) {
+            if (event instanceof EntityCombustByBlockEvent || event instanceof EntityCombustByEntityEvent) {
+                return;
+            }
             event.setCancelled(true);
+        }
     }
 
     public void onEntityTarget(EntityTargetEvent event) {
