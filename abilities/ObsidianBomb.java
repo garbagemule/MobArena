@@ -27,7 +27,7 @@ public class ObsidianBomb implements Ability
         final World world = arena.getWorld();
         final Location loc = target.getLocation();
         
-        Block b = world.getBlockAt(target.getLocation()); 
+        Block b = world.getBlockAt(loc); 
         b.setType(Material.OBSIDIAN);
         arena.addBlock(b);
         
