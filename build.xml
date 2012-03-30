@@ -13,7 +13,7 @@
     <property name="ability-dest" location="${res}/res/abilities" />
     
     <!-- Dependency variables -->
-    <property name="cbver" value="1.1-R6" />
+    <property name="cbver" value="1.2.4-R1.0" />
     <property name="cbjar" value="craftbukkit-${cbver}.jar" />
     <property name="cburl" value="http://repo.bukkit.org/content/repositories/releases/org/bukkit/craftbukkit/${cbver}/${cbjar}" />
     
