@@ -4,7 +4,7 @@ import com.garbagemule.MobArena.waves.WaveUtils;
 
 public enum BossHealth
 {
-    LOW(8), MEDIUM(15), HIGH(25), PSYCHO(40);
+    VERYLOW(4), LOW(8), MEDIUM(15), HIGH(25), VERYHIGH(40), PSYCHO(60);
     private int multiplier;
     
     private BossHealth(int multiplier) {
