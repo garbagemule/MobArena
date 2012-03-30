@@ -40,8 +40,13 @@ public enum MACreature
     BLAZE(EntityType.BLAZE),              BLAZES(EntityType.BLAZE),
     ENDERDRAGON(EntityType.ENDER_DRAGON), ENDERDRAGONS(EntityType.ENDER_DRAGON),
     SNOWMAN(EntityType.SNOWMAN),          SNOWMEN(EntityType.SNOWMAN),
+    SNOWGOLEM(EntityType.SNOWMAN),        SNOWGOLEMS(EntityType.SNOWMAN),
     MUSHROOMCOW(EntityType.MUSHROOM_COW), MUSHROOMCOWS(EntityType.MUSHROOM_COW),
-    VILLAGER(EntityType.VILLAGER),        VILLAGERS(EntityType.VILLAGER),        
+    VILLAGER(EntityType.VILLAGER),        VILLAGERS(EntityType.VILLAGER),
+    
+    // 1.2 creatures
+    OCELOT(EntityType.OCELOT),            OCELOTS(EntityType.OCELOT),
+    IRONGOLEM(EntityType.IRON_GOLEM),     IRONGOLEMS(EntityType.IRON_GOLEM),
     
     // Passive creatures
     CHICKEN(EntityType.CHICKEN),          CHICKENS(EntityType.CHICKEN),
