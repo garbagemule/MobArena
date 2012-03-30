@@ -620,19 +620,30 @@ public class ArenaListener
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Player p = event.getPlayer();
 
-        // If the player is active in the arena, only cancel if sharing is not
-        // allowed
+        // If the player is active in the arena, only cancel if sharing is not allowed
         if (arena.inArena(p)) {
             if (!canShare) {
                 Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
                 event.setCancelled(true);
             }
         }
-
-        // Else, if the player is in the lobby or a spectator, just cancel
-        else if (arena.inLobby(p) || arena.inSpec(p)) {
+        
+        // If the player is in the lobby, just cancel
+        else if (arena.inLobby(p)) {
             Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
+        }
+        
+        // Same if it's a spectator, but...
+        else if (arena.inSpec(p)) {
+            Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+            event.setCancelled(true);
+            
+            // If the spectator isn't in the region, force them to leave
+            if (!region.contains(p.getLocation())) {
+                Messenger.tellPlayer(p, Msg.MISC_MA_LEAVE_REMINDER);
+                arena.playerLeave(p);
+            }
         }
 
         /*
