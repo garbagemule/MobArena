@@ -18,6 +18,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Snowman;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Wolf;
@@ -45,6 +46,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -447,6 +449,10 @@ public class ArenaListener
         // Player
         else if (damagee instanceof Player) {
             onPlayerDamage(event, (Player) damagee, damager);
+        }
+        // Snowman
+        else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
+            event.setCancelled(true);
         }
         // Boss
         else if (monsters.getBossMonsters().contains(damagee)) {
