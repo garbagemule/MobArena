@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.commands.setup;
 import org.bukkit.command.CommandSender;
 
 import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -23,17 +24,25 @@ public class RemoveLeaderboardCommand implements Command{
         
         // If no argument, use the currently selected arena
         if (arg1.equals("")) {
-            if(am.getSelectedArena().getRegion().getLeaderboard() != null) {
+            if (am.getSelectedArena().getRegion().getLeaderboard() != null) {
                 am.getSelectedArena().getRegion().set("leaderboard", null);
                 Messenger.tellPlayer(sender, "Leaderboard for " + am.getSelectedArena().arenaName() + " successfully removed!");
                 return true;
             }
+            else {
+                Messenger.tellPlayer(sender, Msg.ARENA_LBOARD_NOT_FOUND);
+            }
         }
         else {
-            if(am.getArenaWithName(arg1) != null) {
-                am.getArenaWithName(arg1).getRegion().set("leaderboard", null);
-                Messenger.tellPlayer(sender, "Leaderboard for " + am.getSelectedArena().arenaName() + " successfully removed!");
-                return true;
+            if (am.getArenaWithName(arg1) != null) {
+                if (am.getSelectedArena().getRegion().getLeaderboard() != null) {
+                    am.getArenaWithName(arg1).getRegion().set("leaderboard", null);
+                    Messenger.tellPlayer(sender, "Leaderboard for " + am.getArenaWithName(arg1).arenaName() + " successfully removed!");
+                    return true;
+                }
+                else {
+                    Messenger.tellPlayer(sender, Msg.ARENA_LBOARD_NOT_FOUND);
+                }
             }
             else {
                 Messenger.tellPlayer(sender, "Usage: /ma removeleaderboard <arenaname>");
