@@ -57,12 +57,12 @@ public class ItemParser
             int lvl = entry.getValue();
             
             // <eid>:<level>;
-            enchantments += "; " + id + ":" + lvl;
+            enchantments += ";" + id + ":" + lvl;
         }
         
         // Trim off the leading ';' if it is there
         if (!enchantments.equals("")) {
-            enchantments = enchantments.substring(2);
+            enchantments = enchantments.substring(1);
         }
         
         // <item>

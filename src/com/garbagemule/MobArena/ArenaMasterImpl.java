@@ -24,6 +24,7 @@ import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -424,6 +425,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     private boolean addRemoveClassPermission(String classname, String perm, boolean add) {
+        classname = TextUtils.camelCase(classname);
         String path = "classes." + classname;
         if (config.getConfigSection(path) == null)
             return false;
@@ -433,6 +435,18 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Get any previous nodes
         List<String> nodes = section.getStringList("permissions", null);
+        
+        if (nodes.contains(perm) && add)
+            return false;
+        else if (nodes.contains(perm) && !add)
+            nodes.remove(perm);
+        else if (!nodes.contains(perm) && add)
+            nodes.add(perm);
+        else if (!nodes.contains(perm) && !add)
+            return false;
+        
+        /* erroneous logic - if it contains the perm when trying to remove, it won't remove it.
+         * it would return false early.
         if (nodes.contains(perm))
             return false;
 
@@ -444,6 +458,7 @@ public class ArenaMasterImpl implements ArenaMaster
         else {
             nodes.remove(perm);
         }
+        */
 
         // Replace the set.
         section.set("permissions", nodes);

@@ -100,6 +100,7 @@ public class ArenaImpl implements Arena
     private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     
     // Logging
+    private boolean logging;
     private ArenaLog log;
     private LogSessionBuilder sessionBuilder;
     private LogTotalsBuilder  totalsBuilder;
@@ -124,6 +125,7 @@ public class ArenaImpl implements Arena
         
         this.enabled = settings.getBoolean("enabled", false);
         this.protect = settings.getBoolean("protect", true);
+        this.logging = settings.getBoolean("logging", true);
         this.running = false;
         this.edit    = false;
         
@@ -170,11 +172,13 @@ public class ArenaImpl implements Arena
         Time time = Enums.getEnumFromString(Time.class, timeString);
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
         
-        this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
-        this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
-        this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
-        
-        this.log = new ArenaLog(this, sessionBuilder, totalsBuilder);
+        if(isLogging()) {
+            this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
+            this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
+            this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
+            
+            this.log = new ArenaLog(this, sessionBuilder, totalsBuilder);
+        }
     }
     
     
@@ -219,6 +223,18 @@ public class ArenaImpl implements Arena
     @Override
     public void setProtected(boolean value) {
         protect = value;
+        settings.set("protect", protect);
+    }
+    
+    @Override
+    public boolean isLogging() {
+        return logging;
+    }
+    
+    @Override
+    public void setLogging(boolean value) {
+        logging = value;
+        settings.set("logging", logging);
     }
 
     @Override
@@ -436,7 +452,8 @@ public class ArenaImpl implements Arena
         
         // Start logging
         rewardManager.reset();
-        log.start();
+        if(isLogging())
+            log.start();
         
         // Initialize leaderboards and start displaying info.
         leaderboard.initialize();
@@ -471,7 +488,8 @@ public class ArenaImpl implements Arena
         leaderboard.update();
         
         // Finish logging
-        log.end();
+        if(isLogging())
+            log.end();
         
         // Stop spawning.
         stopSpawner();

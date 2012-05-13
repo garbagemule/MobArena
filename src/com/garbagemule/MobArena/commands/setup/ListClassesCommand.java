@@ -10,7 +10,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 
 @CommandInfo(
     name    = "listclasses",
-    pattern = "(list)?class(.)*",
+    pattern = "(list)?classes(.)*",
     usage   = "/ma listclasses",
     desc    = "list all current classes",
     permission = "mobarena.setup.classes"

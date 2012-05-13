@@ -48,6 +48,10 @@ public interface Arena
     
     public void setProtected(boolean value);
     
+    public boolean isLogging();
+    
+    public void setLogging(boolean value);
+    
     public boolean isRunning();
     
     public boolean inEditMode();
