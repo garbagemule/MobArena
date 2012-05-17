@@ -135,6 +135,18 @@ public class ArenaListener
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
+        if (!arena.getRegion().contains(event.getBlock().getLocation()))
+            return;
+        // Below this, the block break is in the arena's region - ACStache
+        
+        if (!arena.inArena(event.getPlayer())) {
+            if (arena.inEditMode())
+                return;
+            else
+                // Players not partaking in the arena while edit mode is off - ACStache
+                event.setCancelled(true);
+        }
+        
         if (onBlockDestroy(event))
             return;
 
@@ -142,24 +154,29 @@ public class ArenaListener
     }
 
     public void onBlockBurn(BlockBurnEvent event) {
-        if (onBlockDestroy(event))
+        if (!arena.getRegion().contains(event.getBlock().getLocation()) || onBlockDestroy(event))
             return;
 
         event.setCancelled(true);
     }
 
     private boolean onBlockDestroy(BlockEvent event) {
-        if (!arena.getRegion().contains(event.getBlock().getLocation()) || arena.inEditMode() || (!arena.isProtected() && arena.isRunning()))
+        if (arena.inEditMode())
             return true;
-
-        Block b = event.getBlock();
-        if (arena.removeBlock(b) || b.getType() == Material.TNT)
-            return true;
-
-        if (softRestore && arena.isRunning()) {
+        // Below this, arena is not in edit mode - ACStache
+        
+        if (!arena.isRunning())
+            return false;
+        // Below this, arena is running - ACStache
+        
+        if (softRestore) {
+            if (arena.isProtected())
+                return false;
+            
+            Block b = event.getBlock();
             BlockState state = b.getState();
-
             Repairable r = null;
+            
             if (state instanceof InventoryHolder)
                 r = new RepairableContainer(state);
             else if (state instanceof Sign)
@@ -170,10 +187,9 @@ public class ArenaListener
                 r = new RepairableBlock(state);
 
             arena.addRepairable(r);
-
-            if (!softRestoreDrops)
+            
+            if(!softRestoreDrops)
                 b.setTypeId(0);
-
             return true;
         }
 

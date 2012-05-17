@@ -436,29 +436,19 @@ public class ArenaMasterImpl implements ArenaMaster
         // Get any previous nodes
         List<String> nodes = section.getStringList("permissions", null);
         
-        if (nodes.contains(perm) && add)
+        if (nodes.contains(perm) && add) {
             return false;
-        else if (nodes.contains(perm) && !add)
+        }
+        else if (nodes.contains(perm) && !add) {
             nodes.remove(perm);
-        else if (!nodes.contains(perm) && add)
-            nodes.add(perm);
-        else if (!nodes.contains(perm) && !add)
-            return false;
-        
-        /* erroneous logic - if it contains the perm when trying to remove, it won't remove it.
-         * it would return false early.
-        if (nodes.contains(perm))
-            return false;
-
-        // Add or remove.
-        if (add) {
+        }
+        else if (!nodes.contains(perm) && add) {
             removeContradictions(nodes, perm);
             nodes.add(perm);
         }
-        else {
-            nodes.remove(perm);
+        else if (!nodes.contains(perm) && !add) {
+            return false;
         }
-        */
 
         // Replace the set.
         section.set("permissions", nodes);
