@@ -149,7 +149,7 @@ public class ItemParser
     }
     
     private static ItemStack withDataAndAmount(String item, String data, String amount) {
-        Material m = getMaterial(item.toUpperCase());
+        Material m = getMaterial(item);
         short    d = getData(data, m);
         int      a = getAmount(amount);
         

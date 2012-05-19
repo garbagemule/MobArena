@@ -34,6 +34,12 @@ public class JoinCommand implements Command
             return false;
         }
         
+        // Deny joining from other arenas
+        if (am.getArenaWithPlayer(p) != null) {
+            Messenger.tellPlayer(p, Msg.JOIN_ALREADY_PLAYING);
+            return false;
+        }
+        
         // Per-arena sanity checks
         if (!arena.canJoin(p)) {
             return false;

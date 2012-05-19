@@ -168,12 +168,15 @@ public class ArenaListener
         if (!arena.isRunning())
             return false;
         // Below this, arena is running - ACStache
+
+        Block b = event.getBlock();
+        if (arena.removeBlock(b) || b.getType() == Material.TNT)
+            return true;
         
         if (softRestore) {
             if (arena.isProtected())
                 return false;
             
-            Block b = event.getBlock();
             BlockState state = b.getState();
             Repairable r = null;
             
@@ -188,7 +191,7 @@ public class ArenaListener
 
             arena.addRepairable(r);
             
-            if(!softRestoreDrops)
+            if (!softRestoreDrops)
                 b.setTypeId(0);
             return true;
         }
