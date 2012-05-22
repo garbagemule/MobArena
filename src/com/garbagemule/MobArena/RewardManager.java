@@ -15,6 +15,7 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class RewardManager
 {
+    @SuppressWarnings("unused")
     private MobArena plugin;
     @SuppressWarnings("unused")
     private Arena arena;
@@ -57,13 +58,12 @@ public class RewardManager
             }
             
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                plugin.giveMoney(p, stack.getAmount()); //TODO bug JustMe in IRC to find out what he changed to fix Economy Money Dupe
+                // plugin.giveMoney(p, stack.getAmount()); - removed to fix double money rewards
                 continue;
             }
             
             p.getInventory().addItem(stack);
         }
-        
         rewarded.add(p);
     }
 }

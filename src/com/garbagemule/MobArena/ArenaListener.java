@@ -97,6 +97,7 @@ public class ArenaListener
             pvpEnabled,
             foodRegen,
             lockFoodLevel;
+    @SuppressWarnings("unused")
     private boolean allowTeleport,
             canShare,
             allowMonsters,
@@ -596,7 +597,6 @@ public class ArenaListener
             return;
         }
 
-        //TODO watch for arena's pvp setting, then remove all players
         // If a potion has harmful effects, remove all players.
         for (PotionEffect effect : potion.getEffects()) {
             PotionEffectType type = effect.getType();

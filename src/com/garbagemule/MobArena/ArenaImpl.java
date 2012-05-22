@@ -452,7 +452,7 @@ public class ArenaImpl implements Arena
         
         // Start logging
         rewardManager.reset();
-        if(logging)
+        if (logging)
             log.start();
         
         // Initialize leaderboards and start displaying info.
@@ -488,7 +488,7 @@ public class ArenaImpl implements Arena
         leaderboard.update();
         
         // Finish logging
-        if(logging)
+        if (logging)
             log.end();
         
         // Stop spawning.
@@ -659,8 +659,9 @@ public class ArenaImpl implements Arena
         
         if (settings.getBoolean("spectate-on-death", true)) {
             movePlayerToSpec(p);
-            //TODO remove this line below, and require "/ma leave" to get inv and rewards back? perhaps a msg should be displayed?
-            restoreInvAndExp(p);
+            //TODO revert if people throw a fit. Should help deter removing valuables from the arena
+            Messenger.tellPlayer(p, Msg.SPEC_FROM_ARENA);
+            //restoreInvAndExp(p);
         } else {
             restoreInvAndExp(p);
             movePlayerToEntry(p);
