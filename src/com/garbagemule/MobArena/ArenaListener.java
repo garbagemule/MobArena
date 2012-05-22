@@ -137,13 +137,11 @@ public class ArenaListener
     public void onBlockBreak(BlockBreakEvent event) {
         if (!arena.getRegion().contains(event.getBlock().getLocation()))
             return;
-        // Below this, the block break is in the arena's region - ACStache
         
         if (!arena.inArena(event.getPlayer())) {
             if (arena.inEditMode())
                 return;
             else
-                // Players not partaking in the arena while edit mode is off - ACStache
                 event.setCancelled(true);
         }
         
@@ -163,11 +161,9 @@ public class ArenaListener
     private boolean onBlockDestroy(BlockEvent event) {
         if (arena.inEditMode())
             return true;
-        // Below this, arena is not in edit mode - ACStache
         
         if (!arena.isRunning())
             return false;
-        // Below this, arena is running - ACStache
 
         Block b = event.getBlock();
         if (arena.removeBlock(b) || b.getType() == Material.TNT)
@@ -600,6 +596,7 @@ public class ArenaListener
             return;
         }
 
+        //TODO watch for arena's pvp setting, then remove all players
         // If a potion has harmful effects, remove all players.
         for (PotionEffect effect : potion.getEffects()) {
             PotionEffectType type = effect.getType();

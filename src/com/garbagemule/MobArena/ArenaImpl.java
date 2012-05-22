@@ -172,7 +172,7 @@ public class ArenaImpl implements Arena
         Time time = Enums.getEnumFromString(Time.class, timeString);
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
         
-        if(isLogging()) {
+        if (logging) {
             this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
             this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
             this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
@@ -452,7 +452,7 @@ public class ArenaImpl implements Arena
         
         // Start logging
         rewardManager.reset();
-        if(isLogging())
+        if(logging)
             log.start();
         
         // Initialize leaderboards and start displaying info.
@@ -488,7 +488,7 @@ public class ArenaImpl implements Arena
         leaderboard.update();
         
         // Finish logging
-        if(isLogging())
+        if(logging)
             log.end();
         
         // Stop spawning.
@@ -598,19 +598,15 @@ public class ArenaImpl implements Arena
         removePotionEffects(p);
         
         ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (ap != null && running) log.playerDeath(ap);
+        if (logging)
+            if (ap != null && running)
+                log.playerDeath(ap);
         
-        if (inLobby(p) || inArena(p)) {
-            inventoryManager.clearInventory(p);
-            inventoryManager.restoreInventory(p);
-            rewardManager.grantRewards(p);
+        arenaPlayers.remove(p);
+        
+        restoreInvAndExp(p);
+        if(inLobby(p) || inArena(p))
             refund(p);
-            //p.updateInventory();
-        }
-        else if (inSpec(p)) {
-            inventoryManager.restoreInventory(p);
-            //p.updateInventory();
-        }
         
         movePlayerToEntry(p);
         discardPlayer(p);
@@ -627,7 +623,9 @@ public class ArenaImpl implements Arena
         plugin.getServer().getPluginManager().callEvent(event);
         
         ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (ap != null) log.playerDeath(ap);
+        if (logging)
+            if (ap != null)
+                log.playerDeath(ap);
         
         arenaPlayers.remove(p);
         
@@ -661,6 +659,7 @@ public class ArenaImpl implements Arena
         
         if (settings.getBoolean("spectate-on-death", true)) {
             movePlayerToSpec(p);
+            //TODO remove this line below, and require "/ma leave" to get inv and rewards back? perhaps a msg should be displayed?
             restoreInvAndExp(p);
         } else {
             restoreInvAndExp(p);

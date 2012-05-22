@@ -57,7 +57,7 @@ public class RewardManager
             }
             
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                plugin.giveMoney(p, stack.getAmount());
+                plugin.giveMoney(p, stack.getAmount()); //TODO bug JustMe in IRC to find out what he changed to fix Economy Money Dupe
                 continue;
             }
             
