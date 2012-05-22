@@ -272,8 +272,13 @@ public class ArenaListener
         }
 
         if (event.getSpawnReason() != SpawnReason.CUSTOM) {
-            event.setCancelled(true);
-            return;
+            if (event.getSpawnReason() == SpawnReason.BUILD_IRONGOLEM || event.getSpawnReason() == SpawnReason.BUILD_SNOWMAN) {
+                monsters.addGolem(event.getEntity());
+            }
+            else {
+                event.setCancelled(true);
+                return;
+            }
         }
 
         LivingEntity entity = (LivingEntity) event.getEntity();
@@ -360,6 +365,9 @@ public class ArenaListener
         }
         else if (monsters.removeMonster(event.getEntity())) {
             onMonsterDeath(event);
+        }
+        else if (monsters.removeGolem(event.getEntity())) {
+            Messenger.tellAll(arena, Msg.GOLEM_DIED);
         }
     }
 

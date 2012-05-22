@@ -605,7 +605,7 @@ public class ArenaImpl implements Arena
         arenaPlayers.remove(p);
         
         restoreInvAndExp(p);
-        if(inLobby(p) || inArena(p))
+        if (inLobby(p) || inArena(p))
             refund(p);
         
         movePlayerToEntry(p);
@@ -661,6 +661,7 @@ public class ArenaImpl implements Arena
             movePlayerToSpec(p);
             //TODO revert if people throw a fit. Should help deter removing valuables from the arena
             Messenger.tellPlayer(p, Msg.SPEC_FROM_ARENA);
+            Messenger.tellPlayer(p, Msg.MISC_MA_LEAVE_REMINDER);
             //restoreInvAndExp(p);
         } else {
             restoreInvAndExp(p);
