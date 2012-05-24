@@ -601,13 +601,10 @@ public class ArenaImpl implements Arena
         if (logging)
             if (ap != null && running)
                 log.playerDeath(ap);
-        
+
+        restoreInvAndExp(p);
         if (inLobby(p) || inArena(p)) {
-            restoreInvAndExp(p);
             refund(p);
-        }
-        else if (inSpec(p)) {
-            inventoryManager.restoreInventory(p);
         }
         
         movePlayerToEntry(p);
@@ -661,7 +658,6 @@ public class ArenaImpl implements Arena
         
         if (settings.getBoolean("spectate-on-death", true)) {
             movePlayerToSpec(p);
-            //TODO revert if people throw a fit. Should help deter removing valuables from the arena
             Messenger.tellPlayer(p, Msg.SPEC_FROM_ARENA);
             Messenger.tellPlayer(p, Msg.MISC_MA_LEAVE_REMINDER);
             //restoreInvAndExp(p);
