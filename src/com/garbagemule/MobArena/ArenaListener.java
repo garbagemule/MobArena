@@ -474,7 +474,7 @@ public class ArenaListener
         else if (damagee instanceof Player) {
             onPlayerDamage(event, (Player) damagee, damager);
         }
-        // Snowman
+        // Snowmen melting
         else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
             event.setCancelled(true);
         }
@@ -485,6 +485,10 @@ public class ArenaListener
         // Regular monster
         else if (monsters.getMonsters().contains(damagee)) {
             onMonsterDamage(event, damagee, damager);
+        }
+        // Player made golems
+        else if (monsters.getGolems().contains(damagee)) {
+            onGolemDamage(event, damagee, damager);
         }
     }
 
@@ -531,6 +535,21 @@ public class ArenaListener
         else if (damager instanceof LivingEntity) {
             if (!monsterInfight)
                 event.setCancelled(true);
+        }
+    }
+    
+    private void onGolemDamage(EntityDamageEvent event, Entity golem, Entity damager) {
+        if (damager instanceof Player) {
+            Player p = (Player) damager;
+            if (!arena.inArena(p)) {
+                event.setCancelled(true);
+                return;
+            }
+            
+            if (!pvpEnabled) {
+                event.setCancelled(true);
+                return;
+            }
         }
     }
 
@@ -786,8 +805,9 @@ public class ArenaListener
 
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player p = event.getPlayer();
-        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p)))
+        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p))) {
             return;
+        }
 
         arena.playerLeave(p);
         banned.add(p);
@@ -796,7 +816,7 @@ public class ArenaListener
 
     public void onPlayerKick(PlayerKickEvent event) {
         Player p = event.getPlayer();
-        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p))) {
+        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p))) {
             return;
         }
 

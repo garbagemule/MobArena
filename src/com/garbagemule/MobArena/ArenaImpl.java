@@ -602,11 +602,13 @@ public class ArenaImpl implements Arena
             if (ap != null && running)
                 log.playerDeath(ap);
         
-        arenaPlayers.remove(p);
-        
-        restoreInvAndExp(p);
-        if (inLobby(p) || inArena(p))
+        if (inLobby(p) || inArena(p)) {
+            restoreInvAndExp(p);
             refund(p);
+        }
+        else if (inSpec(p)) {
+            inventoryManager.restoreInventory(p);
+        }
         
         movePlayerToEntry(p);
         discardPlayer(p);
@@ -720,7 +722,7 @@ public class ArenaImpl implements Arena
     
     private void removePotionEffects(Player p) {
         for (PotionEffect effect : p.getActivePotionEffects()) {
-            p.addPotionEffect(new PotionEffect(effect.getType(), 0, 0), true);
+            p.removePotionEffect(effect.getType());
         }
     }
     
@@ -891,6 +893,9 @@ public class ArenaImpl implements Arena
         
         if (!settings.getBoolean("keep-exp", false)) {
             playerData.get(p).restoreData();
+        }
+        else {
+            p.setFoodLevel(playerData.get(p).food());
         }
     }
 
