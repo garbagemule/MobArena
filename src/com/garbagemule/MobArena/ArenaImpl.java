@@ -998,7 +998,7 @@ public class ArenaImpl implements Arena
         }
         
         assignClass(p, className);
-        Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
+        Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), getClassLogo(className));
     }
 
     @Override

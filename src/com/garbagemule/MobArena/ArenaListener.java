@@ -815,12 +815,14 @@ public class ArenaListener
     private void delayAssignClass(final Player p, final String className) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {
             public void run() {
-                arena.assignClass(p, className);
-
-                if (!className.equalsIgnoreCase("random"))
+                if (!className.equalsIgnoreCase("random")) {
+                    arena.assignClass(p, className);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
-                else
+                }
+                else {
+                    arena.assignRandomClass(p);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
+                }
             }
         });
     }
