@@ -72,8 +72,9 @@ public class ArenaImpl implements Arena
     private Leaderboard leaderboard;
     
     // Player stuff
-    private InventoryManager inventoryManager;
-    private RewardManager    rewardManager;
+    private InventoryManager  inventoryManager;
+    private RewardManager     rewardManager;
+    private ClassLimitManager limitManager;
     private Map<Player,ArenaPlayer> arenaPlayerMap;
     private Map<Player,PlayerData> playerData = new HashMap<Player,PlayerData>();
     
@@ -131,6 +132,7 @@ public class ArenaImpl implements Arena
         
         this.inventoryManager = new InventoryManager(this);
         this.rewardManager    = new RewardManager(this);
+        this.limitManager     = new ClassLimitManager(this);
 
         // Warps, points and locations
         this.leaderboard = new Leaderboard(plugin, this, region.getLeaderboard());
@@ -384,6 +386,11 @@ public class ArenaImpl implements Arena
     }
     
     @Override
+    public ClassLimitManager getClassLimitManager() {
+        return limitManager;
+    }
+    
+    @Override
     public ArenaLog getLog() {
         return log;
     }
@@ -432,6 +439,14 @@ public class ArenaImpl implements Arena
         
         // Teleport players, give full health, initialize map
         for (Player p : arenaPlayers) {
+            // TODO figure out how people die in lobby and get sent to spectator area early
+            // Remove player from spec list to avoid invincibility issues
+            if (inSpec(p)) {
+                specPlayers.remove(p);
+                System.out.println("[MobArena] Player " + p.getName() + " joined the arena from the spec area!");
+                System.out.println("[MobArena] Invincibility glitch attempt stopped!");
+            }
+            
             p.teleport(region.getArenaWarp());
             //movePlayerToLocation(p, region.getArenaWarp());
             setHealth(p, 20);

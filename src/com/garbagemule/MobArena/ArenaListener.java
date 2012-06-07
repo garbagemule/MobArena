@@ -129,6 +129,17 @@ public class ArenaListener
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
         this.canShare         = s.getBoolean("share-items-in-arena", true);
         this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
+        
+        /*
+         * TODO: ClassLimitManager limits = arena.getClassLimitManager();
+         * For Each loop to go through each class
+         * Make sure each class is an actual class
+         * 
+         * put this stuff in the limit manager
+         *   Map<String, Integer> to house the class names and defined limit
+         *   Map<String, Integer> to house the current amounts
+         *   clearing methods for the current amounts when the arena starts
+         */
 
         this.allowMonsters = arena.getWorld().getAllowMonsters();
 
@@ -785,6 +796,17 @@ public class ArenaListener
             Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
+        
+        /*
+         * TODO put in class limit check (use ClassLimitManager)
+         * going to need to track how many pick what classes
+         * going to need to deny them if there is already too many of that class
+         * will need to display the new message for class limit exceeded - Msg.LOBBY_CLASS_FULL
+         * 
+         * big todo: check if a player switches class. if the player already has a class, remove it, and add the new one
+         *   will be "playerChangedClass(previous ArenaClass)" followed by "playerPickedClass(new ArenaClass)"
+         *   however... if the previous and new classes are the same, ignore it completely, and let it move to delayAssignClass()
+         */
 
         // Delay the inventory stuff to ensure that right-clicking works.
         delayAssignClass(p, className);

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.ArenaListener;
 import com.garbagemule.MobArena.ArenaPlayer;
+import com.garbagemule.MobArena.ClassLimitManager;
 import com.garbagemule.MobArena.MASpawnThread;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.MonsterManager;
@@ -103,6 +104,8 @@ public interface Arena
     public RewardManager getRewardManager();
     
     public MonsterManager getMonsterManager();
+
+    public ClassLimitManager getClassLimitManager();
 
     public void revivePlayer(Player p);
     

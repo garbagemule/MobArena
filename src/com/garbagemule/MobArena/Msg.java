@@ -46,6 +46,7 @@ public enum Msg
     LOBBY_DROP_ITEM("No sharing allowed at this time!", "Can't drop items here."),
     LOBBY_PLAYER_READY("You have been flagged as ready!", "Flagged as ready!"),
     LOBBY_PICK_CLASS("You must first pick a class!", "Pick a class first!"),
+    LOBBY_CLASS_FULL("This class can no longer be selected, class limit reached!", "Class limit reached!"),
     LOBBY_NOT_ENOUGH_PLAYERS("Not enough players to start. Need at least % players.", "Need more players."),
     LOBBY_RIGHT_CLICK("Punch the sign. Don't right-click.", "Punch the sign."),
     LOBBY_CLASS_PICKED("You have chosen % as your class!", "%"),
