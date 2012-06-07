@@ -820,7 +820,7 @@ public class ArenaListener
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
                 }
                 else {
-                    arena.assignRandomClass(p);
+                    arena.addRandomPlayer(p);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
                 }
             }

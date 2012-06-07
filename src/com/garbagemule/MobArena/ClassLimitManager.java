@@ -24,14 +24,14 @@ public class ClassLimitManager
     
     public int getClassLimit(ArenaClass ac) {
         if (classLimits.get(ac) != null)
-            return classLimits.get(ac).intValue();
+            return classLimits.get(ac);
         else 
             return addNewClass(ac);
     }
     
     public int getClassInUse(ArenaClass ac) {
         if (classesInUse.get(ac) != null)
-            return classesInUse.get(ac).intValue();
+            return classesInUse.get(ac);
         else {
             addNewClass(ac);
             return 0;
@@ -46,13 +46,13 @@ public class ClassLimitManager
     
     private void initInUseMap() {
         for (ArenaClass ac : plugin.getArenaMaster().getClasses().values()) {
-            classesInUse.put(ac, Integer.valueOf(0));
+            classesInUse.put(ac, 0);
         }
     }
     
     private int addNewClass(ArenaClass ac) {
-        classLimits.put(ac, Integer.valueOf(-1));
-        classesInUse.put(ac, Integer.valueOf(0));
+        classLimits.put(ac, -1);
+        classesInUse.put(ac, 0);
         limits.set(ac.getName(), -1);
         return -1;
     }
@@ -66,9 +66,9 @@ public class ClassLimitManager
     }
     
     public boolean canPlayerJoinClass(ArenaClass ac) {
-        if (classLimits.get(ac).intValue() <= -1)
+        if (classLimits.get(ac) <= -1)
             return true;
-        else if (classesInUse.get(ac).intValue() >= classLimits.get(ac).intValue())
+        else if (classesInUse.get(ac) >= classLimits.get(ac))
             return false;
         else
             return true;

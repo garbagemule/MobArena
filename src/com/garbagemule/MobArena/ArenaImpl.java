@@ -431,6 +431,7 @@ public class ArenaImpl implements Arena
         for (Player p : randoms) {
             assignRandomClass(p);
         }
+        randoms.clear();
         
         // Then check if there are still players left.
         if (arenaPlayers.isEmpty()) {
@@ -977,6 +978,11 @@ public class ArenaImpl implements Arena
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
+    }
+    
+    @Override
+    public void addRandomPlayer(Player p) {
+        randoms.add(p);
     }
 
     @Override

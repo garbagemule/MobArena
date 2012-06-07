@@ -178,6 +178,8 @@ public interface Arena
     ////////////////////////////////////////////////////////////////////*/
     
     public void assignClass(Player p, String className);
+
+    public void addRandomPlayer(Player p);
     
     public void assignRandomClass(Player p);
     
