@@ -132,7 +132,6 @@ public class ArenaImpl implements Arena
         
         this.inventoryManager = new InventoryManager(this);
         this.rewardManager    = new RewardManager(this);
-        this.limitManager     = new ClassLimitManager(this);
 
         // Warps, points and locations
         this.leaderboard = new Leaderboard(plugin, this, region.getLeaderboard());
@@ -147,8 +146,9 @@ public class ArenaImpl implements Arena
         this.randoms        = new HashSet<Player>();
 
         // Classes, items and permissions
-        this.classes     = plugin.getArenaMaster().getClasses();
-        this.attachments = new HashMap<Player,PermissionAttachment>();
+        this.classes      = plugin.getArenaMaster().getClasses();
+        this.attachments  = new HashMap<Player,PermissionAttachment>();
+        this.limitManager = new ClassLimitManager(this, classes);
         
         // Blocks and pets
         this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());

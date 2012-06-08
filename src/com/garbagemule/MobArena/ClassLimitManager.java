@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.config.ConfigSection;
@@ -10,11 +11,13 @@ public class ClassLimitManager
     private HashMap<ArenaClass, Integer> classLimits, classesInUse;
     private ConfigSection limits;
     private MobArena plugin;
+    private Map<String, ArenaClass> classes;
     
-    public ClassLimitManager(Arena arena) {
+    public ClassLimitManager(Arena arena, Map<String, ArenaClass> classes) {
         this.plugin = arena.getPlugin();
         this.limits = new ConfigSection(plugin.getMAConfig(), "arenas." + arena.configName() + ".class-limits");
         
+        this.classes      = classes;
         this.classLimits  = new HashMap<ArenaClass, Integer>();
         this.classesInUse = new HashMap<ArenaClass, Integer>();
 
@@ -22,49 +25,39 @@ public class ClassLimitManager
         initInUseMap();
     }
     
-    public int getClassLimit(ArenaClass ac) {
-        if (classLimits.get(ac) != null)
-            return classLimits.get(ac);
-        else 
-            return addNewClass(ac);
-    }
-    
-    public int getClassInUse(ArenaClass ac) {
-        if (classesInUse.get(ac) != null)
-            return classesInUse.get(ac);
-        else {
-            addNewClass(ac);
-            return 0;
-        }
-    }
-    
     private void loadLimitMap() {
-        for (ArenaClass ac : plugin.getArenaMaster().getClasses().values()) {
+        for (ArenaClass ac : classes.values()) {
             classLimits.put(ac, limits.getInt(ac.getName(), -1));
         }
     }
     
     private void initInUseMap() {
-        for (ArenaClass ac : plugin.getArenaMaster().getClasses().values()) {
+        for (ArenaClass ac : classes.values()) {
             classesInUse.put(ac, 0);
         }
     }
     
-    private int addNewClass(ArenaClass ac) {
-        classLimits.put(ac, -1);
-        classesInUse.put(ac, 0);
-        limits.set(ac.getName(), -1);
-        return -1;
-    }
-    
+    /**
+     * This is the class a player is changing to
+     * @param ac the new ArenaClass
+     */
     public void playerPickedClass(ArenaClass ac) {
         classesInUse.put(ac, classesInUse.get(ac) + 1);
     }
     
+    /**
+     * This is the class a player changed from
+     * @param ac the current/old ArenaClass
+     */
     public void playerChangedClass(ArenaClass ac) {
         classesInUse.put(ac, classesInUse.get(ac) - 1);
     }
     
+    /**
+     * Checks to see if a player can pick a specific class
+     * @param ac the ArenaClass to check
+     * @return true/false
+     */
     public boolean canPlayerJoinClass(ArenaClass ac) {
         if (classLimits.get(ac) <= -1)
             return true;
