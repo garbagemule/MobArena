@@ -792,20 +792,19 @@ public class ArenaListener
         ArenaClass oldAC = arena.getArenaPlayer(p).getArenaClass();
         ArenaClass newAC = arena.getClasses().get(className);
         
-        // If they picked the same sign, don't do anything
-        if (oldAC.equals(newAC)) {
-            return;
+        // If they already had a class, make sure to change the "in use" in the Class Limit Manager
+        if (oldAC != null) {
+            // If they picked the same sign, don't do anything
+            if (oldAC.equals(newAC)) {
+                return;
+            }
+            classLimits.playerChangedClass(oldAC);
         }
         
         // If they can not join the class, deny them
         if (!classLimits.canPlayerJoinClass(newAC)) {
             Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
             return;
-        }
-        
-        // If they already had a class, make sure to change the "in use" in the Class Limit Manager
-        if (oldAC != null) {
-            classLimits.playerChangedClass(oldAC);
         }
         
         // Increment the "in use" in the Class Limit Manager
