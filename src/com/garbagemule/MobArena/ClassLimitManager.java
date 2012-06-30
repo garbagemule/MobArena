@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.config.ConfigSection;
+import com.garbagemule.MobArena.util.config.ConfigUtils;
 
 public class ClassLimitManager
 {
@@ -15,7 +16,11 @@ public class ClassLimitManager
     
     public ClassLimitManager(Arena arena, Map<String, ArenaClass> classes) {
         this.plugin = arena.getPlugin();
+        ConfigUtils.addMissingNodes(plugin, plugin.getMAConfig(), "arenas." + arena.configName() + ".class-limits", "class-limits.yml");
         this.limits = new ConfigSection(plugin.getMAConfig(), "arenas." + arena.configName() + ".class-limits");
+        //TODO figure out why limits is not loading the proper values from the config
+        //TODO perhaps send along the limits config section from the ArenaImpl class?
+        //TODO try to use ArenaRegion's config stuff to set up CLM properly
         
         this.classes      = classes;
         this.classLimits  = new HashMap<ArenaClass, Integer>();
@@ -43,14 +48,16 @@ public class ClassLimitManager
      */
     public void playerPickedClass(ArenaClass ac) {
         classesInUse.put(ac, classesInUse.get(ac) + 1);
+        debug();
     }
     
     /**
-     * This is the class a player changed from
+     * This is the class a player left
      * @param ac the current/old ArenaClass
      */
-    public void playerChangedClass(ArenaClass ac) {
+    public void playerLeftClass(ArenaClass ac) {
         classesInUse.put(ac, classesInUse.get(ac) - 1);
+        debug();
     }
     
     /**
@@ -59,6 +66,7 @@ public class ClassLimitManager
      * @return true/false
      */
     public boolean canPlayerJoinClass(ArenaClass ac) {
+        debug();
         if (classLimits.get(ac) <= -1)
             return true;
         else if (classesInUse.get(ac) >= classLimits.get(ac))
@@ -70,5 +78,16 @@ public class ClassLimitManager
     public void clearClassesInUse() {
         classesInUse.clear();
         initInUseMap();
+        debug();
+    }
+    
+    private void debug() {
+        System.out.println("classesInUse:");
+        for (ArenaClass ac : classesInUse.keySet())
+            System.out.println(ac.getName() + " has " + classesInUse.get(ac).intValue() + " players using it.");
+        System.out.println();
+        System.out.println("classLimits:");
+        for (ArenaClass ac : classLimits.keySet())
+            System.out.println(ac.getName() + " has a limit of " + classLimits.get(ac).intValue() + " players.");
     }
 }

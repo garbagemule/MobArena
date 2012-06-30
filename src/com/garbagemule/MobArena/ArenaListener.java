@@ -794,11 +794,14 @@ public class ArenaListener
         
         // If they already had a class, make sure to change the "in use" in the Class Limit Manager
         if (oldAC != null) {
+            p.sendMessage("already had a class");
             // If they picked the same sign, don't do anything
             if (oldAC.equals(newAC)) {
+                p.sendMessage("picked the same class");
                 return;
             }
-            classLimits.playerChangedClass(oldAC);
+            System.out.println("decrementing the classesInUse of " + oldAC.getName());
+            classLimits.playerLeftClass(oldAC);
         }
         
         // If they can not join the class, deny them
@@ -808,6 +811,7 @@ public class ArenaListener
         }
         
         // Increment the "in use" in the Class Limit Manager
+        System.out.println("incrementing the classesInUse of " + newAC.getName());
         classLimits.playerPickedClass(newAC);
 
         // Delay the inventory stuff to ensure that right-clicking works.

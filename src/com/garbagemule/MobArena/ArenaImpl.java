@@ -623,6 +623,12 @@ public class ArenaImpl implements Arena
             refund(p);
         }
         
+        if (inLobby(p)) {
+            if (ap.getArenaClass() != null) {
+                limitManager.playerLeftClass(ap.getArenaClass());
+            }
+        }
+        
         movePlayerToEntry(p);
         discardPlayer(p);
         
