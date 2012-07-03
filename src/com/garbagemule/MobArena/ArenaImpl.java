@@ -466,6 +466,9 @@ public class ArenaImpl implements Arena
         // Spawn pets (must happen after 'running = true;')
         spawnPets();
         
+        // Clear the classes in use map, as they're no longer needed
+        limitManager.clearClassesInUse();
+        
         // Start logging
         rewardManager.reset();
         if (logging)
