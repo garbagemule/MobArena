@@ -29,17 +29,24 @@ public class JoinCommand implements Command
         String arg1 = (args.length > 0 ? args[0] : null);
         
         // Run some rough sanity checks, and grab the arena to join.
-        Arena arena = Commands.getArenaToJoinOrSpec(am, p, arg1);
-        if (arena == null) {
+        Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
+        Arena fromArena = am.getArenaWithPlayer(p);
+        if (toArena == null) {
+            return false;
+        }
+        
+        // Deny joining from other arenas
+        if (fromArena != null && (fromArena.inArena(p) || fromArena.inLobby(p))) {
+            Messenger.tellPlayer(p, Msg.JOIN_ALREADY_PLAYING);
             return false;
         }
         
         // Per-arena sanity checks
-        if (!arena.canJoin(p)) {
+        if (!toArena.canJoin(p)) {
             return false;
         }
         
         // Join the arena!
-        return arena.playerJoin(p, p.getLocation());
+        return toArena.playerJoin(p, p.getLocation());
     }
 }

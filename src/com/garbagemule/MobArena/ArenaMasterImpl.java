@@ -24,6 +24,7 @@ import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -424,6 +425,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     private boolean addRemoveClassPermission(String classname, String perm, boolean add) {
+        classname = TextUtils.camelCase(classname);
         String path = "classes." + classname;
         if (config.getConfigSection(path) == null)
             return false;
@@ -433,16 +435,19 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Get any previous nodes
         List<String> nodes = section.getStringList("permissions", null);
-        if (nodes.contains(perm))
+        
+        if (nodes.contains(perm) && add) {
             return false;
-
-        // Add or remove.
-        if (add) {
+        }
+        else if (nodes.contains(perm) && !add) {
+            nodes.remove(perm);
+        }
+        else if (!nodes.contains(perm) && add) {
             removeContradictions(nodes, perm);
             nodes.add(perm);
         }
-        else {
-            nodes.remove(perm);
+        else if (!nodes.contains(perm) && !add) {
+            return false;
         }
 
         // Replace the set.

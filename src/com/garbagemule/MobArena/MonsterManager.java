@@ -17,7 +17,7 @@ import com.garbagemule.MobArena.waves.MABoss;
 
 public class MonsterManager
 {
-    private Set<LivingEntity> monsters, sheep;
+    private Set<LivingEntity> monsters, sheep, golems;
     private Set<Wolf> pets;
     private Map<LivingEntity,MABoss> bosses;
     private Map<LivingEntity,List<ItemStack>> suppliers;
@@ -25,6 +25,7 @@ public class MonsterManager
     public MonsterManager() {
         this.monsters  = new HashSet<LivingEntity>();
         this.sheep     = new HashSet<LivingEntity>();
+        this.golems    = new HashSet<LivingEntity>();
         this.pets      = new HashSet<Wolf>();
         this.bosses    = new HashMap<LivingEntity,MABoss>();
         this.suppliers = new HashMap<LivingEntity,List<ItemStack>>();
@@ -33,6 +34,7 @@ public class MonsterManager
     public void reset() {
         monsters.clear();
         sheep.clear();
+        golems.clear();
         pets.clear();
         bosses.clear();
         suppliers.clear();
@@ -41,6 +43,7 @@ public class MonsterManager
     public void clear() {
         removeAll(monsters);
         removeAll(sheep);
+        removeAll(golems);
         removeAll(pets);
         removeAll(bosses.keySet());
         removeAll(suppliers.keySet());
@@ -78,6 +81,18 @@ public class MonsterManager
     
     public boolean removeExplodingSheep(LivingEntity e) {
         return sheep.remove(e);
+    }
+    
+    public Set<LivingEntity> getGolems() {
+        return golems;
+    }
+    
+    public void addGolem(LivingEntity e) {
+        golems.add(e);
+    }
+    
+    public boolean removeGolem(LivingEntity e) {
+        return golems.remove(e);
     }
     
     public Set<Wolf> getPets() {

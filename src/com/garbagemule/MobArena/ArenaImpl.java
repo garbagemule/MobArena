@@ -72,8 +72,9 @@ public class ArenaImpl implements Arena
     private Leaderboard leaderboard;
     
     // Player stuff
-    private InventoryManager inventoryManager;
-    private RewardManager    rewardManager;
+    private InventoryManager  inventoryManager;
+    private RewardManager     rewardManager;
+    private ClassLimitManager limitManager;
     private Map<Player,ArenaPlayer> arenaPlayerMap;
     private Map<Player,PlayerData> playerData = new HashMap<Player,PlayerData>();
     
@@ -100,6 +101,7 @@ public class ArenaImpl implements Arena
     private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     
     // Logging
+    private boolean logging;
     private ArenaLog log;
     private LogSessionBuilder sessionBuilder;
     private LogTotalsBuilder  totalsBuilder;
@@ -124,6 +126,7 @@ public class ArenaImpl implements Arena
         
         this.enabled = settings.getBoolean("enabled", false);
         this.protect = settings.getBoolean("protect", true);
+        this.logging = settings.getBoolean("logging", true);
         this.running = false;
         this.edit    = false;
         
@@ -143,8 +146,9 @@ public class ArenaImpl implements Arena
         this.randoms        = new HashSet<Player>();
 
         // Classes, items and permissions
-        this.classes     = plugin.getArenaMaster().getClasses();
-        this.attachments = new HashMap<Player,PermissionAttachment>();
+        this.classes      = plugin.getArenaMaster().getClasses();
+        this.attachments  = new HashMap<Player,PermissionAttachment>();
+        this.limitManager = new ClassLimitManager(this, classes);
         
         // Blocks and pets
         this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
@@ -170,11 +174,13 @@ public class ArenaImpl implements Arena
         Time time = Enums.getEnumFromString(Time.class, timeString);
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
         
-        this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
-        this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
-        this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
-        
-        this.log = new ArenaLog(this, sessionBuilder, totalsBuilder);
+        if (logging) {
+            this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
+            this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
+            this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
+            
+            this.log = new ArenaLog(this, sessionBuilder, totalsBuilder);
+        }
     }
     
     
@@ -219,6 +225,18 @@ public class ArenaImpl implements Arena
     @Override
     public void setProtected(boolean value) {
         protect = value;
+        settings.set("protect", protect);
+    }
+    
+    @Override
+    public boolean isLogging() {
+        return logging;
+    }
+    
+    @Override
+    public void setLogging(boolean value) {
+        logging = value;
+        settings.set("logging", logging);
     }
 
     @Override
@@ -368,6 +386,11 @@ public class ArenaImpl implements Arena
     }
     
     @Override
+    public ClassLimitManager getClassLimitManager() {
+        return limitManager;
+    }
+    
+    @Override
     public ArenaLog getLog() {
         return log;
     }
@@ -408,6 +431,7 @@ public class ArenaImpl implements Arena
         for (Player p : randoms) {
             assignRandomClass(p);
         }
+        randoms.clear();
         
         // Then check if there are still players left.
         if (arenaPlayers.isEmpty()) {
@@ -416,6 +440,14 @@ public class ArenaImpl implements Arena
         
         // Teleport players, give full health, initialize map
         for (Player p : arenaPlayers) {
+            // TODO figure out how people die in lobby and get sent to spectator area early
+            // Remove player from spec list to avoid invincibility issues
+            if (inSpec(p)) {
+                specPlayers.remove(p);
+                System.out.println("[MobArena] Player " + p.getName() + " joined the arena from the spec area!");
+                System.out.println("[MobArena] Invincibility glitch attempt stopped!");
+            }
+            
             p.teleport(region.getArenaWarp());
             //movePlayerToLocation(p, region.getArenaWarp());
             setHealth(p, 20);
@@ -434,9 +466,13 @@ public class ArenaImpl implements Arena
         // Spawn pets (must happen after 'running = true;')
         spawnPets();
         
+        // Clear the classes in use map, as they're no longer needed
+        limitManager.clearClassesInUse();
+        
         // Start logging
         rewardManager.reset();
-        log.start();
+        if (logging)
+            log.start();
         
         // Initialize leaderboards and start displaying info.
         leaderboard.initialize();
@@ -471,7 +507,8 @@ public class ArenaImpl implements Arena
         leaderboard.update();
         
         // Finish logging
-        log.end();
+        if (logging)
+            log.end();
         
         // Stop spawning.
         stopSpawner();
@@ -580,18 +617,19 @@ public class ArenaImpl implements Arena
         removePotionEffects(p);
         
         ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (ap != null && running) log.playerDeath(ap);
-        
+        if (logging)
+            if (ap != null && running)
+                log.playerDeath(ap);
+
+        restoreInvAndExp(p);
         if (inLobby(p) || inArena(p)) {
-            inventoryManager.clearInventory(p);
-            inventoryManager.restoreInventory(p);
-            rewardManager.grantRewards(p);
             refund(p);
-            //p.updateInventory();
         }
-        else if (inSpec(p)) {
-            inventoryManager.restoreInventory(p);
-            //p.updateInventory();
+        
+        if (inLobby(p)) {
+            if (ap.getArenaClass() != null) {
+                limitManager.playerLeftClass(ap.getArenaClass());
+            }
         }
         
         movePlayerToEntry(p);
@@ -609,7 +647,9 @@ public class ArenaImpl implements Arena
         plugin.getServer().getPluginManager().callEvent(event);
         
         ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (ap != null) log.playerDeath(ap);
+        if (logging)
+            if (ap != null)
+                log.playerDeath(ap);
         
         arenaPlayers.remove(p);
         
@@ -643,7 +683,9 @@ public class ArenaImpl implements Arena
         
         if (settings.getBoolean("spectate-on-death", true)) {
             movePlayerToSpec(p);
-            restoreInvAndExp(p);
+            Messenger.tellPlayer(p, Msg.SPEC_FROM_ARENA);
+            Messenger.tellPlayer(p, Msg.MISC_MA_LEAVE_REMINDER);
+            //restoreInvAndExp(p);
         } else {
             restoreInvAndExp(p);
             movePlayerToEntry(p);
@@ -701,7 +743,7 @@ public class ArenaImpl implements Arena
     
     private void removePotionEffects(Player p) {
         for (PotionEffect effect : p.getActivePotionEffects()) {
-            p.addPotionEffect(new PotionEffect(effect.getType(), 0, 0), true);
+            p.removePotionEffect(effect.getType());
         }
     }
     
@@ -873,6 +915,9 @@ public class ArenaImpl implements Arena
         if (!settings.getBoolean("keep-exp", false)) {
             playerData.get(p).restoreData();
         }
+        else {
+            p.setFoodLevel(playerData.get(p).food());
+        }
     }
 
     @Override
@@ -943,6 +988,11 @@ public class ArenaImpl implements Arena
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
     }
+    
+    @Override
+    public void addRandomPlayer(Player p) {
+        randoms.add(p);
+    }
 
     @Override
     public void assignRandomClass(Player p)
@@ -963,7 +1013,7 @@ public class ArenaImpl implements Arena
         }
         
         assignClass(p, className);
-        Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, className);
+        Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), getClassLogo(className));
     }
 
     @Override

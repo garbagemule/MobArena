@@ -247,6 +247,10 @@ public class MASpawnThread implements Runnable
                 continue;
             }
 
+            // TODO remove debug message
+            Location l = p.getLocation();
+            System.out.println("Player: " + p.getName() + " found at location:" + l.getX() + ", " + l.getY() + ", " + l.getZ());
+            
             Messenger.tellPlayer(p, "Leaving so soon?");
             p.getInventory().clear();
             arena.playerLeave(p);
@@ -299,7 +303,7 @@ public class MASpawnThread implements Runnable
                 Messenger.warning("Could not add null reward. Please check the config-file!");
             }
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                if (plugin.giveMoney(p, reward.getAmount())) {
+                if (plugin.giveMoney(p, reward.getAmount())) { // Money already awarded here, not needed at end of match as well
                     Messenger.tellPlayer(p, Msg.WAVE_REWARD, plugin.economyFormat(reward.getAmount()));
                 }
                 else {
