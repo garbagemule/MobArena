@@ -25,7 +25,7 @@ public class BossWave extends AbstractWave
     private BossHealth health;
     
     private List<Ability> abilities;
-    private boolean activated;
+    private boolean activated, abilityAnnounce;
     
     private int abilityInterval;
     
@@ -34,6 +34,7 @@ public class BossWave extends AbstractWave
         this.bosses    = new HashSet<MABoss>();
         this.abilities = new ArrayList<Ability>();
         this.activated = false;
+        this.abilityAnnounce = false;
         this.setType(WaveType.BOSS);
     }
     
@@ -78,6 +79,14 @@ public class BossWave extends AbstractWave
         this.abilityInterval = abilityInterval;
     }
     
+    public boolean getAbilityAnnounce() {
+        return abilityAnnounce;
+    }
+    
+    public void setAbilityAnnounce(boolean abilityAnnounce) {
+        this.abilityAnnounce = abilityAnnounce;
+    }
+    
     public void activateAbilities(Arena arena) {
         if (activated) {
             return;
@@ -89,7 +98,9 @@ public class BossWave extends AbstractWave
     }
     
     public void announceAbility(Ability ability, MABoss boss, Arena arena) {
-        AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
-        Messenger.tellAll(arena, Msg.WAVE_BOSS_ABILITY, info.name());
+        if(getAbilityAnnounce()) {
+            AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
+            Messenger.tellAll(arena, Msg.WAVE_BOSS_ABILITY, info.name());
+        }
     }
 }

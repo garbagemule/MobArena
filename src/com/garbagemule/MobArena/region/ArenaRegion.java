@@ -193,7 +193,7 @@ public class ArenaRegion
     
     // Region expand
     public void expandUp(int amount) {
-        p2.setY(Math.min(127D, p2.getY() + amount));
+        p2.setY(Math.min(arena.getWorld().getMaxHeight(), p2.getY() + amount));
         set(RegionPoint.P2, p2);
     }
     
@@ -221,7 +221,7 @@ public class ArenaRegion
     
     // Lobby expand
     public void expandLobbyUp(int amount) {
-        l2.setY(Math.min(127D, l2.getY() + amount));
+        l2.setY(Math.min(arena.getWorld().getMaxHeight(), l2.getY() + amount));
         set(RegionPoint.L2, l2);
     }
     

@@ -250,9 +250,9 @@ public class WaveParser
             }
         }
         
-        // As well as the ability interval.
-        int interval = config.getInt("ability-interval", 3) * 20;
-        result.setAbilityInterval(interval);
+        // As well as the ability interval and ability announce.
+        result.setAbilityInterval(config.getInt("ability-interval", 3) * 20);
+        result.setAbilityAnnounce(config.getBoolean("ability-announce", true));
         
         return result;
     }

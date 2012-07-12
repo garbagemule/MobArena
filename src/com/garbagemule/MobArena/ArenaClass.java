@@ -101,6 +101,12 @@ public class ArenaClass
         else if (stack.getType() == Material.BONE) {
             pets += stack.getAmount();
         }
+        else if (stack.getAmount() > 64) {
+            while (stack.getAmount() > 64) {
+                items.add(new ItemStack(stack.getType(), 64));
+                stack.setAmount(stack.getAmount() - 64);
+            }
+        }
         
         items.add(stack);
     }
@@ -229,7 +235,7 @@ public class ArenaClass
     /**
      * Used by isWeapon() to determine if an ItemStack is a weapon type.
      */
-    private static int[] weaponTypes = new int[]{256,257,258,267,268,269,270,271,272,273,274,275,276,277,278,279,283,284,285,286,290,291,292,293,294};
+    private static int[] weaponTypes = new int[]{256,257,258,261,267,268,269,270,271,272,273,274,275,276,277,278,279,283,284,285,286,290,291,292,293,294};
     
     /**
      * Returns true, if the ItemStack appears to be a weapon, in which case

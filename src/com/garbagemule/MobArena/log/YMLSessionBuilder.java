@@ -16,9 +16,9 @@ import com.garbagemule.MobArena.util.config.Config;
 
 public class YMLSessionBuilder implements LogSessionBuilder
 {
-    private final String GENERAL = "general-info.";
-    private final String PLAYERS = "players.";
-    private final String CLASSES = "class-distribution.";
+    private final String GENERAL = "general-info";
+    private final String PLAYERS = "players";
+    private final String CLASSES = "class-distribution";
     
     private Config config;
     private long start, end;
@@ -31,42 +31,42 @@ public class YMLSessionBuilder implements LogSessionBuilder
     @Override
     public void buildStartTime() {
         start = new Date().getTime();
-        config.set(GENERAL + "start-time", TimeUtils.toDateTime(start));
+        config.set(GENERAL + ".start-time", TimeUtils.toDateTime(start));
     }
 
     @Override
     public void buildEndTime() {
         end = new Date().getTime();
-        config.set(GENERAL + "end-time", TimeUtils.toDateTime(end));
+        config.set(GENERAL + ".end-time", TimeUtils.toDateTime(end));
     }
 
     @Override
     public void buildDuration() {
         String duration = TimeUtils.toTime(end - start);
-        config.set(GENERAL + "duration", duration);
+        config.set(GENERAL + ".duration", duration);
     }
     
     @Override
     public void buildLastWave(int lastWave) {
-        config.set(GENERAL + "last-wave", lastWave);
+        config.set(GENERAL + ".last-wave", lastWave);
     }
     
     @Override
     public void buildNumberOfPlayers(int amount) {
-        config.set(GENERAL + "number-of-players", amount);
+        config.set(GENERAL + ".number-of-players", amount);
     }
     
     @Override
     public void buildClassDistribution(Map<String,MutableInt> classDistribution) {
         for (Entry<String,MutableInt> entry : classDistribution.entrySet()) {
             int amount = entry.getValue().value();
-            config.set(CLASSES + entry.getKey(), amount);
+            config.set(CLASSES + "." + entry.getKey(), amount);
         }
     }
 
     @Override
     public void buildPlayerEntry(ArenaLogPlayerEntry entry, List<ItemStack> rewards) {
-        String path = PLAYERS + entry.playername + ".";
+        String path = PLAYERS + "." + entry.playername + ".";
         
         // Name and class
         config.set(path + "name",  entry.playername);
@@ -106,8 +106,11 @@ public class YMLSessionBuilder implements LogSessionBuilder
     }
     
     private void reset() {
-        config.set(GENERAL, null);
-        config.set(CLASSES, null);
-        config.set(PLAYERS, null);
+        if(config.get(GENERAL) != null)
+            config.set(GENERAL, null);
+        if(config.get(CLASSES) != null)
+            config.set(CLASSES, null);
+        if(config.get(PLAYERS) != null)
+            config.set(PLAYERS, null);
     }
 }

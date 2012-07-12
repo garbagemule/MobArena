@@ -88,6 +88,7 @@ public class ArenaListener
     private Arena arena;
     private ArenaRegion region;
     private MonsterManager monsters;
+    private ClassLimitManager classLimits;
 
     private boolean softRestore,
             softRestoreDrops,
@@ -97,6 +98,7 @@ public class ArenaListener
             pvpEnabled,
             foodRegen,
             lockFoodLevel;
+    @SuppressWarnings("unused")
     private boolean allowTeleport,
             canShare,
             allowMonsters,
@@ -128,6 +130,8 @@ public class ArenaListener
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
         this.canShare         = s.getBoolean("share-items-in-arena", true);
         this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
+        
+        this.classLimits = arena.getClassLimitManager();
 
         this.allowMonsters = arena.getWorld().getAllowMonsters();
 
@@ -135,6 +139,16 @@ public class ArenaListener
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
+        if (!arena.getRegion().contains(event.getBlock().getLocation()))
+            return;
+        
+        if (!arena.inArena(event.getPlayer())) {
+            if (arena.inEditMode())
+                return;
+            else
+                event.setCancelled(true);
+        }
+        
         if (onBlockDestroy(event))
             return;
 
@@ -142,24 +156,30 @@ public class ArenaListener
     }
 
     public void onBlockBurn(BlockBurnEvent event) {
-        if (onBlockDestroy(event))
+        if (!arena.getRegion().contains(event.getBlock().getLocation()) || onBlockDestroy(event))
             return;
 
         event.setCancelled(true);
     }
 
     private boolean onBlockDestroy(BlockEvent event) {
-        if (!arena.getRegion().contains(event.getBlock().getLocation()) || arena.inEditMode() || (!arena.isProtected() && arena.isRunning()))
+        if (arena.inEditMode())
             return true;
+        
+        if (!arena.isRunning())
+            return false;
 
         Block b = event.getBlock();
         if (arena.removeBlock(b) || b.getType() == Material.TNT)
             return true;
-
-        if (softRestore && arena.isRunning()) {
+        
+        if (softRestore) {
+            if (arena.isProtected())
+                return false;
+            
             BlockState state = b.getState();
-
             Repairable r = null;
+            
             if (state instanceof InventoryHolder)
                 r = new RepairableContainer(state);
             else if (state instanceof Sign)
@@ -170,10 +190,9 @@ public class ArenaListener
                 r = new RepairableBlock(state);
 
             arena.addRepairable(r);
-
+            
             if (!softRestoreDrops)
                 b.setTypeId(0);
-
             return true;
         }
 
@@ -256,8 +275,13 @@ public class ArenaListener
         }
 
         if (event.getSpawnReason() != SpawnReason.CUSTOM) {
-            event.setCancelled(true);
-            return;
+            if (event.getSpawnReason() == SpawnReason.BUILD_IRONGOLEM || event.getSpawnReason() == SpawnReason.BUILD_SNOWMAN) {
+                monsters.addGolem(event.getEntity());
+            }
+            else {
+                event.setCancelled(true);
+                return;
+            }
         }
 
         LivingEntity entity = (LivingEntity) event.getEntity();
@@ -344,6 +368,9 @@ public class ArenaListener
         }
         else if (monsters.removeMonster(event.getEntity())) {
             onMonsterDeath(event);
+        }
+        else if (monsters.removeGolem(event.getEntity())) {
+            Messenger.tellAll(arena, Msg.GOLEM_DIED);
         }
     }
 
@@ -450,7 +477,7 @@ public class ArenaListener
         else if (damagee instanceof Player) {
             onPlayerDamage(event, (Player) damagee, damager);
         }
-        // Snowman
+        // Snowmen melting
         else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
             event.setCancelled(true);
         }
@@ -461,6 +488,10 @@ public class ArenaListener
         // Regular monster
         else if (monsters.getMonsters().contains(damagee)) {
             onMonsterDamage(event, damagee, damager);
+        }
+        // Player made golems
+        else if (monsters.getGolems().contains(damagee)) {
+            onGolemDamage(event, damagee, damager);
         }
     }
 
@@ -507,6 +538,21 @@ public class ArenaListener
         else if (damager instanceof LivingEntity) {
             if (!monsterInfight)
                 event.setCancelled(true);
+        }
+    }
+    
+    private void onGolemDamage(EntityDamageEvent event, Entity golem, Entity damager) {
+        if (damager instanceof Player) {
+            Player p = (Player) damager;
+            if (!arena.inArena(p)) {
+                event.setCancelled(true);
+                return;
+            }
+            
+            if (!pvpEnabled) {
+                event.setCancelled(true);
+                return;
+            }
         }
     }
 
@@ -742,6 +788,31 @@ public class ArenaListener
             Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
+        
+        ArenaClass oldAC = arena.getArenaPlayer(p).getArenaClass();
+        ArenaClass newAC = arena.getClasses().get(className);
+        
+        // If they already had a class, make sure to change the "in use" in the Class Limit Manager
+        if (oldAC != null) {
+            p.sendMessage("already had a class");
+            // If they picked the same sign, don't do anything
+            if (oldAC.equals(newAC)) {
+                p.sendMessage("picked the same class");
+                return;
+            }
+            System.out.println("decrementing the classesInUse of " + oldAC.getName());
+            classLimits.playerLeftClass(oldAC);
+        }
+        
+        // If they can not join the class, deny them
+        if (!classLimits.canPlayerJoinClass(newAC)) {
+            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
+            return;
+        }
+        
+        // Increment the "in use" in the Class Limit Manager
+        System.out.println("incrementing the classesInUse of " + newAC.getName());
+        classLimits.playerPickedClass(newAC);
 
         // Delay the inventory stuff to ensure that right-clicking works.
         delayAssignClass(p, className);
@@ -750,20 +821,23 @@ public class ArenaListener
     private void delayAssignClass(final Player p, final String className) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {
             public void run() {
-                arena.assignClass(p, className);
-
-                if (!className.equalsIgnoreCase("random"))
+                if (!className.equalsIgnoreCase("random")) {
+                    arena.assignClass(p, className);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
-                else
+                }
+                else {
+                    arena.addRandomPlayer(p);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
+                }
             }
         });
     }
 
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player p = event.getPlayer();
-        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p)))
+        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p))) {
             return;
+        }
 
         arena.playerLeave(p);
         banned.add(p);
@@ -772,7 +846,7 @@ public class ArenaListener
 
     public void onPlayerKick(PlayerKickEvent event) {
         Player p = event.getPlayer();
-        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p))) {
+        if (!arena.isEnabled() || (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p))) {
             return;
         }
 

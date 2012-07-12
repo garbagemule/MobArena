@@ -185,6 +185,7 @@ public class CommandHandler implements CommandExecutor
         register(RemoveClassCommand.class);
         register(RemoveClassPermCommand.class);
         register(RemoveContainerCommand.class);
+        register(RemoveLeaderboardCommand.class);
         register(RemoveSpawnpointCommand.class);
         register(SetArenaCommand.class);
         register(SetClassCommand.class);

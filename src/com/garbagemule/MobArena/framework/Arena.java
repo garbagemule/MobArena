@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.ArenaListener;
 import com.garbagemule.MobArena.ArenaPlayer;
+import com.garbagemule.MobArena.ClassLimitManager;
 import com.garbagemule.MobArena.MASpawnThread;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.MonsterManager;
@@ -47,6 +48,10 @@ public interface Arena
     public boolean isProtected();
     
     public void setProtected(boolean value);
+    
+    public boolean isLogging();
+    
+    public void setLogging(boolean value);
     
     public boolean isRunning();
     
@@ -99,6 +104,8 @@ public interface Arena
     public RewardManager getRewardManager();
     
     public MonsterManager getMonsterManager();
+
+    public ClassLimitManager getClassLimitManager();
 
     public void revivePlayer(Player p);
     
@@ -171,6 +178,8 @@ public interface Arena
     ////////////////////////////////////////////////////////////////////*/
     
     public void assignClass(Player p, String className);
+
+    public void addRandomPlayer(Player p);
     
     public void assignRandomClass(Player p);
     
