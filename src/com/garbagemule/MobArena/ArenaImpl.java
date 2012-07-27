@@ -148,7 +148,7 @@ public class ArenaImpl implements Arena
         // Classes, items and permissions
         this.classes      = plugin.getArenaMaster().getClasses();
         this.attachments  = new HashMap<Player,PermissionAttachment>();
-        this.limitManager = new ClassLimitManager(this, classes);
+        this.limitManager = new ClassLimitManager(this, classes, new ConfigSection(config, "arenas." + name + ".class-limits"));
         
         // Blocks and pets
         this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
@@ -729,8 +729,7 @@ public class ArenaImpl implements Arena
             p.getInventory().removeItem(new ItemStack(Material.BONE, petAmount));
             
             for (int i = 0; i < petAmount; i++) {
-                Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), EntityType.WOLF);
-                //Wolf wolf = (Wolf) world.spawnCreature(p.getLocation(), CreatureType.WOLF);
+                Wolf wolf = (Wolf) world.spawnEntity(p.getLocation(), EntityType.WOLF);
                 wolf.setTamed(true);
                 wolf.setOwner(p);
                 wolf.setHealth(wolf.getMaxHealth());
