@@ -139,6 +139,14 @@ public class ArenaListener
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
+        // Check if the block is a sign, it might be a leaderboard
+        if (event.getBlock() instanceof Sign) {
+            // If the sign is the leaderboard sign, null out the config
+            if (event.getBlock().getLocation().equals(arena.getRegion().getLeaderboard())) {
+                arena.getRegion().set("leaderboard", null);
+            }
+        }
+        
         if (!arena.getRegion().contains(event.getBlock().getLocation()))
             return;
         
@@ -631,9 +639,13 @@ public class ArenaListener
         for (PotionEffect effect : potion.getEffects()) {
             PotionEffectType type = effect.getType();
             if (type.equals(PotionEffectType.HARM) || type.equals(PotionEffectType.POISON)) {
-                for (Player p : arena.getPlayersInArena()) {
-                    event.setIntensity(p, 0D);
+                Set<LivingEntity> players = new HashSet<LivingEntity>();
+                for (LivingEntity le : event.getAffectedEntities()) {
+                    if (le instanceof Player) {
+                        players.add(le);
+                    }
                 }
+                event.getAffectedEntities().removeAll(players);
                 break;
             }
         }
@@ -794,28 +806,38 @@ public class ArenaListener
         
         // If they already had a class, make sure to change the "in use" in the Class Limit Manager
         if (oldAC != null) {
-            p.sendMessage("already had a class");
-            // If they picked the same sign, don't do anything
+            // If they picked the same class, don't do anything
             if (oldAC.equals(newAC)) {
-                p.sendMessage("picked the same class");
                 return;
             }
-            System.out.println("decrementing the classesInUse of " + oldAC.getName());
-            classLimits.playerLeftClass(oldAC);
+            // If they can join the class, decrement the previous class's count
+            if (canPlayerJoinClass(newAC, p)) {
+                classLimits.playerLeftClass(oldAC);
+            }
+            else {
+                return;
+            }
         }
-        
-        // If they can not join the class, deny them
-        if (!classLimits.canPlayerJoinClass(newAC)) {
-            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
-            return;
+        else {
+            if (!canPlayerJoinClass(newAC, p)) {
+                return;
+            }
         }
-        
-        // Increment the "in use" in the Class Limit Manager
-        System.out.println("incrementing the classesInUse of " + newAC.getName());
-        classLimits.playerPickedClass(newAC);
 
         // Delay the inventory stuff to ensure that right-clicking works.
         delayAssignClass(p, className);
+    }
+    
+    private boolean canPlayerJoinClass(ArenaClass ac, Player p) {
+        // If they can not join the class, deny them
+        if (!classLimits.canPlayerJoinClass(ac)) {
+            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
+            return false;
+        }
+        
+        // Increment the "in use" in the Class Limit Manager
+        classLimits.playerPickedClass(ac);
+        return true;
     }
 
     private void delayAssignClass(final Player p, final String className) {
@@ -873,6 +895,11 @@ public class ArenaListener
         Player p = event.getPlayer();
 
         if (region.contains(from)) {
+            // Players with proper admin permission can warp out
+            if (p.hasPermission("mobarena.admin.teleport")) {
+                return TeleportResponse.ALLOW;
+            }
+            
             // Players not in the arena are free to warp out.
             if (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p)) {
                 return TeleportResponse.ALLOW;
@@ -887,6 +914,11 @@ public class ArenaListener
             return TeleportResponse.REJECT;
         }
         else if (region.contains(to)) {
+            // Players with proper admin permission can warp in
+            if (p.hasPermission("mobarena.admin.teleport")) {
+                return TeleportResponse.ALLOW;
+            }
+            
             if (region.isWarp(from) || region.isWarp(to) || to.equals(arena.getPlayerEntry(p))) {
                 return TeleportResponse.ALLOW;
             }
