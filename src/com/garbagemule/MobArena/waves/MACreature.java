@@ -88,8 +88,7 @@ public enum MACreature
     }
     
     public LivingEntity spawn(Arena arena, World world, Location loc) {
-        LivingEntity e = world.spawnCreature(loc, type);
-        //TODO change this to: LivingEntity e = (LivingEntity) world.spawnEntity(loc, type);
+        LivingEntity e = (LivingEntity) world.spawnEntity(loc, type);
         
         switch (this) {
             case SHEEP:
