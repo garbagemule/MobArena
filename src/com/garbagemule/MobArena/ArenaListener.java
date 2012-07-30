@@ -139,14 +139,14 @@ public class ArenaListener
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
-    	// Check if the block is a sign, it might be a leaderboard
-    	if (event.getBlock() instanceof Sign) {
-    		// If the sign is the leaderboard sign, null out the config
-    		if (event.getBlock().getLocation().equals(arena.getRegion().getLeaderboard())) {
-    			arena.getRegion().set("leaderboard", null);
-    		}
-    	}
-    	
+        // Check if the block is a sign, it might be a leaderboard
+        if (event.getBlock() instanceof Sign) {
+            // If the sign is the leaderboard sign, null out the config
+            if (event.getBlock().getLocation().equals(arena.getRegion().getLeaderboard())) {
+                arena.getRegion().set("leaderboard", null);
+            }
+        }
+        
         if (!arena.getRegion().contains(event.getBlock().getLocation()))
             return;
         
