@@ -36,7 +36,7 @@ public class ArenaLogPlayerEntry
         ArenaLogPlayerEntry entry = new ArenaLogPlayerEntry();
 
         entry.playername = ap.getPlayer().getName();
-        entry.classname  = ap.getArenaClass().getName();
+        entry.classname  = ap.getArenaClass().getLowercaseName();
         
         ArenaPlayerStatistics stats = ap.getStats();
         entry.kills     = stats.getInt("kills");

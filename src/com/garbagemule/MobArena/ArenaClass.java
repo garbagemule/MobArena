@@ -15,7 +15,7 @@ import org.bukkit.permissions.PermissionAttachment;
 
 public class ArenaClass
 {
-    private String name;
+    private String configName, lowercaseName;
     private ItemStack helmet, chestplate, leggings, boots;
     private List<ItemStack> items, armor;
     private Map<String,Boolean> perms;
@@ -23,10 +23,11 @@ public class ArenaClass
     
     /**
      * Create a new, empty arena class with the given name.
-     * @param name the class name
+     * @param name the class name as it appears in the config-file
      */
     public ArenaClass(String name) {
-        this.name = name;
+        this.configName    = name;
+        this.lowercaseName = name.toLowerCase();
         
         this.items = new ArrayList<ItemStack>();
         this.armor = new ArrayList<ItemStack>(4);
@@ -35,11 +36,19 @@ public class ArenaClass
     }
     
     /**
-     * Get the name of the arena class.
-     * @return the class name
+     * Get the name of the arena class as it appears in the config-file.
+     * @return the class name as it appears in the config-file
      */
-    public String getName() {
-        return name;
+    public String getConfigName() {
+        return configName;
+    }
+    
+    /**
+     * Get the lowercase class name.
+     * @return the lowercase class name
+     */
+    public String getLowercaseName() {
+        return lowercaseName;
     }
     
     /**
@@ -217,7 +226,7 @@ public class ArenaClass
                 String perm   = entry.getKey() + ":" + entry.getValue();
                 String player = p.getName();
                 
-                Messenger.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.name
+                Messenger.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.configName
                                 + "'.\nPlease verify that your class permissions are well-formed.");
             }
         }
@@ -285,5 +294,20 @@ public class ArenaClass
             }
             return null;
         }
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (this == o) return true;
+        if (!this.getClass().equals(o.getClass())) return false;
+        
+        ArenaClass other = (ArenaClass) o;
+        return other.lowercaseName.equals(this.lowercaseName);
+    }
+    
+    @Override
+    public int hashCode() {
+        return lowercaseName.hashCode();
     }
 }

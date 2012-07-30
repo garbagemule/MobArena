@@ -27,7 +27,7 @@ public class UpgradeWave extends AbstractWave
     }
     
     public void grantItems(Player p, String className) {
-        List<ItemStack> stacks = classMap.get(className.toLowerCase());
+        List<ItemStack> stacks = classMap.get(className);
         if (stacks == null || stacks.isEmpty()) return;
 
         PlayerInventory inv = p.getInventory();

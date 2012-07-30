@@ -310,8 +310,8 @@ public class ArenaMasterImpl implements ArenaMaster
             return null;
         }
 
-        // Create an ArenaClass with the lowercase name.
-        ArenaClass arenaClass = new ArenaClass(lowercase);
+        // Create an ArenaClass with the config-file name.
+        ArenaClass arenaClass = new ArenaClass(classname);
 
         // Parse the items-node
         String items = section.getString("items", "");

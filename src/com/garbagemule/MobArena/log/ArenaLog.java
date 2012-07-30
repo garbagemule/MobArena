@@ -29,7 +29,7 @@ public class ArenaLog
             classDistribution.put(classname, new MutableInt());
         }
         for (ArenaPlayer ap : arena.getArenaPlayerSet()) {
-            classDistribution.get(ap.getArenaClass().getName()).inc();
+            classDistribution.get(ap.getArenaClass().getLowercaseName()).inc();
         }
         sessionBuilder.buildClassDistribution(classDistribution);
         totalsBuilder.updateClassDistribution(classDistribution);

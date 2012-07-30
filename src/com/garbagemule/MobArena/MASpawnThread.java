@@ -188,8 +188,7 @@ public class MASpawnThread implements Runnable
         UpgradeWave uw = (UpgradeWave) w;
 
         for (Player p : arena.getPlayersInArena()) {
-            String className = arena.getArenaPlayer(p).getArenaClass().getName();
-            //String className = arena.getClassOfPlayer(p);
+            String className = arena.getArenaPlayer(p).getArenaClass().getLowercaseName();
             uw.grantItems(p, className);
             uw.grantItems(p, "All");
         }

@@ -21,7 +21,7 @@ public class ArenaPlayerStatistics
     public ArenaPlayerStatistics(ArenaPlayer player) {
         this.player = player;
         this.playerName = player.getPlayer().getName();
-        this.className = player.getArenaClass().getName();
+        this.className = player.getArenaClass().getLowercaseName();
         reset();
     }
 

@@ -804,31 +804,26 @@ public class ArenaListener
         ArenaClass oldAC = arena.getArenaPlayer(p).getArenaClass();
         ArenaClass newAC = arena.getClasses().get(className);
         
-        // If they already had a class, make sure to change the "in use" in the Class Limit Manager
-        if (oldAC != null) {
-            // If they picked the same class, don't do anything
-            if (oldAC.equals(newAC)) {
-                return;
-            }
-            // If they can join the class, decrement the previous class's count
-            if (canPlayerJoinClass(newAC, p)) {
-                classLimits.playerLeftClass(oldAC);
-            }
-            else {
-                return;
-            }
+        // Same class, do nothing.
+        if (newAC.equals(oldAC)) {
+            return;
         }
-        else {
-            if (!canPlayerJoinClass(newAC, p)) {
-                return;
-            }
+        
+        // If the new class is full, inform the player.
+        if (!classLimits.canPlayerJoinClass(newAC)) {
+            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
+            return;
         }
+        
+        // Otherwise, leave the old class, and pick the new!
+        classLimits.playerLeftClass(oldAC);
+        classLimits.playerPickedClass(newAC);
 
         // Delay the inventory stuff to ensure that right-clicking works.
         delayAssignClass(p, className);
     }
     
-    private boolean canPlayerJoinClass(ArenaClass ac, Player p) {
+    /*private boolean cansPlayerJoinClass(ArenaClass ac, Player p) {
         // If they can not join the class, deny them
         if (!classLimits.canPlayerJoinClass(ac)) {
             Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
@@ -838,7 +833,7 @@ public class ArenaListener
         // Increment the "in use" in the Class Limit Manager
         classLimits.playerPickedClass(ac);
         return true;
-    }
+    }*/
 
     private void delayAssignClass(final Player p, final String className) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {

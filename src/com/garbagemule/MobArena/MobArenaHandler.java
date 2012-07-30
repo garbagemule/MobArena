@@ -161,7 +161,7 @@ public class MobArenaHandler
         ArenaClass ac = ap.getArenaClass();
         if (ac == null) return null;
         
-        return ac.getName();
+        return ac.getLowercaseName();
     }
     
     /**
