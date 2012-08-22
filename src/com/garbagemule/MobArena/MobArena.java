@@ -113,7 +113,10 @@ public class MobArena extends JavaPlugin
         
         File file = new File(this.getDataFolder(), "config.yml");
         config = new Config(file);
-        config.load();
+        if (!config.load()) {
+            this.getServer().getPluginManager().disablePlugin(this);
+            throw new IllegalStateException("The config-file could not be loaded! Read further up to find the actual bug!");
+        }
         
         updateSettings(config);
         config.setHeader(getHeader());

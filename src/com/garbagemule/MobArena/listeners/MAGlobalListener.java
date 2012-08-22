@@ -284,6 +284,7 @@ public class MAGlobalListener implements Listener
                 case REJECT:
                     allow = false;
                     break;
+                default: break;
             }
         }
         

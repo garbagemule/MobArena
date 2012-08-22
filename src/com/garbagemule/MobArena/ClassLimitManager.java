@@ -6,7 +6,6 @@ import java.util.Map;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.MutableInt;
 import com.garbagemule.MobArena.util.config.ConfigSection;
-import com.garbagemule.MobArena.util.config.ConfigUtils;
 
 public class ClassLimitManager
 {

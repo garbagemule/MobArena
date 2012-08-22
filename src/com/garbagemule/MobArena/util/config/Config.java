@@ -13,6 +13,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import com.garbagemule.MobArena.Messenger;
+
 /**
  * Wrapper class for Bukkit's Configuration classes.
  * 
@@ -80,7 +82,7 @@ public class Config
             return true;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Messenger.severe("The config-file failed to load. This is the error:\n" + e.getMessage());
             return false;
         }
     }

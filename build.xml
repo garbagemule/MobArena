@@ -7,7 +7,7 @@
     <property name="bin" location="build" />
     <property name="lib" location="lib" />
     <property name="res" location="resources" />
-    <property name="server" location="D:\General\Java\Minecraft\Minecraft Server\plugins" />
+    <property name="server" location="D:\General\Java\Eclipse\Minecraft\Minecraft Server\plugins" />
     
     <property name="ability-src"  location="abilities" />
     <property name="ability-dest" location="${res}/res/abilities" />
