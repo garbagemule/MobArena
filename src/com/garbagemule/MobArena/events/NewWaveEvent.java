@@ -17,6 +17,7 @@ public class NewWaveEvent extends Event implements Cancellable
     private int waveNo;
     
     public NewWaveEvent(Arena arena, Wave wave, int waveNo) {
+        this.arena  = arena;
         this.wave   = wave;
         this.waveNo = waveNo;
     }
