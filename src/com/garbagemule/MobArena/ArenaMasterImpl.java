@@ -390,7 +390,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // If the helmet isn't a real helmet, set it explicitly.
         ItemStack helmet = inv.getHelmet();
-        if (helmet.getTypeId() != 0 && ArmorType.getType(helmet) != ArmorType.HELMET) {
+        if (helmet != null && ArmorType.getType(helmet) != ArmorType.HELMET) {
             section.set("helmet", ItemParser.parseString(helmet));
         }
 

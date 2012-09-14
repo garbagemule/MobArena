@@ -607,19 +607,22 @@ public class ArenaListener
         }
 
         else if (monsters.getMonsters().contains(event.getEntity())) {
-            if (event.getReason() == TargetReason.FORGOT_TARGET)
+            if (event.getReason() == TargetReason.FORGOT_TARGET) {
                 event.setTarget(MAUtils.getClosestPlayer(plugin, event.getEntity(), arena));
-
-            else if (event.getReason() == TargetReason.TARGET_DIED)
+            }
+            else if (event.getReason() == TargetReason.TARGET_DIED) {
                 event.setTarget(MAUtils.getClosestPlayer(plugin, event.getEntity(), arena));
-
-            else if (event.getReason() == TargetReason.TARGET_ATTACKED_ENTITY)
-                if (arena.hasPet(event.getTarget()))
+            }
+            else if (event.getReason() == TargetReason.TARGET_ATTACKED_ENTITY) {
+                if (arena.hasPet(event.getTarget())) {
                     event.setCancelled(true);
-
-                else if (event.getReason() == TargetReason.CLOSEST_PLAYER)
-                    if (!arena.inArena((Player) event.getTarget()))
-                        event.setCancelled(true);
+                }
+            }
+            else if (event.getReason() == TargetReason.CLOSEST_PLAYER) {
+                if (!arena.inArena((Player) event.getTarget())) {
+                    event.setCancelled(true);
+                }
+            }
         }
     }
     
