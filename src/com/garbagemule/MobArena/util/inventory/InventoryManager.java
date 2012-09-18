@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -86,6 +88,14 @@ public class InventoryManager
         inv.setChestplate(null);
         inv.setLeggings(null);
         inv.setBoots(null);
+        InventoryView view = p.getOpenInventory();
+        if (view != null) {
+            view.setCursor(null);
+            Inventory i = view.getTopInventory();
+            if (i != null) {
+                i.clear();
+            }
+        }
     }
     
     private boolean saveToFile(Player p) {
