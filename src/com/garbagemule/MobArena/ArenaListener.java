@@ -931,7 +931,7 @@ public class ArenaListener
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         Player p = event.getPlayer();
 
-        if (event.isCancelled() || (!arena.inArena(p) && !arena.inLobby(p))) {
+        if (event.isCancelled() || (!arena.inArena(p) && !arena.inSpec(p) && !arena.inLobby(p))) {
             return;
         }
 
