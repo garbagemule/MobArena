@@ -3,10 +3,6 @@ package com.garbagemule.MobArena.waves;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.minecraft.server.WorldServer;
-
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -55,11 +51,7 @@ public class SheepBouncer implements Runnable
             // Create an explosion if there's a player amongst the nearby entities.
             for (Entity entity : e.getNearbyEntities(2D, 2D, 2D)) {
                 if (entity instanceof Player) {
-                    CraftEntity ce = (CraftEntity) e;
-                    CraftWorld cw = (CraftWorld) e.getWorld();
-                    WorldServer ws = cw.getHandle();
-                    
-                    ws.createExplosion(ce.getHandle(), e.getLocation().getX(), e.getLocation().getY() + 1, e.getLocation().getZ(), 2f, false);
+                    e.getWorld().createExplosion(e.getLocation(), 2f);
                     e.remove();
                     
                     break;
