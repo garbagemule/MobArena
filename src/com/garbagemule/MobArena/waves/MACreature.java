@@ -5,12 +5,16 @@ import java.util.List;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 
@@ -70,7 +74,13 @@ public enum MACreature
     MAGMACUBETINY(EntityType.MAGMA_CUBE), MAGMACUBESTINY(EntityType.MAGMA_CUBE),
     MAGMACUBESMALL(EntityType.MAGMA_CUBE),MAGMACUBESSMALL(EntityType.MAGMA_CUBE),
     MAGMACUBEBIG(EntityType.MAGMA_CUBE),  MAGMACUBESBIG(EntityType.MAGMA_CUBE),
-    MAGMACUBEHUGE(EntityType.MAGMA_CUBE), MAGMACUBESHUGE(EntityType.MAGMA_CUBE);
+    MAGMACUBEHUGE(EntityType.MAGMA_CUBE), MAGMACUBESHUGE(EntityType.MAGMA_CUBE),
+        
+    // 1.4 creatures
+    BAT(EntityType.BAT),                  BATS(EntityType.BAT),
+    WITCH(EntityType.WITCH),              WITCHES(EntityType.WITCH),
+    WITHER(EntityType.WITHER),            WITHERS(EntityType.WITHER),
+    WITHERSKELETON(EntityType.SKELETON),  WITHERSKELETONS(EntityType.SKELETON);
     
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private EntityType type;
@@ -133,6 +143,19 @@ public enum MACreature
             case MAGMACUBEHUGE:
             case MAGMACUBESHUGE:
                 ((Slime) e).setSize(4);
+                break;
+            case SKELETON:
+            case SKELETONS:
+                ((Skeleton) e).getEquipment().setItemInHand(new ItemStack(Material.BOW, 1));
+            	break;
+            case ZOMBIEPIGMAN:
+            case ZOMBIEPIGMEN:
+            	((PigZombie) e).getEquipment().setItemInHand(new ItemStack(Material.GOLD_SWORD, 1));
+            	break;
+            case WITHERSKELETON:
+            case WITHERSKELETONS:
+                ((Skeleton) e).getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD, 1));
+                ((Skeleton) e).setSkeletonType(SkeletonType.WITHER);
                 break;
             default:
                 break;
