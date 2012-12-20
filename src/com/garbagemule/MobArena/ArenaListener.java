@@ -56,7 +56,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -232,12 +232,9 @@ public class ArenaListener
         // Otherwise, block was placed during a session.
         arena.addBlock(b);
 
-        switch (b.getType()){
+        if (b.getType() == Material.WOODEN_DOOR || b.getType() == Material.IRON_DOOR_BLOCK) {
             // For doors, add the block just above (so we get both halves)
-            case WOODEN_DOOR:
-            case IRON_DOOR_BLOCK:
-                arena.addBlock(b.getRelative(0, 1, 0));
-                break;
+            arena.addBlock(b.getRelative(0, 1, 0));
         }
     }
 
@@ -957,8 +954,8 @@ public class ArenaListener
         Messenger.tellPlayer(p, Msg.MISC_COMMAND_NOT_ALLOWED);
     }
 
-    public void onPlayerPreLogin(PlayerPreLoginEvent event) {
-        Player p = plugin.getServer().getPlayer(event.getName());
+    public void onPlayerPreLogin(PlayerLoginEvent event) {
+        Player p = event.getPlayer();
         if (p == null || !p.isOnline()) return;
         
         Arena arena = plugin.getArenaMaster().getArenaWithPlayer(p);

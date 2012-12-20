@@ -228,7 +228,7 @@ public class MAGlobalListener implements Listener
         if (!am.notifyOnUpdates() || !event.getPlayer().isOp()) return;
 
         final Player p = event.getPlayer();
-        plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin,
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
             new Runnable()
             {
                 public void run()
@@ -295,7 +295,7 @@ public class MAGlobalListener implements Listener
     }
     
     @EventHandler(priority = EventPriority.NORMAL)
-    public void playerPreLogin(PlayerPreLoginEvent event) {
+    public void playerPreLogin(PlayerLoginEvent event) {
         for (Arena arena : am.getArenas()) {
             arena.getEventListener().onPlayerPreLogin(event);
         }
