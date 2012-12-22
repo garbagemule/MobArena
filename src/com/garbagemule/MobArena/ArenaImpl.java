@@ -760,6 +760,13 @@ public class ArenaImpl implements Arena
         
         // Schedule it for the initial first wave delay.
         scheduleTask(spawnThread, settings.getInt("first-wave-delay", 5) * 20);
+        
+        // Schedule to enable PvP if pvp-enabled: true
+        scheduleTask(new Runnable() {
+            public void run() {
+                eventListener.pvpActivate();
+            }
+        }, settings.getInt("first-wave-delay", 5) * 20);
     }
     
     /**
@@ -778,6 +785,7 @@ public class ArenaImpl implements Arena
     
     private void stopSpawner() {
         world.setSpawnFlags(allowMonsters, allowAnimals);
+        eventListener.pvpDeactivate();
         //world.setDifficulty(spawnMonsters);
     }
     
@@ -856,7 +864,7 @@ public class ArenaImpl implements Arena
     @Override
     public void movePlayerToLobby(Player p)
     {
-        updateChunk(region.getLobbyWarp());
+        //updateChunk(region.getLobbyWarp());
         specPlayers.remove(p); // If joining from spec area
         lobbyPlayers.add(p);
         p.teleport(region.getLobbyWarp());
@@ -867,7 +875,7 @@ public class ArenaImpl implements Arena
     @Override
     public void movePlayerToSpec(Player p)
     {
-        updateChunk(region.getSpecWarp());
+        //updateChunk(region.getSpecWarp());
         specPlayers.add(p);
         p.teleport(region.getSpecWarp());
         timeStrategy.setPlayerTime(p);
@@ -880,7 +888,7 @@ public class ArenaImpl implements Arena
         Location entry = playerData.get(p).entry();
         if (entry == null || p.isDead()) return;
         
-        updateChunk(entry);
+        //updateChunk(entry);
         p.teleport(entry);
         timeStrategy.resetPlayerTime(p);
         //movePlayerToLocation(p, entry);

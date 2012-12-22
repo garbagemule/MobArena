@@ -309,9 +309,12 @@ public class ArenaMasterImpl implements ArenaMaster
             Messenger.severe("Failed to load class '" + classname + "'.");
             return null;
         }
+        
+        // Check if weapons for this class should be unbreakable
+        boolean unbreakableWeapons = section.getBoolean("unbreakable-weapons", true);
 
         // Create an ArenaClass with the config-file name.
-        ArenaClass arenaClass = new ArenaClass(classname);
+        ArenaClass arenaClass = new ArenaClass(classname, unbreakableWeapons);
 
         // Parse the items-node
         String items = section.getString("items", "");

@@ -95,7 +95,8 @@ public class ArenaListener
             protect;
     private boolean monsterExp,
             monsterInfight,
-            pvpEnabled,
+            pvpOn,               // pvp-enabled in config
+            pvpEnabled = false,  // activated on first wave
             foodRegen,
             lockFoodLevel;
     @SuppressWarnings("unused")
@@ -124,7 +125,7 @@ public class ArenaListener
         this.protect          = s.getBoolean("protect",              true);
         this.monsterExp       = s.getBoolean("monster-exp",          false);
         this.monsterInfight   = s.getBoolean("monster-infight",      false);
-        this.pvpEnabled       = s.getBoolean("pvp-enabled",          false);
+        this.pvpOn            = s.getBoolean("pvp-enabled",          false);
         this.foodRegen        = s.getBoolean("food-regen",           false);
         this.lockFoodLevel    = s.getBoolean("lock-food-level",      true);
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
@@ -136,6 +137,16 @@ public class ArenaListener
         this.allowMonsters = arena.getWorld().getAllowMonsters();
 
         this.banned = new HashSet<Player>();
+    }
+    
+    void pvpActivate() {
+        if (arena.isRunning() && !arena.getPlayersInArena().isEmpty()) {
+            pvpEnabled = pvpOn;
+        }
+    }
+    
+    void pvpDeactivate() {
+        if (pvpOn) pvpEnabled = false;
     }
 
     public void onBlockBreak(BlockBreakEvent event) {
