@@ -8,6 +8,7 @@ public enum Msg
     ARENA_END("Arena finished.", "Arena finished.", Material.REDSTONE_TORCH_OFF),
     ARENA_DOES_NOT_EXIST("That arena does not exist. Type /ma arenas for a list.", "Can't find arena."),
     ARENA_LBOARD_NOT_FOUND("That arena does not have a leaderboard set up."),
+    ARENA_AUTO_START("Arena will auto-start in % seconds."),
     JOIN_NOT_ENABLED("MobArena is not enabled.", "MobArena disabled.", Material.REDSTONE_TORCH_OFF),
     JOIN_IN_OTHER_ARENA("You are already in an arena! Leave that one first.", "In another arena."),
     JOIN_ARENA_NOT_ENABLED("This arena is not enabled.", "Arena disabled.", Material.REDSTONE_TORCH_OFF),

@@ -27,6 +27,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
+import com.garbagemule.MobArena.autostart.AutoStartTimer;
 import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
@@ -110,6 +111,7 @@ public class ArenaImpl implements Arena
     private ArenaListener eventListener;
     private List<ItemStack> entryFee;
     private TimeStrategy timeStrategy;
+    private AutoStartTimer autoStartTimer;
     
     /**
      * Primary constructor. Requires a name and a world.
@@ -169,6 +171,9 @@ public class ArenaImpl implements Arena
         this.entryFee      = ItemParser.parseItems(settings.getString("entry-fee", ""));
         this.allowMonsters = world.getAllowMonsters();
         this.allowAnimals  = world.getAllowAnimals();
+        
+        int autoStart       = settings.getInt("auto-start-timer", 0);
+        this.autoStartTimer = new AutoStartTimer(this, autoStart);
         
         String timeString = settings.getString("player-time-in-arena", "world");
         Time time = Enums.getEnumFromString(Time.class, timeString);
@@ -583,7 +588,17 @@ public class ArenaImpl implements Arena
         if (MobArena.hasSpout && settings.getBoolean("spout-class-select"))
             Spouty.classSelectionScreen(plugin, this, p);
         
+        // Start the auto-start-timer
+        autoStartTimer.start();
+        
+        // Notify player of joining
         Messenger.tellPlayer(p, Msg.JOIN_PLAYER_JOINED);
+        
+        // Notify player of time left
+        if (autoStartTimer.isRunning()) {
+            Messenger.tellPlayer(p, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining());
+        }
+        
         return true;
     }
 
@@ -603,7 +618,6 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    //@SuppressWarnings("deprecation")
     public boolean playerLeave(Player p)
     {
         // Fire the event and check if it's been cancelled.
@@ -685,7 +699,6 @@ public class ArenaImpl implements Arena
             movePlayerToSpec(p);
             Messenger.tellPlayer(p, Msg.SPEC_FROM_ARENA);
             Messenger.tellPlayer(p, Msg.MISC_MA_LEAVE_REMINDER);
-            //restoreInvAndExp(p);
         } else {
             restoreInvAndExp(p);
             movePlayerToEntry(p);
@@ -700,7 +713,6 @@ public class ArenaImpl implements Arena
         if (settings.getBoolean("spectate-on-death", true)) {
             l = region.getSpecWarp();
         } else {
-            //l = locations.get(p);
             l = playerData.get(p).entry();
         }
         return l;
@@ -799,18 +811,6 @@ public class ArenaImpl implements Arena
         // Start bouncing!
         scheduleTask(sheepBouncer, settings.getInt("first-wave-delay", 5) * 20);
     }
-    
-    private void updateChunk(Location loc)
-    {
-        if (!arenaPlayers.isEmpty() || !world.getName().equals(loc.getWorld().getName()))
-            return;
-        
-        Chunk chunk = world.getChunkAt(loc);
-        if (!world.isChunkLoaded(chunk))
-            world.loadChunk(chunk);
-        else
-            world.refreshChunk(chunk.getX(), chunk.getZ());
-    }
 
     @Override
     public void storePlayerData(Player p, Location loc)
@@ -864,22 +864,18 @@ public class ArenaImpl implements Arena
     @Override
     public void movePlayerToLobby(Player p)
     {
-        //updateChunk(region.getLobbyWarp());
         specPlayers.remove(p); // If joining from spec area
         lobbyPlayers.add(p);
         p.teleport(region.getLobbyWarp());
         timeStrategy.setPlayerTime(p);
-        //movePlayerToLocation(p, region.getLobbyWarp());
     }
 
     @Override
     public void movePlayerToSpec(Player p)
     {
-        //updateChunk(region.getSpecWarp());
         specPlayers.add(p);
         p.teleport(region.getSpecWarp());
         timeStrategy.setPlayerTime(p);
-        //movePlayerToLocation(p, region.getSpecWarp());
     }
 
     @Override
@@ -888,31 +884,12 @@ public class ArenaImpl implements Arena
         Location entry = playerData.get(p).entry();
         if (entry == null || p.isDead()) return;
         
-        //updateChunk(entry);
         p.teleport(entry);
         timeStrategy.resetPlayerTime(p);
-        //movePlayerToLocation(p, entry);
         
         p.setGameMode(playerData.get(p).getMode());
         p.addPotionEffects(playerData.get(p).getPotionEffects());
     }
-    
-    /*private void movePlayerToLocation(Player p, Location l) {
-        WorldServer fromWorld = ((CraftWorld) p.getWorld()).getHandle();
-        WorldServer toWorld   = ((CraftWorld) l.getWorld()).getHandle();
-        EntityPlayer player   = ((CraftPlayer) p).getHandle();
-        
-        if (fromWorld == toWorld) {
-            player.netServerHandler.teleport(l);
-        }
-        else {
-            if (player.activeContainer != player.defaultContainer) {
-                player.closeInventory();
-            }
-            CraftServer cs = ((CraftServer) plugin.getServer());
-            cs.getHandle().moveToWorld(player, toWorld.dimension, true, l);
-        }
-    }*/
     
     private void restoreInvAndExp(Player p) {
         inventoryManager.clearInventory(p);
