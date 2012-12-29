@@ -71,8 +71,9 @@ public class Leaderboard
      */
     public void initialize()
     {
-        if (!isGridWellFormed())
+        if (!isGridWellFormed()) {
             return;
+        }
         
         initializeBoards();
         initializeStats();
@@ -116,8 +117,9 @@ public class Leaderboard
      */
     private boolean isGridWellFormed()
     {
-        if (topLeft == null)
+        if (topLeft == null) {
             return false;
+        }
         
         BlockState state = topLeft.getBlock().getState();
         
@@ -137,8 +139,9 @@ public class Leaderboard
         this.cols = getSignCount(current, direction);
         
         // Require at least 2x2 to be valid
-        if (rows <= 1 || cols <= 1)
+        if (rows <= 1 || cols <= 1) {
             return false;
+        }
         
         // Get the left-most sign in the current row.
         Sign first = getAdjacentSign(current, BlockFace.DOWN);
@@ -239,10 +242,10 @@ public class Leaderboard
     {
         byte data = s.getRawData();
 
-        if (data == 2) return BlockFace.NORTH;
-        if (data == 3) return BlockFace.SOUTH;
-        if (data == 4) return BlockFace.WEST;
-        if (data == 5) return BlockFace.EAST;
+        if (data == 2) return BlockFace.WEST;//BlockFace.NORTH;
+        if (data == 3) return BlockFace.EAST;//BlockFace.SOUTH;
+        if (data == 4) return BlockFace.SOUTH;//BlockFace.WEST;
+        if (data == 5) return BlockFace.NORTH;//BlockFace.EAST;
         
         return null;
     }
