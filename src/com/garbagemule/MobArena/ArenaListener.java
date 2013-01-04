@@ -480,9 +480,6 @@ public class ArenaListener
             if (damager instanceof Projectile) {
                 damager = ((Projectile) damager).getShooter();
             }
-            else if (damager instanceof Wolf && arena.hasPet(damager)) {
-                damager = (Player) ((Wolf) damager).getOwner();
-            }
         }
 
         // Pet wolf
@@ -499,7 +496,7 @@ public class ArenaListener
         }
         // Boss
         else if (monsters.getBossMonsters().contains(damagee)) {
-            onBossDamage(event, (LivingEntity) damagee, damager);
+            onBossDamage(event, (LivingEntity) damagee, damager); // Now an emtpy method
         }
         // Regular monster
         else if (monsters.getMonsters().contains(damagee)) {
@@ -519,7 +516,7 @@ public class ArenaListener
         }
         // If PvP is disabled and damager is a player, cancel damage
         else if (arena.inArena(player)) {
-            if (!pvpEnabled && damager instanceof Player) {
+            if (!pvpEnabled && (damager instanceof Player || damager instanceof Wolf)) {
                 event.setCancelled(true);
                 return;
             }
@@ -545,12 +542,12 @@ public class ArenaListener
             aps.inc("hits");
         }
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
-            event.setDamage(1);
+            //event.setDamage(1);
             Player p = (Player) ((Wolf) damager).getOwner();
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
-            // arena.getArenaPlayer(p).getStats().dmgDone += event.getDamage();
         }
+        //TODO add in check for player made golems doing damage
         else if (damager instanceof LivingEntity) {
             if (!monsterInfight)
                 event.setCancelled(true);
@@ -573,21 +570,7 @@ public class ArenaListener
     }
 
     private void onBossDamage(EntityDamageEvent event, LivingEntity monster, Entity damager) {
-        // Health the boss back up.
-        monster.setHealth(monster.getMaxHealth());
-
-        // Damage the underlying MABoss.
-        MABoss boss = monsters.getBoss(monster);
-        boss.damage(event.getDamage());
-
-        // If it died, remove it from the arena.
-        if (boss.isDead()) {
-            monsters.removeBoss(monster);
-            monster.damage(10000);
-        }
-
-        // And "cancel out" the damage.
-        event.setDamage(1);
+        //TODO useless method as of Entity Max Health API, maybe add in some stat tracking for leaderboards instead?
     }
 
     public void onEntityCombust(EntityCombustEvent event) {
