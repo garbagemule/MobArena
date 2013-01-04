@@ -480,9 +480,6 @@ public class ArenaListener
             if (damager instanceof Projectile) {
                 damager = ((Projectile) damager).getShooter();
             }
-            else if (damager instanceof Wolf && arena.hasPet(damager)) {
-                damager = (Player) ((Wolf) damager).getOwner();
-            }
         }
 
         // Pet wolf
@@ -545,7 +542,7 @@ public class ArenaListener
             aps.inc("hits");
         }
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
-            event.setDamage(1);
+            //event.setDamage(1);
             Player p = (Player) ((Wolf) damager).getOwner();
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
