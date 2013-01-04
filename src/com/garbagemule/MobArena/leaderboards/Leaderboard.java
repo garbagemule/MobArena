@@ -117,8 +117,9 @@ public class Leaderboard
      */
     private boolean isGridWellFormed()
     {
-        if (topLeft == null)
+        if (topLeft == null) {
             return false;
+        }
         
         BlockState state = topLeft.getBlock().getState();
         
