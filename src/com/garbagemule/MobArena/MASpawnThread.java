@@ -156,8 +156,10 @@ public class MASpawnThread implements Runnable
                 monsterManager.addMonster(e);
 
                 // Set the health.
+                e.resetMaxHealth(); // Avoid conflicts/enormous multiplications from other plugins handling Mob health
                 int health = (int) Math.max(1D, e.getMaxHealth() * mul);
-                e.setHealth(Math.min(health, e.getMaxHealth()));
+                e.setMaxHealth(health);
+                e.setHealth(health);
 
                 // Switch on the type.
                 switch (w.getType()){

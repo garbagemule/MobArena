@@ -1,7 +1,7 @@
 name: MobArena
 author: garbagemule
 main: com.garbagemule.MobArena.MobArena
-version: 0.94.4.91
+version: 0.94.4.92
 softdepend: [Spout,MultiVerse,MultiWorld,XcraftGate,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:

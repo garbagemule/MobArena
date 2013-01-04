@@ -5,8 +5,7 @@ import org.bukkit.entity.LivingEntity;
 public class MABoss
 {
     private LivingEntity entity;
-    private int health, health25, maxHealth;
-    private boolean dead, lowHealth;
+    private boolean dead;
     
     /**
      * Create an MABoss from the given entity with the given max health.
@@ -14,12 +13,10 @@ public class MABoss
      * @param maxHealth a max health value
      */
     public MABoss(LivingEntity entity, int maxHealth) {
+        entity.setMaxHealth(maxHealth);
+        entity.setHealth(maxHealth);
         this.entity    = entity;
         this.dead      = false;
-        this.lowHealth = false;
-        
-        this.health   = this.maxHealth = maxHealth;
-        this.health25 = maxHealth / 4;
     }
     
     /**
@@ -35,7 +32,7 @@ public class MABoss
      * @return the current health of the boss
      */
     public int getHealth() {
-        return health;
+        return entity.getHealth();
     }
     
     /**
@@ -43,47 +40,7 @@ public class MABoss
      * @return the maximum health of the boss
      */
     public int getMaxHealth() {
-        return maxHealth;
-    }
-    
-    /**
-     * Set the health of this boss as a percentage between 1 and 100.
-     * @param percentage an integer percentage
-     */
-    public void setHealth(int percentage) {
-        if (percentage < 1) {
-            percentage = 1;
-        }
-        else if (percentage > 100) {
-            percentage = 100;
-        }
-        
-        health = maxHealth * percentage / 100;
-    }
-    
-    /**
-     * Heal the boss for the given amount. Useful for "siphon life"-like abilities.
-     * @param amount the health amount
-     */
-    public void heal(int amount) {
-        health = Math.min(maxHealth, health + amount);
-    }
-    
-    /**
-     * Damage the boss for the given amount. Used internally by MobArena.
-     * @param amount the amount.
-     */
-    public void damage(int amount) {
-        health -= amount;
-        
-        if (health <= health25 && !lowHealth) {
-            lowHealth = true;
-            //System.out.println("Boss is at 25%!");
-        }
-        
-        if (health <= 0) {
-            dead = true;
-        }
+        return entity.getMaxHealth();
     }
     
     /**
