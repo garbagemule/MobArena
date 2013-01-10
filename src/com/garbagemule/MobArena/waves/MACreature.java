@@ -17,6 +17,7 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.MobArena;
@@ -81,7 +82,9 @@ public enum MACreature
     BAT(EntityType.BAT),                  BATS(EntityType.BAT),
     WITCH(EntityType.WITCH),              WITCHES(EntityType.WITCH),
     WITHER(EntityType.WITHER),            WITHERS(EntityType.WITHER),
-    WITHERSKELETON(EntityType.SKELETON),  WITHERSKELETONS(EntityType.SKELETON);
+    WITHERSKELETON(EntityType.SKELETON),  WITHERSKELETONS(EntityType.SKELETON),
+    BABYZOMBIE(EntityType.ZOMBIE),        BABYZOMBIES(EntityType.ZOMBIE),
+    ZOMBIEVILLAGER(EntityType.ZOMBIE),    ZOMBIEVILLAGERS(EntityType.ZOMBIE);
     
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private EntityType type;
@@ -153,6 +156,13 @@ public enum MACreature
             case ZOMBIEPIGMEN:
             	((PigZombie) e).getEquipment().setItemInHand(new ItemStack(Material.GOLD_SWORD, 1));
             	break;
+            case ZOMBIEVILLAGER:
+            case ZOMBIEVILLAGERS:
+                ((Zombie) e).setVillager(true);
+                break;
+            case BABYZOMBIE:
+            case BABYZOMBIES:
+                ((Zombie) e).setBaby(true);
             case WITHERSKELETON:
             case WITHERSKELETONS:
                 ((Skeleton) e).getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD, 1));
