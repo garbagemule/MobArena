@@ -123,6 +123,10 @@ public interface ArenaMaster
      */
     public void loadArenas();
     
+    public void loadArenasInWorld(String worldName);
+    
+    public void unloadArenasInWorld(String worldName);
+    
     public Arena createArenaNode(String configName, World world);
     
     public void removeArenaNode(Arena arena);

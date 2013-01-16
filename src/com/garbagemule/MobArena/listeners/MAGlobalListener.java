@@ -8,6 +8,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
@@ -299,5 +301,24 @@ public class MAGlobalListener implements Listener
         for (Arena arena : am.getArenas()) {
             arena.getEventListener().onPlayerPreLogin(event);
         }
+    }
+    
+    
+    
+    ///////////////////////////////////////////////////////////////////////////
+    //                                                                       //
+    //                            WORLD EVENTS                               //
+    //                                                                       //
+    ///////////////////////////////////////////////////////////////////////////
+    
+    
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void worldLoadEvent(WorldLoadEvent event) {
+        am.loadArenasInWorld(event.getWorld().getName());
+    }
+    
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void worldUnloadEvent(WorldUnloadEvent event) {
+        am.unloadArenasInWorld(event.getWorld().getName());
     }
 }
