@@ -454,6 +454,7 @@ public class ArenaImpl implements Arena
             }
             
             p.teleport(region.getArenaWarp());
+            p.setFlying(false);
             //movePlayerToLocation(p, region.getArenaWarp());
             setHealth(p, 20);
             p.setFoodLevel(20);
