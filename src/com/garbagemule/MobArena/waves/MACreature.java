@@ -163,6 +163,7 @@ public enum MACreature
             case BABYZOMBIE:
             case BABYZOMBIES:
                 ((Zombie) e).setBaby(true);
+                break;
             case WITHERSKELETON:
             case WITHERSKELETONS:
                 ((Skeleton) e).getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD, 1));
