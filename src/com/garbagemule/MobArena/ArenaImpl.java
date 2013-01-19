@@ -454,6 +454,7 @@ public class ArenaImpl implements Arena
             }
             
             p.teleport(region.getArenaWarp());
+            p.setAllowFlight(false);
             p.setFlying(false);
             //movePlayerToLocation(p, region.getArenaWarp());
             setHealth(p, 20);
@@ -868,6 +869,8 @@ public class ArenaImpl implements Arena
         specPlayers.remove(p); // If joining from spec area
         lobbyPlayers.add(p);
         p.teleport(region.getLobbyWarp());
+        p.setAllowFlight(false);
+        p.setFlying(false);
         timeStrategy.setPlayerTime(p);
     }
 
