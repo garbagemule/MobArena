@@ -27,6 +27,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
+import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.autostart.AutoStartTimer;
 import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
@@ -975,6 +976,46 @@ public class ArenaImpl implements Arena
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
+    }
+    
+    @Override
+    public void assignClassGiveInv(Player p, String className, ItemStack[] contents) {
+        ArenaPlayer arenaPlayer = arenaPlayerMap.get(p);
+        ArenaClass arenaClass   = classes.get(className);
+        
+        if (arenaPlayer == null || arenaClass == null) {
+            return;
+        }
+        
+        inventoryManager.clearInventory(p);
+        arenaPlayer.setArenaClass(arenaClass);
+        
+        PlayerInventory inv = p.getInventory();
+        
+        // Check the last four slots to see if they are armor items
+        for (int i = contents.length-1; i > contents.length-5; i--) {
+            if (contents[i] == null) continue;
+            ArmorType type = ArmorType.getType(contents[i]);
+            switch (type) {
+                case HELMET:     inv.setHelmet(contents[i]);      break;
+                case CHESTPLATE: inv.setChestplate(contents[i]);  break;
+                case LEGGINGS:   inv.setLeggings(contents[i]);    break;
+                case BOOTS:      inv.setBoots(contents[i]);       break;
+                default:
+                    continue;
+            }
+            contents[i] = null;
+        }
+        
+        // Check the remaining slots for weapons
+        if (arenaClass.hasUnbreakableWeapons()) {
+            for (ItemStack stack : contents) {
+                if (stack != null && arenaClass.isWeapon(stack)) {
+                    stack.setDurability(Short.MIN_VALUE);
+                }
+            }
+        }
+        p.getInventory().setContents(contents);
     }
     
     @Override

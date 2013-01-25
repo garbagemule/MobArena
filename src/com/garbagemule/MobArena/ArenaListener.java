@@ -98,7 +98,8 @@ public class ArenaListener
             pvpOn,               // pvp-enabled in config
             pvpEnabled = false,  // activated on first wave
             foodRegen,
-            lockFoodLevel;
+            lockFoodLevel,
+            useClassChests;
     @SuppressWarnings("unused")
     private boolean allowTeleport,
             canShare,
@@ -131,6 +132,7 @@ public class ArenaListener
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
         this.canShare         = s.getBoolean("share-items-in-arena", true);
         this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
+        this.useClassChests   = s.getBoolean("use-class-chests",     false);
         
         this.classLimits = arena.getClassLimitManager();
 
@@ -814,7 +816,7 @@ public class ArenaListener
         classLimits.playerPickedClass(newAC);
 
         // Delay the inventory stuff to ensure that right-clicking works.
-        delayAssignClass(p, className);
+        delayAssignClass(p, className, sign);
     }
     
     /*private boolean cansPlayerJoinClass(ArenaClass ac, Player p) {
@@ -829,10 +831,38 @@ public class ArenaListener
         return true;
     }*/
 
-    private void delayAssignClass(final Player p, final String className) {
+    private void delayAssignClass(final Player p, final String className, final Sign sign) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {
             public void run() {
                 if (!className.equalsIgnoreCase("random")) {
+                    if (useClassChests) {
+                        BlockFace backwards = ((org.bukkit.material.Sign) sign.getData()).getFacing().getOppositeFace();
+                        Block blockBelow  = sign.getBlock();
+                        Block blockBehind = blockBelow.getRelative(backwards);
+                        
+                        Block blockChest = null;
+                        for (int i = 0; i < 6; i++) {
+                            if (blockBelow.getType() == Material.CHEST) {
+                                blockChest = blockBelow;
+                                break;
+                            }
+                            if (blockBehind.getType() == Material.CHEST) {
+                                blockChest = blockBehind;
+                                break;
+                            }
+                            blockBelow  = blockBelow.getRelative(BlockFace.DOWN);
+                            blockBehind = blockBehind.getRelative(BlockFace.DOWN);
+                        }
+                        
+                        if (blockChest != null) {
+                            InventoryHolder holder = (InventoryHolder) blockChest.getState();
+                            ItemStack[] contents = holder.getInventory().getContents();
+                            arena.assignClassGiveInv(p, className, contents);
+                            p.getInventory().setContents(contents);
+                            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
+                            return;
+                        }
+                    }
                     arena.assignClass(p, className);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
                 }

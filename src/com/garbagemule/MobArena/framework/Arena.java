@@ -179,6 +179,8 @@ public interface Arena
     
     public void assignClass(Player p, String className);
 
+    public void assignClassGiveInv(Player p, String className, ItemStack[] contents);
+
     public void addRandomPlayer(Player p);
     
     public void assignRandomClass(Player p);

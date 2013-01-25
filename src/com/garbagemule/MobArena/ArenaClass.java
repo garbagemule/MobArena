@@ -244,6 +244,10 @@ public class ArenaClass
         return pets;
     }
     
+    public boolean hasUnbreakableWeapons() {
+        return unbreakableWeapons;
+    }
+    
     /**
      * Used by isWeapon() to determine if an ItemStack is a weapon type.
      */
@@ -256,7 +260,7 @@ public class ArenaClass
      * @param stack an ItemStack
      * @return true, if the item is a weapon
      */
-    private boolean isWeapon(ItemStack stack) {
+    public boolean isWeapon(ItemStack stack) {
         int id = stack.getTypeId();
         
         for (int type : weaponTypes) {
