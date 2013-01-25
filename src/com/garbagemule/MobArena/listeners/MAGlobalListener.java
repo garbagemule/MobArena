@@ -17,6 +17,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.leaderboards.Stats;
 import com.garbagemule.MobArena.util.VersionChecker;
+import com.garbagemule.MobArena.util.inventory.InventoryManager;
 
 /**
  * The point of this class is to simply redirect all events to each arena's
@@ -227,6 +228,7 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerJoin(PlayerJoinEvent event) {
+        InventoryManager.restoreFromFile(plugin, event.getPlayer());
         if (!am.notifyOnUpdates() || !event.getPlayer().isOp()) return;
 
         final Player p = event.getPlayer();
