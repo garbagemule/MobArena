@@ -840,20 +840,14 @@ public class ArenaListener
                         Block blockBelow  = sign.getBlock();
                         Block blockBehind = blockBelow.getRelative(backwards);
                         
-                        Block blockChest = null;
-                        for (int i = 0; i < 6; i++) {
-                            if (blockBelow.getType() == Material.CHEST) {
-                                blockChest = blockBelow;
-                                break;
-                            }
-                            if (blockBehind.getType() == Material.CHEST) {
-                                blockChest = blockBehind;
-                                break;
-                            }
-                            blockBelow  = blockBelow.getRelative(BlockFace.DOWN);
-                            blockBehind = blockBehind.getRelative(BlockFace.DOWN);
-                        }
+                        // TODO: Make number of searches configurable
+                        // First check the pillar below the sign
+                        Block blockChest = findChestBelow(blockBelow, 6);
                         
+                        // Then, if no chest was found, check the pillar behind the sign
+                        if (blockChest == null) blockChest = findChestBelow(blockBehind, 6);
+                        
+                        // If a chest was found, get the contents
                         if (blockChest != null) {
                             InventoryHolder holder = (InventoryHolder) blockChest.getState();
                             ItemStack[] contents = holder.getInventory().getContents();
@@ -862,6 +856,7 @@ public class ArenaListener
                             Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
                             return;
                         }
+                        // Otherwise just fall through and use the items from the config-file
                     }
                     arena.assignClass(p, className);
                     Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
@@ -872,6 +867,15 @@ public class ArenaListener
                 }
             }
         });
+    }
+    
+    private Block findChestBelow(Block b, int left) {
+        if (left < 0) return null;
+        
+        if (b.getType() == Material.CHEST) {
+            return b;
+        }
+        return findChestBelow(b.getRelative(BlockFace.DOWN), left - 1);
     }
 
     public void onPlayerQuit(PlayerQuitEvent event) {
