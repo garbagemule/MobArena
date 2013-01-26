@@ -996,13 +996,13 @@ public class ArenaImpl implements Arena
         for (int i = contents.length-1; i > contents.length-5; i--) {
             if (contents[i] == null) continue;
             ArmorType type = ArmorType.getType(contents[i]);
+            if (type == null) continue;
+            
             switch (type) {
                 case HELMET:     inv.setHelmet(contents[i]);      break;
                 case CHESTPLATE: inv.setChestplate(contents[i]);  break;
                 case LEGGINGS:   inv.setLeggings(contents[i]);    break;
                 case BOOTS:      inv.setBoots(contents[i]);       break;
-                default:
-                    continue;
             }
             contents[i] = null;
         }
