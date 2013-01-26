@@ -837,8 +837,19 @@ public class ArenaListener
                 if (!className.equalsIgnoreCase("random")) {
                     if (useClassChests) {
                         BlockFace backwards = ((org.bukkit.material.Sign) sign.getData()).getFacing().getOppositeFace();
-                        Block blockBelow  = sign.getBlock();
+                        Block blockSign   = sign.getBlock();
+                        Block blockBelow  = blockSign.getRelative(BlockFace.DOWN);
                         Block blockBehind = blockBelow.getRelative(backwards);
+                        
+                        // If the block below this sign is a class sign, swap the order
+                        if (blockBelow.getType() == Material.WALL_SIGN || blockBelow.getType() == Material.SIGN_POST) {
+                            String className = ChatColor.stripColor(((Sign) blockBelow.getState()).getLine(0)).toLowerCase();
+                            if (arena.getClasses().containsKey(className)) {
+                                blockSign = blockBehind;  // Use blockSign as a temp while swapping
+                                blockBehind = blockBelow;
+                                blockBelow = blockSign;
+                            }
+                        }
                         
                         // TODO: Make number of searches configurable
                         // First check the pillar below the sign
@@ -851,6 +862,14 @@ public class ArenaListener
                         if (blockChest != null) {
                             InventoryHolder holder = (InventoryHolder) blockChest.getState();
                             ItemStack[] contents = holder.getInventory().getContents();
+                            // Guard against double-chests for now
+                            if (contents.length > 36) {
+                                ItemStack[] newContents = new ItemStack[36];
+                                for (int i = 0; i < 36; i++) {
+                                    newContents[i] = contents[i];
+                                }
+                                contents = newContents;
+                            }
                             arena.assignClassGiveInv(p, className, contents);
                             p.getInventory().setContents(contents);
                             Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
