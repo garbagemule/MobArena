@@ -578,14 +578,13 @@ public class ArenaImpl implements Arena
         }
         
         takeFee(p);
+        movePlayerToLobby(p);
         storePlayerData(p, loc);
         removePotionEffects(p);
         MAUtils.sitPets(p);
         setHealth(p, 20);
         p.setFoodLevel(20);
-        p.setGameMode(GameMode.SURVIVAL);
-        movePlayerToLobby(p);
-        
+
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
         
         if (MobArena.hasSpout && settings.getBoolean("spout-class-select"))
@@ -824,13 +823,14 @@ public class ArenaImpl implements Arena
         
         // If there's no player stored, create a new one!
         if (mp == null) {
-            mp = new PlayerData(p);
+            mp = new PlayerData(p, loc);
             playerData.put(p, mp);
         }
         
         // At any rate, update the data.
         mp.update();
-        
+        // Must change gamemode BEFORE inventory changes
+        p.setGameMode(GameMode.SURVIVAL);
         // And update the inventory as well.
         inventoryManager.storeInventory(p);
     }
@@ -889,11 +889,14 @@ public class ArenaImpl implements Arena
         Location entry = playerData.get(p).entry();
         if (entry == null || p.isDead()) return;
         
-        p.teleport(entry);
         timeStrategy.resetPlayerTime(p);
         
         p.setGameMode(playerData.get(p).getMode());
         p.addPotionEffects(playerData.get(p).getPotionEffects());
+        // Health must be handled in a certain way because of Heroes
+        setHealth(p, playerData.get(p).health());
+        // Must teleport AFTER everything because of per-world stuff
+        p.teleport(entry);
     }
     
     private void restoreInvAndExp(Player p) {
@@ -902,10 +905,10 @@ public class ArenaImpl implements Arena
         rewardManager.grantRewards(p);
         
         if (!settings.getBoolean("keep-exp", false)) {
-            playerData.get(p).restoreData();
+            playerData.get(p).restoreAllData();
         }
         else {
-            p.setFoodLevel(playerData.get(p).food());
+            playerData.get(p).restoreDataNoExp();
         }
     }
 
@@ -919,10 +922,7 @@ public class ArenaImpl implements Arena
     private void clearPlayer(Player p)
     {
         // Remove the player data completely.
-        PlayerData mp = playerData.remove(p);
-        
-        // Health must be handled in a certain way because of Heroes
-        setHealth(p, mp.health());
+        playerData.remove(p);
         
         // Put out fire.
         Delays.douse(plugin, p, 3);

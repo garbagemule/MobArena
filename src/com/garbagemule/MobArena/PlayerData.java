@@ -12,10 +12,19 @@ public class PlayerData
     private Player player;
     
     private int health, food, level;
-    private float exp;
+    private float exp, saturation;
     private GameMode mode  = null;
     private Location entry = null;
     private Collection<PotionEffect> potions;
+    
+    public PlayerData(Player player, Location loc) {
+        this.player  = player;
+        this.mode    = player.getGameMode();
+        this.entry   = loc;
+        this.potions = player.getActivePotionEffects();
+        
+        update();
+    }
     
     public PlayerData(Player player) {
         this.player  = player;
@@ -33,10 +42,11 @@ public class PlayerData
      * already being a spectator.
      */
     public void update() {
-        this.health = player.getHealth();
-        this.food   = player.getFoodLevel();
-        this.level  = player.getLevel();
-        this.exp    = player.getExp();
+        this.health     = player.getHealth();
+        this.food       = player.getFoodLevel();
+        this.saturation = player.getSaturation();
+        this.level      = player.getLevel();
+        this.exp        = player.getExp();
     }
     
     /**
@@ -44,10 +54,20 @@ public class PlayerData
      * currently stored values of this object. Used when a
      * player leaves the arena.
      */
-    public void restoreData() {
-        player.setFoodLevel(food);
+    public void restoreAllData() {
+        restoreDataNoExp();
         player.setLevel(level);
         player.setExp(exp);
+    }
+    
+    /**
+     * Restores health and food level as per the
+     * currently stored values of this object. Used when a
+     * player leaves the arena.
+     */
+    public void restoreDataNoExp() {
+        player.setFoodLevel(food);
+        player.setSaturation(saturation);
     }
     
     public Player getPlayer() {
