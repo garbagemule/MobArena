@@ -86,6 +86,9 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public Arena getSelectedArena() {
+        if (selectedArena == null && !arenas.isEmpty()) {
+            selectedArena = arenas.get(0);
+        }
         return selectedArena;
     }
 
