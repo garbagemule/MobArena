@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena;
 
-import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -32,11 +31,6 @@ import com.garbagemule.MobArena.autostart.AutoStartTimer;
 import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
-import com.garbagemule.MobArena.log.ArenaLog;
-import com.garbagemule.MobArena.log.LogSessionBuilder;
-import com.garbagemule.MobArena.log.LogTotalsBuilder;
-import com.garbagemule.MobArena.log.YMLSessionBuilder;
-import com.garbagemule.MobArena.log.YMLTotalsBuilder;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.*;
 import com.garbagemule.MobArena.spout.Spouty;
@@ -57,7 +51,6 @@ public class ArenaImpl implements Arena
     private MobArena plugin;
     private String name;
     private World world;
-    private File dir;
     
     // Settings section of the config-file for this arena.
     private ConfigSection settings;
@@ -102,12 +95,6 @@ public class ArenaImpl implements Arena
     private SheepBouncer  sheepBouncer;
     private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
     
-    // Logging
-    private boolean logging;
-    private ArenaLog log;
-    private LogSessionBuilder sessionBuilder;
-    private LogTotalsBuilder  totalsBuilder;
-    
     // Misc
     private ArenaListener eventListener;
     private List<ItemStack> entryFee;
@@ -129,7 +116,6 @@ public class ArenaImpl implements Arena
         
         this.enabled = settings.getBoolean("enabled", false);
         this.protect = settings.getBoolean("protect", true);
-        this.logging = settings.getBoolean("logging", true);
         this.running = false;
         this.edit    = false;
         
@@ -179,14 +165,6 @@ public class ArenaImpl implements Arena
         String timeString = settings.getString("player-time-in-arena", "world");
         Time time = Enums.getEnumFromString(Time.class, timeString);
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
-        
-        if (logging) {
-            this.dir = new File(plugin.getDataFolder() + File.separator + "arenas" + File.separator + name);
-            this.sessionBuilder = new YMLSessionBuilder(new File(dir, "log_session.yml"));
-            this.totalsBuilder  = new YMLTotalsBuilder(new File(dir, "log_totals.yml"));
-            
-            this.log = new ArenaLog(this, sessionBuilder, totalsBuilder);
-        }
     }
     
     
@@ -232,17 +210,6 @@ public class ArenaImpl implements Arena
     public void setProtected(boolean value) {
         protect = value;
         settings.set("protect", protect);
-    }
-    
-    @Override
-    public boolean isLogging() {
-        return logging;
-    }
-    
-    @Override
-    public void setLogging(boolean value) {
-        logging = value;
-        settings.set("logging", logging);
     }
 
     @Override
@@ -396,11 +363,6 @@ public class ArenaImpl implements Arena
         return limitManager;
     }
     
-    @Override
-    public ArenaLog getLog() {
-        return log;
-    }
-    
     
     
     
@@ -477,10 +439,8 @@ public class ArenaImpl implements Arena
         // Clear the classes in use map, as they're no longer needed
         limitManager.clearClassesInUse();
         
-        // Start logging
+        // Reset rewards
         rewardManager.reset();
-        if (logging)
-            log.start();
         
         // Initialize leaderboards and start displaying info.
         leaderboard.initialize();
@@ -513,10 +473,6 @@ public class ArenaImpl implements Arena
         // Stop tracking leaderboards
         leaderboard.stopTracking();
         leaderboard.update();
-        
-        // Finish logging
-        if (logging)
-            log.end();
         
         // Stop spawning.
         stopSpawner();
@@ -633,16 +589,12 @@ public class ArenaImpl implements Arena
         removeClassPermissions(p);
         removePotionEffects(p);
         
-        ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (logging)
-            if (ap != null && running)
-                log.playerDeath(ap);
-
         restoreInvAndExp(p);
         if (inLobby(p) || inArena(p)) {
             refund(p);
         }
-        
+
+        ArenaPlayer ap = arenaPlayerMap.get(p);
         if (inLobby(p)) {
             if (ap.getArenaClass() != null) {
                 limitManager.playerLeftClass(ap.getArenaClass());
@@ -662,11 +614,6 @@ public class ArenaImpl implements Arena
         // Fire the event
         ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this);
         plugin.getServer().getPluginManager().callEvent(event);
-        
-        ArenaPlayer ap = arenaPlayerMap.get(p);
-        if (logging)
-            if (ap != null)
-                log.playerDeath(ap);
         
         arenaPlayers.remove(p);
         

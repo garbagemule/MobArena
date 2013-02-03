@@ -1,7 +1,6 @@
 world: ''
 enabled: true
 protect: true
-logging: true
 entry-fee: ''
 clear-wave-before-next: false
 clear-boss-before-next: false

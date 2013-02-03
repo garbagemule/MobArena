@@ -19,7 +19,6 @@ import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.MonsterManager;
 import com.garbagemule.MobArena.RewardManager;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
-import com.garbagemule.MobArena.log.ArenaLog;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.util.config.ConfigSection;
@@ -48,10 +47,6 @@ public interface Arena
     public boolean isProtected();
     
     public void setProtected(boolean value);
-    
-    public boolean isLogging();
-    
-    public void setLogging(boolean value);
     
     public boolean isRunning();
     
@@ -108,8 +103,6 @@ public interface Arena
     public ClassLimitManager getClassLimitManager();
 
     public void revivePlayer(Player p);
-    
-    public ArenaLog getLog();
     
     
     
