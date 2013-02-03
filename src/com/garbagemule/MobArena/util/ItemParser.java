@@ -2,12 +2,14 @@ package com.garbagemule.MobArena.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.material.MaterialData;
 
 import com.garbagemule.MobArena.MobArena;
@@ -51,8 +53,15 @@ public class ItemParser
         int amount = stack.getAmount();
         
         // Enchantments
+        Map<Enchantment,Integer> enchants = null;
+        if (stack.getType() == Material.ENCHANTED_BOOK) {
+            EnchantmentStorageMeta esm = (EnchantmentStorageMeta) stack.getItemMeta();
+            enchants = esm.getStoredEnchants();
+        } else {
+            enchants = stack.getEnchantments();
+        }
         String enchantments = "";
-        for (Entry<Enchantment,Integer> entry : stack.getEnchantments().entrySet()) {
+        for (Entry<Enchantment,Integer> entry : enchants.entrySet()) {
             int id  = entry.getKey().getId();
             int lvl = entry.getValue();
             
@@ -217,7 +226,13 @@ public class ItemParser
         if (e == null) {// || !e.canEnchantItem(stack) || lvl > e.getMaxLevel() || lvl < e.getStartLevel()) {
             return;
         }
-        //stack.addEnchantment(e, lvl);
-        stack.addUnsafeEnchantment(e, lvl);
+        
+        if (stack.getType() == Material.ENCHANTED_BOOK) {
+            EnchantmentStorageMeta esm = (EnchantmentStorageMeta) stack.getItemMeta();
+            esm.addStoredEnchant(e, lvl, true);
+            stack.setItemMeta(esm);
+        } else {
+            stack.addUnsafeEnchantment(e, lvl);
+        }
     }
 }
