@@ -31,6 +31,7 @@ import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.listeners.SpoutScreenListener;
 import com.garbagemule.MobArena.metrics.Metrics;
 import com.garbagemule.MobArena.util.FileUtils;
+import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
@@ -95,6 +96,11 @@ public class MobArena extends JavaPlugin
         
         // Announce enable!
         Messenger.info("v" + this.getDescription().getVersion() + " enabled.");
+        
+        // Check for updates
+        if (config.getBoolean("global-settings.update-notification", false)) {
+            VersionChecker.checkForUpdates(this, null);
+        }
     }
     
     public void onDisable() {

@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.listeners;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -231,18 +230,7 @@ public class MAGlobalListener implements Listener
         InventoryManager.restoreFromFile(plugin, event.getPlayer());
         if (!am.notifyOnUpdates() || !event.getPlayer().isOp()) return;
 
-        final Player p = event.getPlayer();
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable()
-            {
-                public void run()
-                {
-                    if (plugin.getMAConfig().getBoolean("global-settings.update-notification", false)
-                        && !VersionChecker.isLatest(plugin)) {
-                        Messenger.tellPlayer(p, "There is a new version of MobArena available!");
-                    }
-                }
-            }, 60);
+        VersionChecker.checkForUpdates(plugin, event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.NORMAL)

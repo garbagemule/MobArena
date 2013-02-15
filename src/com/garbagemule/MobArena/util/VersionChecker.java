@@ -1,90 +1,123 @@
 package com.garbagemule.MobArena.util;
 
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.InputStream;
+import java.net.URL;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 
 public class VersionChecker
 {
-    public static String site = "http://forums.bukkit.org/threads/19144/";
+    public static final String url = "http://dev.bukkit.org/server-mods/mobarena/files.rss";
     
-    /**
-     * Check if the current plugin version is the latest version.
-     * @param plugin a MobArena instance
-     * @return false, if the version is not the latest, true otherwise
-     */
-    public static boolean isLatest(MobArena plugin) {
-        if (!plugin.getMAConfig().getBoolean("global-settings.update-notification", false)) {
-            return true;
-        }
-        
-        try {
-            // Make a URI of the site address
-            URI baseURI = new URI(site);
-            
-            // Open the connection and don't redirect.
-            HttpURLConnection con = (HttpURLConnection) baseURI.toURL().openConnection();
-            con.setConnectTimeout(5000);
-            con.setInstanceFollowRedirects(false);
-            
-            String header = con.getHeaderField("Location");
-            
-            // If something's wrong with the connection...
-            if (header == null) {
-                return true;
+    public static void checkForUpdates(final MobArena plugin, final Player player) {
+        // Thread the entire thing to avoid lag
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Grab the version string from the feed
+                final String latestVersion = getLatestVersion();
+                if (latestVersion == null) return;
+                
+                // First check equality with the current version
+                final String currentVersion = plugin.getDescription().getVersion();
+                if (currentVersion.equals(latestVersion)) {
+                    return;
+                }
+                
+                // Split into major-minor-patch
+                String[] latestParts  = latestVersion.split("\\.");
+                String[] currentParts = currentVersion.split("\\.");
+                
+                // Number of comparisons
+                int parts = Math.max(latestParts.length, currentParts.length);
+                
+                // Check version numbers
+                for (int i = 0; i < parts; i++) {
+                    int latest  = getPart(latestParts, i);
+                    int current = getPart(currentParts, i);
+                    
+                    // Early returns
+                    if (current > latest) {
+                        return;
+                    }
+                    
+                    if (current < latest) {
+                        // Use the scheduler to avoid concurrency complaints
+                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                            @Override
+                            public void run() {
+                                if (player == null) {
+                                    Messenger.info("MobArena v" + latestVersion + " is now available!");
+                                    Messenger.info("Your version: v" + currentVersion);
+                                } else if (player.isOnline()) {
+                                    Messenger.tellPlayer(player, "MobArena v" + latestVersion + " is now available!");
+                                    Messenger.tellPlayer(player, "Your version: v" + currentVersion);
+                                }
+                            }
+                        }, (player == null ? 0 : 60));
+                        return;
+                    }
+                }
+                Messenger.info("Later!");
             }
-            
-            // Otherwise, grab the location header to get the real URI.
-            String url = new URI(con.getHeaderField("Location")).toString();
-            
-            // Set up the regex and matcher
-            Pattern regex   = Pattern.compile("v([0-9]+-)*[0-9]+");
-            Matcher matcher = regex.matcher(url);
-            if (!matcher.find()) {
-                return true;
-            }
-            
-            String thisVersion  = plugin.getDescription().getVersion();
-            String forumVersion = matcher.group().substring(1).replace("-", ".");
-            
-            return isLatest(thisVersion, forumVersion);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
         
-        return true;
+        // Start the damn thing.
+        thread.start();
     }
     
-    /**
-     * Check if thisVersion is newer than or equal to forumVersion
-     * @param thisVersion a version string
-     * @param forumVersion a version string
-     * @return true, if thisVersion is newer than or equal to forumVersion, false otherwise
-     */
-    public static boolean isLatest(String thisVersion, String forumVersion) {
-        String[] forumParts = forumVersion.split("\\.");
-        String[] thisParts  = thisVersion.split("\\.");
+    private static int getPart(String[] parts, int index) {
+        try {
+            return Integer.parseInt(parts[index]);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    
+    // Format is "<MAJOR>.<MINOR>.<PATCH>"
+    private static String getLatestVersion() {
+        // Input stream for the feed
+        InputStream is = null;
         
-        int current, forum;
-        boolean thisIsNewer = false;
+        // The version string
+        String version = null;
+        
+        try {
+            // Open the stream
+            is = new URL(url).openStream();
 
-        for (int i = 0; i < Math.max(forumParts.length, thisParts.length); i++) {
-            forum   = forumParts.length <= i ? 0 : Integer.parseInt(forumParts[i]);
-            current = thisParts.length  <= i ? 0 : Integer.parseInt(thisParts[i]);
+            // Build the document
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
             
-            if (forum < current) {
-                thisIsNewer = true;
+            // Get all the "title" elements (where the version string will be)
+            NodeList list = doc.getElementsByTagName("title");
+            
+            // Loop through the items, and break when a version string has been found.
+            for (int i = 0; i < list.getLength(); i++) {
+                String line = list.item(i).getTextContent();
+                if (line.matches("MobArena v.*")) {
+                    version = line.substring("MobArena v".length(), line.length());
+                    break;
+                }
             }
-            
-            if (forum > current && !thisIsNewer) {
-                return false;
+        } catch (Exception e) {
+            Messenger.warning("The version checker failed.");
+            Messenger.warning("This is harmless, but check for updates manually!");
+        } finally {
+            try {
+                if (is != null) is.close();
+            } catch (Exception ex) {
+                Messenger.severe("Failed to close the version checker stream!");
             }
         }
-        
-        return true;
+        return version;
     }
 }
