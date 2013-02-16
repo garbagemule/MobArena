@@ -4,6 +4,7 @@ protect: true
 entry-fee: ''
 clear-wave-before-next: false
 clear-boss-before-next: false
+clear-wave-before-boss: false
 lightning: true
 auto-equip-armor: true
 soft-restore: false
