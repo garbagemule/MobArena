@@ -59,6 +59,19 @@ public class MonsterManager
         }
     }
     
+    public void remove(Entity e) {
+        if (monsters.remove(e)) {
+            sheep.remove(e);
+            golems.remove(e);
+            pets.remove(e);
+            suppliers.remove(e);
+            MABoss boss = bosses.remove(e);
+            if (boss != null) {
+                boss.setDead(true);
+            }
+        }
+    }
+    
     public Set<LivingEntity> getMonsters() {
         return monsters;
     }

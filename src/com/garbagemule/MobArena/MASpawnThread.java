@@ -235,7 +235,7 @@ public class MASpawnThread implements Runnable
             }
 
             if (e.isDead() || !region.contains(e.getLocation())) {
-                monsterManager.removeMonster(e);
+                monsterManager.remove(e);
                 e.remove();
             }
         }
@@ -247,10 +247,6 @@ public class MASpawnThread implements Runnable
             if (region.contains(p.getLocation())) {
                 continue;
             }
-
-            // TODO remove debug message
-            Location l = p.getLocation();
-            System.out.println("Player: " + p.getName() + " found at location:" + l.getX() + ", " + l.getY() + ", " + l.getZ());
             
             Messenger.tellPlayer(p, "Leaving so soon?");
             p.getInventory().clear();

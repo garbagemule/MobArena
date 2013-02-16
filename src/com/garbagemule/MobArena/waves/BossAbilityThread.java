@@ -38,6 +38,9 @@ public class BossAbilityThread implements Runnable
         if (bosses.isEmpty()) {
             return;
         }
+        for (MABoss boss : bosses) {
+            if (boss.isDead()) return;
+        }
         
         // Get the next ability in the list.
         Ability ability = abilities.get(counter++ % abilities.size());

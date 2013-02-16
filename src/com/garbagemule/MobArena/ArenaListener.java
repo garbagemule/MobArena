@@ -314,7 +314,8 @@ public class ArenaListener
         if (!monsters.getMonsters().contains(event.getEntity()) && !arena.getRegion().contains(event.getLocation(), 10))
             return;
 
-        monsters.removeMonster(event.getEntity());
+        // The generic remove method removes bosses as well
+        monsters.remove(event.getEntity());
 
         // Cancel if the arena isn't running
         if (!arena.isRunning()) {
