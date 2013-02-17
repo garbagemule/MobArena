@@ -45,9 +45,20 @@ public class AutoStartTimer {
      */
     private class Timer implements Runnable {
         private int remaining;
+        private int countdownIndex;
+        private int[] intervals = new int[]{1, 2, 3, 4, 5, 10, 30};
         
         private Timer(int seconds) {
-            this.remaining   = seconds;
+            this.remaining = seconds;
+            
+            // Find the first countdown announcement value
+            for (int i = 0; i < intervals.length; i++) {
+                if (seconds > intervals[i]) {
+                    countdownIndex = i;
+                } else {
+                    break;
+                }
+            }
         }
         
         /**
@@ -83,9 +94,10 @@ public class AutoStartTimer {
                     arena.forceStart();
                     started = false;
                 } else {                    
-                    // Warn at 5 seconds left
-                    if (remaining == 5) {
-                        Messenger.tellAll(arena, Msg.ARENA_AUTO_START, "5");
+                    // Warn at x seconds left
+                    if (remaining == intervals[countdownIndex]) {
+                        Messenger.tellAll(arena, Msg.ARENA_AUTO_START, "" + remaining);
+                        countdownIndex--;
                     }
                     
                     // Reschedule
