@@ -34,3 +34,4 @@ player-time-in-arena: world
 auto-ignite-tnt: false
 auto-start-timer: 0
 use-class-chests: false
+display-waves-as-level: false

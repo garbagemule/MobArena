@@ -35,7 +35,7 @@ public class MASpawnThread implements Runnable
     private MonsterManager monsterManager;
 
     private int playerCount, monsterLimit;
-    private boolean waveClear, bossClear, preBossClear;
+    private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
 
     /**
      * Create a new monster spawner for the input arena.
@@ -65,6 +65,7 @@ public class MASpawnThread implements Runnable
         waveClear = arena.getSettings().getBoolean("clear-wave-before-next", false);
         bossClear = arena.getSettings().getBoolean("clear-boss-before-next", false);
         preBossClear = arena.getSettings().getBoolean("clear-wave-before-boss", false);
+        wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
     }
 
     public void run() {
@@ -126,6 +127,14 @@ public class MASpawnThread implements Runnable
         Wave w = waveManager.next();
 
         w.announce(arena, wave);
+        
+        // Set the players' level to the wave number
+        if (wavesAsLevel) {
+            for (Player p : arena.getPlayersInArena()) {
+                p.setLevel(wave);
+                p.setExp(0.0f);
+            }
+        }
 
         if (w.getType() == WaveType.UPGRADE) {
             handleUpgradeWave(w);
