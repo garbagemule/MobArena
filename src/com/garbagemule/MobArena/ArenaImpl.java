@@ -25,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
+import org.fusesource.jansi.Ansi.Color;
 
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.autostart.AutoStartTimer;
@@ -509,6 +510,7 @@ public class ArenaImpl implements Arena
         // Force leave.
         for (Player p : tmp) {
             playerLeave(p);
+            Messenger.tellPlayer(p, "You did not ready up in time! Next time, ready up by clicking an iron block.");
         }
         
         startArena();
