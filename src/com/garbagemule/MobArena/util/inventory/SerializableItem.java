@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -34,7 +35,8 @@ public class SerializableItem implements Serializable
     }
     
     public ItemStack toItemStack() {
-        ItemStack stack = new ItemStack(id, amount, damage, data);
+        ItemStack stack = new ItemStack(id, amount, damage);
+        if (data != null) stack.setData(new MaterialData(data));
         
         if (!enchantments.isEmpty()) {
             for (Entry<Integer,Integer> entry : this.enchantments.entrySet()) {
