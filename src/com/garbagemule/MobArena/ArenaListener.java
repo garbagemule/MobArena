@@ -497,10 +497,6 @@ public class ArenaListener
         else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
             event.setCancelled(true);
         }
-        // Boss
-        else if (monsters.getBossMonsters().contains(damagee)) {
-            onBossDamage(event, (LivingEntity) damagee, damager); // Now an emtpy method
-        }
         // Regular monster
         else if (monsters.getMonsters().contains(damagee)) {
             onMonsterDamage(event, damagee, damager);
@@ -573,10 +569,6 @@ public class ArenaListener
                 return;
             }
         }
-    }
-
-    private void onBossDamage(EntityDamageEvent event, LivingEntity monster, Entity damager) {
-        //TODO useless method as of Entity Max Health API, maybe add in some stat tracking for leaderboards instead?
     }
 
     public void onEntityCombust(EntityCombustEvent event) {
