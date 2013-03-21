@@ -539,6 +539,9 @@ public class ArenaListener
                 event.setCancelled(true);
                 return;
             }
+            
+            // Dirty hack for invincible weapons
+            p.getInventory().getContents()[p.getInventory().getHeldItemSlot()].setDurability((short) 0);
 
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
