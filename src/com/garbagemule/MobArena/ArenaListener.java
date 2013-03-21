@@ -537,7 +537,8 @@ public class ArenaListener
             }
             
             // Dirty hack for invincible weapons
-            p.getInventory().getContents()[p.getInventory().getHeldItemSlot()].setDurability((short) 0);
+            ItemStack weapon = p.getInventory().getContents()[p.getInventory().getHeldItemSlot()];
+            if (weapon != null) weapon.setDurability((short) 0);
 
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
