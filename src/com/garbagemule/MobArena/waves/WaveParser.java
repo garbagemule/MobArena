@@ -230,6 +230,12 @@ public class WaveParser
         
         BossWave result = new BossWave(monster);
         
+        // Check if there's a specific boss name
+        String bossName = config.getString("name");
+        if (bossName != null && !bossName.equals("")) {
+            result.setBossName(bossName);
+        }
+        
         // Grab the boss health
         String hlth = config.getString("health");
         BossHealth health = BossHealth.fromString(hlth);

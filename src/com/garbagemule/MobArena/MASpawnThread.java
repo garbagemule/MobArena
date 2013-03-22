@@ -179,6 +179,10 @@ public class MASpawnThread implements Runnable
                         MABoss boss = monsterManager.addBoss(e, maxHealth);
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
+                        if (bw.getBossName() != null) {
+                            e.setCustomName(bw.getBossName());
+                            e.setCustomNameVisible(true);
+                        }
                         break;
                     case SWARM:
                         health = (int) (mul < 1D ? e.getMaxHealth() * mul : 1);

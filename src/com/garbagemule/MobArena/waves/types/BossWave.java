@@ -20,6 +20,8 @@ import com.garbagemule.MobArena.waves.enums.*;
 
 public class BossWave extends AbstractWave
 {
+    private String bossName;
+    
     private MACreature monster;
     private Set<MABoss> bosses;
     
@@ -50,6 +52,14 @@ public class BossWave extends AbstractWave
         Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
         result.put(monster, 1);
         return result;
+    }
+    
+    public String getBossName() {
+        return bossName;
+    }
+    
+    public void setBossName(String bossName) {
+        this.bossName = bossName;
     }
     
     public int getMaxHealth(int playerCount) {
