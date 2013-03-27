@@ -538,7 +538,10 @@ public class ArenaListener
             
             // Dirty hack for invincible weapons
             ItemStack weapon = p.getInventory().getContents()[p.getInventory().getHeldItemSlot()];
-            if (weapon != null) weapon.setDurability((short) 0);
+            if (weapon != null &&               // Avoid NPE
+                weapon.getTypeId() != 373 &&    // Prevent potion -> water bottle
+                weapon.getTypeId() != 35)       // Prevent wool -> white wool
+                weapon.setDurability((short) 0);
 
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
