@@ -540,7 +540,8 @@ public class ArenaListener
             ItemStack weapon = p.getInventory().getContents()[p.getInventory().getHeldItemSlot()];
             if (weapon != null &&               // Avoid NPE
                 weapon.getTypeId() != 373 &&    // Prevent potion -> water bottle
-                weapon.getTypeId() != 35)       // Prevent wool -> white wool
+                weapon.getTypeId() != 35  &&    // Prevent wool -> white wool
+                weapon.getTypeId() != 322)      // Prevent ench. apple -> normal apple
                 weapon.setDurability((short) 0);
 
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
