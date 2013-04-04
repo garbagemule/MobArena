@@ -892,7 +892,7 @@ public class ArenaListener
     private Block findChestBelow(Block b, int left) {
         if (left < 0) return null;
         
-        if (b.getType() == Material.CHEST) {
+        if (b.getType() == Material.CHEST || b.getType() == Material.TRAPPED_CHEST) {
             return b;
         }
         return findChestBelow(b.getRelative(BlockFace.DOWN), left - 1);
