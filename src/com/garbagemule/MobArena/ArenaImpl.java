@@ -940,17 +940,23 @@ public class ArenaImpl implements Arena
         
         PlayerInventory inv = p.getInventory();
         
-        // Check the last four slots to see if they are armor items
+        // Check the very last slot to see if it'll work as a helmet
+        int last = contents.length-1;
+        if (contents[last] != null) {
+            inv.setHelmet(contents[last]);
+            contents[last] = null;
+        }
+        // Check the remaining three of the four last slots for armor
         for (int i = contents.length-1; i > contents.length-5; i--) {
             if (contents[i] == null) continue;
             ArmorType type = ArmorType.getType(contents[i]);
-            if (type == null) continue;
+            if (type == null || type == ArmorType.HELMET) continue;
             
             switch (type) {
-                case HELMET:     inv.setHelmet(contents[i]);      break;
                 case CHESTPLATE: inv.setChestplate(contents[i]);  break;
                 case LEGGINGS:   inv.setLeggings(contents[i]);    break;
                 case BOOTS:      inv.setBoots(contents[i]);       break;
+                default: break;
             }
             contents[i] = null;
         }
