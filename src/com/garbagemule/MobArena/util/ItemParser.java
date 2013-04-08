@@ -42,11 +42,16 @@ public class ItemParser
 
         // <data> part
         MaterialData md = stack.getData();
-        byte data = (md != null ? md.getData() : 0);
+        short data = (md != null ? md.getData() : 0);
         
         // Take wool into account
         if (stack.getType() == Material.WOOL) {
             data = (byte) (15 - data);
+        }
+        
+        // Take potions into account
+        else if (stack.getType() == Material.POTION) {
+            data = stack.getDurability();
         }
         
         // <amount> part
