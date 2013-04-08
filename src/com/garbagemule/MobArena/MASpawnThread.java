@@ -99,7 +99,8 @@ public class MASpawnThread implements Runnable
             arena.scheduleTask(this, 60);
             return;
         }
-
+        ScoreBoardManager.wave(arena, nextWave);
+        
         // Grant rewards (if any) for the wave about to spawn
         grantRewards(nextWave);
 

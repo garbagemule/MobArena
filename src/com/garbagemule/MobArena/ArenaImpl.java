@@ -386,6 +386,7 @@ public class ArenaImpl implements Arena
         if (event.isCancelled()) {
             return false;
         }
+        ScoreBoardManager.start(this);
 
         // Store all chest contents.
         storeContainerContents();
@@ -464,6 +465,7 @@ public class ArenaImpl implements Arena
         if (event.isCancelled()) {
             return false;
         }
+        ScoreBoardManager.stop(this);
         
         // Set the running boolean and disable arena if not disabled.
         boolean en = enabled;
@@ -534,6 +536,7 @@ public class ArenaImpl implements Arena
             return false;
         }
         
+        ScoreBoardManager.add(this, p);
         takeFee(p);
         storePlayerData(p, loc);
         removePotionEffects(p);
@@ -587,6 +590,7 @@ public class ArenaImpl implements Arena
             return false;
         }
         
+        ScoreBoardManager.remove(this, p);
         removeClassPermissions(p);
         removePotionEffects(p);
         
@@ -617,6 +621,7 @@ public class ArenaImpl implements Arena
         plugin.getServer().getPluginManager().callEvent(event);
         
         arenaPlayers.remove(p);
+        ScoreBoardManager.remove(this, p);
         
         if (!settings.getBoolean("auto-respawn", true)) {
             deadPlayers.add(p);
