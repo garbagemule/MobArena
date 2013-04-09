@@ -91,6 +91,9 @@ public class MobArena extends JavaPlugin
         // Register event listeners
         registerListeners();
         
+        // Initialize the ScoreBoardManager
+        ScoreBoardManager.init(this);
+        
         // Go go Metrics
         startMetrics();
         
