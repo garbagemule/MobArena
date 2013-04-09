@@ -435,6 +435,7 @@ public class ArenaListener
                 ArenaPlayerStatistics stats = ap.getStats();
                 if (stats != null) {
                     ap.getStats().inc("kills");
+                    arena.getScoreboard().addKill((Player) damager);
                 }
             }
         }

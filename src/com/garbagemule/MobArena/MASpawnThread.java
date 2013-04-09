@@ -128,6 +128,8 @@ public class MASpawnThread implements Runnable
 
         w.announce(arena, wave);
         
+        arena.getScoreboard().updateWave(wave);
+        
         // Set the players' level to the wave number
         if (wavesAsLevel) {
             for (Player p : arena.getPlayersInArena()) {

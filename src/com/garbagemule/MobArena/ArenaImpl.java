@@ -102,6 +102,9 @@ public class ArenaImpl implements Arena
     private TimeStrategy timeStrategy;
     private AutoStartTimer autoStartTimer;
     
+    // Scoreboards
+    private ScoreboardManager scoreboard;
+    
     /**
      * Primary constructor. Requires a name and a world.
      */
@@ -166,6 +169,9 @@ public class ArenaImpl implements Arena
         String timeString = settings.getString("player-time-in-arena", "world");
         Time time = Enums.getEnumFromString(Time.class, timeString);
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
+        
+        // Scoreboards
+        this.scoreboard = new ScoreboardManager(this);
     }
     
     
@@ -364,6 +370,10 @@ public class ArenaImpl implements Arena
         return limitManager;
     }
     
+    @Override
+    public ScoreboardManager getScoreboard() {
+        return scoreboard;
+    }
     
     
     
@@ -407,6 +417,9 @@ public class ArenaImpl implements Arena
             return false;
         }
         
+        // Initialize scoreboards
+        scoreboard.initialize();
+        
         // Teleport players, give full health, initialize map
         for (Player p : arenaPlayers) {
             // TODO figure out how people die in lobby and get sent to spectator area early
@@ -425,6 +438,8 @@ public class ArenaImpl implements Arena
             p.setFoodLevel(20);
             assignClassPermissions(p);
             arenaPlayerMap.get(p).resetStats();
+            
+            scoreboard.addPlayer(p);
         }
         
         // Start spawning monsters (must happen before 'running = true;')
@@ -882,6 +897,8 @@ public class ArenaImpl implements Arena
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
         arenaPlayerMap.remove(p);
+        
+        scoreboard.removePlayer(p);
     }
     
     private void setHealth(Player p, int health) {
