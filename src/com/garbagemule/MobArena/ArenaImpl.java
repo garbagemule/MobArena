@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -740,10 +741,7 @@ public class ArenaImpl implements Arena
      */
     @Override
     public void scheduleTask(Runnable r, int delay) {
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(
-                plugin,
-                r,
-                delay);
+        Bukkit.getScheduler().runTaskLater(plugin, r, delay);
     }
     
     private void stopSpawner() {
