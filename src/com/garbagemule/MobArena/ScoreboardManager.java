@@ -59,7 +59,7 @@ public class ScoreboardManager {
      * @param wave a wave number
      */
     void updateWave(int wave) {
-        kills.setDisplayName("§aMobArena Kills     §bWave " + wave);
+        kills.setDisplayName("§aKills       §bWave " + wave);
     }
     
     /**
