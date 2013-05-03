@@ -434,7 +434,7 @@ public class ArenaImpl implements Arena
             p.setAllowFlight(false);
             p.setFlying(false);
             //movePlayerToLocation(p, region.getArenaWarp());
-            setHealth(p, 20);
+            setHealth(p, p.getMaxHealth());
             p.setFoodLevel(20);
             assignClassPermissions(p);
             arenaPlayerMap.get(p).resetStats();
@@ -554,7 +554,7 @@ public class ArenaImpl implements Arena
         storePlayerData(p, loc);
         removePotionEffects(p);
         MAUtils.sitPets(p);
-        setHealth(p, 20);
+        setHealth(p, p.getMaxHealth());
         p.setFoodLevel(20);
         p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
@@ -640,7 +640,7 @@ public class ArenaImpl implements Arena
             return;
         }
         
-        p.setHealth(20);
+        setHealth(p, p.getMaxHealth());
         Delays.revivePlayer(plugin, this, p);
         endArena();
     }
