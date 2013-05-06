@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -155,8 +156,8 @@ public class MAUtils
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        //for (Player p : arena.livePlayers)
-        for (Player p : arena.getPlayersInArena()) {
+        List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+        for (Player p : players) {
             if (!arena.getWorld().equals(p.getWorld())) {
                 Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
