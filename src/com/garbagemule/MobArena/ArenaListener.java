@@ -67,6 +67,9 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -235,12 +238,16 @@ public class ArenaListener
             return;
         }
         
-        // If the block is TNT, replace with a TNTPrimed
-        if (autoIgniteTNT && b.getType() == Material.TNT) {
-            event.setCancelled(true);
-            event.getPlayer().getInventory().removeItem(new ItemStack(Material.TNT, 1));
-            b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
-            return;
+        // If the block is TNT, set its planter
+        if (b.getType() == Material.TNT) {
+            if (autoIgniteTNT) {
+                event.setCancelled(true);
+                event.getPlayer().getInventory().removeItem(new ItemStack(Material.TNT, 1));
+                TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
+                setPlanter(tnt, event.getPlayer());
+                return;
+            }
+            setPlanter(b, event.getPlayer());
         }
 
         // Otherwise, block was placed during a session.
@@ -250,6 +257,20 @@ public class ArenaListener
             // For doors, add the block just above (so we get both halves)
             arena.addBlock(b.getRelative(0, 1, 0));
         }
+    }
+    
+    private void setPlanter(Metadatable tnt, Player planter) {
+        tnt.setMetadata("mobarena-planter", new FixedMetadataValue(plugin, planter));
+    }
+    
+    private Player getPlanter(Metadatable tnt) {
+        List<MetadataValue> values = tnt.getMetadata("mobarena-planter");
+        for (MetadataValue value : values) {
+            if (value.getOwningPlugin().equals(plugin)) {
+                return (Player) value.value();
+            }
+        }
+        return null;
     }
 
     public void onBlockForm(BlockFormEvent event) {
@@ -262,19 +283,28 @@ public class ArenaListener
     }
 
     public void onBlockIgnite(BlockIgniteEvent event) {
-        if (!arena.getRegion().contains(event.getBlock().getLocation()))
+        Block b = event.getBlock();
+        if (!arena.getRegion().contains(b.getLocation()))
             return;
 
-        switch (event.getCause()){
+        switch (event.getCause()) {
+            case FLINT_AND_STEEL:
+                if (arena.isRunning()) {
+                    if (b.getType() == Material.TNT) {
+                        Player planter = getPlanter(b);
+                        if (planter != null) {
+                            b.setTypeId(0);
+                            TNTPrimed tnt = b.getWorld().spawn(b.getLocation(), TNTPrimed.class);
+                            setPlanter(tnt, planter);
+                        }
+                    } else {
+                        arena.addBlock(event.getBlock().getRelative(BlockFace.UP));
+                    }
+                    break;
+                }
             case LIGHTNING:
             case SPREAD:
                 event.setCancelled(true);
-                break;
-            case FLINT_AND_STEEL:
-                if (arena.isRunning())
-                    arena.addBlock(event.getBlock().getRelative(BlockFace.UP));
-                else
-                    event.setCancelled(true);
                 break;
             default:
                 break;
@@ -484,6 +514,8 @@ public class ArenaListener
 
             if (damager instanceof Projectile) {
                 damager = ((Projectile) damager).getShooter();
+            } else if (damager instanceof TNTPrimed) {
+                damager = getPlanter(damager);
             }
         }
 
@@ -517,7 +549,7 @@ public class ArenaListener
         }
         // If PvP is disabled and damager is a player, cancel damage
         else if (arena.inArena(player)) {
-            if (!pvpEnabled && (damager instanceof Player || damager instanceof Wolf)) {
+            if (!pvpEnabled && ((damager instanceof Player && !damager.equals(player)) || damager instanceof Wolf)) {
                 event.setCancelled(true);
                 return;
             }
