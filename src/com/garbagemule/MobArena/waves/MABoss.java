@@ -1,11 +1,13 @@
 package com.garbagemule.MobArena.waves;
 
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.ItemStack;
 
 public class MABoss
 {
     private LivingEntity entity;
     private boolean dead;
+    private ItemStack reward;
     
     /**
      * Create an MABoss from the given entity with the given max health.
@@ -60,5 +62,13 @@ public class MABoss
      */
     public void setDead(boolean dead) {
         this.dead = dead;
+    }
+    
+    public void setReward(ItemStack reward) {
+        this.reward = reward;
+    }
+
+    public ItemStack getReward() {
+        return reward;
     }
 }

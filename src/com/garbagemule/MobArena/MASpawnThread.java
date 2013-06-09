@@ -179,6 +179,7 @@ public class MASpawnThread implements Runnable
                         BossWave bw = (BossWave) w;
                         int maxHealth = bw.getMaxHealth(playerCount);
                         MABoss boss = monsterManager.addBoss(e, maxHealth);
+                        boss.setReward(bw.getReward());
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
                         if (bw.getBossName() != null) {

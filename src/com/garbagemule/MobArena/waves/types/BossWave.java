@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.inventory.ItemStack;
+
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
@@ -33,6 +35,8 @@ public class BossWave extends AbstractWave
     private boolean activated, abilityAnnounce;
     
     private int abilityInterval;
+
+    private ItemStack reward;
     
     public BossWave(MACreature monster) {
         this.monster   = monster;
@@ -111,6 +115,14 @@ public class BossWave extends AbstractWave
     
     public void setAbilityAnnounce(boolean abilityAnnounce) {
         this.abilityAnnounce = abilityAnnounce;
+    }
+    
+    public ItemStack getReward() {
+        return reward;
+    }
+
+    public void setReward(ItemStack reward) {
+        this.reward = reward;
     }
     
     public void activateAbilities(Arena arena) {

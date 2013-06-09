@@ -461,12 +461,30 @@ public class ArenaListener
 
         // If the damager was a player, add to kills.
         if (damager instanceof Player) {
-            ArenaPlayer ap = arena.getArenaPlayer((Player) damager);
+            Player p = (Player) damager;
+            ArenaPlayer ap = arena.getArenaPlayer(p);
             if (ap != null) {
                 ArenaPlayerStatistics stats = ap.getStats();
                 if (stats != null) {
                     ap.getStats().inc("kills");
-                    arena.getScoreboard().addKill((Player) damager);
+                    arena.getScoreboard().addKill(p);
+                }
+                MABoss boss = monsters.removeBoss(event.getEntity());
+                if (boss != null) {
+                    ItemStack reward = boss.getReward();
+                    if (reward != null) {
+                        String msg = p.getName() + " killed the boss and won: ";
+                        if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
+                            plugin.giveMoney(p, reward.getAmount());
+                            msg += plugin.economyFormat(reward.getAmount());
+                        } else {
+                            arena.getRewardManager().addReward((Player) damager, reward);
+                            msg += MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount();
+                        }
+                        for (Player q : arena.getPlayersInArena()) {
+                            Messenger.tellPlayer(q, msg);
+                        }
+                    }
                 }
             }
         }

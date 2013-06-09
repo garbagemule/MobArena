@@ -276,6 +276,13 @@ public class WaveParser
         result.setAbilityInterval(config.getInt("ability-interval", 3) * 20);
         result.setAbilityAnnounce(config.getBoolean("ability-announce", true));
         
+        // Rewards!
+        String rew = config.getString("reward");
+        if (rew != null) {
+            ItemStack item = ItemParser.parseItem(rew);
+            if (item != null) result.setReward(item);
+        }
+        
         return result;
     }
     
