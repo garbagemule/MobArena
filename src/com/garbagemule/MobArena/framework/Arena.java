@@ -24,7 +24,6 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
-import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.WaveManager;
 
 public interface Arena
@@ -216,8 +215,6 @@ public interface Arena
     public String arenaName();
     
     public MobArena getPlugin();
-    
-    public Wave getWave();
     
     public Map<String,ArenaClass> getClasses();
     

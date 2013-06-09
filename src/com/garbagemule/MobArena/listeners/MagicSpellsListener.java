@@ -38,7 +38,7 @@ public class MagicSpellsListener implements Listener
         if (arena == null || !arena.isRunning()) return;
         
         String spell = event.getSpell().getName();
-        WaveType type = (arena.getWave() != null) ? arena.getWave().getType() : null;
+        WaveType type = (arena.getWaveManager().getCurrent() != null) ? arena.getWaveManager().getCurrent().getType() : null;
         
         if (disabled.contains(spell) ||
            (type == WaveType.BOSS && disabledOnBoss.contains(spell)) ||

@@ -91,7 +91,6 @@ public class ArenaImpl implements Arena
     
     // Wave stuff
     private WaveManager   waveManager;
-    private Wave          currentWave;
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
     private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
@@ -1147,12 +1146,6 @@ public class ArenaImpl implements Arena
     public MobArena getPlugin()
     {
         return plugin;
-    }
-
-    @Override
-    public Wave getWave()
-    {
-        return currentWave;
     }
 
     @Override
