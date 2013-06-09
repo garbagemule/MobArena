@@ -792,7 +792,12 @@ public class ArenaImpl implements Arena
         mp.update();
         
         // And update the inventory as well.
-        inventoryManager.storeInventory(p);
+        try {
+            inventoryManager.storeInv(p);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messenger.severe("Failed to store inventory for player " + p.getName() + "!");
+        }
     }
 
     @Override
@@ -858,7 +863,12 @@ public class ArenaImpl implements Arena
     
     private void restoreInvAndExp(Player p) {
         inventoryManager.clearInventory(p);
-        inventoryManager.restoreInventory(p);
+        try {
+            inventoryManager.restoreInv(p);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messenger.severe("Failed to restore inventory for player " + p.getName() + "!");
+        }
         rewardManager.grantRewards(p);
         
         if (!settings.getBoolean("keep-exp", false)) {

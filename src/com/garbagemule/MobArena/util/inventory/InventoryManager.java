@@ -2,8 +2,11 @@ package com.garbagemule.MobArena.util.inventory;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -15,7 +18,6 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class InventoryManager
 {
-    private static String EXT = ".inv";
     private File dir;
     private Map<Player,ItemStack[]> items, armor;
     
@@ -27,54 +29,57 @@ public class InventoryManager
         this.armor  = new HashMap<Player,ItemStack[]>();
     }
     
-    /**
-     * Store a player's inventory in memory and in a file.
-     * @param p a player
-     * @return true, if the inventory was stored, false if it already existed
-     */
-    public boolean storeInventory(Player p) {
-        if (items.containsKey(p) && armor.containsKey(p)) {
-            return false;
-        }
+    public void storeInv(Player p) throws IOException {
+        // Avoid overwrites
+        if (items.containsKey(p)) return;
         
-        // Store the inventory in memory
-        PlayerInventory inv = p.getInventory();
-        ItemStack[] memItems = inv.getContents();
-        ItemStack[] memArmor = inv.getArmorContents();
-        items.put(p, memItems);
-        armor.put(p, memArmor);
+        // Fetch the player's items and armor
+        ItemStack[] items = p.getInventory().getContents();
+        ItemStack[] armor = p.getInventory().getArmorContents();
         
-        // And save it to a file
-        saveToFile(p);
+        // Store them in memory
+        this.items.put(p, items);
+        this.armor.put(p, armor);
+        
+        // And on disk
+        File file = new File(dir, p.getName());
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("items", items);
+        config.set("armor", armor);
+        config.save(file);
+        
+        // And clear the inventory
         clearInventory(p);
-        return true;
     }
     
-    /**
-     * Restore a player's inventory from memory or from a file
-     * Note that this method is idempotent; calling it multiple times will
-     * not duplicate player items or anything like that.
-     * @param p a player
-     * @return true, if the inventory was restored successfully, false otherwise
-     */
-    public boolean restoreInventory(Player p) {
-        ItemStack[] memItems = items.remove(p);
-        ItemStack[] memArmor = armor.remove(p);
+    public void restoreInv(Player p) throws FileNotFoundException, IOException, InvalidConfigurationException {
+        // Grab the file on disk
+        File file = new File(dir, p.getName());
         
-        // Restore from inventory if possible
-        if (memItems != null && memArmor != null) {
-            PlayerInventory inv = p.getInventory();
+        // Try to grab the items from memory first
+        ItemStack[] items = this.items.remove(p);
+        ItemStack[] armor = this.armor.remove(p);
+        
+        // If we can't restore from memory, restore from file
+        if (items == null || armor == null) {
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(file);
             
-            inv.setContents(memItems);
-            inv.setArmorContents(memArmor);
+            // Get the items and armor lists
+            List<?> itemsList = config.getList("items");
+            List<?> armorList = config.getList("armor");
             
-            new File(dir, p.getName() + EXT).delete();
-            
-            return true;
+            // Turn the lists into arrays
+            items = itemsList.toArray(new ItemStack[itemsList.size()]);
+            armor = armorList.toArray(new ItemStack[armorList.size()]);
         }
         
-        // Otherwise, load from file
-        return loadFromFile(p);
+        // Set the player inventory contents
+        p.getInventory().setContents(items);
+        p.getInventory().setArmorContents(armor);
+        
+        // Delete the file
+        file.delete();
     }
     
     /**
@@ -98,59 +103,6 @@ public class InventoryManager
         }
     }
     
-    private boolean saveToFile(Player p) {
-        File file = new File(dir, p.getName() + EXT);
-        
-        // If the file exists, encourage restoring first.
-        if (file.exists()) {
-            return false;
-        }
-        
-        try {
-            SerializableInventory inv = new SerializableInventory(p.getInventory());
-            
-            FileOutputStream fos   = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            
-            oos.writeObject(inv);
-            oos.close();
-            
-            return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    private boolean loadFromFile(Player p) {
-        File file = new File(dir, p.getName() + EXT);
-        
-        // If the file doesn't exist, we can't restore from it!
-        if (!file.exists()) {
-            return false;
-        }
-        
-        try {
-            FileInputStream fis   = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            
-            Object o = ois.readObject();
-            ois.close();
-            
-            SerializableInventory inv = (SerializableInventory) o;
-            SerializableInventory.loadContents(p, inv);
-            
-            file.delete();
-            
-            return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
     public static boolean hasEmptyInventory(Player p) {
         ItemStack[] inventory = p.getInventory().getContents();
         ItemStack[] armor     = p.getInventory().getArmorContents();
@@ -170,38 +122,31 @@ public class InventoryManager
         return true;
     }
     
-    /**
-     * Restore a player's inventory from file
-     * @param plugin MobArena instance
-     * @param p a player
-     * @return true, if the inventory was restored successfully, false otherwise
-     */
     public static boolean restoreFromFile(MobArena plugin, Player p) {
-        File dir = new File(plugin.getDataFolder(), "inventories");
-        
-        File file = new File(dir, p.getName() + EXT);
-        
-        // If the file doesn't exist, we can't restore from it!
-        if (!file.exists()) {
-            return false;
-        }
-        
         try {
-            FileInputStream fis   = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
+            // Grab the file and load the config
+            File dir = new File(plugin.getDataFolder(), "inventories");
+            File file = new File(dir, p.getName());
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(file);
             
-            Object o = ois.readObject();
-            ois.close();
+            // Get the items and armor lists
+            List<?> itemsList = config.getList("items");
+            List<?> armorList = config.getList("armor");
             
-            SerializableInventory inv = (SerializableInventory) o;
-            SerializableInventory.loadContents(p, inv);
+            // Turn the lists into arrays
+            ItemStack[] items = itemsList.toArray(new ItemStack[itemsList.size()]);
+            ItemStack[] armor = armorList.toArray(new ItemStack[armorList.size()]);
             
+            // Set the player inventory contents
+            p.getInventory().setContents(items);
+            p.getInventory().setArmorContents(armor);
+            
+            // Delete files
             file.delete();
             
             return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             return false;
         }
     }
