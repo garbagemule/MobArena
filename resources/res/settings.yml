@@ -33,5 +33,6 @@ spout-class-select: false
 player-time-in-arena: world
 auto-ignite-tnt: false
 auto-start-timer: 0
+auto-ready: false
 use-class-chests: false
 display-waves-as-level: false

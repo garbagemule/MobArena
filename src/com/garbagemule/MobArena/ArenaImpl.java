@@ -948,6 +948,14 @@ public class ArenaImpl implements Arena
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
+        
+        if (settings.getBoolean("auto-ready", false)) {
+            if (autoStartTimer.getRemaining() <= 0) {
+                playerReady(p);
+            } else {
+                readyPlayers.add(p);
+            }
+        }
     }
     
     @Override
