@@ -871,7 +871,7 @@ public class ArenaImpl implements Arena
         }
         rewardManager.grantRewards(p);
         
-        if (!settings.getBoolean("keep-exp", false)) {
+        if (lobbyPlayers.contains(p) || !settings.getBoolean("keep-exp", false)) {
             playerData.get(p).restoreData();
         }
         else {

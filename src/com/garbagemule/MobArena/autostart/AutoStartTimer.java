@@ -1,5 +1,7 @@
 package com.garbagemule.MobArena.autostart;
 
+import org.bukkit.entity.Player;
+
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
@@ -9,11 +11,13 @@ public class AutoStartTimer {
     private int seconds;
     private Timer timer;
     private boolean started;
+    private boolean useLevels;
     
     public AutoStartTimer(Arena arena, int seconds) {
         this.arena     = arena;
         this.seconds   = seconds;
         this.started   = false;
+        this.useLevels = arena.getSettings().getBoolean("display-timer-as-level", false);
     }
     
     /**
@@ -93,9 +97,15 @@ public class AutoStartTimer {
                 if (remaining <= 0) {
                     arena.forceStart();
                     started = false;
-                } else {                    
-                    // Warn at x seconds left
-                    if (remaining == intervals[countdownIndex]) {
+                } else {
+                    // If using levels, update 'em
+                    if (useLevels) {
+                        for (Player p : arena.getPlayersInLobby()) {
+                            p.setLevel(remaining);
+                        }
+                    }
+                    // Otherwise, warn at x seconds left
+                    else if (remaining == intervals[countdownIndex]) {
                         Messenger.tellAll(arena, Msg.ARENA_AUTO_START, "" + remaining);
                         countdownIndex--;
                     }
