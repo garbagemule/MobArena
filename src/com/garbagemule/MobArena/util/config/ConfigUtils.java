@@ -29,7 +29,7 @@ public class ConfigUtils
         }
         
         // Extract the yml file.
-        YamlConfiguration ymlConfig = FileUtils.getConfig(plugin, filename);
+        YamlConfiguration ymlConfig = FileUtils.getConfig(plugin, filename, plugin.getClass());
         
         // Assert the nodes.
         assertNodes(section, ymlConfig, keepOthers);

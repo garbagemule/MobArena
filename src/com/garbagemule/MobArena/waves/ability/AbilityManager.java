@@ -38,7 +38,7 @@ public class AbilityManager
      * the specified directory.
      * @param dir a directory of .class (and/or .java) files
      */
-    public static void loadAbilities(File classDir) {
+    public static void loadAbilities(File classDir, Class<?> cls) {
         abilities = new HashMap<String,Ability>();
         
         // Grab the source directory.
@@ -62,14 +62,14 @@ public class AbilityManager
         String[] files = classDir.list();
         if (files.length == 0 || (files.length == 1 && files[0].equals("src"))) {
             Messenger.info("No boss abilities found. Extracting defaults...");
-            extractDefaultAbilities(classDir);
+            extractDefaultAbilities(classDir, cls);
         }
         
         // Load all the custom abilities.
         loadClasses(classDir);
     }
     
-    private static void extractDefaultAbilities(File classDir) {
+    private static void extractDefaultAbilities(File classDir, Class<?> cls) {
         // Grab a list of all the class files.
         List<String> resources = FileUtils.listFilesOnPath("res/abilities/", ".class");
         
@@ -80,7 +80,7 @@ public class AbilityManager
         }
         
         // Extract everything.
-        List<File> files = FileUtils.extractResources(classDir, "abilities/", resources);
+        List<File> files = FileUtils.extractResources(classDir, "abilities/", resources, cls);
         Messenger.info("Extracted abilities: " + fileListToString(files, "$"));
     }
     

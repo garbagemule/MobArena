@@ -65,7 +65,7 @@ public class MobArena extends JavaPlugin
 
     public void onEnable() {
         // Create default files and initialize config-file
-        FileUtils.extractResource(this.getDataFolder(), "config.yml");
+        FileUtils.extractResource(this.getDataFolder(), "config.yml", getClass());
         loadConfigFile();
         
         // Load boss abilities
@@ -205,7 +205,7 @@ public class MobArena extends JavaPlugin
         File dir = new File(this.getDataFolder(), "abilities");
         if (!dir.exists()) dir.mkdir();
         
-        AbilityManager.loadAbilities(dir);
+        AbilityManager.loadAbilities(dir, getClass());
     }
     
     private void startMetrics() {

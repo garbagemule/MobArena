@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -25,11 +24,11 @@ public class FileUtils
      * @param resources a list of resources to extract
      * @return a list of all the files that were written
      */
-    public static List<File> extractResources(File dir, List<String> resources) {
-        return extractResources(dir, "", resources);
+    public static List<File> extractResources(File dir, List<String> resources, Class<?> cls) {
+        return extractResources(dir, "", resources, cls);
     }
     
-    public static List<File> extractResources(File dir, String path, List<String> filenames) {
+    public static List<File> extractResources(File dir, String path, List<String> filenames, Class<?> cls) {
         List<File> files = new ArrayList<File>();
         
         // If the path is empty, just forget about it.
@@ -47,25 +46,13 @@ public class FileUtils
         
         // Extract each resource
         for (String filename : filenames) {
-            File file = extractResource(dir, path + filename);
+            File file = extractResource(dir, path + filename, cls);
             
             if (file != null) {
                 files.add(file);
             }
         }
         return files;
-    }
-
-    /**
-     * Extracts all of the given resources to the given directory.
-     * Convenience method, used if one is too lazy to create a new list for
-     * the resource names.
-     * @param dir a directory
-     * @param resources an array of resources to extract
-     * @return a list of all the files that were written
-     */
-    public static List<File> extractResources(File dir, String... resources) {
-        return extractResources(dir, Arrays.asList(resources));
     }
     
     /**
@@ -74,7 +61,7 @@ public class FileUtils
      * @param resource a resource to extract
      * @return the file that was written, or null
      */
-    public static File extractResource(File dir, String resource) {
+    public static File extractResource(File dir, String resource, Class<?> cls) {
         if (!dir.exists()) dir.mkdirs();
         
         // Set up our new file.
@@ -85,7 +72,7 @@ public class FileUtils
         if (file.exists()) return file;
         
         // Grab the resource input stream.
-        InputStream in = MobArena.class.getResourceAsStream("/res/" + resource);
+        InputStream in = cls.getResourceAsStream("/res/" + resource);
         if (in == null) return null;
         
         try {
@@ -163,8 +150,8 @@ public class FileUtils
         return (slash < 0 ? resource : resource.substring(slash + 1));
     }
     
-    public static YamlConfiguration getConfig(MobArena plugin, String filename) {
-        InputStream in = MobArena.class.getResourceAsStream("/res/" + filename);
+    public static YamlConfiguration getConfig(MobArena plugin, String filename, Class<?> cls) {
+        InputStream in = cls.getResourceAsStream("/res/" + filename);
         if (in == null) {
             Messenger.severe("Failed to load '" + filename + "', the server must be restarted!");
             return null;

@@ -25,7 +25,7 @@ public class MagicSpellsListener implements Listener
         this.plugin = plugin;
         
         // Set up the MagicSpells config-file.
-        File spellFile = FileUtils.extractResource(plugin.getDataFolder(), "magicspells.yml");
+        File spellFile = FileUtils.extractResource(plugin.getDataFolder(), "magicspells.yml", plugin.getClass());
         Config spellConfig = new Config(spellFile);
         spellConfig.load();
         setupSpells(spellConfig);
