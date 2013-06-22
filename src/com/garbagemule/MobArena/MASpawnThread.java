@@ -209,7 +209,7 @@ public class MASpawnThread implements Runnable
         for (Player p : arena.getPlayersInArena()) {
             String className = arena.getArenaPlayer(p).getArenaClass().getLowercaseName();
             uw.grantItems(p, className);
-            uw.grantItems(p, "All");
+            uw.grantItems(p, "all");
         }
     }
 

@@ -373,9 +373,6 @@ public class WaveParser
             String itemList = config.getString(path + className);
             List<ItemStack> stacks = ItemParser.parseItems(itemList);
             
-            if (className.equalsIgnoreCase("All")) {
-                className = "All";
-            }
             upgrades.put(className.toLowerCase(), stacks);
         }
         
