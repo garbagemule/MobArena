@@ -435,6 +435,10 @@ public class ArenaImpl implements Arena
             //movePlayerToLocation(p, region.getArenaWarp());
             setHealth(p, p.getMaxHealth());
             p.setFoodLevel(20);
+            if (settings.getBoolean("display-waves-as-level", false)) {
+                p.setLevel(0);
+                p.setExp(0.0f);
+            }
             assignClassPermissions(p);
             arenaPlayerMap.get(p).resetStats();
             
@@ -555,6 +559,10 @@ public class ArenaImpl implements Arena
         MAUtils.sitPets(p);
         setHealth(p, p.getMaxHealth());
         p.setFoodLevel(20);
+        if (settings.getBoolean("display-timer-as-level", false)) {
+            p.setLevel(0);
+            p.setExp(0.0f);
+        }
         p.setGameMode(GameMode.SURVIVAL);
         movePlayerToLobby(p);
         
@@ -870,8 +878,12 @@ public class ArenaImpl implements Arena
             Messenger.severe("Failed to restore inventory for player " + p.getName() + "!");
         }
         rewardManager.grantRewards(p);
-        
-        if (lobbyPlayers.contains(p) || !settings.getBoolean("keep-exp", false)) {
+
+        // Try to prevent XP issues
+        if (lobbyPlayers.contains(p)
+         || !settings.getBoolean("keep-exp")
+         ||  settings.getBoolean("display-waves-as-level", false)
+         ||  settings.getBoolean("display-timer-as-level", false)) {
             playerData.get(p).restoreData();
         }
         else {
