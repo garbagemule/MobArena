@@ -183,6 +183,8 @@ public interface Arena
     public void assignClassPermissions(Player p);
     
     public void removeClassPermissions(Player p);
+
+    public void addPermission(Player p, String perm, boolean value);
     
     
     

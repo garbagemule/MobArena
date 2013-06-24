@@ -1061,6 +1061,17 @@ public class ArenaImpl implements Arena
         }
         p.recalculatePermissions();
     }
+
+    @Override
+    public void addPermission(Player p, String perm, boolean value) {
+        PermissionAttachment pa = attachments.get(p);
+        if (pa == null) {
+            pa = p.addAttachment(plugin);
+            attachments.put(p, pa);
+        }
+        pa.setPermission(perm, value);
+        p.recalculatePermissions();
+    }
     
     private void cleanup() {
         removeMonsters();

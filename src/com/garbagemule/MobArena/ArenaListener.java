@@ -579,12 +579,6 @@ public class ArenaListener
     private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager) {
         event.setCancelled(true);
     }
-    
-    // Array of weapon IDs (includes flint and steel, fishing pole)
-    private final int[] weapons = {
-        256, 257, 258, 259, 261, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276,
-        277, 278, 279, 283, 284, 285, 286, 290, 291, 292, 293, 294, 346, 398
-    };
 
     private void onMonsterDamage(EntityDamageEvent event, Entity monster, Entity damager) {
         if (damager instanceof Player) {
@@ -596,7 +590,7 @@ public class ArenaListener
             
             // Dirty hack for invincible weapons
             ItemStack weapon = p.getInventory().getContents()[p.getInventory().getHeldItemSlot()];
-            if (weapon != null && Arrays.binarySearch(weapons, weapon.getTypeId()) >= 0) {
+            if (ArenaClass.isWeapon(weapon)) {
                 weapon.setDurability((short) 0);
             }
 

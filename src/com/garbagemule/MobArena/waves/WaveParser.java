@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves;
 
 import java.util.*;
 
+import com.garbagemule.MobArena.ArenaClass;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,6 +20,7 @@ import com.garbagemule.MobArena.waves.types.SpecialWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.SwarmWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.*;
 
 public class WaveParser
 {
@@ -206,6 +208,20 @@ public class WaveParser
     }
     
     private static Wave parseUpgradeWave(Arena arena, String name, ConfigSection config) {
+        Map<String,List<Upgrade>> upgrades = getUpgradeMap(config);
+        if (upgrades == null || upgrades.isEmpty()) {
+            Messenger.warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
+            return null;
+        }
+
+        UpgradeWave result = new UpgradeWave(upgrades);
+
+        // Determine if all items should be given
+        boolean giveAll = config.getBoolean("give-all-items", false);
+        result.setGiveAll(giveAll);
+
+        return result;
+        /*
         Map<String,List<ItemStack>> classMap = getUpgradeMap(config);
         if (classMap == null || classMap.isEmpty()) {
             Messenger.warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
@@ -219,6 +235,7 @@ public class WaveParser
         result.setGiveAll(giveAll);
         
         return result;
+        */
     }
     
     private static Wave parseBossWave(Arena arena, String name, ConfigSection config) {
@@ -360,20 +377,57 @@ public class WaveParser
         return result;
     }
     
-    private static Map<String,List<ItemStack>> getUpgradeMap(ConfigSection config) {
+    private static Map<String,List<Upgrade>> getUpgradeMap(ConfigSection config) {
         Set<String> classes = config.getKeys("upgrades");
         if (classes == null || classes.isEmpty()) {
             return null;
         }
         
-        Map<String,List<ItemStack>> upgrades = new HashMap<String,List<ItemStack>>();
+        Map<String,List<Upgrade>> upgrades = new HashMap<String,List<Upgrade>>();
         String path = "upgrades.";
         
         for (String className : classes) {
-            String itemList = config.getString(path + className);
-            List<ItemStack> stacks = ItemParser.parseItems(itemList);
-            
-            upgrades.put(className.toLowerCase(), stacks);
+            // Legacy support
+            String itemList = config.getString(path + className, null);
+            if (itemList != null) {
+                List<ItemStack> stacks = ItemParser.parseItems(itemList);
+                List<Upgrade> list = new ArrayList<Upgrade>();
+                for (ItemStack stack : stacks) {
+                    list.add(new GenericUpgrade(stack));
+                }
+                upgrades.put(className.toLowerCase(), list);
+            }
+            // New complex setup
+            else {
+                List<Upgrade> list = new ArrayList<Upgrade>();
+
+                // Items (Generic + Weapons)
+                itemList = config.getString(path + className + ".items", null);
+                if (itemList != null) {
+                    for (ItemStack stack : ItemParser.parseItems(itemList)) {
+                        list.add(ArenaClass.isWeapon(stack) ? new WeaponUpgrade(stack) : new GenericUpgrade(stack));
+                    }
+                }
+
+                // Armor
+                itemList = config.getString(path + className + ".armor", null);
+                if (itemList != null) {
+                    for (ItemStack stack : ItemParser.parseItems(itemList)) {
+                        list.add(new ArmorUpgrade(stack));
+                    }
+                }
+
+                // Permissions
+                List<String> perms = config.getStringList(path + className + ".permissions", Collections.EMPTY_LIST);
+                if (!perms.isEmpty()) {
+                    for (String perm : perms) {
+                        list.add(new PermissionUpgrade(perm));
+                    }
+                }
+
+                // Put in the map
+                upgrades.put(className.toLowerCase(), list);
+            }
         }
         
         return upgrades;

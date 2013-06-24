@@ -208,8 +208,8 @@ public class MASpawnThread implements Runnable
 
         for (Player p : arena.getPlayersInArena()) {
             String className = arena.getArenaPlayer(p).getArenaClass().getLowercaseName();
-            uw.grantItems(p, className);
-            uw.grantItems(p, "all");
+            uw.grantItems(arena, p, className);
+            uw.grantItems(arena, p, "all");
         }
     }
 
@@ -217,7 +217,6 @@ public class MASpawnThread implements Runnable
      * Check if the wave is clear for new spawns.
      * If clear-boss-before-next: true, bosses must be dead.
      * If clear-wave-before-next: true, all monsters must be dead.
-     * @param wave the next wave number
      * @return true, if the wave is "clear" for new spawns.
      */
     private boolean isWaveClear() {
@@ -332,33 +331,6 @@ public class MASpawnThread implements Runnable
             else {
                 Messenger.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount(), reward.getType());
             }
-        }
-    }
-
-    /**
-     * Update the targets of all monsters, if their targets aren't alive.
-     */
-    public void updateTargets() {
-        Creature c;
-        Entity target;
-        for (Entity e : monsterManager.getMonsters()) {
-            if (!(e instanceof Creature))
-                continue;
-
-            // TODO: Remove the try-catch when Bukkit API is fixed.
-            c = (Creature) e;
-            try {
-                target = c.getTarget();
-            }
-            catch (ClassCastException cce) {
-                continue;
-            }
-
-            if (target instanceof Player && arena.getPlayersInArena().contains((Player) target)) {
-                continue;
-            }
-
-            c.setTarget(MAUtils.getClosestPlayer(plugin, e, arena));
         }
     }
 }
