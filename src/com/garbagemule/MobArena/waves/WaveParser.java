@@ -279,7 +279,7 @@ public class WaveParser
         if (ablts != null) {
             String[] parts = ablts.split(",");
             for (String ability : parts) {
-                Ability a = AbilityManager.fromString(ability.trim());
+                Ability a = AbilityManager.getAbility(ability.trim());
                 if (a == null) {
                     Messenger.warning(WaveError.BOSS_ABILITY.format(ability.trim(), name, arena.configName()));
                     continue;

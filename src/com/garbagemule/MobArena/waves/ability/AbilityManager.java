@@ -16,6 +16,7 @@ import javax.tools.ToolProvider;
 
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.util.FileUtils;
+import com.garbagemule.MobArena.waves.ability.core.*;
 
 public class AbilityManager
 {
@@ -23,22 +24,58 @@ public class AbilityManager
     private static final String classpath = jarpath + ";" + System.getProperty("java.class.path");
     
     private static Map<String,Ability> abilities;
-    
+    private static Map<String,Class<? extends Ability>> abs;
+
     /**
-     * Get an Ability by one of its aliases.
-     * @param name an Ability alias
-     * @return an Ability, if one exists with the given alias, false otherwise
+     * Get an instance of an ability by alias
+     * @param alias the alias of an ability
+     * @return a new Ability object, or null
      */
-    public static Ability fromString(String name) {
-        return abilities.get(name.toLowerCase().replaceAll("[-_.]", ""));
+    public static Ability getAbility(String alias) {
+        try {
+            Class<? extends Ability> cls = abs.get(alias.toLowerCase().replaceAll("[-_.]", ""));
+            return cls.newInstance();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Load all the core abilities included in MobArena
+     */
+    public static void loadCoreAbilities() {
+        if (abs == null) abs = new HashMap<String,Class<? extends Ability>>();
+
+        register(ChainLightning.class);
+        register(DisorientDistant.class);
+        register(DisorientNearby.class);
+        register(DisorientTarget.class);
+        register(FetchDistant.class);
+        register(FetchNearby.class);
+        register(FetchTarget.class);
+        register(FireAura.class);
+        register(Flood.class);
+        register(LightningAura.class);
+        register(LivingBomb.class);
+        register(ObsidianBomb.class);
+        register(PullDistant.class);
+        register(PullNearby.class);
+        register(PullTarget.class);
+        register(RootTarget.class);
+        register(ShootArrow.class);
+        register(ShootFireball.class);
+        register(ShufflePositions.class);
+        register(ThrowDistant.class);
+        register(ThrowNearby.class);
+        register(ThrowTarget.class);
+        register(WarpToPlayer.class);
     }
     
     /**
-     * Load the known abilities as well as all custom abilities from
-     * the specified directory.
-     * @param dir a directory of .class (and/or .java) files
+     * Load the custom abilities from the specified directory.
+     * @param classDir a directory of .class (and/or .java) files
      */
-    public static void loadAbilities(File classDir, Class<?> cls) {
+    public static void loadAbilities(File classDir) {
         abilities = new HashMap<String,Ability>();
         
         // Grab the source directory.
@@ -56,32 +93,21 @@ public class AbilityManager
             }
         }
         
-        /* If there is only one file in the directory, make sure it isn't the
-         * src/ folder, in which case there will be no .class files to load.
-         * In the case of no .class files, extract the defaults. */
-        String[] files = classDir.list();
-        if (files.length == 0 || (files.length == 1 && files[0].equals("src"))) {
-            Messenger.info("No boss abilities found. Extracting defaults...");
-            extractDefaultAbilities(classDir, cls);
-        }
-        
         // Load all the custom abilities.
         loadClasses(classDir);
     }
-    
-    private static void extractDefaultAbilities(File classDir, Class<?> cls) {
-        // Grab a list of all the class files.
-        List<String> resources = FileUtils.listFilesOnPath("res/abilities/", ".class");
-        
-        // Check that there is stuff to extract.
-        if (resources == null || resources.isEmpty()) {
-            Messenger.severe("Couldn't extract the default boss abilities!");
-            return;
+
+    /**
+     * Register an ability by its class object
+     * @param cls the ability class
+     */
+    private static void register(Class<? extends Ability> cls) {
+        AbilityInfo info = cls.getAnnotation(AbilityInfo.class);
+        if (info == null) return;
+
+        for (String alias : info.aliases()) {
+            abs.put(alias, cls);
         }
-        
-        // Extract everything.
-        List<File> files = FileUtils.extractResources(classDir, "abilities/", resources, cls);
-        Messenger.info("Extracted abilities: " + fileListToString(files, "$"));
     }
     
     private static void compileAbilities(File javaDir, File classDir) {
@@ -175,7 +201,7 @@ public class AbilityManager
     
     /**
      * (Compiles and) loads all custom abilities in the given directory.
-     * @param dir a directory
+     * @param classDir a directory
      */
     private static void loadClasses(File classDir) {
         // Grab the class loader

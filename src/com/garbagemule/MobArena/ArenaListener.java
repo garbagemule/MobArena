@@ -469,7 +469,7 @@ public class ArenaListener
                     ap.getStats().inc("kills");
                     arena.getScoreboard().addKill(p);
                 }
-                MABoss boss = monsters.removeBoss(event.getEntity());
+                MABoss boss = monsters.getBoss(event.getEntity());
                 if (boss != null) {
                     ItemStack reward = boss.getReward();
                     if (reward != null) {

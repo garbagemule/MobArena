@@ -1,16 +1,18 @@
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
+package com.garbagemule.MobArena.waves.ability.core;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.MABoss;
-import com.garbagemule.MobArena.waves.ability.*;
+import com.garbagemule.MobArena.waves.ability.Ability;
+import com.garbagemule.MobArena.waves.ability.AbilityInfo;
+import com.garbagemule.MobArena.waves.ability.AbilityUtils;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 @AbilityInfo(
-    name = "Throw Nearby",
-    aliases = {"thrownearby"}
+    name = "Fetch Nearby",
+    aliases = {"fetchnearby"}
 )
-public class ThrowNearby implements Ability
+public class FetchNearby implements Ability
 {
     /**
      * How close players must be to be affected by the ability.
@@ -22,9 +24,7 @@ public class ThrowNearby implements Ability
         Location bLoc = boss.getEntity().getLocation();
         
         for (Player p : AbilityUtils.getNearbyPlayers(arena, boss.getEntity(), RADIUS)) {
-            Location loc = p.getLocation();
-            Vector v     = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
-            p.setVelocity(v.normalize().setY(0.8));
+            p.teleport(bLoc);
         }
     }
 }

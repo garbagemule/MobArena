@@ -202,8 +202,9 @@ public class MobArena extends JavaPlugin
     private void loadAbilities() {
         File dir = new File(this.getDataFolder(), "abilities");
         if (!dir.exists()) dir.mkdir();
-        
-        AbilityManager.loadAbilities(dir, getClass());
+
+        AbilityManager.loadCoreAbilities();
+        AbilityManager.loadAbilities(dir);
     }
     
     private void startMetrics() {

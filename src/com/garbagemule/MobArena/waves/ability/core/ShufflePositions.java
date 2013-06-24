@@ -1,14 +1,16 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.MABoss;
+import com.garbagemule.MobArena.waves.ability.Ability;
+import com.garbagemule.MobArena.waves.ability.AbilityInfo;
+import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.bukkit.Location;
-import org.bukkit.entity.LivingEntity;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.MABoss;
-import com.garbagemule.MobArena.waves.ability.*;
 
 @AbilityInfo(
     name = "Shuffle Positions",

@@ -1,9 +1,12 @@
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
+package com.garbagemule.MobArena.waves.ability.core;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.MABoss;
-import com.garbagemule.MobArena.waves.ability.*;
+import com.garbagemule.MobArena.waves.ability.Ability;
+import com.garbagemule.MobArena.waves.ability.AbilityInfo;
+import com.garbagemule.MobArena.waves.ability.AbilityUtils;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 @AbilityInfo(
     name = "Disorient Distant",
