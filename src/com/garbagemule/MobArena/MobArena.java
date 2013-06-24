@@ -18,8 +18,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.garbagemule.MobArena.ArenaMasterImpl;
-import com.garbagemule.MobArena.MAMessages;
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -235,7 +233,7 @@ public class MobArena extends JavaPlugin
         
         for (String arena : arenas) {
             String path = "arenas." + arena + ".settings";
-            ConfigUtils.replaceAllNodes(this, config, path, "settings.yml");
+            ConfigUtils.replaceAllNodes(config, path, "settings.yml");
         }
     }
     

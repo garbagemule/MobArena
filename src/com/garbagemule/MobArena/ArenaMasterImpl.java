@@ -19,8 +19,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 
-import com.garbagemule.MobArena.ArenaImpl;
-import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -252,7 +250,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Load the global settings.
      */
     public void loadSettings() {
-        ConfigUtils.replaceAllNodes(plugin, config, "global-settings", "global-settings.yml");
+        ConfigUtils.replaceAllNodes(config, "global-settings", "global-settings.yml");
         ConfigSection section = config.getConfigSection("global-settings");
 
         // Grab the commands string
@@ -295,7 +293,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Loads the classes in res/classes.yml into the config-file.
      */
     public void loadDefaultClasses() {
-        ConfigUtils.addMissingNodes(plugin, config, "classes", "classes.yml");
+        ConfigUtils.addMissingNodes(config, "classes", "classes.yml");
     }
 
     /**
@@ -553,7 +551,7 @@ public class ArenaMasterImpl implements ArenaMaster
         }
 
         // Assert all settings nodes.
-        ConfigUtils.replaceAllNodes(plugin, config, path + ".settings", "settings.yml");
+        ConfigUtils.replaceAllNodes(config, path + ".settings", "settings.yml");
 
         // Create an Arena with the name and world.
         Arena arena = new ArenaImpl(plugin, config, arenaname, world);
@@ -578,14 +576,14 @@ public class ArenaMasterImpl implements ArenaMaster
             throw new IllegalArgumentException("Arena already exists!");
 
         // Extract the default settings and update the world-node.
-        ConfigUtils.replaceAllNodes(plugin, config, path + ".settings", "settings.yml");
+        ConfigUtils.replaceAllNodes(config, path + ".settings", "settings.yml");
         config.set(path + ".settings.world", world.getName());
 
         // Extract the default waves.
-        ConfigUtils.replaceAllNodes(plugin, config, path + ".waves", "waves.yml");
+        ConfigUtils.replaceAllNodes(config, path + ".waves", "waves.yml");
 
         // Extract the default rewards.
-        ConfigUtils.replaceAllNodes(plugin, config, path + ".rewards", "rewards.yml");
+        ConfigUtils.replaceAllNodes(config, path + ".rewards", "rewards.yml");
 
         // Save the changes.
         config.save();

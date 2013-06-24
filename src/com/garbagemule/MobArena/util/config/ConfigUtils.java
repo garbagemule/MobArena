@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.util.config;
 
 import java.util.Set;
 
+import com.garbagemule.MobArena.Messenger;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.garbagemule.MobArena.MobArena;
@@ -10,15 +11,15 @@ import com.garbagemule.MobArena.util.FileUtils;
 
 public class ConfigUtils
 {
-    public static void addMissingNodes(MobArena plugin, Config config, String path, String filename) {
-        assertNodes(plugin, config, path, filename, true);
+    public static void addMissingNodes(Config config, String path, String filename) {
+        assertNodes(config, path, filename, true);
     }
     
-    public static void replaceAllNodes(MobArena plugin, Config config, String path, String filename) {
-        assertNodes(plugin, config, path, filename, false);
+    public static void replaceAllNodes(Config config, String path, String filename) {
+        assertNodes(config, path, filename, false);
     }
     
-    private static void assertNodes(MobArena plugin, Config config, String path, String filename, boolean keepOthers) {
+    private static void assertNodes(Config config, String path, String filename, boolean keepOthers) {
         // Grab the section that the path is pointing to.
         ConfigSection section = config.getConfigSection(path);
         
@@ -27,12 +28,17 @@ public class ConfigUtils
             config.set(path, "");
             section = config.getConfigSection(path);
         }
+
+        try {
+            // Extract the yml file.
+            YamlConfiguration ymlConfig = FileUtils.getConfig(filename);
         
-        // Extract the yml file.
-        YamlConfiguration ymlConfig = FileUtils.getConfig(plugin, filename, plugin.getClass());
-        
-        // Assert the nodes.
-        assertNodes(section, ymlConfig, keepOthers);
+            // Assert the nodes.
+            assertNodes(section, ymlConfig, keepOthers);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messenger.severe("Failed to load '" + filename + "'. Restart required!");
+        }
     }
     
     private static void assertNodes(ConfigSection config, YamlConfiguration ymlConfig, boolean keepOthers) {

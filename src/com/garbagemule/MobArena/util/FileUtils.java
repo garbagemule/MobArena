@@ -1,14 +1,16 @@
 package com.garbagemule.MobArena.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.garbagemule.MobArena.Messenger;
@@ -149,25 +151,22 @@ public class FileUtils
         int slash = resource.lastIndexOf("/");
         return (slash < 0 ? resource : resource.substring(slash + 1));
     }
-    
-    public static YamlConfiguration getConfig(MobArena plugin, String filename, Class<?> cls) {
-        InputStream in = cls.getResourceAsStream("/res/" + filename);
-        if (in == null) {
-            Messenger.severe("Failed to load '" + filename + "', the server must be restarted!");
-            return null;
-        }
 
-        try {
-            YamlConfiguration result = new YamlConfiguration();
-            result.load(in);
-            
-            return result;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            Messenger.warning("Couldn't load '" + filename + "' as stream!");
-        }
-        
-        return null;
+    private static final String JAR = "plugins/MobArena.jar";
+    private static final String RES = "res/";
+
+    /**
+     * Get a YamlConfiguration of a given resource.
+     * @param filename the name of the resource
+     * @return a YamlConfiguration for the given resource
+     * @throws IOException if the resource does not exist
+     * @throws InvalidConfigurationException if the resource is not a valid config
+     */
+    public static YamlConfiguration getConfig(String filename) throws IOException, InvalidConfigurationException {
+        ZipFile zip  = new ZipFile(JAR);
+        ZipEntry entry = zip.getEntry(RES + filename);
+        YamlConfiguration yaml = new YamlConfiguration();
+        yaml.load(zip.getInputStream(entry));
+        return yaml;
     }
 }
