@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -10,6 +11,8 @@ import org.bukkit.scoreboard.Scoreboard;
 import com.garbagemule.MobArena.framework.Arena;
 
 public class ScoreboardManager {
+    private static final String DISPLAY_NAME = ChatColor.GREEN + "Kills       " + ChatColor.AQUA + "Wave ";
+
     private Arena arena;
     private Scoreboard scoreboard;
     private Objective kills;
@@ -59,7 +62,7 @@ public class ScoreboardManager {
      * @param wave a wave number
      */
     void updateWave(int wave) {
-        kills.setDisplayName("§aKills       §bWave " + wave);
+        kills.setDisplayName(DISPLAY_NAME + wave);
     }
     
     /**
