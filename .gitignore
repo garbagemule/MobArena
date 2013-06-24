@@ -1,18 +1,24 @@
-# We don't want to add the Eclipse files.
+# IDE files and folders
 .project
 .classpath
+*.iml
+.idea/
+.settings/
 
-# We can also do without .class files.
+# Compiled files
 *.class
 
-# And we definitely don't need OS files.
+# OS files.
 .DS_Store*
 Thumbs.db
 
-# Exclude some folders
+# Misc folders
 bin/
 build/
 misc/
 lib/
 test/
-.settings/
+
+# Misc files
+MobArena.jar
+build.properties
