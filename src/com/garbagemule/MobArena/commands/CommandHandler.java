@@ -173,6 +173,7 @@ public class CommandHandler implements CommandExecutor
         register(AddSpawnpointCommand.class);
         register(ArenaCommand.class);
         register(CheckDataCommand.class);
+        register(CheckSpawnsCommand.class);
         register(ConfigCommand.class);
         register(ContainersCommand.class);
         register(EditArenaCommand.class);

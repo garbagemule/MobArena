@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -458,33 +459,73 @@ public class ArenaRegion
         if (!isDefined()) {
             return;
         }
-        
+        showBlocks(p, getFramePoints());
+    }
+
+    public void showSpawns(final Player p) {
+        if (spawnpoints.isEmpty()) {
+            return;
+        }
+        showBlocks(p, spawnpoints.values());
+    }
+
+    public void checkSpawns(Player p) {
+        if (spawnpoints.isEmpty()) {
+            return;
+        }
+
+        // Find all the spawnpoints that cover the location
+        Map<String,Location> map = new HashMap<String,Location>();
+        for (Map.Entry<String,Location> entry : spawnpoints.entrySet()) {
+            if (p.getLocation().distanceSquared(entry.getValue()) < MobArena.MIN_PLAYER_DISTANCE_SQUARED) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (map.isEmpty()) {
+            Messenger.tellPlayer(p, "No spawnpoints cover your location!");
+            return;
+        }
+
+        // Notify the player
+        Messenger.tellPlayer(p, "The following points cover your location:");
+        for (Map.Entry<String,Location> entry : map.entrySet()) {
+            Location l = entry.getValue();
+            String coords = l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();
+            p.sendMessage(ChatColor.AQUA + entry.getKey() + ChatColor.WHITE + " :  " + coords);
+        }
+
+        // And show the blocks
+        showBlocks(p, map.values());
+    }
+
+    private void showBlocks(final Player p, Collection<Location> points) {
         // Grab all the blocks, and send block change events.
         final Map<Location,BlockState> blocks = new HashMap<Location,BlockState>();
-        for (Location l : getFramePoints()) {
+        for (Location l : points) {
             Block b = l.getBlock();
             blocks.put(l, b.getState());
             p.sendBlockChange(l, 35, (byte) 14);
         }
-        
+
         arena.scheduleTask(new Runnable() {
-                public void run() {
-                    // If the player isn't online, just forget it.
-                    if (!p.isOnline()) {
-                        return;
-                    }
-                    
-                    // Send block "restore" events.
-                    for (Map.Entry<Location,BlockState> entry : blocks.entrySet()) {
-                        Location l   = entry.getKey();
-                        BlockState b = entry.getValue();
-                        int id       = b.getTypeId();
-                        byte data    = b.getRawData();
-                        
-                        p.sendBlockChange(l, id, data);
-                    }
+            public void run() {
+                // If the player isn't online, just forget it.
+                if (!p.isOnline()) {
+                    return;
                 }
-            }, 100);
+
+                // Send block "restore" events.
+                for (Map.Entry<Location,BlockState> entry : blocks.entrySet()) {
+                    Location l   = entry.getKey();
+                    BlockState b = entry.getValue();
+                    int id       = b.getTypeId();
+                    byte data    = b.getRawData();
+
+                    p.sendBlockChange(l, id, data);
+                }
+            }
+        }, 100);
     }
     
     private List<Location> getFramePoints() {

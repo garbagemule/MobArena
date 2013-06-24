@@ -1,21 +1,23 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.Command;
+import com.garbagemule.MobArena.commands.CommandInfo;
+import com.garbagemule.MobArena.commands.Commands;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.*;
-import com.garbagemule.MobArena.commands.*;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.framework.ArenaMaster;
-
 @CommandInfo(
-    name    = "showregion",
-    pattern = "showregion",
-    usage   = "/ma showregion (<arena>)",
-    desc    = "show an arena region",
-    permission = "mobarena.setup.showregion"
+    name    = "checkspawns",
+    pattern = "checkspawn(point)?s",
+    usage   = "/ma checkspawns (<arena>)",
+    desc    = "show spawnpoints that cover your location",
+    permission = "mobarena.setup.checkspawns"
 )
-public class ShowRegionCommand implements Command
+public class CheckSpawnsCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
@@ -37,9 +39,9 @@ public class ShowRegionCommand implements Command
             if (arena == null) {
                 arena = am.getSelectedArena();
             }
-            
-            if (!arena.getRegion().isDefined()) {
-                Messenger.tellPlayer(sender, "The region is not defined for the selected arena.");
+
+            if (arena.getRegion().getSpawnpoints().isEmpty()) {
+                Messenger.tellPlayer(sender, "There are no spawnpoints in the selected arena.");
                 return false;
             }
         }
@@ -51,8 +53,8 @@ public class ShowRegionCommand implements Command
                 return false;
             }
         }
-        
-        arena.getRegion().showRegion(p);
+
+        arena.getRegion().checkSpawns(p);
         
         return true;
     }
