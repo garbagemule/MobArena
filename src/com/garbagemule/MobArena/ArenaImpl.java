@@ -45,6 +45,7 @@ import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.inventory.InventoryUtils;
 import com.garbagemule.MobArena.waves.*;
+import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 
 public class ArenaImpl implements Arena
 {
@@ -170,7 +171,7 @@ public class ArenaImpl implements Arena
         this.timeStrategy = (time != null ? new TimeStrategyLocked(time) : new TimeStrategyNull());
         
         // Scoreboards
-        this.scoreboard = new ScoreboardManager(this);
+        this.scoreboard = (settings.getBoolean("use-scoreboards", true) ? new ScoreboardManager(this) : new NullScoreboardManager(this));
     }
     
     

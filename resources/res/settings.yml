@@ -37,3 +37,4 @@ auto-ready: false
 use-class-chests: false
 display-waves-as-level: false
 display-timer-as-level: false
+use-scoreboards: true

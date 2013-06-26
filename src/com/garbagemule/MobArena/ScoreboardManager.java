@@ -92,4 +92,15 @@ public class ScoreboardManager {
         kills.setDisplaySlot(DisplaySlot.SIDEBAR);
         updateWave(0);
     }
+
+    static class NullScoreboardManager extends ScoreboardManager {
+        NullScoreboardManager(Arena arena) {
+            super(arena);
+        }
+        void addPlayer(Player player) {}
+        void removePlayer(Player player) {}
+        void addKill(Player player) {}
+        void updateWave(int wave) {}
+        void initialize() {}
+    }
 }
