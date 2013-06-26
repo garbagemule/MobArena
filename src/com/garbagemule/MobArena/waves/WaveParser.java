@@ -153,6 +153,13 @@ public class WaveParser
         
         // Create the wave.
         DefaultWave result = new DefaultWave(monsters);
+
+        // Check if this is a fixed wave
+        boolean fixed = config.getBoolean("fixed", false);
+        if (fixed) {
+            result.setFixed(true);
+            return result;
+        }
         
         // Grab the WaveGrowth
         String grw = config.getString("growth");

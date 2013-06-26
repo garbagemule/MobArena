@@ -11,6 +11,7 @@ public class DefaultWave extends AbstractWave
 {
     private SortedMap<Integer,MACreature> monsterMap;
     private WaveGrowth growth;
+    private boolean fixed;
     
     public DefaultWave(SortedMap<Integer,MACreature> monsterMap) {
         this.monsterMap = monsterMap;
@@ -20,6 +21,8 @@ public class DefaultWave extends AbstractWave
     
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
+        if (fixed) return getFixed();
+
         // Get the amount of monsters to spawn.
         int toSpawn = (int) Math.max(1D, growth.getAmount(wave, playerCount) * super.getAmountMultiplier());
         
@@ -50,6 +53,20 @@ public class DefaultWave extends AbstractWave
         // Return the map.
         return monsters;
     }
+
+    private Map<MACreature,Integer> getFixed() {
+        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+
+        // For fixed waves, we just convert the accumulated map
+        int acc = 0;
+        for (Map.Entry<Integer,MACreature> entry : monsterMap.entrySet()) {
+            int prob = entry.getKey();
+            result.put(entry.getValue(), prob - acc);
+            acc += prob;
+        }
+
+        return result;
+    }
     
     public WaveGrowth getGrowth() {
         return growth;
@@ -57,5 +74,14 @@ public class DefaultWave extends AbstractWave
     
     public void setGrowth(WaveGrowth growth) {
         this.growth = growth;
+        this.fixed = false;
+    }
+
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
     }
 }
