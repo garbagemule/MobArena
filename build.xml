@@ -83,7 +83,6 @@
     <target name="build">
         <antcall target="clean-bin"/>
         <mkdir dir="${bin}"/>
-        <echo>Compiling project...</echo>
         <javac target="1.6" source="1.6"
                srcdir="${src}" destdir="${bin}"
                debug="on" debuglevel="lines,vars,source"
