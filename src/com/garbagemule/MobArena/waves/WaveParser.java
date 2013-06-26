@@ -228,21 +228,6 @@ public class WaveParser
         result.setGiveAll(giveAll);
 
         return result;
-        /*
-        Map<String,List<ItemStack>> classMap = getUpgradeMap(config);
-        if (classMap == null || classMap.isEmpty()) {
-            Messenger.warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
-            return null;
-        }
-        
-        UpgradeWave result = new UpgradeWave(classMap);
-        
-        // Determine if all items should be given
-        boolean giveAll = config.getBoolean("give-all-items", false);
-        result.setGiveAll(giveAll);
-        
-        return result;
-        */
     }
     
     private static Wave parseBossWave(Arena arena, String name, ConfigSection config) {
