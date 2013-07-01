@@ -44,7 +44,6 @@ public class ArenaRegion
         this.chests = coords.getConfigSection("containers");
         
         reloadAll();
-        adjustRegion();
     }
     
     public void reloadAll() {
@@ -60,9 +59,11 @@ public class ArenaRegion
     public void reloadRegion() {
         p1 = coords.getLocation("p1", world);
         p2 = coords.getLocation("p2", world);
+        fixRegion();
         
         l1 = coords.getLocation("l1", world);
         l2 = coords.getLocation("l2", world);
+        fixLobbyRegion();
     }
     
     public void reloadWarps() {
@@ -149,7 +150,7 @@ public class ArenaRegion
     }
     
     public boolean contains(Location l) {
-        if (!l.getWorld().getName().equals(world.getName()) || !setup) {
+        if (!l.getWorld().getName().equals(world.getName()) || !isDefined()) {
             return false;
         }
         
@@ -172,7 +173,7 @@ public class ArenaRegion
     }
     
     public boolean contains(Location l, int radius) {
-        if (!l.getWorld().getName().equals(world.getName()) || !setup) {
+        if (!l.getWorld().getName().equals(world.getName()) || !isDefined()) {
             return false;
         }
         
@@ -264,86 +265,40 @@ public class ArenaRegion
             return;
         }
 
+        boolean modified = false;
+
         if (loc1.getX() > loc2.getX()) {
             double tmp = loc1.getX();
             loc1.setX(loc2.getX());
             loc2.setX(tmp);
+            modified = true;
         }
         
         if (loc1.getZ() > loc2.getZ()) {
             double tmp = loc1.getZ();
             loc1.setZ(loc2.getZ());
             loc2.setZ(tmp);
+            modified = true;
         }
         
         if (loc1.getY() > loc2.getY()) {
             double tmp = loc1.getY();
             loc1.setY(loc2.getY());
             loc2.setY(tmp);
+            modified = true;
         }
         
-        if (!arena.getWorld().getName().equals(world.getName()))
+        if (!arena.getWorld().getName().equals(world.getName())) {
             arena.setWorld(world);
+            modified = true;
+        }
 
+        if (!modified) {
+            return;
+        }
+        
         coords.set(location1, loc1);
         coords.set(location2, loc2);
-    }
-    
-    private void adjustRegion() {
-        if (!setup) {
-            return;
-        }
-
-        // Make sure the arena warp is inside the region.
-        readjustRegion(arenaWarp);
-        
-        // Re-adjust for all spawnpoints and containers.
-        for (Location spawnpoint : spawnpoints.values()) {
-            readjustRegion(spawnpoint);
-        }
-        
-        for (Location chest : containers.values()) {
-            readjustRegion(chest);
-        }
-    }
-    
-    private void readjustRegion(Location l) {
-        if (p1 == null || p2 == null) {
-            return;
-        }
-        
-        int x = l.getBlockX();
-        int y = l.getBlockY();
-        int z = l.getBlockZ();
-        
-        int p1x = p1.getBlockX();
-        int p1y = p1.getBlockY();
-        int p1z = p1.getBlockZ();
-        
-        int p2x = p2.getBlockX();
-        int p2y = p2.getBlockY();
-        int p2z = p2.getBlockZ();
-        
-        if (x <= p1x) {
-            expandP1(p1x - x + 2, 0);
-        }
-        else if (x >= p2x) {
-            expandP2(x - p2x + 2, 0);
-        }
-        
-        if (y <= p1y) {
-            expandDown((int) (p1y - y + 2));
-        }
-        else if (y >= p2y) {
-            expandUp((int) (y - p2y + 2));
-        }
-        
-        if (z <= p1z) {
-            expandP1(0, p1z - z + 2);
-        }
-        else if (z >= p2z) {
-            expandP2(0, z - p2z + 2);
-        }
     }
     
     public List<Chunk> getChunks() {
@@ -398,56 +353,64 @@ public class ArenaRegion
     }
     
     public void set(String point, Location loc) {
+        // Set the point and save
         coords.set(point, loc);
+        save();
         
-        // Adjust the region to accomodate any bounding box breaking.
-        if (point.equals("arena") || point.equals("lobby") || point.equals("spectator")) {
-            readjustRegion(loc);
-        }
-        
-        fixRegion();
-        fixLobbyRegion();
+        // Reload region, warps and leaderboards
         reloadRegion();
         reloadWarps();
         reloadLeaderboards();
         verifyData();
-        save();
     }
     
     public void addSpawn(String name, Location loc) {
+        // Add the spawn and save
         spawns.set(name, loc);
-        readjustRegion(loc);
+        save();
+        
+        // Reload spawnpoints and verify data
         reloadSpawnpoints();
         verifyData();
-        save();
     }
     
     public boolean removeSpawn(String name) {
+        // Check if the spawnpoint exists
         if (spawns.getString(name) == null) {
             return false;
         }
         
+        // Null the spawnpoint and save
         spawns.set(name, null);
+        save();
+        
+        // Reload spawnpoints and verify data
         reloadSpawnpoints();
         verifyData();
-        save();
         return true;
     }
     
     public void addChest(String name, Location loc) {
+        // Add the chest location and save
         chests.set(name, loc);
-        reloadChests();
         save();
+        
+        // Reload the chests
+        reloadChests();
     }
     
     public boolean removeChest(String name) {
+        // Check if the chest exists
         if (chests.getString(name) == null) {
             return false;
         }
         
+        // Null the chest and save
         chests.set(name, null);
-        reloadChests();
         save();
+        
+        // Reload the chests
+        reloadChests();
         return true;
     }
     

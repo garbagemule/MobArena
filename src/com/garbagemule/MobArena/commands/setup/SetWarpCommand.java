@@ -34,9 +34,18 @@ public class SetWarpCommand implements Command
             return true;
         }
         
-        am.getSelectedArena().getRegion().set(arg1, p.getLocation());
-        Messenger.tellPlayer(sender, "Warp point " + arg1 + " was set for arena '" + am.getSelectedArena().configName() + "'");
-        Messenger.tellPlayer(sender, "Type /ma checkdata to see if you're missing anything...");
+        // Make sure the arena warp is inside the region
+        if (arg1.equals("arena") && !am.getSelectedArena().getRegion().contains(p.getLocation())) {
+            if (am.getSelectedArena().getRegion().isDefined()) {
+                Messenger.tellPlayer(sender, "You must be inside the arena region!");
+            } else {
+                Messenger.tellPlayer(sender, "You must first set the region points p1 and p2");
+            }
+        } else {
+            am.getSelectedArena().getRegion().set(arg1, p.getLocation());
+            Messenger.tellPlayer(sender, "Warp point " + arg1 + " was set for arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tellPlayer(sender, "Type /ma checkdata to see if you're missing anything...");
+        }
         return true;
     }
 }

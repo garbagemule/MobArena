@@ -26,7 +26,7 @@ public class RemoveContainerCommand implements Command
             return false;
         }
 
-        if (am.getSelectedArena().getRegion().removeSpawn(arg1))
+        if (am.getSelectedArena().getRegion().removeChest(arg1))
             Messenger.tellPlayer(sender, "Container " + arg1 + " removed for arena '" + am.getSelectedArena().configName() + "'");
         else
             Messenger.tellPlayer(sender, "Could not find the container " + arg1 + "for the arena '" + am.getSelectedArena().configName() + "'");

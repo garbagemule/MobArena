@@ -488,7 +488,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // If no arenas were found, create a default node.
         if (arenanames == null || arenanames.isEmpty()) {
-            createArenaNode("default", plugin.getServer().getWorlds().get(0));
+            createArenaNode("default", plugin.getServer().getWorlds().get(0), false);
         }
         
         arenas = new LinkedList<Arena>();
@@ -571,6 +571,10 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public Arena createArenaNode(String arenaName, World world) {
+        return createArenaNode(arenaName, world, true);
+    }
+
+    private Arena createArenaNode(String arenaName, World world, boolean load) {
         String path = "arenas." + arenaName;
         if (config.getConfigSection(path) != null)
             throw new IllegalArgumentException("Arena already exists!");
@@ -589,7 +593,7 @@ public class ArenaMasterImpl implements ArenaMaster
         config.save();
 
         // Load the arena
-        return loadArena(arenaName);
+        return (load ? loadArena(arenaName) : null);
     }
 
     public void removeArenaNode(Arena arena) {

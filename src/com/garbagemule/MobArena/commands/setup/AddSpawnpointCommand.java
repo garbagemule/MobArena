@@ -34,8 +34,18 @@ public class AddSpawnpointCommand implements Command
             return true;
         }
         
-        am.getSelectedArena().getRegion().addSpawn(arg1, p.getLocation());
-        Messenger.tellPlayer(sender, "Spawnpoint " + arg1 + " added for arena \"" + am.getSelectedArena().configName() + "\"");
+        // Make sure we're inside the region
+        if (am.getSelectedArena().getRegion().contains(p.getLocation())) {
+            am.getSelectedArena().getRegion().addSpawn(arg1, p.getLocation());
+            Messenger.tellPlayer(sender, "Spawnpoint " + arg1 + " added for arena \"" + am.getSelectedArena().configName() + "\"");
+        } else {
+            // If not, make sure the region is defined
+            if (am.getSelectedArena().getRegion().isDefined()) {
+                Messenger.tellPlayer(sender, "You must be inside the arena region!");
+            } else {
+                Messenger.tellPlayer(sender, "You must first set the region points p1 and p2");
+            }
+        }
         return true;
     }
 }
