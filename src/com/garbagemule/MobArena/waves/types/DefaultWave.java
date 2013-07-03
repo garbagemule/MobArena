@@ -58,11 +58,11 @@ public class DefaultWave extends AbstractWave
         Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
 
         // For fixed waves, we just convert the accumulated map
-        int acc = 0;
+        int last = 0;
         for (Map.Entry<Integer,MACreature> entry : monsterMap.entrySet()) {
             int prob = entry.getKey();
-            result.put(entry.getValue(), prob - acc);
-            acc += prob;
+            result.put(entry.getValue(), prob - last);
+            last = prob;
         }
 
         return result;
