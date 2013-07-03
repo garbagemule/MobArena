@@ -111,7 +111,7 @@ public class ArenaClass
             pets += stack.getAmount();
         }
         
-        else if (stack.getType() == Material.HAY_BLOCK && stack.getAmount() == 1) {
+        else if (stack.getTypeId() == 170 && stack.getAmount() == 1) {
             if (mount) return;
             mount = true;
         }
