@@ -14,15 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Snowman;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.ThrownPotion;
-import org.bukkit.entity.Wolf;
+import org.bukkit.entity.*;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -419,6 +411,9 @@ public class ArenaListener
         else if (monsters.removeMonster(event.getEntity())) {
             onMonsterDeath(event);
         }
+        else if (monsters.removeMount(event.getEntity())) {
+            onMountDeath(event);
+        }
         else if (monsters.removeGolem(event.getEntity())) {
             Messenger.tellAll(arena, Msg.GOLEM_DIED);
         }
@@ -445,7 +440,11 @@ public class ArenaListener
         arena.playerRespawn(p);
         return true;
     }
-
+    
+    private void onMountDeath(EntityDeathEvent event) {
+        
+    }
+    
     private void onMonsterDeath(EntityDeathEvent event) {
         EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
         EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
@@ -504,8 +503,6 @@ public class ArenaListener
         if (loot != null && !loot.isEmpty()) {
             event.getDrops().add(getRandomItem(loot));
         }
-
-        return;
     }
 
     private ItemStack getRandomItem(List<ItemStack> stacks) {
@@ -540,6 +537,10 @@ public class ArenaListener
         // Pet wolf
         if (damagee instanceof Wolf && arena.hasPet(damagee)) {
             onPetDamage(event, (Wolf) damagee, damager);
+        }
+        // Mount
+        if (damagee instanceof Horse && monsters.hasMount(damagee)) {
+            onMountDamage(event, (Horse) damagee, damager);
         }
         // Player
         else if (damagee instanceof Player) {
@@ -579,7 +580,11 @@ public class ArenaListener
     private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager) {
         event.setCancelled(true);
     }
+    
+    private void onMountDamage(EntityDamageEvent event, Horse mount, Entity damager) {
 
+    }
+    
     private void onMonsterDamage(EntityDamageEvent event, Entity monster, Entity damager) {
         if (damager instanceof Player) {
             Player p = (Player) damager;

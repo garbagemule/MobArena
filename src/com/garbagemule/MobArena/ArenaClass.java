@@ -17,6 +17,7 @@ public class ArenaClass
     private Map<String,Boolean> perms;
     private int pets;
     private boolean unbreakableWeapons;
+    private boolean mount;
     
     /**
      * Create a new, empty arena class with the given name.
@@ -109,6 +110,12 @@ public class ArenaClass
         else if (stack.getType() == Material.BONE) {
             pets += stack.getAmount();
         }
+        
+        else if (stack.getType() == Material.HAY_BLOCK && stack.getAmount() == 1) {
+            if (mount) return;
+            mount = true;
+        }
+        
         else if (stack.getAmount() > 64) {
             while (stack.getAmount() > 64) {
                 items.add(new ItemStack(stack.getType(), 64));
@@ -242,6 +249,10 @@ public class ArenaClass
     
     public boolean hasUnbreakableWeapons() {
         return unbreakableWeapons;
+    }
+    
+    public boolean hasMount() {
+        return mount;
     }
     
     /**

@@ -11,7 +11,8 @@ public class PlayerData
 {
     private Player player;
     
-    private int health, food, level;
+    private double health;
+    private int food, level;
     private float exp;
     private GameMode mode  = null;
     private Location entry = null;
@@ -54,7 +55,7 @@ public class PlayerData
         return player;
     }
     
-    public int health() {
+    public double health() {
         return health;
     }
     

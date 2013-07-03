@@ -8,9 +8,9 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 public class HealthStrategyHeroes implements HealthStrategy
 {
     @Override
-    public void setHealth(Player p, int health) {
-        int current = p.getHealth();
-        int regain  = health == 20 ? 20 : health - current;
+    public void setHealth(Player p, double health) {
+        double current = p.getHealth();
+        double regain  = health == p.getMaxHealth() ? p.getMaxHealth() : health - current;
         
         try {
             EntityRegainHealthEvent event = new EntityRegainHealthEvent(p, regain, RegainReason.CUSTOM);

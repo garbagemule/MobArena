@@ -9,5 +9,5 @@ public interface HealthStrategy
      * @param p a player
      * @param health amount of health
      */
-    public void setHealth(Player p, int health);
+    public void setHealth(Player p, double health);
 }

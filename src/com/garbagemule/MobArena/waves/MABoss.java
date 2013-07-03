@@ -33,7 +33,7 @@ public class MABoss
      * Get the current health of this MABoss
      * @return the current health of the boss
      */
-    public int getHealth() {
+    public double getHealth() {
         return entity.getHealth();
     }
     
@@ -41,7 +41,7 @@ public class MABoss
      * Get the maximum health of this MABoss
      * @return the maximum health of the boss
      */
-    public int getMaxHealth() {
+    public double getMaxHealth() {
         return entity.getMaxHealth();
     }
     

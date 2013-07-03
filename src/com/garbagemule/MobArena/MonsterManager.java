@@ -21,6 +21,7 @@ public class MonsterManager
     private Set<Wolf> pets;
     private Map<LivingEntity,MABoss> bosses;
     private Map<LivingEntity,List<ItemStack>> suppliers;
+    private Set<LivingEntity> mounts;
     
     public MonsterManager() {
         this.monsters  = new HashSet<LivingEntity>();
@@ -29,6 +30,7 @@ public class MonsterManager
         this.pets      = new HashSet<Wolf>();
         this.bosses    = new HashMap<LivingEntity,MABoss>();
         this.suppliers = new HashMap<LivingEntity,List<ItemStack>>();
+        this.mounts    = new HashSet<LivingEntity>();
     }
     
     public void reset() {
@@ -38,6 +40,7 @@ public class MonsterManager
         pets.clear();
         bosses.clear();
         suppliers.clear();
+        mounts.clear();
     }
     
     public void clear() {
@@ -47,6 +50,7 @@ public class MonsterManager
         removeAll(pets);
         removeAll(bosses.keySet());
         removeAll(suppliers.keySet());
+        removeAll(mounts);
         
         reset();
     }
@@ -127,6 +131,24 @@ public class MonsterManager
             
             w.setOwner(null);
             w.remove();
+        }
+    }
+    
+    public void addMount(LivingEntity e) {
+        mounts.add(e);
+    }
+
+    public boolean hasMount(Entity e) {
+        return mounts.contains(e);
+    }
+
+    public boolean removeMount(Entity e) {
+        return mounts.remove(e);
+    }
+
+    public void removeMounts() {
+        for (LivingEntity e : mounts) {
+            e.remove();
         }
     }
     

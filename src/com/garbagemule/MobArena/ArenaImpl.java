@@ -13,14 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Wolf;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -456,6 +449,9 @@ public class ArenaImpl implements Arena
         // Spawn pets (must happen after 'running = true;')
         spawnPets();
         
+        // Spawn mounts
+        spawnMounts();
+        
         // Clear the classes in use map, as they're no longer needed
         limitManager.clearClassesInUse();
         
@@ -727,6 +723,23 @@ public class ArenaImpl implements Arena
         }
     }
     
+    private void spawnMounts() {
+        for (Map.Entry<Player,ArenaPlayer> entry : arenaPlayerMap.entrySet()) {
+            ArenaClass arenaClass = entry.getValue().getArenaClass();
+            if (!arenaClass.hasMount()) continue;
+
+            // Remove the hay bale
+            Player p = entry.getKey();
+            p.getInventory().removeItem(new ItemStack(Material.HAY_BLOCK, 1));
+
+            // Spawn the horse
+            Horse horse = (Horse) world.spawnEntity(p.getLocation(), EntityType.HORSE);
+            horse.setPassenger(p);
+            horse.setHealth(horse.getMaxHealth());
+            monsterManager.addMount(horse);
+        }
+    }
+    
     private void removePotionEffects(Player p) {
         for (PotionEffect effect : p.getActivePotionEffects()) {
             p.removePotionEffect(effect.getType());
@@ -923,7 +936,7 @@ public class ArenaImpl implements Arena
         scoreboard.removePlayer(p);
     }
     
-    private void setHealth(Player p, int health) {
+    private void setHealth(Player p, double health) {
         plugin.getHealthStrategy().setHealth(p, health);
     }
 
