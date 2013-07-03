@@ -13,7 +13,8 @@ public class HealthStrategyHeroes implements HealthStrategy
         double regain  = health == p.getMaxHealth() ? p.getMaxHealth() : health - current;
         
         try {
-            EntityRegainHealthEvent event = new EntityRegainHealthEvent(p, regain, RegainReason.CUSTOM);
+            // TODO: Remove cast for 1.6
+            EntityRegainHealthEvent event = new EntityRegainHealthEvent(p, (int) regain, RegainReason.CUSTOM);
             Bukkit.getPluginManager().callEvent(event);
         }
         catch (Exception e) {} // Because Bukkit is retarded.

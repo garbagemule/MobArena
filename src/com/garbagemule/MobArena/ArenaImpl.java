@@ -724,6 +724,7 @@ public class ArenaImpl implements Arena
     }
     
     private void spawnMounts() {
+        /* TODO: Uncomment for 1.6
         for (Map.Entry<Player,ArenaPlayer> entry : arenaPlayerMap.entrySet()) {
             ArenaClass arenaClass = entry.getValue().getArenaClass();
             if (!arenaClass.hasMount()) continue;
@@ -737,7 +738,7 @@ public class ArenaImpl implements Arena
             horse.setPassenger(p);
             horse.setHealth(horse.getMaxHealth());
             monsterManager.addMount(horse);
-        }
+        }*/
     }
     
     private void removePotionEffects(Player p) {
