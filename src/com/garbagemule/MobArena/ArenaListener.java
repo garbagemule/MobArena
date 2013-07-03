@@ -868,8 +868,8 @@ public class ArenaListener
         }
         
         // Otherwise, leave the old class, and pick the new!
-        classLimits.playerLeftClass(oldAC);
-        classLimits.playerPickedClass(newAC);
+        classLimits.playerLeftClass(oldAC, p);
+        classLimits.playerPickedClass(newAC, p);
 
         // Delay the inventory stuff to ensure that right-clicking works.
         delayAssignClass(p, className, sign);

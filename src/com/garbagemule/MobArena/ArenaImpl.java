@@ -618,7 +618,7 @@ public class ArenaImpl implements Arena
         ArenaPlayer ap = arenaPlayerMap.get(p);
         if (inLobby(p)) {
             if (ap.getArenaClass() != null) {
-                limitManager.playerLeftClass(ap.getArenaClass());
+                limitManager.playerLeftClass(ap.getArenaClass(), ap.getPlayer());
             }
         }
         
