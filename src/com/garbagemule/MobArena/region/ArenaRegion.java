@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.garbagemule.MobArena.util.Enums;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -111,6 +112,8 @@ public class ArenaRegion
     }
     
     public void checkData(MobArena plugin, CommandSender s) {
+        verifyData();
+        
         if (arenaWarp == null)
             Messenger.tellPlayer(s, "Missing warp: arena");
         if (lobbyWarp == null)
@@ -299,6 +302,7 @@ public class ArenaRegion
         
         coords.set(location1, loc1);
         coords.set(location2, loc2);
+        save();
     }
     
     public List<Chunk> getChunks() {
@@ -352,16 +356,123 @@ public class ArenaRegion
         return leaderboard;
     }
     
+    public void set(RegionPoint point, Location loc) {
+        // Act based on the point
+        switch (point) {
+            case P1: setP1(loc); return;
+            case P2: setP2(loc); return;
+            case ARENA:
+            case LOBBY:
+            case SPECTATOR: setWarp(point, loc); return;
+            case LEADERBOARD: setLeaderboard(loc); return;
+        }
+        
+        throw new IllegalArgumentException("Invalid region point!");
+    }
+    
     public void set(String point, Location loc) {
-        // Set the point and save
-        coords.set(point, loc);
+        // Get the region point enum
+        RegionPoint rp = Enums.getEnumFromString(RegionPoint.class, point);
+        if (rp == null) throw new IllegalArgumentException("Invalid region point '" + point + "'");
+        
+        // Then delegate
+        set(rp, loc);
+    }
+
+    public void setP1(Location l) {
+        if (p2 != null) {
+            boolean modified = false;
+            
+            if (p2.getX() < l.getX()) {
+                double tmp = p2.getX();
+                p2.setX(l.getX());
+                l.setX(tmp);
+                modified = true;
+            }
+            if (p2.getZ() < l.getZ()) {
+                double tmp = p2.getZ();
+                p2.setZ(l.getZ());
+                l.setZ(tmp);
+                modified = true;
+            }
+            if (p2.getY() < l.getY()) {
+                double tmp = p2.getY();
+                p2.setY(l.getY());
+                l.setY(tmp);
+                modified = true;
+            }
+    
+            // If we made modifications, re-save P2
+            if (modified) {
+                coords.set("p2", p2);
+            }
+        }
+        
+        // Set P1 and save
+        coords.set("p1", l);
         save();
         
-        // Reload region, warps and leaderboards
+        // Then reload the region
         reloadRegion();
-        reloadWarps();
-        reloadLeaderboards();
         verifyData();
+    }
+
+    public void setP2(Location l) {
+        if (p1 != null) {
+            boolean modified = false;
+            
+            if (l.getX() < p1.getX()) {
+                double tmp = p1.getX();
+                p1.setX(l.getX());
+                l.setX(tmp);
+                modified = true;
+            }
+    
+            if (l.getZ() < p1.getZ()) {
+                double tmp = p1.getZ();
+                p1.setZ(l.getZ());
+                l.setZ(tmp);
+                modified = true;
+            }
+    
+            if (l.getY() < p1.getY()) {
+                double tmp = p1.getY();
+                p1.setY(l.getY());
+                l.setY(tmp);
+                modified = true;
+            }
+    
+            // If we made modifications, re-save P1
+            if (modified) {
+                coords.set("p1", p1);
+            }
+        }
+
+        // Set P2 and save
+        coords.set("p2", l);
+        save();
+
+        // Then reload the region
+        reloadRegion();
+        verifyData();
+    }
+    
+    public void setWarp(RegionPoint point, Location l) {
+        // Set the point and save
+        coords.set(point.toString(), l);
+        save();
+        
+        // Then reload warps
+        reloadWarps();
+    }
+    
+    public void setLeaderboard(Location l) {
+        // Set the point and save
+        coords.set("leaderboard", l);
+        save();
+        
+        // Then reload the leaderboards
+        reloadLeaderboards();
     }
     
     public void addSpawn(String name, Location loc) {
