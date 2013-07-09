@@ -188,6 +188,7 @@ public class ArenaImpl implements Arena
     @Override
     public void setWorld(World world) {
         this.world = world;
+        if (region != null) region.refreshWorld();
     }
 
     @Override

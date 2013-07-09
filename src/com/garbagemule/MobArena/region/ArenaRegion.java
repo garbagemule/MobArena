@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.util.Enums;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -27,6 +28,7 @@ public class ArenaRegion
     private Arena arena;
     private World world;
     
+    private Location lastP1, lastP2, lastL1, lastL2;
     private Location p1, p2, l1, l2, arenaWarp, lobbyWarp, specWarp, leaderboard;
     private Map<String,Location> spawnpoints, containers;
     
@@ -38,13 +40,17 @@ public class ArenaRegion
     
     public ArenaRegion(ConfigSection coords, Arena arena) {
         this.arena  = arena;
-        this.world  = arena.getWorld();
+        refreshWorld();
         
         this.coords = coords;
         this.spawns = coords.getConfigSection("spawnpoints");
         this.chests = coords.getConfigSection("containers");
         
         reloadAll();
+    }
+    
+    public void refreshWorld() {
+        this.world = arena.getWorld();
     }
     
     public void reloadAll() {
@@ -60,11 +66,11 @@ public class ArenaRegion
     public void reloadRegion() {
         p1 = coords.getLocation("p1", world);
         p2 = coords.getLocation("p2", world);
-        fixRegion();
+        //fixRegion();
         
         l1 = coords.getLocation("l1", world);
         l2 = coords.getLocation("l2", world);
-        fixLobbyRegion();
+        //fixLobbyRegion();
     }
     
     public void reloadWarps() {
@@ -111,23 +117,45 @@ public class ArenaRegion
                       l2 != null);
     }
     
-    public void checkData(MobArena plugin, CommandSender s) {
+    public void checkData(MobArena plugin, CommandSender s, boolean ready, boolean region, boolean warps, boolean spawns) {
+        // Verify data first
         verifyData();
         
-        if (arenaWarp == null)
-            Messenger.tellPlayer(s, "Missing warp: arena");
-        if (lobbyWarp == null)
-            Messenger.tellPlayer(s, "Missing warp: lobby");
-        if (specWarp == null)
-            Messenger.tellPlayer(s, "Missing warp: spectator");
-        if (p1 == null)
-            Messenger.tellPlayer(s, "Missing region point: p1");
-        if (p2 == null)
-            Messenger.tellPlayer(s, "Missing region point: p2");
-        if (spawnpoints.isEmpty())
-            Messenger.tellPlayer(s, "Missing spawnpoints");
-        if (setup)
+        // Prepare the list
+        List<String> list = new ArrayList<String>();
+
+        // Region points
+        if (region) {
+            if (p1 == null) list.add("p1");
+            if (p2 == null) list.add("p2");
+            if (!list.isEmpty()) {
+                Messenger.tellPlayer(s, "Missing region points: " + MAUtils.listToString(list, plugin));
+                list.clear();
+            }
+        }
+        
+        // Warps
+        if (warps) {
+            if (arenaWarp == null) list.add("arena");
+            if (lobbyWarp == null) list.add("lobby");
+            if (specWarp  == null) list.add("spectator");
+            if (!list.isEmpty()) {
+                Messenger.tellPlayer(s, "Missing warps: " + MAUtils.listToString(list, plugin));
+                list.clear();
+            }
+        }
+        
+        // Spawnpoints
+        if (spawns) {
+            if (spawnpoints.isEmpty()) {
+                Messenger.tellPlayer(s, "Missing spawnpoints");
+            }
+        }
+        
+        // Ready?
+        if (ready && setup) {
             Messenger.tellPlayer(s, "Arena is ready to be used!");
+        }
     }
     
     public boolean isDefined() {
@@ -359,15 +387,99 @@ public class ArenaRegion
     public void set(RegionPoint point, Location loc) {
         // Act based on the point
         switch (point) {
-            case P1: setP1(loc); return;
-            case P2: setP2(loc); return;
+            case P1:
+            case P2:
+            case L1:
+            case L2: setPoint(point, loc); return;
             case ARENA:
             case LOBBY:
-            case SPECTATOR: setWarp(point, loc); return;
+            case SPECTATOR:   setWarp(point, loc); return;
             case LEADERBOARD: setLeaderboard(loc); return;
         }
         
         throw new IllegalArgumentException("Invalid region point!");
+    }
+    
+    private void setPoint(RegionPoint point, Location l) {
+        // Lower and upper locations
+        RegionPoint r1, r2;
+        Location lower, upper;
+
+        /* Initialize the bounds.
+         *
+         * To allow users to set a region point without paying attention to
+         * the 'fixed' points, we continuously store the previously stored
+         * location for the given point. These location references are only
+         * ever overwritten when using the set commands, and remain fully
+         * decoupled from the 'fixed' points.
+         * 
+         * Effectively, the config-file and region store 'fixed' locations
+         * that allow fast membership tests, but the region also stores the
+         * 'unfixed' locations for a more intuitive setup process.
+         */
+        switch (point) {
+            case P1:
+                lastP1 = l.clone();
+                lower = lastP1.clone();
+                upper = (lastP2 != null ? lastP2.clone() : p2);
+                r1 = RegionPoint.P1; r2 = RegionPoint.P2;
+                break;
+            case P2:
+                lastP2 = l.clone();
+                lower = (lastP1 != null ? lastP1.clone() : p1);
+                upper = lastP2.clone();
+                r1 = RegionPoint.P1; r2 = RegionPoint.P2;
+                break;
+            case L1:
+                lastL1 = l.clone();
+                lower = lastL1.clone();
+                upper = (lastL2 != null ? lastL2.clone() : l2);
+                r1 = RegionPoint.L1; r2 = RegionPoint.L2;
+                break;
+            case L2:
+                lastL2 = l.clone();
+                lower = (lastL1 != null ? lastL1.clone() : l1);
+                upper = lastL2.clone();
+                r1 = RegionPoint.L1; r2 = RegionPoint.L2;
+                break;
+            default:
+                lower = upper = null;
+                r1    = r2    = null;
+        }
+        
+        // Grab the far corner
+        
+        // Min-max if both locations are non-null
+        if (lower != null && upper != null) {
+            double tmp;
+            if (lower.getX() > upper.getX()) {
+                System.out.println("Swapping x values " + lower.getX() + " and " + upper.getX());
+                tmp = lower.getX();
+                lower.setX(upper.getX());
+                upper.setX(tmp);
+            }
+            if (lower.getY() > upper.getY()) {
+                System.out.println("Swapping y values " + lower.getY() + " and " + upper.getY());
+                tmp = lower.getY();
+                lower.setY(upper.getY());
+                upper.setY(tmp);
+            }
+            if (lower.getZ() > upper.getZ()) {
+                System.out.println("Swapping z values " + lower.getZ() + " and " + upper.getZ());
+                tmp = lower.getZ();
+                lower.setZ(upper.getZ());
+                upper.setZ(tmp);
+            }
+        }
+        
+        // Set the coords and save
+        if (lower != null) coords.set(r1.name().toLowerCase(), lower);
+        if (upper != null) coords.set(r2.name().toLowerCase(), upper);
+        save();
+        
+        // Reload regions and verify data
+        reloadRegion();
+        verifyData();
     }
     
     public void set(String point, Location loc) {
@@ -377,84 +489,6 @@ public class ArenaRegion
         
         // Then delegate
         set(rp, loc);
-    }
-
-    public void setP1(Location l) {
-        if (p2 != null) {
-            boolean modified = false;
-            
-            if (p2.getX() < l.getX()) {
-                double tmp = p2.getX();
-                p2.setX(l.getX());
-                l.setX(tmp);
-                modified = true;
-            }
-            if (p2.getZ() < l.getZ()) {
-                double tmp = p2.getZ();
-                p2.setZ(l.getZ());
-                l.setZ(tmp);
-                modified = true;
-            }
-            if (p2.getY() < l.getY()) {
-                double tmp = p2.getY();
-                p2.setY(l.getY());
-                l.setY(tmp);
-                modified = true;
-            }
-    
-            // If we made modifications, re-save P2
-            if (modified) {
-                coords.set("p2", p2);
-            }
-        }
-        
-        // Set P1 and save
-        coords.set("p1", l);
-        save();
-        
-        // Then reload the region
-        reloadRegion();
-        verifyData();
-    }
-
-    public void setP2(Location l) {
-        if (p1 != null) {
-            boolean modified = false;
-            
-            if (l.getX() < p1.getX()) {
-                double tmp = p1.getX();
-                p1.setX(l.getX());
-                l.setX(tmp);
-                modified = true;
-            }
-    
-            if (l.getZ() < p1.getZ()) {
-                double tmp = p1.getZ();
-                p1.setZ(l.getZ());
-                l.setZ(tmp);
-                modified = true;
-            }
-    
-            if (l.getY() < p1.getY()) {
-                double tmp = p1.getY();
-                p1.setY(l.getY());
-                l.setY(tmp);
-                modified = true;
-            }
-    
-            // If we made modifications, re-save P1
-            if (modified) {
-                coords.set("p1", p1);
-            }
-        }
-
-        // Set P2 and save
-        coords.set("p2", l);
-        save();
-
-        // Then reload the region
-        reloadRegion();
-        verifyData();
     }
     
     public void setWarp(RegionPoint point, Location l) {

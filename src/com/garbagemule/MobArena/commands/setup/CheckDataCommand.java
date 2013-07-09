@@ -27,7 +27,7 @@ public class CheckDataCommand implements Command
             return false;
         }
         
-        arena.getRegion().checkData(am.getPlugin(), sender);
+        arena.getRegion().checkData(am.getPlugin(), sender, true, true, true, true);
         return true;
     }
 }

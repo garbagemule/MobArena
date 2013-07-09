@@ -52,6 +52,14 @@ public class ShowRegionCommand implements Command
             }
         }
         
+        // Show an error message if we aren't in the right world
+        if (!arena.getWorld().getName().equals(arena.getWorld().getName())) {
+            Messenger.tellPlayer(sender, "Arena '" + arena.configName() +
+                    "' is in world '" + arena.getWorld().getName() +
+                    "' and you are in world '" + p.getWorld().getName() + "'");
+            return false;
+        }
+        
         arena.getRegion().showRegion(p);
         
         return true;

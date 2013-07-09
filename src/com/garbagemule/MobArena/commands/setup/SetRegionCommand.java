@@ -36,6 +36,7 @@ public class SetRegionCommand implements Command
         
         am.getSelectedArena().getRegion().set(arg1, p.getLocation());
         Messenger.tellPlayer(sender, "Region point " + arg1 + " for arena '" + am.getSelectedArena().configName() + "' set.");
+        am.getSelectedArena().getRegion().checkData(am.getPlugin(), sender, true, true, false, false);
         return true;
     }
 }
