@@ -9,22 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
+import javax.tools.*;
 
 import com.garbagemule.MobArena.Messenger;
-import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.MobArena.waves.ability.core.*;
 
 public class AbilityManager
 {
-    private static final String jarpath = "." + File.separator + "plugins" + File.separator + "MobArena.jar";
-    private static final String classpath = jarpath + ";" + System.getProperty("java.class.path");
+    private static final String ma = "plugins" + File.separator + "MobArena.jar";
+    private static final String cb = System.getProperty("java.class.path");
+    private static final String classpath = ma + System.getProperty("path.separator") + cb;
     
-    private static Map<String,Ability> abilities;
-    private static Map<String,Class<? extends Ability>> abs;
+    private static Map<String,Class<? extends Ability>> abilities;
 
     /**
      * Get an instance of an ability by alias
@@ -33,7 +29,7 @@ public class AbilityManager
      */
     public static Ability getAbility(String alias) {
         try {
-            Class<? extends Ability> cls = abs.get(alias.toLowerCase().replaceAll("[-_.]", ""));
+            Class<? extends Ability> cls = abilities.get(alias.toLowerCase().replaceAll("[-_.]", ""));
             return cls.newInstance();
         } catch (Exception e) {
             return null;
@@ -44,7 +40,7 @@ public class AbilityManager
      * Load all the core abilities included in MobArena
      */
     public static void loadCoreAbilities() {
-        if (abs == null) abs = new HashMap<String,Class<? extends Ability>>();
+        if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
 
         register(ChainLightning.class);
         register(DisorientDistant.class);
@@ -75,8 +71,8 @@ public class AbilityManager
      * Load the custom abilities from the specified directory.
      * @param classDir a directory of .class (and/or .java) files
      */
-    public static void loadAbilities(File classDir) {
-        abilities = new HashMap<String,Ability>();
+    public static void loadCustomAbilities(File classDir) {
+        if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
         
         // Grab the source directory.
         File javaDir = new File(classDir, "src");
@@ -97,17 +93,25 @@ public class AbilityManager
         loadClasses(classDir);
     }
 
+    private static void register(Class<? extends Ability> cls) {
+        register(cls, false);
+    }
+
     /**
      * Register an ability by its class object
      * @param cls the ability class
      */
-    private static void register(Class<? extends Ability> cls) {
+    private static void register(Class<? extends Ability> cls, boolean announce) {
         AbilityInfo info = cls.getAnnotation(AbilityInfo.class);
         if (info == null) return;
 
+        // Map all the aliases
         for (String alias : info.aliases()) {
-            abs.put(alias, cls);
+            abilities.put(alias, cls);
         }
+        
+        // Announce custom abilities
+        if (announce) Messenger.info("Loaded custom ability '" + info.name() + "'");
     }
     
     private static void compileAbilities(File javaDir, File classDir) {
@@ -208,8 +212,6 @@ public class AbilityManager
         ClassLoader loader = getLoader(classDir);
         if (loader == null) return;
         
-        StringBuffer buffy = new StringBuffer();
-        
         for (File file : classDir.listFiles()) {
             String filename = file.getName();
             
@@ -220,60 +222,16 @@ public class AbilityManager
             // Trim off the .class extension
             String name = filename.substring(0, file.getName().lastIndexOf("."));
             
-            // And make an Ability.
-            Ability ability = makeAbility(loader, name);
-            if (ability == null) continue;
-            
-            // Then load the ability into the map.
-            String abilityName = loadAbility(ability);
-            
-            if (abilityName != null) {
-                buffy.append(", " + abilityName);
-            }
+            try {
+                // Load the class
+                Class<?> cls = loader.loadClass(name);
+                
+                // Verify that it's an Ability, then register it
+                if (Ability.class.isAssignableFrom(cls)) {
+                    register(cls.asSubclass(Ability.class), true);
+                }
+            } catch (Exception e) {}
         }
-    }
-    
-    /**
-     * Loads an Ability into the abilities map by all of its aliases.
-     * @param ability an Ability
-     * @return the first alias of 
-     */
-    private static String loadAbility(Ability ability) {
-        // Grab the annotation.
-        AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
-        if (info == null) return null;
-        
-        // Put the command in the map with each of its aliases.
-        for (String name : info.aliases()) {
-            abilities.put(name, ability);
-        }
-        
-        return info.aliases()[0];
-    }
-    
-    /**
-     * Ask the given ClassLoader to load the ability with the given name.
-     * @param loader a ClassLoader
-     * @param name a class name
-     * @return an Ability, if the ClassLoader found one with the given name, null otherwise
-     */
-    private static Ability makeAbility(ClassLoader loader, String name) {
-        try {
-            // Load the class.
-            Class<?> c = loader.loadClass(name);
-            
-            // Create an instance of it.
-            Object o = c.newInstance();
-            
-            // If it's an ability, return it.
-            if (o instanceof Ability) {
-                return (Ability) o;
-            }
-        }
-        catch (Exception e) {}
-        
-        // Otherwise, return null.
-        return null;
     }
     
     /**

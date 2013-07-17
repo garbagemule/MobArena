@@ -204,7 +204,7 @@ public class MobArena extends JavaPlugin
         if (!dir.exists()) dir.mkdir();
 
         AbilityManager.loadCoreAbilities();
-        AbilityManager.loadAbilities(dir);
+        AbilityManager.loadCustomAbilities(dir);
     }
     
     private void startMetrics() {
