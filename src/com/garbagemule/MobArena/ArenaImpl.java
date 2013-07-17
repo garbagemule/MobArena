@@ -976,14 +976,7 @@ public class ArenaImpl implements Arena
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
-        
-        if (settings.getBoolean("auto-ready", false)) {
-            if (autoStartTimer.getRemaining() <= 0) {
-                playerReady(p);
-            } else {
-                readyPlayers.add(p);
-            }
-        }
+        autoReady(p);
     }
     
     @Override
@@ -1030,6 +1023,17 @@ public class ArenaImpl implements Arena
             }
         }
         p.getInventory().setContents(contents);
+        autoReady(p);
+    }
+    
+    private void autoReady(Player p) {
+        if (settings.getBoolean("auto-ready", false)) {
+            if (autoStartTimer.getRemaining() <= 0) {
+                playerReady(p);
+            } else {
+                readyPlayers.add(p);
+            }
+        }
     }
     
     @Override
