@@ -84,6 +84,7 @@ public enum MACreature
     WITHER(EntityType.WITHER),            WITHERS(EntityType.WITHER),
     WITHERSKELETON(EntityType.SKELETON),  WITHERSKELETONS(EntityType.SKELETON),
     BABYZOMBIE(EntityType.ZOMBIE),        BABYZOMBIES(EntityType.ZOMBIE),
+    BABYPIGMAN(EntityType.PIG_ZOMBIE),    BABYPIGMEN(EntityType.PIG_ZOMBIE),
     ZOMBIEVILLAGER(EntityType.ZOMBIE),    ZOMBIEVILLAGERS(EntityType.ZOMBIE);
     
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
@@ -162,6 +163,8 @@ public enum MACreature
                 break;
             case BABYZOMBIE:
             case BABYZOMBIES:
+            case BABYPIGMAN:
+            case BABYPIGMEN:
                 ((Zombie) e).setBaby(true);
                 break;
             case WITHERSKELETON:
