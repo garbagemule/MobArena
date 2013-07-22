@@ -700,19 +700,16 @@ public class ArenaImpl implements Arena
     }
 
     private void spawnPets() {
-        for (Map.Entry<Player,ArenaPlayer> entry : arenaPlayerMap.entrySet()) {
-            ArenaClass arenaClass = entry.getValue().getArenaClass();
-            int petAmount = arenaClass.getPetAmount();
+        for (Player p : arenaPlayers) {
+            // Find the first slot containing bones
+            int bone = p.getInventory().first(Material.BONE);
+            if (bone == -1) continue;
             
-            if (petAmount <= 0) {
-                continue;
-            }
+            // Get the amount of pets to spawn
+            int amount = p.getInventory().getItem(bone).getAmount();
             
-            // Remove the bones from the inventory.
-            Player p = entry.getKey();
-            p.getInventory().removeItem(new ItemStack(Material.BONE, petAmount));
-            
-            for (int i = 0; i < petAmount; i++) {
+            // Spawn each pet
+            for (int i = 0; i < amount; i++) {
                 Wolf wolf = (Wolf) world.spawnEntity(p.getLocation(), EntityType.WOLF);
                 wolf.setTamed(true);
                 wolf.setOwner(p);
@@ -721,6 +718,9 @@ public class ArenaImpl implements Arena
                     wolf.setFireTicks(32768);
                 monsterManager.addPet(wolf);
             }
+            
+            // Remove the bones
+            p.getInventory().setItem(bone, null);
         }
     }
     

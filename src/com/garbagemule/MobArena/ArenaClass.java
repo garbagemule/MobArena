@@ -15,7 +15,6 @@ public class ArenaClass
     private ItemStack helmet, chestplate, leggings, boots;
     private List<ItemStack> items, armor;
     private Map<String,Boolean> perms;
-    private int pets;
     private boolean unbreakableWeapons;
     private boolean mount;
     
@@ -30,7 +29,6 @@ public class ArenaClass
         this.items = new ArrayList<ItemStack>();
         this.armor = new ArrayList<ItemStack>(4);
         this.perms = new HashMap<String,Boolean>();
-        this.pets  = 0;
         
         this.unbreakableWeapons = unbreakableWeapons;
     }
@@ -106,9 +104,6 @@ public class ArenaClass
         
         if (unbreakableWeapons && isWeapon(stack)) {
             stack.setDurability(Short.MIN_VALUE);
-        }
-        else if (stack.getType() == Material.BONE) {
-            pets += stack.getAmount();
         }
         
         else if (stack.getTypeId() == 170 && stack.getAmount() == 1) {
@@ -237,14 +232,6 @@ public class ArenaClass
             }
         }
         return pa;
-    }
-    
-    /**
-     * Get the amount of pets this class is given upon starting the arena.
-     * @return the number of pets this class has
-     */
-    public int getPetAmount() {
-        return pets;
     }
     
     public boolean hasUnbreakableWeapons() {
