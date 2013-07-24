@@ -526,7 +526,7 @@ public class ArenaImpl implements Arena
         // Force leave.
         for (Player p : tmp) {
             playerLeave(p);
-            Messenger.tellPlayer(p, "You did not ready up in time! Next time, ready up by clicking an iron block.");
+            Messenger.tellPlayer(p, Msg.LEAVE_NOT_READY);
         }
         
         startArena();

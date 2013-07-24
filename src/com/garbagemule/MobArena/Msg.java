@@ -28,6 +28,7 @@ public enum Msg
     JOIN_EXISTING_INV_RESTORED("Your old inventory items have been restored."),
     JOIN_PLAYER_JOINED("You joined the arena. Have fun!", "Joined arena.", Material.IRON_SWORD),
     LEAVE_NOT_PLAYING("You are not in the arena.", "Not in arena."),
+    LEAVE_NOT_READY("You did not ready up in time! Next time, ready up by clicking an iron block."),
     LEAVE_PLAYER_LEFT("You left the arena. Thanks for playing!", "Left arena.", Material.WOOD_DOOR),
     PLAYER_DIED("% died!", "% died!", Material.BONE),
     GOLEM_DIED("A friendly Golem has died!", "A Golem has died!", Material.PUMPKIN),
