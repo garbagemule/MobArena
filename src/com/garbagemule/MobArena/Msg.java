@@ -6,6 +6,7 @@ public enum Msg
 {
     ARENA_START("Let the slaughter begin!", "Arena started!", Material.REDSTONE_TORCH_ON),
     ARENA_END("Arena finished.", "Arena finished.", Material.REDSTONE_TORCH_OFF),
+    ARENA_END_GLOBAL("Arena '%' finished! Type /ma j % to join a new game!"),
     ARENA_DOES_NOT_EXIST("That arena does not exist. Type /ma arenas for a list.", "Can't find arena."),
     ARENA_LBOARD_NOT_FOUND("That arena does not have a leaderboard set up."),
     ARENA_AUTO_START("Arena will auto-start in % seconds."),

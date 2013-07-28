@@ -495,7 +495,13 @@ public class ArenaImpl implements Arena
         stopSpawner();
 
         // Announce and clean arena floor, etc.
-        Messenger.tellAll(this, Msg.ARENA_END, true);
+        if (settings.getBoolean("global-end-announce", false)) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                Messenger.tellPlayer(p, Msg.ARENA_END_GLOBAL, configName());
+            }
+        } else {
+            Messenger.tellAll(this, Msg.ARENA_END, true);
+        }
         cleanup();
         
         // Restore region.
