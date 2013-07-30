@@ -559,7 +559,16 @@ public class ArenaImpl implements Arena
         if (event.isCancelled()) {
             return false;
         }
-        
+
+        // Announce globally (must happen before moving player)
+        if (settings.getBoolean("global-first-join-announce", false)) {
+            if (lobbyPlayers.isEmpty()) {
+                for (Player q : Bukkit.getOnlinePlayers()) {
+                    Messenger.tellPlayer(q, Msg.ARENA_JOIN_GLOBAL, configName());
+                }
+            }
+        }
+
         takeFee(p);
         storePlayerData(p, loc);
         removePotionEffects(p);
