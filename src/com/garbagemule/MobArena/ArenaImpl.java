@@ -569,6 +569,7 @@ public class ArenaImpl implements Arena
             }
         }
 
+        movePlayerToLobby(p);
         takeFee(p);
         storePlayerData(p, loc);
         removePotionEffects(p);
@@ -580,7 +581,6 @@ public class ArenaImpl implements Arena
             p.setExp(0.0f);
         }
         p.setGameMode(GameMode.SURVIVAL);
-        movePlayerToLobby(p);
         
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
         
@@ -826,7 +826,7 @@ public class ArenaImpl implements Arena
         
         // If there's no player stored, create a new one!
         if (mp == null) {
-            mp = new PlayerData(p);
+            mp = new PlayerData(p, loc);
             playerData.put(p, mp);
         }
         

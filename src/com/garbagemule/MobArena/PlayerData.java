@@ -18,11 +18,11 @@ public class PlayerData
     private Location entry = null;
     private Collection<PotionEffect> potions;
     
-    public PlayerData(Player player) {
+    public PlayerData(Player player, Location loc) {
         this.player  = player;
         this.mode    = player.getGameMode();
-        this.entry   = player.getLocation();
         this.potions = player.getActivePotionEffects();
+        this.entry   = loc;
         
         update();
     }
