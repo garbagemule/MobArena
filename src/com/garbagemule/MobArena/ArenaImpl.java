@@ -833,30 +833,20 @@ public class ArenaImpl implements Arena
     @Override
     public void storeContainerContents()
     {
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable() {
-                public void run() {
-                    for (Location loc : region.getContainers()) {
-                        BlockState state = world.getBlockAt(loc).getState();
-                        if (state instanceof InventoryHolder) {
-                            containables.add(new RepairableContainer(state, false));
-                        }
-                    }
-                }
-            });
+        for (Location loc : region.getContainers()) {
+            BlockState state = world.getBlockAt(loc).getState();
+            if (state instanceof InventoryHolder) {
+                containables.add(new RepairableContainer(state, false));
+            }
+        }
     }
 
     @Override
     public void restoreContainerContents()
     {
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,
-            new Runnable() {
-                public void run() {
-                    for (Repairable r : containables) {
-                        r.repair();
-                    }
-                }
-            });
+        for (Repairable r : containables) {
+            r.repair();
+        }
     }
 
     @Override
