@@ -281,6 +281,7 @@ public class ArenaListener
 
         switch (event.getCause()) {
             case FLINT_AND_STEEL:
+                if (arena.inEditMode()) return;
                 if (arena.isRunning()) {
                     if (b.getType() == Material.TNT) {
                         Player planter = getPlanter(b);
