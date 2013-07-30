@@ -94,6 +94,7 @@ public class ArenaImpl implements Arena
     private List<ItemStack> entryFee;
     private TimeStrategy timeStrategy;
     private AutoStartTimer autoStartTimer;
+    private boolean isolatedChat;
     
     // Scoreboards
     private ScoreboardManager scoreboard;
@@ -158,6 +159,8 @@ public class ArenaImpl implements Arena
         
         int autoStart       = settings.getInt("auto-start-timer", 0);
         this.autoStartTimer = new AutoStartTimer(this, autoStart);
+
+        this.isolatedChat  = settings.getBoolean("isolated-chat", false);
         
         String timeString = settings.getString("player-time-in-arena", "world");
         Time time = Enums.getEnumFromString(Time.class, timeString);
@@ -1360,6 +1363,11 @@ public class ArenaImpl implements Arena
         else return true;
         
         return false;
+    }
+
+    @Override
+    public boolean hasIsolatedChat() {
+        return isolatedChat;
     }
         
     /**

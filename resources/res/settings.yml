@@ -38,4 +38,5 @@ use-class-chests: false
 display-waves-as-level: false
 display-timer-as-level: false
 use-scoreboards: true
+isolated-chat: false
 global-end-announce: false

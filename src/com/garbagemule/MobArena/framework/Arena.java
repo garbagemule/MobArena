@@ -237,4 +237,6 @@ public interface Arena
     public boolean canJoin(Player p);
     
     public boolean canSpec(Player p);
+
+    public boolean hasIsolatedChat();
 }

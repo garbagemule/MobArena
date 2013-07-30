@@ -204,6 +204,16 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onPlayerBucketEmpty(event);
     }
 
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void playerChat(AsyncPlayerChatEvent event) {
+        if (!am.isEnabled()) return;
+
+        Arena arena = am.getArenaWithPlayer(event.getPlayer());
+        if (arena == null || !arena.hasIsolatedChat()) return;
+
+        event.getRecipients().retainAll(arena.getAllPlayers());
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void playerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if (!am.isEnabled()) return;
