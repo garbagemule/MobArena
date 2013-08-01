@@ -9,15 +9,20 @@ import com.garbagemule.MobArena.*;
 import com.garbagemule.MobArena.commands.*;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 
+import java.util.Arrays;
+import java.util.List;
+
 @CommandInfo(
     name    = "setwarp",
     pattern = "set(warp|point)",
-    usage   = "/ma setwarp arena|lobby|spectator",
+    usage   = "/ma setwarp arena|lobby|spectator|exit",
     desc    = "set a warp point for an arena",
     permission = "mobarena.setup.setwarp"
 )
 public class SetWarpCommand implements Command
 {
+    private static final List<String> WARPS = Arrays.asList("arena", "lobby", "spectator", "exit");
+
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
@@ -30,8 +35,11 @@ public class SetWarpCommand implements Command
         
         // Cast the sender.
         Player p = (Player) sender;
-        
-        if (!(arg1.equals("arena") || arg1.equals("lobby") || arg1.equals("spectator"))) {
+
+        // spec -> spectator
+        if (arg1.equals("spec")) arg1 = "spectator";
+
+        if (!WARPS.contains(arg1)) {
             Messenger.tellPlayer(sender, "Usage: /ma setwarp arena|lobby|spectator");
             return true;
         }

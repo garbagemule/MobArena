@@ -826,6 +826,7 @@ public class ArenaImpl implements Arena
         
         // If there's no player stored, create a new one!
         if (mp == null) {
+            if (region.getExitWarp() != null) loc = region.getExitWarp();
             mp = new PlayerData(p, loc);
             playerData.put(p, mp);
         }

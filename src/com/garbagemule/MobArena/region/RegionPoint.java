@@ -8,6 +8,7 @@ public enum RegionPoint {
     ARENA,
     LOBBY,
     SPECTATOR,
+    EXIT,
     LEADERBOARD;
 
     @Override

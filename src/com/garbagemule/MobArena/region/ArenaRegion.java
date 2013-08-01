@@ -29,7 +29,7 @@ public class ArenaRegion
     private World world;
     
     private Location lastP1, lastP2, lastL1, lastL2;
-    private Location p1, p2, l1, l2, arenaWarp, lobbyWarp, specWarp, leaderboard;
+    private Location p1, p2, l1, l2, arenaWarp, lobbyWarp, specWarp, exitWarp, leaderboard;
     private Map<String,Location> spawnpoints, containers;
     
     private boolean setup, lobbySetup;
@@ -77,6 +77,7 @@ public class ArenaRegion
         arenaWarp = coords.getLocation("arena", world);
         lobbyWarp = coords.getLocation("lobby", world);
         specWarp  = coords.getLocation("spectator", world);
+        exitWarp  = coords.getLocation("exit", world);
 
         leaderboard = coords.getLocation("leaderboard", world);
     }
@@ -177,7 +178,8 @@ public class ArenaRegion
     public boolean isWarp(Location l) {
         return (l.equals(arenaWarp) ||
                 l.equals(lobbyWarp) ||
-                l.equals(specWarp));
+                l.equals(specWarp)  ||
+                l.equals(exitWarp));
     }
     
     public boolean contains(Location l) {
@@ -363,6 +365,10 @@ public class ArenaRegion
     public Location getSpecWarp() {
         return specWarp;
     }
+
+    public Location getExitWarp() {
+        return exitWarp;
+    }
     
     public Location getSpawnpoint(String name) {
         return spawnpoints.get(name);
@@ -393,6 +399,7 @@ public class ArenaRegion
             case L2: setPoint(point, loc); return;
             case ARENA:
             case LOBBY:
+            case EXIT:
             case SPECTATOR:   setWarp(point, loc); return;
             case LEADERBOARD: setLeaderboard(loc); return;
         }
