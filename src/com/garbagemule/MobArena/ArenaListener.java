@@ -828,6 +828,9 @@ public class ArenaListener
         }
         // Sign
         else if (event.getClickedBlock().getState() instanceof Sign) {
+            // Make sure to allow clicking signs
+            event.setCancelled(false);
+
             Sign sign = (Sign) event.getClickedBlock().getState();
             handleSign(sign, p);
         }
