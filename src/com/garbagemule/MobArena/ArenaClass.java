@@ -15,6 +15,7 @@ public class ArenaClass
     private ItemStack helmet, chestplate, leggings, boots;
     private List<ItemStack> items, armor;
     private Map<String,Boolean> perms;
+    private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons;
     private boolean mount;
     
@@ -29,6 +30,7 @@ public class ArenaClass
         this.items = new ArrayList<ItemStack>();
         this.armor = new ArrayList<ItemStack>(4);
         this.perms = new HashMap<String,Boolean>();
+        this.lobbyperms = new HashMap<String,Boolean>();
         
         this.unbreakableWeapons = unbreakableWeapons;
     }
@@ -205,6 +207,14 @@ public class ArenaClass
     public Map<String,Boolean> getPermissions() {
         return Collections.unmodifiableMap(perms);
     }
+
+    public void addLobbyPermission(String perm, boolean value) {
+        lobbyperms.put(perm, value);
+    }
+
+    public Map<String,Boolean> getLobbyPermissions() {
+        return Collections.unmodifiableMap(lobbyperms);
+    }
     
     /**
      * Grant the given player all the permissions of the class.
@@ -218,20 +228,31 @@ public class ArenaClass
         if (perms.isEmpty()) return null;
         
         PermissionAttachment pa = p.addAttachment(plugin);
-        
-        for (Entry<String,Boolean> entry : perms.entrySet()) {
+        grantPerms(pa, perms, p);
+        return pa;
+    }
+
+    public PermissionAttachment grantLobbyPermissions(MobArena plugin, Player p) {
+        if (lobbyperms.isEmpty()) return null;
+
+        PermissionAttachment pa = p.addAttachment(plugin);
+        grantPerms(pa, lobbyperms, p);
+        return pa;
+    }
+
+    private void grantPerms(PermissionAttachment pa, Map<String,Boolean> map, Player p) {
+        for (Entry<String,Boolean> entry : map.entrySet()) {
             try {
                 pa.setPermission(entry.getKey(), entry.getValue());
             }
             catch (Exception e) {
                 String perm   = entry.getKey() + ":" + entry.getValue();
                 String player = p.getName();
-                
+
                 Messenger.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.configName
                                 + "'.\nPlease verify that your class permissions are well-formed.");
             }
         }
-        return pa;
     }
     
     public boolean hasUnbreakableWeapons() {

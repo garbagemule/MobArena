@@ -985,6 +985,10 @@ public class ArenaImpl implements Arena
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
+
+        PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
+        replacePermissions(p, pa);
+
         autoReady(p);
     }
     
@@ -1032,7 +1036,23 @@ public class ArenaImpl implements Arena
             }
         }
         p.getInventory().setContents(contents);
+
+        PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
+        replacePermissions(p, pa);
+
         autoReady(p);
+    }
+
+    private void replacePermissions(Player p, PermissionAttachment rep) {
+        PermissionAttachment old = attachments.get(p);
+        if (old != null) {
+            p.removeAttachment(old);
+            p.recalculatePermissions();
+        }
+        if (rep != null) {
+            attachments.put(p, rep);
+            p.recalculatePermissions();
+        }
     }
     
     private void autoReady(Player p) {
@@ -1076,10 +1096,7 @@ public class ArenaImpl implements Arena
     public void assignClassPermissions(Player p)
     {
         PermissionAttachment pa = arenaPlayerMap.get(p).getArenaClass().grantPermissions(plugin, p);
-        if (pa == null) return;
-        
-        attachments.put(p, pa);
-        p.recalculatePermissions();
+        replacePermissions(p, pa);
     }
 
     @Override

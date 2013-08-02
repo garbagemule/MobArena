@@ -352,6 +352,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Per-class permissions
         loadClassPermissions(arenaClass, section);
+        loadClassLobbyPermissions(arenaClass, section);
 
         // Register the permission.
         registerPermission("mobarena.classes." + lowercase, PermissionDefault.TRUE).addParent("mobarena.classes", true);
@@ -363,8 +364,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigSection section) {
         List<String> perms = section.getStringList("permissions", null);
-        if (perms.isEmpty())
-            return;
+        if (perms.isEmpty()) return;
 
         for (String perm : perms) {
             // If the permission starts with - or ^, it must be revoked.
@@ -374,6 +374,21 @@ public class ArenaMasterImpl implements ArenaMaster
                 value = false;
             }
             arenaClass.addPermission(perm, value);
+        }
+    }
+
+    private void loadClassLobbyPermissions(ArenaClass arenaClass, ConfigSection section) {
+        List<String> perms = section.getStringList("lobby-permissions", null);
+        if (perms.isEmpty()) return;
+
+        for (String perm : perms) {
+            // If the permission starts with - or ^, it must be revoked.
+            boolean value = true;
+            if (perm.startsWith("-") || perm.startsWith("^")) {
+                perm = perm.substring(1).trim();
+                value = false;
+            }
+            arenaClass.addLobbyPermission(perm, value);
         }
     }
 
