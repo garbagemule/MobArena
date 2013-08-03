@@ -1293,7 +1293,7 @@ public class ArenaImpl implements Arena
         for (ItemStack stack : entryFee) {
             // Economy money
             if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                if (!plugin.hasEnough(p, stack.getAmount())) {
+                if (!plugin.hasEnough(p, stack)) {
                     return false;
                 }
             }
@@ -1315,7 +1315,7 @@ public class ArenaImpl implements Arena
 
         // Take some economy money        
         for (ItemStack stack : InventoryUtils.extractAll(MobArena.ECONOMY_MONEY_ID, entryFee)) {
-            plugin.takeMoney(p, stack.getAmount());
+            plugin.takeMoney(p, stack);
         }
         
         // Take any other items
@@ -1334,7 +1334,7 @@ public class ArenaImpl implements Arena
         
         // Refund economy money
         for (ItemStack stack : InventoryUtils.extractAll(MobArena.ECONOMY_MONEY_ID, entryFee)) {
-            plugin.giveMoney(p, stack.getAmount());
+            plugin.giveMoney(p, stack);
         }
         
         // Refund other items.

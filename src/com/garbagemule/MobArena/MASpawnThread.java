@@ -321,8 +321,8 @@ public class MASpawnThread implements Runnable
                 Messenger.warning("Could not add null reward. Please check the config-file!");
             }
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                if (plugin.giveMoney(p, reward.getAmount())) { // Money already awarded here, not needed at end of match as well
-                    Messenger.tellPlayer(p, Msg.WAVE_REWARD, plugin.economyFormat(reward.getAmount()));
+                if (plugin.giveMoney(p, reward)) { // Money already awarded here, not needed at end of match as well
+                    Messenger.tellPlayer(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
                 }
                 else {
                     Messenger.warning("Tried to add money, but no economy plugin detected!");

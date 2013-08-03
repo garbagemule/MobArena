@@ -12,6 +12,7 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -271,33 +272,39 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    public boolean giveMoney(Player p, int amount) {
+    public boolean giveMoney(Player p, ItemStack item) {
         if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p.getName(), amount);
+            EconomyResponse result = economy.depositPlayer(p.getName(), getAmount(item));
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
     }
     
-    public boolean takeMoney(Player p, int amount) {
+    public boolean takeMoney(Player p, ItemStack item) {
         if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p.getName(), amount);
+            EconomyResponse result = economy.withdrawPlayer(p.getName(), getAmount(item));
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
     }
 
-    public boolean hasEnough(Player p, double amount) {
+    public boolean hasEnough(Player p, ItemStack item) {
         if (economy != null) {
-            return (economy.getBalance(p.getName()) >= amount);
+            return (economy.getBalance(p.getName()) >= getAmount(item));
         }
         return true;
     }
     
-    public String economyFormat(double amount) {
+    public String economyFormat(ItemStack item) {
         if (economy != null) {
-            return economy.format(amount);
+            return economy.format(getAmount(item));
         }
         return null;
+    }
+
+    private double getAmount(ItemStack item) {
+        double major = item.getAmount();
+        double minor = item.getDurability() / 100D;
+        return major + minor;
     }
 }

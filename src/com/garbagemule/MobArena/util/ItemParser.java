@@ -151,9 +151,12 @@ public class ItemParser
     }
     
     private static ItemStack singleItem(String item) {
-        if (item.matches("\\$[1-9][0-9]*")) {
-            int amount = Integer.parseInt(item.substring(1));
-            return new ItemStack(MobArena.ECONOMY_MONEY_ID, amount);
+        if (item.matches("\\$([1-9]|([0-9].[0-9]))[0-9]*")) {
+            double amount = Double.parseDouble(item.substring(1));
+
+            int major = (int) amount;
+            int minor = ((int) (amount * 100D)) % 100;
+            return new ItemStack(MobArena.ECONOMY_MONEY_ID, major, (short) minor);
         }
         int id = getTypeId(item);
         return new ItemStack(id);

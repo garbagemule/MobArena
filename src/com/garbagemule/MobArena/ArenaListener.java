@@ -475,8 +475,8 @@ public class ArenaListener
                     if (reward != null) {
                         String msg = p.getName() + " killed the boss and won: ";
                         if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                            plugin.giveMoney(p, reward.getAmount());
-                            msg += plugin.economyFormat(reward.getAmount());
+                            plugin.giveMoney(p, reward);
+                            msg += plugin.economyFormat(reward);
                         } else {
                             arena.getRewardManager().addReward((Player) damager, reward);
                             msg += MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount();

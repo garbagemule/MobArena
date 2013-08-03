@@ -243,7 +243,7 @@ public class MAUtils
             for (E e : list) {
                 stack = (ItemStack) e;
                 if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                    String formatted = plugin.economyFormat(stack.getAmount());
+                    String formatted = plugin.economyFormat(stack);
                     if (formatted != null) {
                         buffy.append(formatted);
                         buffy.append(", ");
