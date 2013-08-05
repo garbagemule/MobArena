@@ -201,12 +201,12 @@ public class CommandHandler implements CommandExecutor
     }
     
     /**
-     * Register a single command.
+     * Register a command.
      * The Command's CommandInfo annotation is queried to find its pattern
      * string, which is used to map the commands.
      * @param c a Command
      */
-    private void register(Class<? extends Command> c) {
+    public void register(Class<? extends Command> c) {
         CommandInfo info = c.getAnnotation(CommandInfo.class);
         if (info == null) return;
         

@@ -44,6 +44,7 @@ public class MobArena extends JavaPlugin
 {
     private Config config;
     private ArenaMaster arenaMaster;
+    private CommandHandler commandHandler;
     
     // Inventories from disconnects
     private Set<String> inventoriesToRestore;
@@ -134,9 +135,9 @@ public class MobArena extends JavaPlugin
     
     private void registerListeners() {
         // Bind the /ma, /mobarena commands to MACommands.
-        CommandHandler handler = new CommandHandler(this);
-        getCommand("ma").setExecutor(handler);
-        getCommand("mobarena").setExecutor(handler);
+        commandHandler = new CommandHandler(this);
+        getCommand("ma").setExecutor(commandHandler);
+        getCommand("mobarena").setExecutor(commandHandler);
         
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
@@ -227,6 +228,10 @@ public class MobArena extends JavaPlugin
     
     public ArenaMaster getArenaMaster() {
         return arenaMaster;
+    }
+
+    public CommandHandler getCommandHandler() {
+        return commandHandler;
     }
     
     private void updateSettings(Config config) {
