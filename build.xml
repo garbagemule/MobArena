@@ -69,6 +69,11 @@
         <copy file="${ant.project.name}.jar" tofile="${dropbox.dir}/${ant.project.name}.jar" />
     </target>
 
+    <!-- Copy MobArena.jar to the remote.dir folder from the properties file -->
+    <target name="copy-to-remote" if="remote.dir">
+        <scp file="${ant.project.name}.jar" todir="${remote.usr}:${remote.pwd}@${remote.host}:${remote.dir}" />
+    </target>
+
 
 
     <!--
@@ -108,6 +113,14 @@
         <antcall target="build-package"/>
         <antcall target="copy-to-server"/>
         <antcall target="copy-to-dropbox"/>
+    </target>
+
+    <!-- Build, package and distribute the project (includes remote) -->
+    <target name="build-package-distribute-remote">
+        <antcall target="build-package"/>
+        <antcall target="copy-to-server"/>
+        <antcall target="copy-to-dropbox"/>
+        <antcall target="copy-to-remote"/>
     </target>
 
 
