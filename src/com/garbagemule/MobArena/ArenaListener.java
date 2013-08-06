@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.garbagemule.MobArena.events.ArenaKillEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -425,6 +426,9 @@ public class ArenaListener
             event.getDrops().clear();
             event.setDroppedExp(0);
             event.setKeepLevel(true);
+            if (player.getKiller() != null) {
+                callKillEvent(player.getKiller(), player);
+            }
             arena.playerDeath(player);
         }
     }
@@ -450,6 +454,7 @@ public class ArenaListener
         EntityDamageEvent e1 = event.getEntity().getLastDamageCause();
         EntityDamageByEntityEvent e2 = (e1 instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) e1 : null;
         Entity damager = (e2 != null) ? e2.getDamager() : null;
+        LivingEntity damagee = event.getEntity();
 
         // Make sure to grab the owner of a projectile/pet
         if (damager instanceof Projectile) {
@@ -469,7 +474,7 @@ public class ArenaListener
                     ap.getStats().inc("kills");
                     arena.getScoreboard().addKill(p);
                 }
-                MABoss boss = monsters.getBoss(event.getEntity());
+                MABoss boss = monsters.getBoss(damagee);
                 if (boss != null) {
                     ItemStack reward = boss.getReward();
                     if (reward != null) {
@@ -487,9 +492,10 @@ public class ArenaListener
                     }
                 }
             }
+            callKillEvent(p, damagee);
         }
         
-        MABoss boss = monsters.removeBoss(event.getEntity());
+        MABoss boss = monsters.removeBoss(damagee);
         if (boss != null) {
             boss.setDead(true);
         }
@@ -500,10 +506,15 @@ public class ArenaListener
 
         event.getDrops().clear();
 
-        List<ItemStack> loot = monsters.getLoot(event.getEntity());
+        List<ItemStack> loot = monsters.getLoot(damagee);
         if (loot != null && !loot.isEmpty()) {
             event.getDrops().add(getRandomItem(loot));
         }
+    }
+
+    private void callKillEvent(Player killer, Entity victim) {
+        ArenaKillEvent event = new ArenaKillEvent(killer, victim);
+        plugin.getServer().getPluginManager().callEvent(event);
     }
 
     private ItemStack getRandomItem(List<ItemStack> stacks) {
