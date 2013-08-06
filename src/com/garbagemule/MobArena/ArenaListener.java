@@ -513,7 +513,7 @@ public class ArenaListener
     }
 
     private void callKillEvent(Player killer, Entity victim) {
-        ArenaKillEvent event = new ArenaKillEvent(killer, victim);
+        ArenaKillEvent event = new ArenaKillEvent(arena, killer, victim);
         plugin.getServer().getPluginManager().callEvent(event);
     }
 

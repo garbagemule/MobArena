@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.events;
 
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -11,12 +12,23 @@ import org.bukkit.event.HandlerList;
 public class ArenaKillEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
+    private Arena arena;
     private Player killer;
     private Entity victim;
 
-    public ArenaKillEvent(Player killer, Entity victim) {
+    public ArenaKillEvent(Arena arena, Player killer, Entity victim) {
+        this.arena  = arena;
         this.killer = killer;
         this.victim = victim;
+    }
+
+    /**
+     * Get the arena the event happened in.
+     *
+     * @return an arena
+     */
+    public Arena getArena() {
+        return arena;
     }
 
     /**
