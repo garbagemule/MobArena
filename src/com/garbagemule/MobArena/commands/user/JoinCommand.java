@@ -45,6 +45,9 @@ public class JoinCommand implements Command
         if (!toArena.canJoin(p)) {
             return false;
         }
+
+        // Force leave previous arena
+        if (fromArena != null) fromArena.playerLeave(p);
         
         // Join the arena!
         return toArena.playerJoin(p, p.getLocation());
