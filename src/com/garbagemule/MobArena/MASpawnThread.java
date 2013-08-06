@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.garbagemule.MobArena.events.ArenaCompleteEvent;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -105,11 +106,15 @@ public class MASpawnThread implements Runnable
 
         // Check if this is the final wave, in which case, end instead of spawn
         if (nextWave > 1 && (nextWave - 1) == waveManager.getFinalWave()) {
+            // Fire the complete event
+            ArenaCompleteEvent complete = new ArenaCompleteEvent(arena);
+            plugin.getServer().getPluginManager().callEvent(complete);
+
+            // Then force leave everyone
             List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
             for (Player p : players) {
                 arena.playerLeave(p);
             }
-
             return;
         }
 
