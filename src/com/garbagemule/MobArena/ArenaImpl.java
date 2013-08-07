@@ -719,12 +719,19 @@ public class ArenaImpl implements Arena
 
     private void spawnPets() {
         for (Player p : arenaPlayers) {
+            // Skip players who are either null or offline
+            if (p == null || !p.isOnline()) continue;
+
+            // Grab the inventory
+            PlayerInventory inv = p.getInventory();
+            if (inv == null) continue;
+
             // Find the first slot containing bones
-            int bone = p.getInventory().first(Material.BONE);
+            int bone = inv.first(Material.BONE);
             if (bone == -1) continue;
             
             // Get the amount of pets to spawn
-            int amount = p.getInventory().getItem(bone).getAmount();
+            int amount = inv.getItem(bone).getAmount();
             
             // Spawn each pet
             for (int i = 0; i < amount; i++) {
@@ -738,7 +745,7 @@ public class ArenaImpl implements Arena
             }
             
             // Remove the bones
-            p.getInventory().setItem(bone, null);
+            inv.setItem(bone, null);
         }
     }
     
