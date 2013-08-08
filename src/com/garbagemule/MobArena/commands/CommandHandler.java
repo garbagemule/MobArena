@@ -45,7 +45,11 @@ public class CommandHandler implements CommandExecutor
         
         // The help command is a little special
         if (base.equals("?") || base.equals("help")) {
-            showHelp(sender);
+            // Make-shift help menu
+            String page = (args.length < 2 ? "1" : args[1]);
+            if (!isInteger(page))
+                page = "1";
+            showHelp(sender, page);
             return true;
         }
         
@@ -135,12 +139,37 @@ public class CommandHandler implements CommandExecutor
      * List all the available MobArena commands for the CommandSender.
      * @param sender a player or the console
      */
-    private void showHelp(CommandSender sender) {
+    private void showHelp(CommandSender sender, String page) {
+        int pn = Integer.parseInt(page);
         Messenger.tellPlayer(sender, "Available MobArena commands:");
-        
-        for (Command cmd : commands.values()) {
-            showUsage(cmd, sender);
+        int top = pn * 4;
+        if(top - 4 > commands.size()){
+            // Page doesn't exist
+            Messenger.tellPlayer(sender, "That page does not exist!");
+            return;
         }
+        int i = 0;
+        for (Command cmd : commands.values()) {
+            if(i >= top - 3)
+                showUsage(cmd, sender);
+            i++;
+            if(i > top)
+                break;
+        }
+    }
+
+    /**
+     * Checks if a string is an integer.
+     * @param s string
+     * @return boolean checking if it the string is a integer
+     */
+    private boolean isInteger(String s){
+        try{
+            Integer.parseInt(s);
+        } catch (NumberFormatException e){
+            return false;
+        }
+        return true;
     }
     
     /**
