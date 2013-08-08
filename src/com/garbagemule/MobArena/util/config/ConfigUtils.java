@@ -5,7 +5,6 @@ import java.util.Set;
 import com.garbagemule.MobArena.Messenger;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.FileUtils;
 

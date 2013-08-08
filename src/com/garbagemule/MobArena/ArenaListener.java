@@ -1,13 +1,11 @@
 package com.garbagemule.MobArena;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import com.garbagemule.MobArena.events.ArenaKillEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,7 +13,15 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.Snowman;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -33,17 +39,17 @@ import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -59,7 +65,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
-import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -67,15 +72,19 @@ import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.events.ArenaKillEvent;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.listeners.MAGlobalListener.TeleportResponse;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.region.RegionPoint;
-import com.garbagemule.MobArena.repairable.*;
+import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.repairable.RepairableAttachable;
+import com.garbagemule.MobArena.repairable.RepairableBed;
+import com.garbagemule.MobArena.repairable.RepairableBlock;
+import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.repairable.RepairableDoor;
+import com.garbagemule.MobArena.repairable.RepairableSign;
 import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.waves.MABoss;
@@ -366,7 +375,7 @@ public class ArenaListener
         for (Block b : event.blockList()) {
             BlockState state = b.getState();
 
-            if (state.getData() instanceof Door && ((Door) state.getData()).isTopHalf()) {
+            if (isTopHalf(b)) {
                 state = b.getRelative(BlockFace.DOWN).getState();
             }
             else if (state.getData() instanceof Bed && ((Bed) state.getData()).isHeadOfBed()) {
@@ -381,7 +390,7 @@ public class ArenaListener
                 r = new RepairableSign(state);
             else if (state.getData() instanceof Bed)
                 r = new RepairableBed(state);
-            else if (state.getData() instanceof Door)
+            else if (isDoor(b.getTypeId()))
                 r = new RepairableDoor(state);
             else if (state.getData() instanceof Attachable || state.getData() instanceof Redstone)
                 r = new RepairableAttachable(state);
@@ -1115,5 +1124,13 @@ public class ArenaListener
         if (arena == null) return;
         
         arena.playerLeave(p);
+    }
+    
+    private boolean isTopHalf(Block b){
+       return ((b.getState().getData().getData() & 0x8) == 0x8);
+    }
+    
+    private boolean isDoor(int id){
+       return id == 64 || id == 71;
     }
 }

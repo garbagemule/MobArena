@@ -410,7 +410,7 @@ public class WaveParser
                 }
 
                 // Permissions
-                List<String> perms = config.getStringList(path + className + ".permissions", Collections.EMPTY_LIST);
+                List<String> perms = config.getStringList(path + className + ".permissions", Collections.<String> emptyList());
                 if (!perms.isEmpty()) {
                     for (String perm : perms) {
                         list.add(new PermissionUpgrade(perm));
