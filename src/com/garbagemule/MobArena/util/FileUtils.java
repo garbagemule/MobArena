@@ -1,6 +1,9 @@
 package com.garbagemule.MobArena.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -8,13 +11,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-
-import com.garbagemule.MobArena.Messenger;
-import com.garbagemule.MobArena.MobArena;
 
 public class FileUtils
 {
@@ -139,6 +138,7 @@ public class FileUtils
                     result.add(getFilename(name));
                 }
             }
+            jarFile.close();
             return result;
         }
         catch (Exception e) {
@@ -167,6 +167,7 @@ public class FileUtils
         ZipEntry entry = zip.getEntry(RES + filename);
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.load(zip.getInputStream(entry));
+        zip.close();
         return yaml;
     }
 }
