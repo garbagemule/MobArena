@@ -12,12 +12,12 @@ public class ArenaCompleteEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
     private Arena arena;
-    private Set<Player> winners;
+    private Set<Player> survivors;
 
     public ArenaCompleteEvent(Arena arena) {
         this.arena = arena;
-        this.winners = new HashSet<Player>();
-        this.winners.addAll(arena.getPlayersInArena());
+        this.survivors = new HashSet<Player>();
+        this.survivors.addAll(arena.getPlayersInArena());
     }
 
     /**
@@ -34,8 +34,8 @@ public class ArenaCompleteEvent extends Event {
      *
      * @return a set of winners
      */
-    public Set<Player> getWinners() {
-        return winners;
+    public Set<Player> getSurvivors() {
+        return survivors;
     }
 
     public HandlerList getHandlers() {
