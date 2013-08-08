@@ -312,11 +312,12 @@ public class ArenaMasterImpl implements ArenaMaster
             return null;
         }
         
-        // Check if weapons for this class should be unbreakable
-        boolean unbreakableWeapons = section.getBoolean("unbreakable-weapons", true);
+        // Check if weapons and armor for this class should be unbreakable
+        boolean weps = section.getBoolean("unbreakable-weapons", true);
+        boolean arms = section.getBoolean("unbreakable-armor", true);
 
         // Create an ArenaClass with the config-file name.
-        ArenaClass arenaClass = new ArenaClass(classname, unbreakableWeapons);
+        ArenaClass arenaClass = new ArenaClass(classname, weps, arms);
 
         // Parse the items-node
         String items = section.getString("items", "");

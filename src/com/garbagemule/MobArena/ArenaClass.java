@@ -16,14 +16,13 @@ public class ArenaClass
     private List<ItemStack> items, armor;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
-    private boolean unbreakableWeapons;
-    private boolean mount;
+    private boolean unbreakableWeapons, unbreakableArmor;
     
     /**
      * Create a new, empty arena class with the given name.
      * @param name the class name as it appears in the config-file
      */
-    public ArenaClass(String name, boolean unbreakableWeapons) {
+    public ArenaClass(String name, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
         this.lowercaseName = name.toLowerCase();
         
@@ -31,8 +30,9 @@ public class ArenaClass
         this.armor = new ArrayList<ItemStack>(4);
         this.perms = new HashMap<String,Boolean>();
         this.lobbyperms = new HashMap<String,Boolean>();
-        
+
         this.unbreakableWeapons = unbreakableWeapons;
+        this.unbreakableArmor = unbreakableArmor;
     }
     
     /**
@@ -97,29 +97,17 @@ public class ArenaClass
     
     /**
      * Add an item to the items list.
-     * If the item is a weapon-type, its durability will be set to "infinite".
-     * If the item is a bone, the pets counter will be incremented.
      * @param stack an item
      */
     public void addItem(ItemStack stack) {
         if (stack == null) return;
         
-        if (unbreakableWeapons && isWeapon(stack)) {
-            stack.setDurability(Short.MIN_VALUE);
-        }
-        
-        else if (stack.getTypeId() == 170 && stack.getAmount() == 1) {
-            if (mount) return;
-            mount = true;
-        }
-        
-        else if (stack.getAmount() > 64) {
+        if (stack.getAmount() > 64) {
             while (stack.getAmount() > 64) {
                 items.add(new ItemStack(stack.getType(), 64));
                 stack.setAmount(stack.getAmount() - 64);
             }
         }
-        
         items.add(stack);
     }
     
@@ -254,13 +242,13 @@ public class ArenaClass
             }
         }
     }
-    
+
     public boolean hasUnbreakableWeapons() {
         return unbreakableWeapons;
     }
-    
-    public boolean hasMount() {
-        return mount;
+
+    public boolean hasUnbreakableArmor() {
+        return unbreakableArmor;
     }
     
     /**

@@ -56,6 +56,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
@@ -541,6 +542,11 @@ public class ArenaListener
 
             if (damager instanceof Projectile) {
                 damager = ((Projectile) damager).getShooter();
+            }
+
+            // Repair weapons if necessary
+            if (damager instanceof Player) {
+                repairWeapon((Player) damager);
             } else if (damager instanceof TNTPrimed) {
                 damager = getPlanter(damager);
             }
@@ -579,9 +585,14 @@ public class ArenaListener
             event.setCancelled(true);
             return;
         }
+
         // If PvP is disabled and damager is a player, cancel damage
-        else if (arena.inArena(player)) {
-            if (!pvpEnabled && ((damager instanceof Player && !damager.equals(player)) || damager instanceof Wolf)) {
+        if (arena.inArena(player)) {
+            // Repair armor if necessary
+            repairArmor(player);
+
+            // Cancel PvP damage if disabled
+            if (!pvpEnabled && damager instanceof Player && !damager.equals(player)) {
                 event.setCancelled(true);
                 return;
             }
@@ -605,12 +616,6 @@ public class ArenaListener
             if (!arena.inArena(p)) {
                 event.setCancelled(true);
                 return;
-            }
-            
-            // Dirty hack for invincible weapons
-            ItemStack weapon = p.getInventory().getContents()[p.getInventory().getHeldItemSlot()];
-            if (ArenaClass.isWeapon(weapon)) {
-                weapon.setDurability((short) 0);
             }
 
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
@@ -642,6 +647,34 @@ public class ArenaListener
                 event.setCancelled(true);
                 return;
             }
+        }
+    }
+
+    private void repairWeapon(Player p) {
+        ArenaPlayer ap = arena.getArenaPlayer(p);
+        if (ap != null) {
+            ArenaClass ac = ap.getArenaClass();
+            if (ac != null && ac.hasUnbreakableWeapons()) {
+                ItemStack weapon = p.getItemInHand();
+                if (ArenaClass.isWeapon(weapon)) {
+                    weapon.setDurability((short) 0);
+                }
+            }
+        }
+    }
+
+    private void repairArmor(Player p) {
+        ArenaClass ac = arena.getArenaPlayer(p).getArenaClass();
+        if (ac != null && ac.hasUnbreakableArmor()) {
+            PlayerInventory inv = p.getInventory();
+            ItemStack stack = inv.getHelmet();
+            if (stack != null) stack.setDurability((short) 0);
+            stack = inv.getChestplate();
+            if (stack != null) stack.setDurability((short) 0);
+            stack = inv.getLeggings();
+            if (stack != null) stack.setDurability((short) 0);
+            stack = inv.getBoots();
+            if (stack != null) stack.setDurability((short) 0);
         }
     }
 
