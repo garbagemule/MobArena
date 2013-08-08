@@ -239,4 +239,6 @@ public interface Arena
     public boolean canSpec(Player p);
 
     public boolean hasIsolatedChat();
+
+    public Player getLastPlayerStanding();
 }

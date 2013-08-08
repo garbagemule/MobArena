@@ -11,10 +11,12 @@ public class ArenaPlayerDeathEvent extends Event
     private static final HandlerList handlers = new HandlerList();
     private Player player;
     private Arena arena;
+    private boolean last;
     
-    public ArenaPlayerDeathEvent(Player player, Arena arena) {
+    public ArenaPlayerDeathEvent(Player player, Arena arena, boolean last) {
         this.player = player;
-        this.arena =  arena;
+        this.arena  = arena;
+        this.last   = last;
     }
     
     public Player getPlayer() {
@@ -23,6 +25,10 @@ public class ArenaPlayerDeathEvent extends Event
     
     public Arena getArena() {
         return arena;
+    }
+
+    public boolean wasLastPlayerStanding() {
+        return last;
     }
     
     public HandlerList getHandlers() {

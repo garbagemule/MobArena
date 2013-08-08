@@ -98,6 +98,9 @@ public class ArenaImpl implements Arena
     
     // Scoreboards
     private ScoreboardManager scoreboard;
+
+    // Last player standing
+    private Player lastStanding;
     
     /**
      * Primary constructor. Requires a name and a world.
@@ -484,6 +487,9 @@ public class ArenaImpl implements Arena
         if (event.isCancelled()) {
             return false;
         }
+
+        // Reset last standing
+        lastStanding = null;
         
         // Set the running boolean and disable arena if not disabled.
         boolean en = enabled;
@@ -652,9 +658,9 @@ public class ArenaImpl implements Arena
     public void playerDeath(Player p)
     {
         // Fire the event
-        ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this);
+        ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, arenaPlayers.size() == 1);
         plugin.getServer().getPluginManager().callEvent(event);
-        
+
         arenaPlayers.remove(p);
         
         if (!settings.getBoolean("auto-respawn", true)) {
@@ -1053,7 +1059,7 @@ public class ArenaImpl implements Arena
     private void replacePermissions(Player p, PermissionAttachment rep) {
         PermissionAttachment old = attachments.get(p);
         if (old != null) {
-            p.removeAttachment(old);
+            old.remove();
             p.recalculatePermissions();
         }
         if (rep != null) {
@@ -1402,6 +1408,11 @@ public class ArenaImpl implements Arena
     @Override
     public boolean hasIsolatedChat() {
         return isolatedChat;
+    }
+
+    @Override
+    public Player getLastPlayerStanding() {
+        return lastStanding;
     }
         
     /**
