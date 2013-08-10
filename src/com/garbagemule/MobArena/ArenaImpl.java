@@ -119,7 +119,7 @@ public class ArenaImpl implements Arena
         this.protect = settings.getBoolean("protect", true);
         this.running = false;
         this.edit    = false;
-        
+
         this.inventoryManager = new InventoryManager(this);
         this.rewardManager    = new RewardManager(this);
 
