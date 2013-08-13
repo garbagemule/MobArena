@@ -198,6 +198,7 @@ public class CommandHandler implements CommandExecutor
         register(SpawnpointsCommand.class);
         register(AutoGenerateCommand.class);
         register(AutoDegenerateCommand.class);
+        register(ClassChestCommand.class);
     }
     
     /**

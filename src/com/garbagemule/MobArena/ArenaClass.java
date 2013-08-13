@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,8 @@ public class ArenaClass
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
-    
+    private Location classchest;
+
     /**
      * Create a new, empty arena class with the given name.
      * @param name the class name as it appears in the config-file
@@ -243,6 +245,14 @@ public class ArenaClass
         }
     }
 
+    public Location getClassChest() {
+        return classchest;
+    }
+
+    public void setClassChest(Location loc) {
+        classchest = loc;
+    }
+
     public boolean hasUnbreakableWeapons() {
         return unbreakableWeapons;
     }
@@ -267,7 +277,7 @@ public class ArenaClass
         if (stack == null) return false;
         return Arrays.binarySearch(weaponTypes, stack.getTypeId()) > -1;
     }
-    
+
     /**
      * Used by the grantItems() method to determine the armor type of a given
      * ItemStack. Armor pieces are auto-equipped.

@@ -358,6 +358,10 @@ public class ArenaMasterImpl implements ArenaMaster
         // Register the permission.
         registerPermission("mobarena.classes." + lowercase, PermissionDefault.TRUE).addParent("mobarena.classes", true);
 
+        // Check for class chests
+        Location cc = section.getLocation("classchest", null);
+        arenaClass.setClassChest(cc);
+
         // Finally add the class to the classes map.
         classes.put(lowercase, arenaClass);
         return arenaClass;
