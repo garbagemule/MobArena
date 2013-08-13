@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -273,9 +274,8 @@ public class Config
         if (string == null)
             return def;
 
-        //TODO: Figure out if this would work
-        //if (string.split(",").length == 6)
-        //    return parseLocation(string);
+        if (world == null && string.split(",").length == 6)
+            return parseLocation(string);
         
         return parseLocation(world, string);
     }
@@ -404,8 +404,12 @@ public class Config
         Float pitch = parseFloat(parts[4]);
         World world = Bukkit.getServer().getWorld(parts[5]);
 
-        if (x == null || y == null || z == null || yaw == null || pitch == null)
-            throw new NullPointerException("Some of the parsed values are null!");
+        Validate.notNull(x, "x value is null");
+        Validate.notNull(y, "y value is null");
+        Validate.notNull(z, "z value is null");
+        Validate.notNull(yaw, "yaw value is null");
+        Validate.notNull(pitch, "pitch value is null");
+        Validate.notNull(world, "pitch value is null");
 
         return new Location(world, x, y, z, yaw, pitch);
     }
@@ -428,9 +432,12 @@ public class Config
         Float z     = parseFloat(parts[2]);
         Float yaw   = parseFloat(parts[3]);
         Float pitch = parseFloat(parts[4]);
-        
-        if (x == null || y == null || z == null || yaw == null || pitch == null)
-            throw new NullPointerException("Some of the parsed values are null!");
+
+        Validate.notNull(x, "x value is null");
+        Validate.notNull(y, "y value is null");
+        Validate.notNull(z, "z value is null");
+        Validate.notNull(yaw, "yaw value is null");
+        Validate.notNull(pitch, "pitch value is null");
         
         return new Location(world, x, y, z, yaw, pitch);
     }
@@ -447,7 +454,8 @@ public class Config
         result.append(twoPlaces(loc.getY())).append(",");
         result.append(twoPlaces(loc.getZ())).append(",");
         result.append(twoPlaces(loc.getYaw())).append(",");
-        result.append(twoPlaces(loc.getPitch()));
+        result.append(twoPlaces(loc.getPitch())).append(",");
+        result.append(loc.getWorld().getName());
         
         return result.toString();
     }
@@ -475,5 +483,5 @@ public class Config
     private static String twoPlaces(double value) {
         return df.format(value);
     }
-    private static final DecimalFormat df = new DecimalFormat("#.00");
+    private static final DecimalFormat df = new DecimalFormat("0.##");
 }
