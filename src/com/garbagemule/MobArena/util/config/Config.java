@@ -1,12 +1,14 @@
 package com.garbagemule.MobArena.util.config;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -270,6 +272,10 @@ public class Config
         
         if (string == null)
             return def;
+
+        //TODO: Figure out if this would work
+        //if (string.split(",").length == 6)
+        //    return parseLocation(string);
         
         return parseLocation(world, string);
     }
@@ -385,6 +391,24 @@ public class Config
         
         return new Location(world, x, y, z);
     }
+
+    public static Location parseLocation(String coords) {
+        String[] parts = coords.split(",");
+        if (parts.length != 6)
+            throw new IllegalArgumentException("Input string must contain x, y, z, yaw, pitch, and world");
+
+        Float x     = parseFloat(parts[0]);
+        Float y     = parseFloat(parts[1]);
+        Float z     = parseFloat(parts[2]);
+        Float yaw   = parseFloat(parts[3]);
+        Float pitch = parseFloat(parts[4]);
+        World world = Bukkit.getServer().getWorld(parts[5]);
+
+        if (x == null || y == null || z == null || yaw == null || pitch == null)
+            throw new NullPointerException("Some of the parsed values are null!");
+
+        return new Location(world, x, y, z, yaw, pitch);
+    }
     
     /**
      * Parse an input string on the form "x,y,z,yaw,pitch" and an input World
@@ -398,10 +422,10 @@ public class Config
         String[] parts = coords.split(",");
         if (parts.length != 5)
             throw new IllegalArgumentException("Input string must contain x, y, z, yaw and pitch");
-        
-        Integer x   = parseInteger(parts[0]);
-        Integer y   = parseInteger(parts[1]);
-        Integer z   = parseInteger(parts[2]);
+
+        Float x     = parseFloat(parts[0]);
+        Float y     = parseFloat(parts[1]);
+        Float z     = parseFloat(parts[2]);
         Float yaw   = parseFloat(parts[3]);
         Float pitch = parseFloat(parts[4]);
         
@@ -419,11 +443,11 @@ public class Config
     public static String locationToString(Location loc) {
         StringBuffer result = new StringBuffer();
         
-        result.append(loc.getBlockX() + ",");
-        result.append(loc.getBlockY() + ",");
-        result.append(loc.getBlockZ() + ",");
-        result.append(loc.getYaw() + ",");
-        result.append(loc.getPitch());
+        result.append(twoPlaces(loc.getX())).append(",");
+        result.append(twoPlaces(loc.getY())).append(",");
+        result.append(twoPlaces(loc.getZ())).append(",");
+        result.append(twoPlaces(loc.getYaw())).append(",");
+        result.append(twoPlaces(loc.getPitch()));
         
         return result.toString();
     }
@@ -433,6 +457,7 @@ public class Config
             return Integer.parseInt(s.trim());
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -442,7 +467,13 @@ public class Config
             return Float.parseFloat(s.trim());
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
+
+    private static String twoPlaces(double value) {
+        return df.format(value);
+    }
+    private static final DecimalFormat df = new DecimalFormat("#.00");
 }
