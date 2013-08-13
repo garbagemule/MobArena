@@ -441,7 +441,7 @@ public class Config
      * @return a String of the form "x,y,z,yaw,pitch"
      */
     public static String locationToString(Location loc) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         
         result.append(twoPlaces(loc.getX())).append(",");
         result.append(twoPlaces(loc.getY())).append(",");
