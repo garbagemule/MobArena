@@ -81,7 +81,10 @@ public class ArenaRegion
     }
     
     public void reloadLeaderboards() {
-        leaderboard = coords.getLocation("leaderboard", world);
+        leaderboard = coords.getLocation("leaderboard", null);
+        if (leaderboard != null && leaderboard.getWorld() == null) {
+            leaderboard.setWorld(world);
+        }
     }
     
     public void reloadSpawnpoints() {
@@ -451,8 +454,6 @@ public class ArenaRegion
                 lower = upper = null;
                 r1    = r2    = null;
         }
-        
-        // Grab the far corner
         
         // Min-max if both locations are non-null
         if (lower != null && upper != null) {
