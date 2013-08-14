@@ -46,7 +46,7 @@ public class ExpandLobbyRegionCommand implements Command
         }
         
         // In case of a "negative" region, fix it!
-        am.getSelectedArena().getRegion().fixRegion();
+        am.getSelectedArena().getRegion().fixLobbyRegion();
         
         Messenger.tellPlayer(sender, "Lobby region for '" + am.getSelectedArena().configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
         am.getSelectedArena().getRegion().save();
