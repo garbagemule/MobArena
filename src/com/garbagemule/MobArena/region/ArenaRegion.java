@@ -77,9 +77,7 @@ public class ArenaRegion
         arenaWarp = coords.getLocation("arena", world);
         lobbyWarp = coords.getLocation("lobby", world);
         specWarp  = coords.getLocation("spectator", world);
-        exitWarp  = coords.getLocation("exit", world);
-
-        leaderboard = coords.getLocation("leaderboard", world);
+        exitWarp  = coords.getLocation("exit", null);
     }
     
     public void reloadLeaderboards() {

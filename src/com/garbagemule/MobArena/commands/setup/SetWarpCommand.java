@@ -40,7 +40,7 @@ public class SetWarpCommand implements Command
         if (arg1.equals("spec")) arg1 = "spectator";
 
         if (!WARPS.contains(arg1)) {
-            Messenger.tellPlayer(sender, "Usage: /ma setwarp arena|lobby|spectator");
+            Messenger.tellPlayer(sender, "Usage: /ma setwarp arena|lobby|spectator|exit");
             return true;
         }
         
@@ -48,7 +48,7 @@ public class SetWarpCommand implements Command
         Arena arena = am.getSelectedArena();
         World aw = arena.getWorld();
         World pw = p.getLocation().getWorld();
-        boolean changeWorld = !aw.getName().equals(pw.getName());
+        boolean changeWorld = !arg1.equals("exit") && !aw.getName().equals(pw.getName());
         
         // Change worlds to make sure the region check doesn't fail
         if (changeWorld) arena.setWorld(pw);

@@ -453,8 +453,8 @@ public class Config
         result.append(twoPlaces(loc.getX())).append(",");
         result.append(twoPlaces(loc.getY())).append(",");
         result.append(twoPlaces(loc.getZ())).append(",");
-        result.append(twoPlaces(loc.getYaw())).append(",");
-        result.append(twoPlaces(loc.getPitch())).append(",");
+        result.append(twoPlaces(loc.getYaw(),   true)).append(",");
+        result.append(twoPlaces(loc.getPitch(), true)).append(",");
         result.append(loc.getWorld().getName());
         
         return result.toString();
@@ -480,8 +480,13 @@ public class Config
         }
     }
 
-    private static String twoPlaces(double value) {
-        return df.format(value);
+    private static String twoPlaces(double value, boolean force) {
+        return force ? DF_FORCE.format(value) : DF_NORMAL.format(value);
     }
-    private static final DecimalFormat df = new DecimalFormat("0.##");
+
+    private static String twoPlaces(double value) {
+        return twoPlaces(value, false);
+    }
+    private static final DecimalFormat DF_NORMAL = new DecimalFormat("0.##");
+    private static final DecimalFormat DF_FORCE  = new DecimalFormat("0.0#");
 }
