@@ -2,7 +2,7 @@ name: MobArena
 author: garbagemule
 main: com.garbagemule.MobArena.MobArena
 version: 0.95.5.16
-softdepend: [Spout,Towny,Heroes,MagicSpells,Vault]
+softdepend: [Multiverse-Core,Spout,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:
         description: Base command for MobArena
