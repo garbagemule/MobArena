@@ -61,7 +61,7 @@ public class Leaderboard
         }
         
         if (!(topLeft.getBlock().getState() instanceof Sign)) {
-            Messenger.warning("The leaderboard-node for arena '" + arena.configName() + "' does not point to a sign! Note that leaderboards must be in the same world as the arena itself!");
+            Messenger.warning("The leaderboard-node for arena '" + arena.configName() + "' does not point to a sign!");
             return;
         }
         
