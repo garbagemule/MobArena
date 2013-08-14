@@ -424,7 +424,7 @@ public class Config
      */
     public static Location parseLocation(World world, String coords) {
         String[] parts = coords.split(",");
-        if (parts.length != 5)
+        if (parts.length < 5)
             throw new IllegalArgumentException("Input string must contain x, y, z, yaw and pitch");
 
         Float x     = parseFloat(parts[0]);
