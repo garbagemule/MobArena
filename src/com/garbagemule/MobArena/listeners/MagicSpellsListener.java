@@ -4,13 +4,14 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.FileUtils;
-import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.waves.enums.*;
 import com.garbagemule.MobArena.MobArena;
 import com.nisovin.magicspells.events.SpellCastEvent;
@@ -23,12 +24,16 @@ public class MagicSpellsListener implements Listener
     public MagicSpellsListener(MobArena plugin)
     {
         this.plugin = plugin;
-        
+
         // Set up the MagicSpells config-file.
-        File spellFile = FileUtils.extractResource(plugin.getDataFolder(), "magicspells.yml", plugin.getClass());
-        Config spellConfig = new Config(spellFile);
-        spellConfig.load();
-        setupSpells(spellConfig);
+        plugin.saveResource("res/magicspells.yml", false);
+        FileConfiguration config = new YamlConfiguration();
+        try {
+            config.load(new File(plugin.getDataFolder(), "magicspells.yml"));
+            setupSpells(config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     @EventHandler(priority = EventPriority.NORMAL)
@@ -47,10 +52,10 @@ public class MagicSpellsListener implements Listener
         }
     }
     
-    private void setupSpells(Config config)
+    private void setupSpells(ConfigurationSection config)
     {
-        this.disabled        = config.getStringList("disabled-spells", new LinkedList<String>());
-        this.disabledOnBoss  = config.getStringList("disabled-on-bosses", new LinkedList<String>());
-        this.disabledOnSwarm = config.getStringList("disabled-on-swarms", new LinkedList<String>());
+        this.disabled        = config.getStringList("disabled-spells");
+        this.disabledOnBoss  = config.getStringList("disabled-on-bosses");
+        this.disabledOnSwarm = config.getStringList("disabled-on-swarms");
     }
 }

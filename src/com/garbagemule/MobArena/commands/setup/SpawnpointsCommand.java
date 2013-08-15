@@ -19,8 +19,8 @@ public class SpawnpointsCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        StringBuffer buffy = new StringBuffer();
-        Set<String> spawnpoints = am.getPlugin().getMAConfig().getKeys("arenas." + am.getSelectedArena().configName() + ".coords.spawnpoints");
+        StringBuilder buffy = new StringBuilder();
+        Set<String> spawnpoints = am.getPlugin().getConfig().getConfigurationSection("arenas." + am.getSelectedArena().configName() + ".coords.spawnpoints").getKeys(false);
         
         if (spawnpoints != null) {
             for (String s : spawnpoints) {

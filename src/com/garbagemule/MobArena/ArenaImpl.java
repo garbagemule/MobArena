@@ -13,12 +13,15 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
+
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.autostart.AutoStartTimer;
@@ -33,8 +36,6 @@ import com.garbagemule.MobArena.time.TimeStrategy;
 import com.garbagemule.MobArena.time.TimeStrategyLocked;
 import com.garbagemule.MobArena.time.TimeStrategyNull;
 import com.garbagemule.MobArena.util.*;
-import com.garbagemule.MobArena.util.config.Config;
-import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.inventory.InventoryUtils;
 import com.garbagemule.MobArena.waves.*;
@@ -48,7 +49,7 @@ public class ArenaImpl implements Arena
     private World world;
     
     // Settings section of the config-file for this arena.
-    private ConfigSection settings;
+    private ConfigurationSection settings;
     
     // Run-time settings and critical config settings
     private boolean enabled, protect, running, edit;
@@ -105,15 +106,15 @@ public class ArenaImpl implements Arena
     /**
      * Primary constructor. Requires a name and a world.
      */
-    public ArenaImpl(MobArena plugin, Config config, String name, World world) {
+    public ArenaImpl(MobArena plugin, ConfigurationSection section, String name, World world) {
         if (world == null)
             throw new NullPointerException("[MobArena] ERROR! World for arena '" + name + "' does not exist!");
         
         this.name     = name;
         this.world    = world;
         this.plugin   = plugin;
-        this.settings = new ConfigSection(config, "arenas." + name + ".settings");
-        this.region   = new ArenaRegion(new ConfigSection(config, "arenas." + name + ".coords"), this);
+        this.settings = makeSection(section, "settings");
+        this.region   = new ArenaRegion(section, this);
         
         this.enabled = settings.getBoolean("enabled", false);
         this.protect = settings.getBoolean("protect", true);
@@ -138,7 +139,7 @@ public class ArenaImpl implements Arena
         // Classes, items and permissions
         this.classes      = plugin.getArenaMaster().getClasses();
         this.attachments  = new HashMap<Player,PermissionAttachment>();
-        this.limitManager = new ClassLimitManager(this, classes, new ConfigSection(config, "arenas." + name + ".class-limits"));
+        this.limitManager = new ClassLimitManager(this, classes, makeSection(section, "class-limits"));
         
         // Blocks and pets
         this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
@@ -150,9 +151,9 @@ public class ArenaImpl implements Arena
         this.monsterManager = new MonsterManager();
         
         // Wave stuff
-        this.waveManager  = new WaveManager(this, config);
-        this.everyWaveMap = MAUtils.getArenaRewardMap(plugin, config, name, "every");
-        this.afterWaveMap = MAUtils.getArenaRewardMap(plugin, config, name, "after");
+        this.waveManager  = new WaveManager(this, section.getConfigurationSection("waves"));
+        this.everyWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "every");
+        this.afterWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "after");
         
         // Misc
         this.eventListener = new ArenaListener(this, plugin);
@@ -182,7 +183,7 @@ public class ArenaImpl implements Arena
     /////////////////////////////////////////////////////////////////////////*/
     
     @Override
-    public ConfigSection getSettings() {
+    public ConfigurationSection getSettings() {
         return settings;
     }
 
@@ -195,7 +196,7 @@ public class ArenaImpl implements Arena
     public void setWorld(World world) {
         this.world = world;
         settings.set("world", world.getName());
-        settings.getParent().save();
+        plugin.saveConfig();
         if (region != null) region.refreshWorld();
     }
 

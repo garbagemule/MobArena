@@ -4,36 +4,37 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.MutableInt;
-import com.garbagemule.MobArena.util.config.ConfigSection;
+import org.bukkit.plugin.Plugin;
 
 public class ClassLimitManager
 {
     private HashMap<ArenaClass,MutableInt> classLimits;
     private HashMap<ArenaClass, HashSet<String>> classesInUse;
-    private ConfigSection limits;
+    private ConfigurationSection limits;
     private Map<String,ArenaClass> classes;
     
-    public ClassLimitManager(Arena arena, Map<String,ArenaClass> classes, ConfigSection limits) {
+    public ClassLimitManager(Arena arena, Map<String,ArenaClass> classes, ConfigurationSection limits) {
         this.limits       = limits;
         this.classes      = classes;
         this.classLimits  = new HashMap<ArenaClass,MutableInt>();
         this.classesInUse = new HashMap<ArenaClass, HashSet<String>>();
 
-        loadLimitMap();
+        loadLimitMap(arena.getPlugin());
         initInUseMap();
     }
     
-    private void loadLimitMap() {
+    private void loadLimitMap(Plugin plugin) {
         // If the config-section is empty, create and populate it.
-        if (limits.getKeys() == null) {
+        if (limits.getKeys(false).isEmpty()) {
             for (ArenaClass ac : classes.values()) {
                 limits.set(ac.getConfigName(), -1);
             }
-            limits.getParent().save();
+            plugin.saveConfig();
         }
         
         // Populate the limits map using the values in the config-file.

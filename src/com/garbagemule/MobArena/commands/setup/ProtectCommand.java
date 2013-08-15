@@ -67,8 +67,8 @@ public class ProtectCommand implements Command
             }
             arena.setProtected(arg2.equals("true"));
         }
-        
-        arena.getSettings().getParent().save();
+
+        arena.getPlugin().saveConfig();
         Messenger.tellPlayer(sender, "Protection for arena '" + arena.configName() + "': " + ((arena.isProtected()) ? ChatColor.GREEN + "on" : ChatColor.RED + "off")); 
         return true;
     }

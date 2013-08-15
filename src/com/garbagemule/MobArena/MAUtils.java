@@ -19,6 +19,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
@@ -34,7 +35,6 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 
 public class MAUtils
@@ -54,30 +54,16 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */    
-    public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, Config config, String arena, String type)
+    public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
     {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
-        String typePath = ConfigUtils.waveRewardList(arena, type);
         Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
-        
-        if (config.getKeys(typePath) == null)
-        {
-            if (type.equals("every"))
-            {
-                config.set(typePath + ".3", "feather, bone, stick");
-                config.set(typePath + ".5", "dirt:4, gravel:4, stone:4");
-                config.set(typePath + ".10", "iron_ingot:10, gold_ingot:8");
-            }
-            else if (type.equals("after"))
-            {
-                config.set(typePath + ".7", "minecart, storage_minecart, powered_minecart");
-                config.set(typePath + ".13", "iron_sword, iron_pickaxe, iron_spade");
-                config.set(typePath + ".16", "diamond_sword");
-            }
-        }
+
+        String typePath = "rewards." + type;
+        if (!config.contains(typePath)) return result;
         
         //Set<String> waves = config.getKeys(arenaPath + type);
-        Set<String> waves = config.getKeys(typePath);
+        Set<String> waves = config.getConfigurationSection(typePath).getKeys(false);
         if (waves == null) return result;
         
         for (String n : waves)
@@ -86,7 +72,7 @@ public class MAUtils
                 continue;
             
             int wave = Integer.parseInt(n);
-            String path = ConfigUtils.waveReward(arena, type, wave);
+            String path = typePath + "." + wave;
             String rewards = config.getString(path);
             
             result.put(wave, ItemParser.parseItems(rewards));
@@ -494,10 +480,9 @@ public class MAUtils
         {
             world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
         }
-        
-        Config config = plugin.getMAConfig();
-        config.remove("arenas." + name);
-        config.save();
+
+        plugin.getConfig().set("arenas." + name, null);
+        plugin.saveConfig();
         
         file.delete();
         

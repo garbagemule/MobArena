@@ -19,8 +19,8 @@ public class ContainersCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        StringBuffer buffy = new StringBuffer();
-        Set<String> containers = am.getPlugin().getMAConfig().getKeys("arenas." + am.getSelectedArena().configName() + ".coords.containers");
+        StringBuilder buffy = new StringBuilder();
+        Set<String> containers = am.getPlugin().getConfig().getConfigurationSection("arenas." + am.getSelectedArena().configName() + ".coords.containers").getKeys(false);
         
         if (containers != null) {
             for (String c : containers) {

@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
@@ -77,7 +78,6 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.region.RegionPoint;
 import com.garbagemule.MobArena.repairable.*;
 import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.waves.MABoss;
 
 public class ArenaListener
@@ -118,7 +118,7 @@ public class ArenaListener
          * fairly easy to implement an observer pattern - More private fields -
          * Uglier code
          */
-        ConfigSection s = arena.getSettings();
+        ConfigurationSection s = arena.getSettings();
         this.softRestore      = s.getBoolean("soft-restore",         false);
         this.softRestoreDrops = s.getBoolean("soft-restore-drops",   false);
         this.protect          = s.getBoolean("protect",              true);

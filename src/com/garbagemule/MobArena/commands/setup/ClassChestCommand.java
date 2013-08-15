@@ -51,7 +51,7 @@ public class ClassChestCommand implements Command {
                 return true;
         }
 
-        am.getPlugin().getMAConfig().set("classes." + ac.getConfigName() + ".classchest", b.getLocation());
+        am.getPlugin().getConfig().set("classes." + ac.getConfigName() + ".classchest", b.getLocation());
         am.saveConfig();
         Messenger.tellPlayer(sender, "Class chest updated for class " + ac.getConfigName());
         am.loadClasses();

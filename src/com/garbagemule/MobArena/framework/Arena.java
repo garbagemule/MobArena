@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,7 +23,6 @@ import com.garbagemule.MobArena.ScoreboardManager;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
-import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.waves.WaveManager;
 
@@ -33,8 +33,8 @@ public interface Arena
     //      NEW METHODS IN REFACTORING
     //
     /////////////////////////////////////////////////////////////////////////*/
-    
-    public ConfigSection getSettings();
+
+    public ConfigurationSection getSettings();
     
     public World getWorld();
     

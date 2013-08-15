@@ -29,9 +29,7 @@ import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.listeners.SpoutScreenListener;
 import com.garbagemule.MobArena.metrics.Metrics;
-import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.MobArena.util.VersionChecker;
-import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
@@ -42,7 +40,6 @@ import com.garbagemule.MobArena.waves.ability.AbilityManager;
  */
 public class MobArena extends JavaPlugin
 {
-    private Config config;
     private ArenaMaster arenaMaster;
     private CommandHandler commandHandler;
     
@@ -69,35 +66,35 @@ public class MobArena extends JavaPlugin
         
         // Load boss abilities
         loadAbilities();
-        
+
         // Set up soft dependencies
         setupVault();
         setupHeroes();
         setupSpout();
         setupMagicSpells();
         setupStrategies();
-        
+
         // Set up the ArenaMaster
         arenaMaster = new ArenaMasterImpl(this);
         arenaMaster.initialize();
-        
+
         // Register any inventories to restore.
         registerInventories();
-        
+
         // Make sure all the announcements are configured.
         MAMessages.init(this);
-        
+
         // Register event listeners
         registerListeners();
-        
+
         // Go go Metrics
         startMetrics();
-        
+
         // Announce enable!
         Messenger.info("v" + this.getDescription().getVersion() + " enabled.");
-        
+
         // Check for updates
-        if (config.getBoolean("global-settings.update-notification", false)) {
+        if (getConfig().getBoolean("global-settings.update-notification", false)) {
             VersionChecker.checkForUpdates(this, null);
         }
     }
@@ -117,11 +114,12 @@ public class MobArena extends JavaPlugin
     }
     
     private void loadConfigFile() {
+        // Create if missing
         saveDefaultConfig();
-        config = new Config(new File(getDataFolder(), "config.yml"));
-        updateSettings(config);
-        config.setHeader(getHeader());
-        config.save();
+
+        // Set the header and save
+        getConfig().options().header(getHeader());
+        saveConfig();
     }
     
     private void registerListeners() {
@@ -184,7 +182,7 @@ public class MobArena extends JavaPlugin
     private void setupMagicSpells() {
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) return;
-        
+
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
     }
     
@@ -213,10 +211,6 @@ public class MobArena extends JavaPlugin
         return healthStrategy;
     }
     
-    public Config getMAConfig() {
-        return config;
-    }
-    
     public ArenaMaster getArenaMaster() {
         return arenaMaster;
     }
@@ -225,21 +219,11 @@ public class MobArena extends JavaPlugin
         return commandHandler;
     }
     
-    private void updateSettings(Config config) {
-        Set<String> arenas = config.getKeys("arenas");
-        if (arenas == null) return;
-        
-        for (String arena : arenas) {
-            String path = "arenas." + arena + ".settings";
-            ConfigUtils.replaceAllNodes(getFilename(), config, path, "settings.yml");
-        }
-    }
-    
     private String getHeader() {
         String sep = System.getProperty("line.separator");
         return "MobArena v" + this.getDescription().getVersion() + " - Config-file" + sep + 
                "Read the Wiki for details on how to set up this file: http://goo.gl/F5TTc" + sep +
-               "Note: You -must- use spaces instead of tabs!\r";
+               "Note: You -must- use spaces instead of tabs!";
     }
     
     private void registerInventories() {
@@ -302,9 +286,5 @@ public class MobArena extends JavaPlugin
         double major = item.getAmount();
         double minor = item.getDurability() / 100D;
         return major + minor;
-    }
-
-    public String getFilename() {
-        return super.getFile().getName();
     }
 }

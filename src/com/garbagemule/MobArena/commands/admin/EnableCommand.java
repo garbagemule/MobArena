@@ -49,7 +49,7 @@ public class EnableCommand implements Command
     
     private void enable(Arena arena, CommandSender sender) {
         arena.setEnabled(true);
-        arena.getSettings().getParent().save();
+        arena.getPlugin().saveConfig();
         Messenger.tellPlayer(sender, "Arena '" + arena.configName() + "' " + ChatColor.GREEN + "enabled");
     }
 }

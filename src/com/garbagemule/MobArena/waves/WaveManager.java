@@ -5,36 +5,26 @@ import java.util.TreeSet;
 
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.config.Config;
-import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.waves.enums.*;
+import org.bukkit.configuration.ConfigurationSection;
 
 public class WaveManager
 {
     private Arena arena;
-    private Config config;
+    private ConfigurationSection section;
 
     private Wave defaultWave, currentWave;
     private TreeSet<Wave> recurrentWaves, singleWaves, singleWavesInstance;
     
     private int wave, finalWave;
     
-    public WaveManager(Arena arena, Config config) {
+    public WaveManager(Arena arena, ConfigurationSection section) {
         this.arena     = arena;
-        this.config    = config;
+        this.section   = section;
         this.wave      = 0;
         this.finalWave = 0;
         
         reloadWaves();
-    }
-    
-    public void reload() {
-        config.load();
-        reloadWaves();
-    }
-    
-    public void save() {
-        config.save();
     }
     
     public TreeSet<Wave> getRecurrentWaves() {
@@ -48,13 +38,13 @@ public class WaveManager
     }
     
     public void reloadWaves() {
-        ConfigSection rConfig = config.getConfigSection("arenas." + arena.configName() + ".waves.recurrent");
-        ConfigSection sConfig = config.getConfigSection("arenas." + arena.configName() + ".waves.single");
+        ConfigurationSection rConfig = section.getConfigurationSection("recurrent");
+        ConfigurationSection sConfig = section.getConfigurationSection("single");
         
         recurrentWaves = WaveParser.parseWaves(arena, rConfig, WaveBranch.RECURRENT);
         singleWaves    = WaveParser.parseWaves(arena, sConfig, WaveBranch.SINGLE);
         
-        finalWave = config.getInt("arenas." + arena.configName() + ".settings.final-wave", 0);
+        finalWave = section.getInt("arenas." + arena.configName() + ".settings.final-wave", 0);
         
         if (recurrentWaves.isEmpty()) {
             Messenger.warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));

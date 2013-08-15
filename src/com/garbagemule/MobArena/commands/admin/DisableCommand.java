@@ -49,7 +49,7 @@ public class DisableCommand implements Command
     
     private void disable(Arena arena, CommandSender sender) {
         arena.setEnabled(false);
-        arena.getSettings().getParent().save();
+        arena.getPlugin().saveConfig();
         Messenger.tellPlayer(sender, "Arena '" + arena.configName() + "' " + ChatColor.RED + "disabled");
     }
 }

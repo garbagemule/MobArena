@@ -1,13 +1,9 @@
 package com.garbagemule.MobArena.region;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.Enums;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -16,12 +12,12 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.Messenger;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.config.ConfigSection;
+import java.util.*;
+
+import static com.garbagemule.MobArena.util.config.ConfigUtils.*;
 
 public class ArenaRegion
 {
@@ -34,17 +30,17 @@ public class ArenaRegion
     
     private boolean setup, lobbySetup;
     
-    private ConfigSection coords;
-    private ConfigSection spawns;
-    private ConfigSection chests;
+    private ConfigurationSection coords;
+    private ConfigurationSection spawns;
+    private ConfigurationSection chests;
     
-    public ArenaRegion(ConfigSection coords, Arena arena) {
+    public ArenaRegion(ConfigurationSection section, Arena arena) {
         this.arena  = arena;
         refreshWorld();
-        
-        this.coords = coords;
-        this.spawns = coords.getConfigSection("spawnpoints");
-        this.chests = coords.getConfigSection("containers");
+
+        this.coords = makeSection(section, "coords");
+        this.spawns = makeSection(coords,  "spawnpoints");
+        this.chests = makeSection(coords,  "containers");
         
         reloadAll();
     }
@@ -64,24 +60,24 @@ public class ArenaRegion
     }
     
     public void reloadRegion() {
-        p1 = coords.getLocation("p1", world);
-        p2 = coords.getLocation("p2", world);
+        p1 = parseLocation(coords, "p1", world);
+        p2 = parseLocation(coords, "p2", world);
         //fixRegion();
         
-        l1 = coords.getLocation("l1", world);
-        l2 = coords.getLocation("l2", world);
+        l1 = parseLocation(coords, "l1", world);
+        l2 = parseLocation(coords, "l2", world);
         //fixLobbyRegion();
     }
     
     public void reloadWarps() {
-        arenaWarp = coords.getLocation("arena", world);
-        lobbyWarp = coords.getLocation("lobby", world);
-        specWarp  = coords.getLocation("spectator", world);
-        exitWarp  = coords.getLocation("exit", null);
+        arenaWarp = parseLocation(coords, "arena", world);
+        lobbyWarp = parseLocation(coords, "lobby", world);
+        specWarp  = parseLocation(coords, "spectator", world);
+        exitWarp  = parseLocation(coords, "exit", null);
     }
     
     public void reloadLeaderboards() {
-        leaderboard = coords.getLocation("leaderboard", null);
+        leaderboard = parseLocation(coords, "leaderboard", null);
         if (leaderboard != null && leaderboard.getWorld() == null) {
             leaderboard.setWorld(world);
         }
@@ -89,20 +85,20 @@ public class ArenaRegion
     
     public void reloadSpawnpoints() {
         spawnpoints = new HashMap<String,Location>();
-        Set<String> keys = spawns.getKeys();
+        Set<String> keys = spawns.getKeys(false);
         if (keys != null) {
             for (String spwn : keys) {
-                spawnpoints.put(spwn, spawns.getLocation(spwn, world));
+                spawnpoints.put(spwn, parseLocation(spawns, spwn, world));
             }
         }
     }
     
     public void reloadChests() {
         containers = new HashMap<String,Location>();
-        Set<String> keys = chests.getKeys();
+        Set<String> keys = chests.getKeys(false);
         if (keys != null) {
             for (String chst : keys) {
-                containers.put(chst, chests.getLocation(chst, world));
+                containers.put(chst, parseLocation(chests, chst, world));
             }
         }
     }
@@ -229,25 +225,31 @@ public class ArenaRegion
     
     // Region expand
     public void expandUp(int amount) {
-        p2.setY(Math.min(arena.getWorld().getMaxHeight(), p2.getY() + amount));
-        set(RegionPoint.P2, p2);
+        Location l = new Location(p2.getWorld(), p2.getX(), Math.min(p2.getWorld().getMaxHeight(), p2.getY() + amount), p2.getZ());
+        setLocation(coords, "p2", l);
+        save();
+        reloadRegion();
     }
     
     public void expandDown(int amount) {
-        p1.setY(Math.max(0D, p1.getY() - amount));
-        set(RegionPoint.P1, p1);
+        Location l = new Location(p1.getWorld(), p1.getX(), Math.max(0D, p1.getY() - amount), p1.getZ());
+        setLocation(coords, "p1", l);
+        save();
+        reloadRegion();
     }
     
     public void expandP1(int x, int z) {
-        p1.setX(p1.getX() - x);
-        p1.setZ(p1.getZ() - z);
-        set(RegionPoint.P1, p1);
+        Location l = new Location(p1.getWorld(), p1.getX() - x, p1.getY(), p1.getZ() - z);
+        setLocation(coords, "p1", l);
+        save();
+        reloadRegion();
     }
     
     public void expandP2(int x, int z) {
-        p2.setX(p2.getX() + x);
-        p2.setZ(p2.getZ() + z);
-        set(RegionPoint.P2, p2);
+        Location l = new Location(p2.getWorld(), p2.getX() + x, p2.getY(), p2.getZ() + z);
+        setLocation(coords, "p2", l);
+        save();
+        reloadRegion();
     }
     
     public void expandOut(int amount) {
@@ -292,8 +294,8 @@ public class ArenaRegion
     }
     
     private void fix(String location1, String location2) {
-        Location loc1 = coords.getLocation(location1, world);
-        Location loc2 = coords.getLocation(location2, world);
+        Location loc1 = parseLocation(coords, location1, world);
+        Location loc2 = parseLocation(coords, location2, world);
         
         if (loc1 == null || loc2 == null) {
             return;
@@ -331,8 +333,8 @@ public class ArenaRegion
             return;
         }
         
-        coords.set(location1, loc1);
-        coords.set(location2, loc2);
+        setLocation(coords, location1, loc1);
+        setLocation(coords, location2, loc2);
         save();
     }
     
@@ -479,8 +481,8 @@ public class ArenaRegion
         }
         
         // Set the coords and save
-        if (lower != null) coords.set(r1.name().toLowerCase(), lower);
-        if (upper != null) coords.set(r2.name().toLowerCase(), upper);
+        if (lower != null) setLocation(coords, r1.name().toLowerCase(), lower);
+        if (upper != null) setLocation(coords, r2.name().toLowerCase(), upper);
         save();
         
         // Reload regions and verify data
@@ -499,7 +501,7 @@ public class ArenaRegion
     
     public void setWarp(RegionPoint point, Location l) {
         // Set the point and save
-        coords.set(point.toString(), l);
+        setLocation(coords, point.toString(), l);
         save();
         
         // Then reload warps
@@ -508,7 +510,7 @@ public class ArenaRegion
     
     public void setLeaderboard(Location l) {
         // Set the point and save
-        coords.set("leaderboard", l);
+        setLocation(coords, "leaderboard", l);
         save();
         
         // Then reload the leaderboards
@@ -517,7 +519,7 @@ public class ArenaRegion
     
     public void addSpawn(String name, Location loc) {
         // Add the spawn and save
-        spawns.set(name, loc);
+        setLocation(spawns, name, loc);
         save();
         
         // Reload spawnpoints and verify data
@@ -532,7 +534,7 @@ public class ArenaRegion
         }
         
         // Null the spawnpoint and save
-        spawns.set(name, null);
+        setLocation(spawns, name, null);
         save();
         
         // Reload spawnpoints and verify data
@@ -543,7 +545,7 @@ public class ArenaRegion
     
     public void addChest(String name, Location loc) {
         // Add the chest location and save
-        chests.set(name, loc);
+        setLocation(chests, name, loc);
         save();
         
         // Reload the chests
@@ -557,7 +559,7 @@ public class ArenaRegion
         }
         
         // Null the chest and save
-        chests.set(name, null);
+        setLocation(chests, name, null);
         save();
         
         // Reload the chests
@@ -566,7 +568,7 @@ public class ArenaRegion
     }
     
     public void save() {
-        spawns.getParent().save();
+        arena.getPlugin().saveConfig();
     }
     
     public void showRegion(final Player p) {
