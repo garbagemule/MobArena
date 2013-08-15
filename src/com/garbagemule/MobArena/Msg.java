@@ -86,15 +86,15 @@ public enum Msg {
     }
 
     void set(String value) {
-        this.value = ChatColor.translateAlternateColorCodes('&', value);
+        this.value = value;
     }
 
     public String toString() {
-        return value;
+        return ChatColor.translateAlternateColorCodes('&', value);
     }
 
     public String format(String s) {
-        return value.replaceAll("%", s);
+        return toString().replaceAll("%", s);
     }
 
     static void load(ConfigurationSection config) {
