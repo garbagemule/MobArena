@@ -36,13 +36,13 @@ public class RootTarget implements Ability
      * How many times the player will be warped back to his original position.
      * Must be greater than 0.
      */
-    private final int ITERATIONS = 5;
+    private final int ITERATIONS = 30;
     
     /**
      * How many server ticks between each iteration of
      * Must be greater than 0.
      */
-    private final int TICKS = 5;
+    private final int TICKS = 1;
     
     @Override
     public void execute(Arena arena, MABoss boss) {
