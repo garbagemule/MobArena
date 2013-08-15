@@ -583,7 +583,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Finally, add it to the arena list.
         arenas.add(arena);
-        Messenger.info("Loaded arena '" + arenaname + "'.");
         return arena;
     }
 
@@ -640,6 +639,10 @@ public class ArenaMasterImpl implements ArenaMaster
         loadSettings();
         loadClasses();
         loadArenas();
+
+        for (Arena arena : arenas) {
+            Messenger.info("Loaded arena '" + arena.configName() + "'");
+        }
 
         // If MobArena was enabled, re-enable it after updating.
         if (wasEnabled) {
