@@ -22,18 +22,18 @@ public class ConfigCommand implements Command
         
         if (arg1.equals("reload")) {
             am.reloadConfig();
-            Messenger.tellPlayer(sender, "Config reloaded.");
+            Messenger.tell(sender, "Config reloaded.");
             return true;
         }
         
         if (arg1.equals("save")) {
             am.saveConfig();
-            Messenger.tellPlayer(sender, "Config saved.");
+            Messenger.tell(sender, "Config saved.");
             return true;
         }
 
         // Requires an argument.
-        Messenger.tellPlayer(sender, "Usage: /ma config reload|save");
+        Messenger.tell(sender, "Usage: /ma config reload|save");
         return false;
     }
 }

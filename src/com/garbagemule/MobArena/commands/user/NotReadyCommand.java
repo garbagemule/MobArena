@@ -28,7 +28,7 @@ public class NotReadyCommand implements Command
         if (!arg1.equals("")) {
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
         }
@@ -37,17 +37,17 @@ public class NotReadyCommand implements Command
             arena = am.getArenaWithPlayer(p);
             
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.LEAVE_NOT_PLAYING);
+                Messenger.tell(sender, Msg.LEAVE_NOT_PLAYING);
                 return false;
             }
         }
         else {
-            Messenger.tellPlayer(sender, "Usage: /ma notready <arena name>");
+            Messenger.tell(sender, "Usage: /ma notready <arena name>");
             return false;
         }
         
         String list = MAUtils.listToString(arena.getNonreadyPlayers(), am.getPlugin());
-        Messenger.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(list));
+        Messenger.tell(sender, Msg.MISC_LIST_PLAYERS.format(list));
         return true;
     }
 }

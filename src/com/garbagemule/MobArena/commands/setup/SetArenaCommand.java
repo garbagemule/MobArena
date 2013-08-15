@@ -23,17 +23,17 @@ public class SetArenaCommand implements Command
 
         // Require an argument
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma setarena <arena>");
+            Messenger.tell(sender, "Usage: /ma setarena <arena>");
             return false;
         }
         
         Arena arena = am.getArenaWithName(arg1);
         if (arena != null) {
             am.setSelectedArena(arena);
-            Messenger.tellPlayer(sender, "Currently selected arena: " + arena.configName());
+            Messenger.tell(sender, "Currently selected arena: " + arena.configName());
         }
         else {
-            Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+            Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
         }
         
         return true;

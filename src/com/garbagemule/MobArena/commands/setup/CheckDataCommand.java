@@ -23,7 +23,7 @@ public class CheckDataCommand implements Command
         
         Arena arena = arg1.equals("") ? am.getSelectedArena() : am.getArenaWithName(arg1);
         if (arena == null) {
-            Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+            Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
             return false;
         }
         

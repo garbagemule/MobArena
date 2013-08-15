@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,9 +67,6 @@ import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.listeners.MAGlobalListener.TeleportResponse;
@@ -310,7 +306,7 @@ public class ArenaListener
         arena.setLeaderboard(new Leaderboard(plugin, arena, event.getBlock().getLocation()));
         arena.getRegion().set(RegionPoint.LEADERBOARD, event.getBlock().getLocation());
 
-        Messenger.tellPlayer(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
+        Messenger.tell(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event) {
@@ -418,7 +414,7 @@ public class ArenaListener
             onMountDeath(event);
         }
         else if (monsters.removeGolem(event.getEntity())) {
-            Messenger.tellAll(arena, Msg.GOLEM_DIED);
+            Messenger.announce(arena, Msg.GOLEM_DIED);
         }
     }
 
@@ -488,7 +484,7 @@ public class ArenaListener
                             msg += MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount();
                         }
                         for (Player q : arena.getPlayersInArena()) {
-                            Messenger.tellPlayer(q, msg);
+                            Messenger.tell(q, msg);
                         }
                     }
                 }
@@ -792,25 +788,25 @@ public class ArenaListener
         // If the player is active in the arena, only cancel if sharing is not allowed
         if (arena.inArena(p)) {
             if (!canShare) {
-                Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+                Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
                 event.setCancelled(true);
             }
         }
         
         // If the player is in the lobby, just cancel
         else if (arena.inLobby(p)) {
-            Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+            Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
         }
         
         // Same if it's a spectator, but...
         else if (arena.inSpec(p)) {
-            Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+            Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
             
             // If the spectator isn't in the region, force them to leave
             if (!region.contains(p.getLocation())) {
-                Messenger.tellPlayer(p, Msg.MISC_MA_LEAVE_REMINDER);
+                Messenger.tell(p, Msg.MISC_MA_LEAVE_REMINDER);
                 arena.playerLeave(p);
             }
         }
@@ -821,7 +817,7 @@ public class ArenaListener
          * they are trying to drop items when not allowed
          */
         else if (region.contains(p.getLocation())) {
-            Messenger.tellPlayer(p, Msg.LOBBY_DROP_ITEM);
+            Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
         }
 
@@ -882,11 +878,11 @@ public class ArenaListener
 
     private void handleReadyBlock(Player p) {
         if (arena.getArenaPlayer(p).getArenaClass() != null) {
-            Messenger.tellPlayer(p, Msg.LOBBY_PLAYER_READY);
+            Messenger.tell(p, Msg.LOBBY_PLAYER_READY);
             arena.playerReady(p);
         }
         else {
-            Messenger.tellPlayer(p, Msg.LOBBY_PICK_CLASS);
+            Messenger.tell(p, Msg.LOBBY_PICK_CLASS);
         }
     }
 
@@ -899,7 +895,7 @@ public class ArenaListener
 
         // Check for permission.
         if (!plugin.has(p, "mobarena.classes." + className) && !className.equals("random")) {
-            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PERMISSION);
+            Messenger.tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
         
@@ -913,7 +909,7 @@ public class ArenaListener
         
         // If the new class is full, inform the player.
         if (!classLimits.canPlayerJoinClass(newAC)) {
-            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
+            Messenger.tell(p, Msg.LOBBY_CLASS_FULL);
             return;
         }
         
@@ -928,7 +924,7 @@ public class ArenaListener
     /*private boolean cansPlayerJoinClass(ArenaClass ac, Player p) {
         // If they can not join the class, deny them
         if (!classLimits.canPlayerJoinClass(ac)) {
-            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_FULL);
+            Messenger.tell(p, Msg.LOBBY_CLASS_FULL);
             return false;
         }
         
@@ -985,17 +981,17 @@ public class ArenaListener
                             }
                             arena.assignClassGiveInv(p, className, contents);
                             p.getInventory().setContents(contents);
-                            Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
+                            Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
                             return;
                         }
                         // Otherwise just fall through and use the items from the config-file
                     }
                     arena.assignClass(p, className);
-                    Messenger.tellPlayer(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className), arena.getClassLogo(className));
+                    Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
                 }
                 else {
                     arena.addRandomPlayer(p);
-                    Messenger.tellPlayer(p, Msg.LOBBY_CLASS_RANDOM);
+                    Messenger.tell(p, Msg.LOBBY_CLASS_RANDOM);
                 }
             }
         });
@@ -1065,7 +1061,7 @@ public class ArenaListener
                 return TeleportResponse.ALLOW;
             }
 
-            Messenger.tellPlayer(p, Msg.WARP_FROM_ARENA);
+            Messenger.tell(p, Msg.WARP_FROM_ARENA);
             return TeleportResponse.REJECT;
         }
         else if (region.contains(to)) {
@@ -1078,7 +1074,7 @@ public class ArenaListener
                 return TeleportResponse.ALLOW;
             }
 
-            Messenger.tellPlayer(p, Msg.WARP_TO_ARENA);
+            Messenger.tell(p, Msg.WARP_TO_ARENA);
             return TeleportResponse.REJECT;
         }
 
@@ -1111,7 +1107,7 @@ public class ArenaListener
 
         // Cancel the event regardless.
         event.setCancelled(true);
-        Messenger.tellPlayer(p, Msg.MISC_COMMAND_NOT_ALLOWED);
+        Messenger.tell(p, Msg.MISC_COMMAND_NOT_ALLOWED);
     }
 
     public void onPlayerPreLogin(PlayerLoginEvent event) {

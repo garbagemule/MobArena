@@ -58,8 +58,8 @@ public class VersionChecker
                                     Messenger.info("MobArena v" + latestVersion + " is now available!");
                                     Messenger.info("Your version: v" + currentVersion);
                                 } else if (player.isOnline()) {
-                                    Messenger.tellPlayer(player, "MobArena v" + latestVersion + " is now available!");
-                                    Messenger.tellPlayer(player, "Your version: v" + currentVersion);
+                                    Messenger.tell(player, "MobArena v" + latestVersion + " is now available!");
+                                    Messenger.tell(player, "Your version: v" + currentVersion);
                                 }
                             }
                         }, (player == null ? 0 : 60));

@@ -26,7 +26,7 @@ public class SetWarpCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
         
@@ -40,7 +40,7 @@ public class SetWarpCommand implements Command
         if (arg1.equals("spec")) arg1 = "spectator";
 
         if (!WARPS.contains(arg1)) {
-            Messenger.tellPlayer(sender, "Usage: /ma setwarp arena|lobby|spectator|exit");
+            Messenger.tell(sender, "Usage: /ma setwarp arena|lobby|spectator|exit");
             return true;
         }
         
@@ -56,9 +56,9 @@ public class SetWarpCommand implements Command
         // Make sure the arena warp is inside the region
         if (arg1.equals("arena") && !arena.getRegion().contains(p.getLocation())) {
             if (arena.getRegion().isDefined()) {
-                Messenger.tellPlayer(sender, "You must be inside the arena region!");
+                Messenger.tell(sender, "You must be inside the arena region!");
             } else {
-                Messenger.tellPlayer(sender, "You must first set the region points p1 and p2");
+                Messenger.tell(sender, "You must first set the region points p1 and p2");
             }
             
             // Restore the world reference in the arena 
@@ -70,11 +70,11 @@ public class SetWarpCommand implements Command
             // Notify the player if world changed
             if (changeWorld) {
                 String msg = String.format("Changed world of arena '%s' from '%s' to '%s'", arena.configName(), aw.getName(), pw.getName());
-                Messenger.tellPlayer(sender, msg);
+                Messenger.tell(sender, msg);
             }
             
             // Then notify about point set
-            Messenger.tellPlayer(sender, "Warp point '" + arg1 + "' was set for arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Warp point '" + arg1 + "' was set for arena '" + am.getSelectedArena().configName() + "'");
             arena.getRegion().checkData(am.getPlugin(), sender, true, false, true, false);
         }
         return true;

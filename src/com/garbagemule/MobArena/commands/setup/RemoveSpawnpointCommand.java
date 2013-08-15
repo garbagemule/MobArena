@@ -22,14 +22,14 @@ public class RemoveSpawnpointCommand implements Command
 
         // Require an argument
         if (!arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removespawn <point name>");
+            Messenger.tell(sender, "Usage: /ma removespawn <point name>");
             return true;
         }
 
         if (am.getSelectedArena().getRegion().removeSpawn(arg1))
-            Messenger.tellPlayer(sender, "Spawnpoint " + arg1 + " removed for arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Spawnpoint " + arg1 + " removed for arena '" + am.getSelectedArena().configName() + "'");
         else
-            Messenger.tellPlayer(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.getSelectedArena().configName() + "'");
         return true;
     }
 }

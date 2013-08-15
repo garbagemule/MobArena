@@ -22,7 +22,7 @@ public class ShowSpawnsCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
         
@@ -41,7 +41,7 @@ public class ShowSpawnsCommand implements Command
             }
 
             if (arena.getRegion().getSpawnpoints().isEmpty()) {
-                Messenger.tellPlayer(sender, "There are no spawnpoints in the selected arena.");
+                Messenger.tell(sender, "There are no spawnpoints in the selected arena.");
                 return false;
             }
         }
@@ -49,7 +49,7 @@ public class ShowSpawnsCommand implements Command
             arena = am.getArenaWithName(arg1);
             
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
         }

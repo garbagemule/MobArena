@@ -20,7 +20,7 @@ public class SetClassCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
         
@@ -33,7 +33,7 @@ public class SetClassCommand implements Command
         
         // Require an argument.
         if (arg1.equals("")) {
-            Messenger.tellPlayer(p, "Usage: /ma setclass (safe) <classname>");
+            Messenger.tell(p, "Usage: /ma setclass (safe) <classname>");
             return true;
         }
         
@@ -41,7 +41,7 @@ public class SetClassCommand implements Command
         boolean safe = arg1.equals("safe");
 
         if (safe && arg2.equals("")) {
-            Messenger.tellPlayer(p, "Usage: /ma setclass (safe) <classname>");
+            Messenger.tell(p, "Usage: /ma setclass (safe) <classname>");
             return true;
         }
         
@@ -53,13 +53,13 @@ public class SetClassCommand implements Command
         
         // If the class is null, it was not created.
         if (arenaClass == null) {
-            Messenger.tellPlayer(p, "That class already exists!");
-            Messenger.tellPlayer(p, "To overwrite, omit the 'safe' parameter.");
+            Messenger.tell(p, "That class already exists!");
+            Messenger.tell(p, "To overwrite, omit the 'safe' parameter.");
             return true;
         }
         
         // Otherwise, yay!
-        Messenger.tellPlayer(p, "Class '" + className + "' set with your current inventory.");
+        Messenger.tell(p, "Class '" + className + "' set with your current inventory.");
         return true;
     }
 }

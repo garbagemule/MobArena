@@ -23,18 +23,18 @@ public class RemoveArenaCommand implements Command
 
         // Require an argument
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removearena <arena>");
+            Messenger.tell(sender, "Usage: /ma removearena <arena>");
             return false;
         }
         
         if (am.getArenas().size() == 1) {
-            Messenger.tellPlayer(sender, "At least one arena must exist.");
+            Messenger.tell(sender, "At least one arena must exist.");
             return false;
         }
         
         Arena arena = am.getArenaWithName(arg1);
         if (arena == null) {
-            Messenger.tellPlayer(sender, "There is no arena with that name.");
+            Messenger.tell(sender, "There is no arena with that name.");
             return false;
         }
         
@@ -44,7 +44,7 @@ public class RemoveArenaCommand implements Command
             am.setSelectedArena(am.getArenas().get(0));
         }
         
-        Messenger.tellPlayer(sender, "Arena '" + arena.configName() + "' deleted.");
+        Messenger.tell(sender, "Arena '" + arena.configName() + "' deleted.");
         return true;
     }
 }

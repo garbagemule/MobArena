@@ -20,7 +20,7 @@ public class SpecCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
         
@@ -37,7 +37,7 @@ public class SpecCommand implements Command
 
         // Deny spectating from other arenas
         if (fromArena != null && (fromArena.inArena(p) || fromArena.inLobby(p))) {
-            Messenger.tellPlayer(p, Msg.SPEC_ALREADY_PLAYING);
+            Messenger.tell(p, Msg.SPEC_ALREADY_PLAYING);
             return false;
         }
         

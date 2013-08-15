@@ -22,14 +22,14 @@ public class RemoveContainerCommand implements Command
 
         // Require an argument
         if (!arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removecontainer <point name>");
+            Messenger.tell(sender, "Usage: /ma removecontainer <point name>");
             return false;
         }
 
         if (am.getSelectedArena().getRegion().removeChest(arg1))
-            Messenger.tellPlayer(sender, "Container " + arg1 + " removed for arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Container " + arg1 + " removed for arena '" + am.getSelectedArena().configName() + "'");
         else
-            Messenger.tellPlayer(sender, "Could not find the container " + arg1 + "for the arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Could not find the container " + arg1 + "for the arena '" + am.getSelectedArena().configName() + "'");
         return true;
     }
 }

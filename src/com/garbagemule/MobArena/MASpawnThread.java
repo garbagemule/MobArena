@@ -9,14 +9,9 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-import com.garbagemule.MobArena.ArenaPlayer;
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.events.NewWaveEvent;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
@@ -274,7 +269,7 @@ public class MASpawnThread implements Runnable
                 continue;
             }
             
-            Messenger.tellPlayer(p, "Leaving so soon?");
+            Messenger.tell(p, "Leaving so soon?");
             p.getInventory().clear();
             arena.playerLeave(p);
         }
@@ -322,19 +317,19 @@ public class MASpawnThread implements Runnable
             rewardManager.addReward(p, reward);
 
             if (reward == null) {
-                Messenger.tellPlayer(p, "ERROR! Problem with rewards. Notify server host!");
+                Messenger.tell(p, "ERROR! Problem with rewards. Notify server host!");
                 Messenger.warning("Could not add null reward. Please check the config-file!");
             }
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
                 if (plugin.giveMoney(p, reward)) { // Money already awarded here, not needed at end of match as well
-                    Messenger.tellPlayer(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
+                    Messenger.tell(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
                 }
                 else {
                     Messenger.warning("Tried to add money, but no economy plugin detected!");
                 }
             }
             else {
-                Messenger.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount(), reward.getType());
+                Messenger.tell(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
             }
         }
     }

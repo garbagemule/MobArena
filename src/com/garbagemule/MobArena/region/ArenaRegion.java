@@ -127,7 +127,7 @@ public class ArenaRegion
             if (p1 == null) list.add("p1");
             if (p2 == null) list.add("p2");
             if (!list.isEmpty()) {
-                Messenger.tellPlayer(s, "Missing region points: " + MAUtils.listToString(list, plugin));
+                Messenger.tell(s, "Missing region points: " + MAUtils.listToString(list, plugin));
                 list.clear();
             }
         }
@@ -138,7 +138,7 @@ public class ArenaRegion
             if (lobbyWarp == null) list.add("lobby");
             if (specWarp  == null) list.add("spectator");
             if (!list.isEmpty()) {
-                Messenger.tellPlayer(s, "Missing warps: " + MAUtils.listToString(list, plugin));
+                Messenger.tell(s, "Missing warps: " + MAUtils.listToString(list, plugin));
                 list.clear();
             }
         }
@@ -146,13 +146,13 @@ public class ArenaRegion
         // Spawnpoints
         if (spawns) {
             if (spawnpoints.isEmpty()) {
-                Messenger.tellPlayer(s, "Missing spawnpoints");
+                Messenger.tell(s, "Missing spawnpoints");
             }
         }
         
         // Ready?
         if (ready && setup) {
-            Messenger.tellPlayer(s, "Arena is ready to be used!");
+            Messenger.tell(s, "Arena is ready to be used!");
         }
     }
     
@@ -599,12 +599,12 @@ public class ArenaRegion
         }
 
         if (map.isEmpty()) {
-            Messenger.tellPlayer(p, "No spawnpoints cover your location!");
+            Messenger.tell(p, "No spawnpoints cover your location!");
             return;
         }
 
         // Notify the player
-        Messenger.tellPlayer(p, "The following points cover your location:");
+        Messenger.tell(p, "The following points cover your location:");
         for (Map.Entry<String,Location> entry : map.entrySet()) {
             Location l = entry.getValue();
             String coords = l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();

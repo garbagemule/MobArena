@@ -23,7 +23,7 @@ public class RemoveClassCommand implements Command
 
         // Require an argument.
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removeclass <classname>");
+            Messenger.tell(sender, "Usage: /ma removeclass <classname>");
             return false;
         }
         
@@ -31,12 +31,12 @@ public class RemoveClassCommand implements Command
         ArenaClass arenaClass = am.getClasses().get(arg1);
         String className = TextUtils.camelCase(arg1);
         if (arenaClass == null) {
-            Messenger.tellPlayer(sender, "The class '" + className + "' does not exist.");
+            Messenger.tell(sender, "The class '" + className + "' does not exist.");
             return false;
         }
         
         am.removeClassNode(className);
-        Messenger.tellPlayer(sender, "Removed class '" + className + "'.");
+        Messenger.tell(sender, "Removed class '" + className + "'.");
         return true;
     }
 }

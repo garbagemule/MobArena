@@ -11,6 +11,7 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -59,6 +60,9 @@ public class MobArena extends JavaPlugin
     public void onEnable() {
         // Initialize config-file
         loadConfigFile();
+
+        // Initialize announcements-file
+        loadAnnouncementsFile();
         
         // Load boss abilities
         loadAbilities();
@@ -75,9 +79,6 @@ public class MobArena extends JavaPlugin
 
         // Register any inventories to restore.
         registerInventories();
-
-        // Make sure all the announcements are configured.
-        MAMessages.init(this);
 
         // Register event listeners
         registerListeners();
@@ -112,6 +113,31 @@ public class MobArena extends JavaPlugin
         // Set the header and save
         getConfig().options().header(getHeader());
         saveConfig();
+    }
+
+    private void loadAnnouncementsFile() {
+        // Create if missing
+        File file = new File(getDataFolder(), "announcements.yml");
+        try {
+            if (file.createNewFile()) {
+                Messenger.info("announcements.yml created.");
+                YamlConfiguration yaml = Msg.toYaml();
+                yaml.save(file);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Otherwise, load the announcements from the file
+        try {
+            YamlConfiguration yaml = new YamlConfiguration();
+            yaml.load(file);
+            ConfigUtils.addMissingRemoveObsolete(file, Msg.toYaml(), yaml);
+            Msg.load(yaml);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     private void registerListeners() {

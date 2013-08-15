@@ -26,7 +26,7 @@ public class ListClassPermsCommand implements Command
         
         // Require an argument.
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma listclassperms <classname>");
+            Messenger.tell(sender, "Usage: /ma listclassperms <classname>");
             return true;
         }
         
@@ -34,14 +34,14 @@ public class ListClassPermsCommand implements Command
         String className = TextUtils.camelCase(arg1);
         
         if (arenaClass == null) {
-            Messenger.tellPlayer(sender, "The class '" + className + "' does not exist.");
+            Messenger.tell(sender, "The class '" + className + "' does not exist.");
             return true;
         }
         
-        Messenger.tellPlayer(sender, "Permissions for '" + className + "':");
+        Messenger.tell(sender, "Permissions for '" + className + "':");
         Map<String,Boolean> perms = arenaClass.getPermissions();
         if (perms.isEmpty()) {
-            Messenger.tellPlayer(sender, "<none>");
+            Messenger.tell(sender, "<none>");
             return true;
         }
         
@@ -50,7 +50,7 @@ public class ListClassPermsCommand implements Command
             if (!entry.getValue()) {
                 perm = "^" + perm;
             }
-            Messenger.tellPlayer(sender, "- " + perm);
+            Messenger.tell(sender, "- " + perm);
         }
         return true;
     }

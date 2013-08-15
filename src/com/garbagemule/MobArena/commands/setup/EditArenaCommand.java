@@ -42,9 +42,9 @@ public class EditArenaCommand implements Command
             else {
                 arena = am.getArenaWithName(arg1);
                 if (arena == null) {
-                    Messenger.tellPlayer(sender, "There is no arena with that name.");
-                    Messenger.tellPlayer(sender, "Usage: /ma editarena (true|false)");
-                    Messenger.tellPlayer(sender, "    or /ma editarena <arena> (true|false)");
+                    Messenger.tell(sender, "There is no arena with that name.");
+                    Messenger.tell(sender, "Usage: /ma editarena (true|false)");
+                    Messenger.tell(sender, "    or /ma editarena <arena> (true|false)");
                     return true;
                 }
                 arena.setEditMode(!arena.inEditMode());
@@ -54,22 +54,22 @@ public class EditArenaCommand implements Command
         // Two arguments
         else {
             if (!(arg2.matches("true|on") || arg2.matches("false|off"))) {
-                Messenger.tellPlayer(sender, "Usage: /ma editarena (true|false)");
-                Messenger.tellPlayer(sender, "    or /ma editarena <arena> (true|false)");
+                Messenger.tell(sender, "Usage: /ma editarena (true|false)");
+                Messenger.tell(sender, "    or /ma editarena <arena> (true|false)");
                 return true;
             }
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tellPlayer(sender, "There is no arena with that name.");
-                Messenger.tellPlayer(sender, "Usage: /ma editarena (true|false)");
-                Messenger.tellPlayer(sender, "    or /ma editarena <arena> (true|false)");
+                Messenger.tell(sender, "There is no arena with that name.");
+                Messenger.tell(sender, "Usage: /ma editarena (true|false)");
+                Messenger.tell(sender, "    or /ma editarena <arena> (true|false)");
                 return true;
             }
             arena.setEditMode(arg2.equals("true"));
         }
         
-        Messenger.tellPlayer(sender, "Edit mode for arena '" + arena.configName() + "': " + ((arena.inEditMode()) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
-        if (arena.inEditMode()) Messenger.tellPlayer(sender, "Remember to turn it back off after editing!"); 
+        Messenger.tell(sender, "Edit mode for arena '" + arena.configName() + "': " + ((arena.inEditMode()) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
+        if (arena.inEditMode()) Messenger.tell(sender, "Remember to turn it back off after editing!");
         return true;
     }
 }

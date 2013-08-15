@@ -23,19 +23,19 @@ public class RestoreCommand implements Command
         
         // Require an argument
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma restore <player>");
+            Messenger.tell(sender, "Usage: /ma restore <player>");
             return false;
         }
         
         if (am.getArenaWithPlayer(arg1) != null) {
-            Messenger.tellPlayer(sender, "Player is currently in an arena.");
+            Messenger.tell(sender, "Player is currently in an arena.");
             return false;
         }
         
         if (InventoryManager.restoreFromFile(am.getPlugin(), am.getPlugin().getServer().getPlayer(arg1))) {
-            Messenger.tellPlayer(sender, "Restored " + arg1 + "'s inventory!");
+            Messenger.tell(sender, "Restored " + arg1 + "'s inventory!");
         } else {
-            Messenger.tellPlayer(sender, "Failed to restore " + arg1 + "'s inventory.");
+            Messenger.tell(sender, "Failed to restore " + arg1 + "'s inventory.");
         }
         
         return true;

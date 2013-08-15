@@ -23,28 +23,28 @@ public class AutoDegenerateCommand implements Command
 
         // Require an argument
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma autodegenerate <arena>");
+            Messenger.tell(sender, "Usage: /ma autodegenerate <arena>");
             return true;
         }
         
         if (am.getArenas().size() < 2) {
-            Messenger.tellPlayer(sender, "At least one arena must exist!");
+            Messenger.tell(sender, "At least one arena must exist!");
             return true;
         }
         
         // Check if arena exists.
         Arena arena = am.getArenaWithName(arg1);
         if (arena == null) {
-            Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+            Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
             return true;
         }
         
         if (!MAUtils.undoItHippieMonster(arg1, am.getPlugin(), true)) {
-            Messenger.tellPlayer(sender, "Could not degenerate arena.");
+            Messenger.tell(sender, "Could not degenerate arena.");
             return true;
         }
         
-        Messenger.tellPlayer(sender, "Arena with name '" + arg1 + "' degenerated.");
+        Messenger.tell(sender, "Arena with name '" + arg1 + "' degenerated.");
         return true;
     }
 }

@@ -23,25 +23,25 @@ public class AddClassPermCommand implements Command
         String arg2 = (args.length > 1 ? args[1] : "");
         
         if (arg1.equals("") || arg2.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma addclassperm <classname> <permission>");
+            Messenger.tell(sender, "Usage: /ma addclassperm <classname> <permission>");
             return false;
         }
         
         // Grab the arena class
         ArenaClass arenaClass = am.getClasses().get(arg1);
         if (arenaClass == null) {
-            Messenger.tellPlayer(sender, "The class '" + TextUtils.camelCase(arg1) + "' does not exist.");
+            Messenger.tell(sender, "The class '" + TextUtils.camelCase(arg1) + "' does not exist.");
             return false;
         }
         
         // Try to add the permission.
         if (am.addClassPermission(arg1, arg2)) {
-            Messenger.tellPlayer(sender, "Added permission '" + arg2 + "' to class '" + TextUtils.camelCase(arg1) + "'.");
+            Messenger.tell(sender, "Added permission '" + arg2 + "' to class '" + TextUtils.camelCase(arg1) + "'.");
             return true;
         }
         
         // If it wasn't added, notify.
-        Messenger.tellPlayer(sender, "Permission '" + arg2 + "' was NOT added to class '" + TextUtils.camelCase(arg1) + "'.");
+        Messenger.tell(sender, "Permission '" + arg2 + "' was NOT added to class '" + TextUtils.camelCase(arg1) + "'.");
         return false;
     }
 }

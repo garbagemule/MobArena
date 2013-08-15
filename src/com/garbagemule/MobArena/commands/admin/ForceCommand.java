@@ -29,7 +29,7 @@ public class ForceCommand implements Command
                     arena.forceEnd();
                 }
                 
-                Messenger.tellPlayer(sender, Msg.FORCE_END_ENDED);
+                Messenger.tell(sender, Msg.FORCE_END_ENDED);
                 am.resetArenaMap();
                 return true;
             }
@@ -37,18 +37,18 @@ public class ForceCommand implements Command
             // Otherwise, grab the arena in question.
             Arena arena = am.getArenaWithName(arg2);
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
             
             if (arena.getAllPlayers().isEmpty()) {
-                Messenger.tellPlayer(sender, Msg.FORCE_END_EMPTY);
+                Messenger.tell(sender, Msg.FORCE_END_EMPTY);
                 return false;
             }
             
             // And end it!
             arena.forceEnd();
-            Messenger.tellPlayer(sender, Msg.FORCE_END_ENDED);
+            Messenger.tell(sender, Msg.FORCE_END_ENDED);
             
             return true;
         }
@@ -56,35 +56,35 @@ public class ForceCommand implements Command
         if (arg1.equals("start")) {
             // Require argument.
             if (arg2.equals("")) {
-                Messenger.tellPlayer(sender, "Usage: /ma force start <arena>");
+                Messenger.tell(sender, "Usage: /ma force start <arena>");
                 return false;
             }
             
             // Grab the arena.
             Arena arena = am.getArenaWithName(arg2);
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
             
             if (arena.isRunning()) {
-                Messenger.tellPlayer(sender, Msg.FORCE_START_RUNNING);
+                Messenger.tell(sender, Msg.FORCE_START_RUNNING);
                 return false;
             }
             
             if (arena.getReadyPlayersInLobby().isEmpty()) {
-                Messenger.tellPlayer(sender, Msg.FORCE_START_NOT_READY);
+                Messenger.tell(sender, Msg.FORCE_START_NOT_READY);
                 return false;
             }
             
             // And start it!
             arena.forceStart();
-            Messenger.tellPlayer(sender, Msg.FORCE_START_STARTED);
+            Messenger.tell(sender, Msg.FORCE_START_STARTED);
             
             return true;
         }
         
-        Messenger.tellPlayer(sender, "Usage: /ma force start|end (<arena name>)");
+        Messenger.tell(sender, "Usage: /ma force start|end (<arena name>)");
         return true;
     }
 }

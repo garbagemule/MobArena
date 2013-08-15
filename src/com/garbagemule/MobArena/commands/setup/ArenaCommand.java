@@ -19,7 +19,7 @@ public class ArenaCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        Messenger.tellPlayer(sender, "Currently selected arena: " + ChatColor.GREEN + am.getSelectedArena().configName());
+        Messenger.tell(sender, "Currently selected arena: " + ChatColor.GREEN + am.getSelectedArena().configName());
 
         StringBuffer buffy = new StringBuffer();
         if (am.getArenas().size() > 1) {
@@ -31,7 +31,7 @@ public class ArenaCommand implements Command
         }
         else buffy.append(Msg.MISC_NONE);
         
-        Messenger.tellPlayer(sender, "Other arenas: " + buffy.toString());
+        Messenger.tell(sender, "Other arenas: " + buffy.toString());
         return true;
     }
 }

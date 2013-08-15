@@ -93,7 +93,7 @@ public class MAGlobalListener implements Listener
         }
         else if ((stat = Stats.getByShortName(text)) != null) {
             setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
-            Messenger.tellPlayer(event.getPlayer(), "Stat sign created.");
+            Messenger.tell(event.getPlayer(), "Stat sign created.");
         }
     }
     

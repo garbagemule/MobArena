@@ -26,26 +26,26 @@ public class RemoveLeaderboardCommand implements Command{
         if (arg1.equals("")) {
             if (am.getSelectedArena().getRegion().getLeaderboard() != null) {
                 am.getSelectedArena().getRegion().set("leaderboard", null);
-                Messenger.tellPlayer(sender, "Leaderboard for " + am.getSelectedArena().arenaName() + " successfully removed!");
+                Messenger.tell(sender, "Leaderboard for " + am.getSelectedArena().arenaName() + " successfully removed!");
                 return true;
             }
             else {
-                Messenger.tellPlayer(sender, Msg.ARENA_LBOARD_NOT_FOUND);
+                Messenger.tell(sender, Msg.ARENA_LBOARD_NOT_FOUND);
             }
         }
         else {
             if (am.getArenaWithName(arg1) != null) {
                 if (am.getSelectedArena().getRegion().getLeaderboard() != null) {
                     am.getArenaWithName(arg1).getRegion().set("leaderboard", null);
-                    Messenger.tellPlayer(sender, "Leaderboard for " + am.getArenaWithName(arg1).arenaName() + " successfully removed!");
+                    Messenger.tell(sender, "Leaderboard for " + am.getArenaWithName(arg1).arenaName() + " successfully removed!");
                     return true;
                 }
                 else {
-                    Messenger.tellPlayer(sender, Msg.ARENA_LBOARD_NOT_FOUND);
+                    Messenger.tell(sender, Msg.ARENA_LBOARD_NOT_FOUND);
                 }
             }
             else {
-                Messenger.tellPlayer(sender, "Usage: /ma removeleaderboard <arenaname>");
+                Messenger.tell(sender, "Usage: /ma removeleaderboard <arenaname>");
                 return false;
             }
         }

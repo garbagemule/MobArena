@@ -26,16 +26,12 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.util.config.ConfigUtils;
 
 public class MAUtils
 {         
@@ -59,7 +55,7 @@ public class MAUtils
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
         Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
 
-        String typePath = "rewards." + type;
+        String typePath = "rewards.waves." + type;
         if (!config.contains(typePath)) return result;
         
         //Set<String> waves = config.getKeys(arenaPath + type);
@@ -147,7 +143,7 @@ public class MAUtils
             if (!arena.getWorld().equals(p.getWorld())) {
                 Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
-                Messenger.tellPlayer(p, "You warped out of the arena world.");
+                Messenger.tell(p, "You warped out of the arena world.");
                 continue;
             }
             

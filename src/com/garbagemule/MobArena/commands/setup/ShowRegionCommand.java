@@ -20,7 +20,7 @@ public class ShowRegionCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
         
@@ -39,7 +39,7 @@ public class ShowRegionCommand implements Command
             }
             
             if (!arena.getRegion().isDefined()) {
-                Messenger.tellPlayer(sender, "The region is not defined for the selected arena.");
+                Messenger.tell(sender, "The region is not defined for the selected arena.");
                 return false;
             }
         }
@@ -47,14 +47,14 @@ public class ShowRegionCommand implements Command
             arena = am.getArenaWithName(arg1);
             
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
         }
         
         // Show an error message if we aren't in the right world
         if (!arena.getWorld().getName().equals(arena.getWorld().getName())) {
-            Messenger.tellPlayer(sender, "Arena '" + arena.configName() +
+            Messenger.tell(sender, "Arena '" + arena.configName() +
                     "' is in world '" + arena.getWorld().getName() +
                     "' and you are in world '" + p.getWorld().getName() + "'");
             return false;

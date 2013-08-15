@@ -22,18 +22,18 @@ public class ClassChestCommand implements Command {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
 
         if (args.length != 1) {
-            Messenger.tellPlayer(sender, "Usage: /ma classchest <class>");
+            Messenger.tell(sender, "Usage: /ma classchest <class>");
             return true;
         }
 
         ArenaClass ac = am.getClasses().get(args[0].toLowerCase());
         if (ac == null) {
-            Messenger.tellPlayer(sender, "Class not found.");
+            Messenger.tell(sender, "Class not found.");
             return true;
         }
 
@@ -47,13 +47,13 @@ public class ClassChestCommand implements Command {
             case TRAPPED_CHEST:
                 break;
             default:
-                Messenger.tellPlayer(sender, "You must look at a chest.");
+                Messenger.tell(sender, "You must look at a chest.");
                 return true;
         }
 
         am.getPlugin().getConfig().set("classes." + ac.getConfigName() + ".classchest", b.getLocation());
         am.saveConfig();
-        Messenger.tellPlayer(sender, "Class chest updated for class " + ac.getConfigName());
+        Messenger.tell(sender, "Class chest updated for class " + ac.getConfigName());
         am.loadClasses();
         return true;
     }

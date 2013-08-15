@@ -24,13 +24,13 @@ public class KickCommand implements Command
         
         // Require an argument
         if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma kick <player>");
+            Messenger.tell(sender, "Usage: /ma kick <player>");
             return false;
         }
         
         Arena arena = am.getArenaWithPlayer(arg1);
         if (arena == null) {
-            Messenger.tellPlayer(sender, "That player is not in an arena.");
+            Messenger.tell(sender, "That player is not in an arena.");
             return false;
         }
         
@@ -40,8 +40,8 @@ public class KickCommand implements Command
         // Force leave.
         arena.playerLeave(bp);
         
-        Messenger.tellPlayer(sender, "Player '" + arg1 + "' was kicked from arena '" + arena.configName() + "'.");
-        Messenger.tellPlayer(bp, "You were kicked by " + sender.getName() + ".");
+        Messenger.tell(sender, "Player '" + arg1 + "' was kicked from arena '" + arena.configName() + "'.");
+        Messenger.tell(bp, "You were kicked by " + sender.getName() + ".");
         return true;
     }
 }

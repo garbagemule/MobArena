@@ -19,15 +19,15 @@ public class ListClassesCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        Messenger.tellPlayer(sender, "Current classes:");
+        Messenger.tell(sender, "Current classes:");
         Set<String> classes = am.getClasses().keySet();
         if (classes == null || classes.isEmpty()) {
-            Messenger.tellPlayer(sender, "<none>");
+            Messenger.tell(sender, "<none>");
             return true;
         }
         
         for (String c : classes) {
-            Messenger.tellPlayer(sender, "- " + c);
+            Messenger.tell(sender, "- " + c);
         }
         return true;
     }

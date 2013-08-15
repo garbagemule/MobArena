@@ -23,25 +23,25 @@ public class RemoveClassPermCommand implements Command
         String arg2 = (args.length > 1 ? args[1] : "");
         
         if (arg1.equals("") || arg2.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removeclassperm <classname> <permission>");
+            Messenger.tell(sender, "Usage: /ma removeclassperm <classname> <permission>");
             return false;
         }
         
         // Grab the arena class
         ArenaClass arenaClass = am.getClasses().get(arg1);
         if (arenaClass == null) {
-            Messenger.tellPlayer(sender, "The class '" + TextUtils.camelCase(arg1) + "' does not exist.");
+            Messenger.tell(sender, "The class '" + TextUtils.camelCase(arg1) + "' does not exist.");
             return false;
         }
         
         // Remove the permission.
         if (am.removeClassPermission(arg1, arg2)) {
-            Messenger.tellPlayer(sender, "Removed permission '" + arg2 + "' from class '" + TextUtils.camelCase(arg1) + "'.");
+            Messenger.tell(sender, "Removed permission '" + arg2 + "' from class '" + TextUtils.camelCase(arg1) + "'.");
             return true;
         }
 
         // If it wasn't removed, notify.
-        Messenger.tellPlayer(sender, "Permission '" + arg2 + "' was NOT removed from class '" + TextUtils.camelCase(arg1) + "'.");
+        Messenger.tell(sender, "Permission '" + arg2 + "' was NOT removed from class '" + TextUtils.camelCase(arg1) + "'.");
         return false;
     }
 }

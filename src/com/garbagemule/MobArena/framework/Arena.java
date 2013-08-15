@@ -54,8 +54,6 @@ public interface Arena
     
     public void setEditMode(boolean value);
     
-    public Material getClassLogo(String classname);
-    
     public List<ItemStack> getEntryFee();
     
     public Set<Map.Entry<Integer,List<ItemStack>>> getEveryWaveEntrySet();

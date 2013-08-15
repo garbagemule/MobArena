@@ -30,7 +30,7 @@ public class PlayerListCommand implements Command
             Arena arena = am.getArenaWithName(arg1);
             
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
             
@@ -48,7 +48,7 @@ public class PlayerListCommand implements Command
             list = buffy.toString();
         }
         
-        Messenger.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(list));
+        Messenger.tell(sender, Msg.MISC_LIST_PLAYERS.format(list));
         return true;
     }
 }

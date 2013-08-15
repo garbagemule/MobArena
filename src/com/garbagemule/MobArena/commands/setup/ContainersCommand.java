@@ -32,7 +32,7 @@ public class ContainersCommand implements Command
             buffy.append(Msg.MISC_NONE);
         }
         
-        Messenger.tellPlayer(sender, "Containers for arena '" + am.getSelectedArena().configName() + "': " + buffy.toString());
+        Messenger.tell(sender, "Containers for arena '" + am.getSelectedArena().configName() + "': " + buffy.toString());
         return true;
     }
 }

@@ -22,12 +22,12 @@ public class ExpandRegionCommand implements Command
         String arg2 = (args.length > 1 ? args[1] : "");
 
         if (args.length != 2 || !arg1.matches("(-)?[0-9]+")) {
-            Messenger.tellPlayer(sender, "Usage: /ma expandregion <amount> up|down|out");
+            Messenger.tell(sender, "Usage: /ma expandregion <amount> up|down|out");
             return false;
         }
         
         if (!am.getSelectedArena().getRegion().isDefined()) {
-            Messenger.tellPlayer(sender, "You must first define p1 and p2");
+            Messenger.tell(sender, "You must first define p1 and p2");
             return true;
         }
         
@@ -41,14 +41,14 @@ public class ExpandRegionCommand implements Command
             am.getSelectedArena().getRegion().expandOut(Integer.parseInt(arg1));
         }
         else {
-            Messenger.tellPlayer(sender, "Usage: /ma expandregion <amount> up|down|out");
+            Messenger.tell(sender, "Usage: /ma expandregion <amount> up|down|out");
             return true;
         }
         
         // In case of a "negative" region, fix it!
         am.getSelectedArena().getRegion().fixRegion();
         
-        Messenger.tellPlayer(sender, "Region for '" + am.getSelectedArena().configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
+        Messenger.tell(sender, "Region for '" + am.getSelectedArena().configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
         am.getSelectedArena().getRegion().save();
         
         return true;

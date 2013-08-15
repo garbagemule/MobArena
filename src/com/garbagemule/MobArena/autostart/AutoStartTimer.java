@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.autostart;
 
+import com.garbagemule.MobArena.Msg;
 import org.bukkit.entity.Player;
 
 import com.garbagemule.MobArena.Messenger;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 
 public class AutoStartTimer {
@@ -106,7 +106,7 @@ public class AutoStartTimer {
                     }
                     // Otherwise, warn at x seconds left
                     else if (remaining == intervals[countdownIndex]) {
-                        Messenger.tellAll(arena, Msg.ARENA_AUTO_START, "" + remaining);
+                        Messenger.announce(arena, Msg.ARENA_AUTO_START, ""+remaining);
                         countdownIndex--;
                     }
                     

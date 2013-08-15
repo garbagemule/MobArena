@@ -39,7 +39,7 @@ public class CommandHandler implements CommandExecutor
         
         // If there's no base argument, show a helpful message.
         if (base.equals("")) {
-            Messenger.tellPlayer(sender, Msg.MISC_HELP);
+            Messenger.tell(sender, Msg.MISC_HELP);
             return true;
         }
         
@@ -54,7 +54,7 @@ public class CommandHandler implements CommandExecutor
         
         // If there's more than one match, display them.
         if (matches.size() > 1) {
-            Messenger.tellPlayer(sender, Msg.MISC_MULTIPLE_MATCHES);
+            Messenger.tell(sender, Msg.MISC_MULTIPLE_MATCHES);
             for (Command cmd : matches) {
                 showUsage(cmd, sender);
             }
@@ -63,7 +63,7 @@ public class CommandHandler implements CommandExecutor
         
         // If there are no matches at all, notify.
         if (matches.size() == 0) {
-            Messenger.tellPlayer(sender, Msg.MISC_NO_MATCHES);
+            Messenger.tell(sender, Msg.MISC_NO_MATCHES);
             return true;
         }
         
@@ -73,7 +73,7 @@ public class CommandHandler implements CommandExecutor
         
         // First check if the sender has permission.
         if (!plugin.has(sender, info.permission())) {
-            Messenger.tellPlayer(sender, Msg.MISC_NO_ACCESS);
+            Messenger.tell(sender, Msg.MISC_NO_ACCESS);
             return true;
         }
         
@@ -118,7 +118,7 @@ public class CommandHandler implements CommandExecutor
         CommandInfo info = cmd.getClass().getAnnotation(CommandInfo.class);
         if (!plugin.has(sender, info.permission())) return;
         
-        Messenger.tellPlayer(sender, info.usage() + " " + ChatColor.YELLOW + info.desc());
+        Messenger.tell(sender, info.usage() + " " + ChatColor.YELLOW + info.desc());
     }
     
     /**
@@ -136,7 +136,7 @@ public class CommandHandler implements CommandExecutor
      * @param sender a player or the console
      */
     private void showHelp(CommandSender sender) {
-        Messenger.tellPlayer(sender, "Available MobArena commands:");
+        Messenger.tell(sender, "Available MobArena commands:");
         
         for (Command cmd : commands.values()) {
             showUsage(cmd, sender);

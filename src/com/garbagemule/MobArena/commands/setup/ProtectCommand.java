@@ -42,9 +42,9 @@ public class ProtectCommand implements Command
             else {
                 arena = am.getArenaWithName(arg1);
                 if (arena == null) {
-                    Messenger.tellPlayer(sender, "There is no arena with that name.");
-                    Messenger.tellPlayer(sender, "Usage: /ma protect (true|false)");
-                    Messenger.tellPlayer(sender, "    or /ma protect <arena> (true|false)");
+                    Messenger.tell(sender, "There is no arena with that name.");
+                    Messenger.tell(sender, "Usage: /ma protect (true|false)");
+                    Messenger.tell(sender, "    or /ma protect <arena> (true|false)");
                     return true;
                 }
                 arena.setProtected(!arena.isProtected());
@@ -54,22 +54,22 @@ public class ProtectCommand implements Command
         // Two arguments
         else  {
             if (!(arg2.matches("true|on") || arg2.matches("false|off"))) {
-                Messenger.tellPlayer(sender, "Usage: /ma protect (true|false)");
-                Messenger.tellPlayer(sender, "    or /ma protect <arena name> (true|false)");
+                Messenger.tell(sender, "Usage: /ma protect (true|false)");
+                Messenger.tell(sender, "    or /ma protect <arena name> (true|false)");
                 return true;
             }
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tellPlayer(sender, "There is no arena with that name.");
-                Messenger.tellPlayer(sender, "Usage: /ma protect (true|false)");
-                Messenger.tellPlayer(sender, "    or /ma protect <arena name> (true|false)");
+                Messenger.tell(sender, "There is no arena with that name.");
+                Messenger.tell(sender, "Usage: /ma protect (true|false)");
+                Messenger.tell(sender, "    or /ma protect <arena name> (true|false)");
                 return true;
             }
             arena.setProtected(arg2.equals("true"));
         }
 
         arena.getPlugin().saveConfig();
-        Messenger.tellPlayer(sender, "Protection for arena '" + arena.configName() + "': " + ((arena.isProtected()) ? ChatColor.GREEN + "on" : ChatColor.RED + "off")); 
+        Messenger.tell(sender, "Protection for arena '" + arena.configName() + "': " + ((arena.isProtected()) ? ChatColor.GREEN + "on" : ChatColor.RED + "off"));
         return true;
     }
 }

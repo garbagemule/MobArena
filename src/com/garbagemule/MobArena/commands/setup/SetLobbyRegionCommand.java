@@ -21,7 +21,7 @@ public class SetLobbyRegionCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
         
@@ -32,7 +32,7 @@ public class SetLobbyRegionCommand implements Command
         Player p = (Player) sender;
         
         if (!(arg1.equals("l1") || arg1.equals("l2"))) {
-            Messenger.tellPlayer(sender, "Usage: /ma setlobbyregion l1|l2");
+            Messenger.tell(sender, "Usage: /ma setlobbyregion l1|l2");
             return true;
         }
 
@@ -42,12 +42,12 @@ public class SetLobbyRegionCommand implements Command
 
         if (!aw.getName().equals(pw.getName())) {
             String msg = String.format("Changing world of arena '%s' from '%s' to '%s'", arena.configName(), aw.getName(), pw.getName());
-            Messenger.tellPlayer(sender, msg);
+            Messenger.tell(sender, msg);
         }
 
         arena.setWorld(p.getWorld());
         arena.getRegion().set(arg1, p.getLocation());
-        Messenger.tellPlayer(sender, "Lobby region point " + arg1 + " for arena '" + am.getSelectedArena().configName() + "' set.");
+        Messenger.tell(sender, "Lobby region point " + arg1 + " for arena '" + am.getSelectedArena().configName() + "' set.");
         return true;
     }
 }
