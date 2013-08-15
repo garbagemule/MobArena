@@ -30,7 +30,6 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.*;
-import com.garbagemule.MobArena.spout.Spouty;
 import com.garbagemule.MobArena.time.Time;
 import com.garbagemule.MobArena.time.TimeStrategy;
 import com.garbagemule.MobArena.time.TimeStrategyLocked;
@@ -592,9 +591,6 @@ public class ArenaImpl implements Arena
         p.setGameMode(GameMode.SURVIVAL);
         
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
-        
-        if (MobArena.hasSpout && settings.getBoolean("spout-class-select"))
-            Spouty.classSelectionScreen(plugin, this, p);
         
         // Start the auto-start-timer
         autoStartTimer.start();

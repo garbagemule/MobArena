@@ -27,7 +27,6 @@ import com.garbagemule.MobArena.health.HealthStrategyHeroes;
 import com.garbagemule.MobArena.health.HealthStrategyStandard;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
-import com.garbagemule.MobArena.listeners.SpoutScreenListener;
 import com.garbagemule.MobArena.metrics.Metrics;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -53,9 +52,6 @@ public class MobArena extends JavaPlugin
     // Vault
     private Economy economy;
     
-    // Spout stuff
-    public static boolean hasSpout;
-    
     public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
     public static final int ECONOMY_MONEY_ID = -29;
     public static Random random = new Random();
@@ -70,7 +66,6 @@ public class MobArena extends JavaPlugin
         // Set up soft dependencies
         setupVault();
         setupHeroes();
-        setupSpout();
         setupMagicSpells();
         setupStrategies();
 
@@ -100,9 +95,6 @@ public class MobArena extends JavaPlugin
     }
     
     public void onDisable() {
-        // Disable Spout features.
-        hasSpout = false;
-        
         // Force all arenas to end.
         if (arenaMaster == null) return;
         for (Arena arena : arenaMaster.getArenas()) {
@@ -130,10 +122,6 @@ public class MobArena extends JavaPlugin
         
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
-        
-        if (hasSpout) {
-            pm.registerEvents(new SpoutScreenListener(this), this);
-        }
     }
     
     // Permissions stuff
@@ -170,13 +158,6 @@ public class MobArena extends JavaPlugin
         if (heroesPlugin == null) return;
         
         hasHeroes = true;
-    }
-    
-    private void setupSpout() {
-        Plugin spoutPlugin = this.getServer().getPluginManager().getPlugin("Spout");
-        if (spoutPlugin == null) return;
-        
-        hasSpout = true;
     }
     
     private void setupMagicSpells() {

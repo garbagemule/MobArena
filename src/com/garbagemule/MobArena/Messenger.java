@@ -8,8 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.getspout.spoutapi.SpoutManager;
-import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.garbagemule.MobArena.framework.Arena;
 
@@ -20,43 +18,6 @@ public class Messenger
     private static final String prefix = "[MobArena] ";
     
     private Messenger() {}
-    
-    public static boolean tellSpoutPlayer(Player p, Msg msg, String s, Material logo) {
-        // Grab the SpoutPlayer.
-        SpoutPlayer sp = MobArena.hasSpout ? SpoutManager.getPlayer(p) : null;
-
-        if (msg.hasSpoutMsg() && sp != null && sp.isSpoutCraftEnabled()) {
-            // Grab the message text.
-            String text = msg.toSpoutString(s);
-
-            // If more than 26 characters, truncate.
-            if (text.length() > 26)
-                text = text.substring(0, 26);
-
-            // If the logo is null, use an iron sword.
-            if (logo == null)
-                logo = msg.getLogo();
-
-            // Send the notification.
-            sp.sendNotification("MobArena", text, logo, (short) 0, 2000);
-            return true;
-        }
-        else {
-            return tellPlayer(p, msg.toString(s));
-        }
-    }
-
-    public static boolean tellSpoutPlayer(Player p, Msg msg, Material logo) {
-        return tellSpoutPlayer(p, msg, null, logo);
-    }
-
-    public static boolean tellSpoutPlayer(Player p, Msg msg, String s) {
-        return tellSpoutPlayer(p, msg, s, null);
-    }
-
-    public static boolean tellSpoutPlayer(Player p, Msg msg) {
-        return tellSpoutPlayer(p, msg, null, null);
-    }
 
     public static boolean tellPlayer(CommandSender p, String msg) {
         // If the input sender is null or the string is empty, return.
@@ -69,22 +30,19 @@ public class Messenger
     }
 
     public static boolean tellPlayer(CommandSender p, Msg msg, String s, boolean spout, Material logo) {
-        if (spout && p instanceof Player)
-            return tellSpoutPlayer((Player) p, msg, s, logo);
-
         return tellPlayer(p, msg.toString(s));
     }
 
     public static boolean tellPlayer(CommandSender p, Msg msg, String s, Material logo) {
-        return tellPlayer(p, msg, s, MobArena.hasSpout, logo);
+        return tellPlayer(p, msg.toString(s));
     }
 
     public static boolean tellPlayer(CommandSender p, Msg msg, String s) {
-        return tellPlayer(p, msg, s, MobArena.hasSpout, null);
+        return tellPlayer(p, msg.toString(s));
     }
 
     public static boolean tellPlayer(CommandSender p, Msg msg) {
-        return tellPlayer(p, msg, null, MobArena.hasSpout, null);
+        return tellPlayer(p, msg.toString());
     }
 
     public static void tellAll(Arena arena, Msg msg, String s, boolean notifyPlayers) {
