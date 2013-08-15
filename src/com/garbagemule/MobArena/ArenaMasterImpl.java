@@ -601,19 +601,13 @@ public class ArenaMasterImpl implements ArenaMaster
     public void reloadConfig() {
         boolean wasEnabled = isEnabled();
         if (wasEnabled) setEnabled(false);
-
         for (Arena a : arenas) {
             a.forceEnd();
         }
-
-        loadSettings();
-        loadClasses();
-        loadArenas();
-
-        for (Arena arena : arenas) {
-            Messenger.info("Loaded arena '" + arena.configName() + "'");
-        }
-        setEnabled(wasEnabled);
+        plugin.reloadConfig();
+        config = plugin.getConfig();
+        initialize();
+        if (wasEnabled) setEnabled(true);
     }
 
     public void saveConfig() {
