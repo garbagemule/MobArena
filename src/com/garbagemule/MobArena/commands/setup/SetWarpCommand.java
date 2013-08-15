@@ -69,9 +69,8 @@ public class SetWarpCommand implements Command
             
             // Notify the player if world changed
             if (changeWorld) {
-                Messenger.tellPlayer(sender, "Changed world of arena '" + arena.configName() +
-                        "' from '" + aw.getName() +
-                        "' to '" + pw.getName() + "'");
+                String msg = String.format("Changed world of arena '%s' from '%s' to '%s'", arena.configName(), aw.getName(), pw.getName());
+                Messenger.tellPlayer(sender, msg);
             }
             
             // Then notify about point set
