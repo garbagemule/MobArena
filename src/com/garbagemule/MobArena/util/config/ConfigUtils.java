@@ -11,15 +11,15 @@ import com.garbagemule.MobArena.util.FileUtils;
 
 public class ConfigUtils
 {
-    public static void addMissingNodes(Config config, String path, String filename) {
-        assertNodes(config, path, filename, true);
+    public static void addMissingNodes(String filename, Config config, String path, String resourcename) {
+        assertNodes(filename, config, path, resourcename, true);
     }
     
-    public static void replaceAllNodes(Config config, String path, String filename) {
-        assertNodes(config, path, filename, false);
+    public static void replaceAllNodes(String filename, Config config, String path, String resourcename) {
+        assertNodes(filename, config, path, resourcename, false);
     }
     
-    private static void assertNodes(Config config, String path, String filename, boolean keepOthers) {
+    private static void assertNodes(String filename, Config config, String path, String resourcename, boolean keepOthers) {
         // Grab the section that the path is pointing to.
         ConfigSection section = config.getConfigSection(path);
         
@@ -31,13 +31,13 @@ public class ConfigUtils
 
         try {
             // Extract the yml file.
-            YamlConfiguration ymlConfig = FileUtils.getConfig(filename);
+            YamlConfiguration ymlConfig = FileUtils.getConfig(filename, resourcename);
         
             // Assert the nodes.
             assertNodes(section, ymlConfig, keepOthers);
         } catch (Exception e) {
             e.printStackTrace();
-            Messenger.severe("Failed to load '" + filename + "'. Restart required!");
+            Messenger.severe("Failed to load '" + resourcename + "'. Restart required!");
         }
     }
     

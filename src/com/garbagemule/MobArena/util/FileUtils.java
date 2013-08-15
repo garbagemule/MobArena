@@ -100,60 +100,13 @@ public class FileUtils
         return null;
     }
     
-    /**
-     * Lists all files in the MobArena jar file that exist on the given path.
-     * The resulting list contains only filenames (with extensions)
-     * @param path the path of the jar file to list files from
-     * @param ext the file extension of the file type, can be null or the empty string
-     * @return a list of file names
-     */
-    public static List<String> listFilesOnPath(String path, String ext) {
-        try {
-            // If the jar can't be found for some odd reason, escape.
-            File file = new File("plugins" + File.separator + "MobArena.jar");
-            if (file == null || !file.exists()) return null;
-            
-            // Create a JarFile out of the.. jar file
-            JarFile jarFile = new JarFile(file);
-            List<String> result = new ArrayList<String>();
-            
-            // JarEntry names never start with /
-            if (path.startsWith("/")) {
-                path = path.substring(1);
-            }
-            
-            // If null, replace with the empty string.
-            if (ext == null) {
-                ext = "";
-            }
-            // Require that extensions start with a period
-            else if (!ext.startsWith(".")) {
-                ext = "." + ext;
-            }
-            
-            // Loop through all entries, add the ones that match the path and extension
-            for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
-                String name = entries.nextElement().getName();
-                
-                if (name.startsWith(path) && name.endsWith(ext)) {
-                    result.add(getFilename(name));
-                }
-            }
-            return result;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<String>(1);
-        }
-    }
-    
     private static String getFilename(String resource) {
         int slash = resource.lastIndexOf("/");
         return (slash < 0 ? resource : resource.substring(slash + 1));
     }
 
-    private static final String JAR = "plugins/MobArena.jar";
     private static final String RES = "res/";
+    private static final String PLUGINS = "plugins/";
 
     /**
      * Get a YamlConfiguration of a given resource.
@@ -162,9 +115,9 @@ public class FileUtils
      * @throws IOException if the resource does not exist
      * @throws InvalidConfigurationException if the resource is not a valid config
      */
-    public static YamlConfiguration getConfig(String filename) throws IOException, InvalidConfigurationException {
-        ZipFile zip  = new ZipFile(JAR);
-        ZipEntry entry = zip.getEntry(RES + filename);
+    public static YamlConfiguration getConfig(String filename, String resourcename) throws IOException, InvalidConfigurationException {
+        ZipFile zip  = new ZipFile(PLUGINS + filename);
+        ZipEntry entry = zip.getEntry(RES + resourcename);
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.load(zip.getInputStream(entry));
         return yaml;

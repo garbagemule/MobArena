@@ -252,7 +252,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Load the global settings.
      */
     public void loadSettings() {
-        ConfigUtils.replaceAllNodes(config, "global-settings", "global-settings.yml");
+        ConfigUtils.replaceAllNodes(plugin.getFilename(), config, "global-settings", "global-settings.yml");
         ConfigSection section = config.getConfigSection("global-settings");
 
         // Grab the commands string
@@ -295,7 +295,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Loads the classes in res/classes.yml into the config-file.
      */
     public void loadDefaultClasses() {
-        ConfigUtils.addMissingNodes(config, "classes", "classes.yml");
+        ConfigUtils.addMissingNodes(plugin.getFilename(), config, "classes", "classes.yml");
     }
 
     /**
@@ -573,7 +573,7 @@ public class ArenaMasterImpl implements ArenaMaster
         }
 
         // Assert all settings nodes.
-        ConfigUtils.replaceAllNodes(config, path + ".settings", "settings.yml");
+        ConfigUtils.replaceAllNodes(plugin.getFilename(), config, path + ".settings", "settings.yml");
 
         // Create an Arena with the name and world.
         Arena arena = new ArenaImpl(plugin, config, arenaname, world);
@@ -596,14 +596,14 @@ public class ArenaMasterImpl implements ArenaMaster
             throw new IllegalArgumentException("Arena already exists!");
 
         // Extract the default settings and update the world-node.
-        ConfigUtils.replaceAllNodes(config, path + ".settings", "settings.yml");
+        ConfigUtils.replaceAllNodes(plugin.getFilename(), config, path + ".settings", "settings.yml");
         config.set(path + ".settings.world", world.getName());
 
         // Extract the default waves.
-        ConfigUtils.replaceAllNodes(config, path + ".waves", "waves.yml");
+        ConfigUtils.replaceAllNodes(plugin.getFilename(), config, path + ".waves", "waves.yml");
 
         // Extract the default rewards.
-        ConfigUtils.replaceAllNodes(config, path + ".rewards", "rewards.yml");
+        ConfigUtils.replaceAllNodes(plugin.getFilename(), config, path + ".rewards", "rewards.yml");
 
         // Save the changes.
         config.save();

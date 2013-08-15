@@ -231,7 +231,7 @@ public class MobArena extends JavaPlugin
         
         for (String arena : arenas) {
             String path = "arenas." + arena + ".settings";
-            ConfigUtils.replaceAllNodes(config, path, "settings.yml");
+            ConfigUtils.replaceAllNodes(getFilename(), config, path, "settings.yml");
         }
     }
     
@@ -302,5 +302,9 @@ public class MobArena extends JavaPlugin
         double major = item.getAmount();
         double minor = item.getDurability() / 100D;
         return major + minor;
+    }
+
+    public String getFilename() {
+        return super.getFile().getName();
     }
 }
