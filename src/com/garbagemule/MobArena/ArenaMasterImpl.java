@@ -578,11 +578,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Register the permission
         registerPermission("mobarena.arenas." + arenaname.toLowerCase(), PermissionDefault.TRUE);
-        
-        // Set the selected arena, if it is null
-        if (selectedArena == null) {
-            selectedArena = arena;
-        }
 
         // Finally, add it to the arena list.
         arenas.add(arena);
