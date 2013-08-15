@@ -85,7 +85,7 @@ public class AbilityManager
             if (ToolProvider.getSystemJavaCompiler() != null) {
                 compileAbilities(javaDir, classDir);
             } else {
-                Messenger.warning("Found plugins/MobArena/abilites/src/ folder, but no Java compiler. The source files will not be compiled!");
+                Messenger.warning("Found plugins/MobArena/abilities/src/ folder, but no Java compiler. The source files will not be compiled!");
             }
         }
         
