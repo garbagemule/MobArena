@@ -85,7 +85,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public Arena getSelectedArena() {
         if (selectedArena == null && !arenas.isEmpty()) {
-            System.out.println("SELECTED ARENA IS NULL! ARENAS: " + arenas.size());
             selectedArena = arenas.get(0);
         }
         return selectedArena;
