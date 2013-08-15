@@ -64,8 +64,7 @@ public class MobArena extends JavaPlugin
     public static Random random = new Random();
 
     public void onEnable() {
-        // Create default files and initialize config-file
-        FileUtils.extractResource(this.getDataFolder(), "config.yml", getClass());
+        // Initialize config-file
         loadConfigFile();
         
         // Load boss abilities
@@ -118,16 +117,8 @@ public class MobArena extends JavaPlugin
     }
     
     private void loadConfigFile() {
-        File dir  = this.getDataFolder();
-        if (!dir.exists()) dir.mkdir();
-        
-        File file = new File(this.getDataFolder(), "config.yml");
-        config = new Config(file);
-        if (!config.load()) {
-            this.getServer().getPluginManager().disablePlugin(this);
-            throw new IllegalStateException("The config-file could not be loaded! Read further up to find the actual bug!");
-        }
-        
+        saveDefaultConfig();
+        config = new Config(new File(getDataFolder(), "config.yml"));
         updateSettings(config);
         config.setHeader(getHeader());
         config.save();
