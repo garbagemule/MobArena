@@ -7,9 +7,12 @@ import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
 
 @CommandInfo(
     name    = "classchest",
@@ -51,7 +54,7 @@ public class ClassChestCommand implements Command {
                 return true;
         }
 
-        am.getPlugin().getConfig().set("classes." + ac.getConfigName() + ".classchest", b.getLocation());
+        setLocation(am.getPlugin().getConfig(), "classes." + ac.getConfigName() + ".classchest", b.getLocation());
         am.saveConfig();
         Messenger.tell(sender, "Class chest updated for class " + ac.getConfigName());
         am.loadClasses();
