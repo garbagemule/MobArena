@@ -94,13 +94,13 @@ public enum Msg {
     }
 
     public String format(String s) {
-        return toString().replaceAll("%", s);
+        return toString().replace("%", s);
     }
 
     static void load(ConfigurationSection config) {
         for (Msg msg : values()) {
             // ARENA_END_GLOBAL => arena-end-global
-            String key = msg.name().toLowerCase().replaceAll("_","-");
+            String key = msg.name().toLowerCase().replace("_","-");
             msg.set(config.getString(key, ""));
         }
     }
@@ -109,7 +109,7 @@ public enum Msg {
         YamlConfiguration yaml = new YamlConfiguration();
         for (Msg msg : values()) {
             // ARENA_END_GLOBAL => arena-end-global
-            String key = msg.name().replaceAll("_","-").toLowerCase();
+            String key = msg.name().replace("_","-").toLowerCase();
             yaml.set(key, msg.value);
         }
         return yaml;
