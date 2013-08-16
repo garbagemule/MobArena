@@ -77,7 +77,12 @@ public class ArenaRegion
     }
     
     public void reloadLeaderboards() {
-        leaderboard = parseLocation(coords, "leaderboard", null);
+        // try-catch for backwards compatibility
+        try {
+            leaderboard = parseLocation(coords, "leaderboard", null);
+        } catch (IllegalArgumentException e) {
+            leaderboard = parseLocation(coords, "leaderboard", world);
+        }
         if (leaderboard != null && leaderboard.getWorld() == null) {
             leaderboard.setWorld(world);
         }
