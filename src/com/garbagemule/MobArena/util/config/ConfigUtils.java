@@ -98,6 +98,10 @@ public class ConfigUtils
     }
 
     public static void setLocation(ConfigurationSection config, String path, Location location) {
+        if (location == null) {
+            config.set(path, null);
+            return;
+        }
         String x = twoPlaces(location.getX());
         String y = twoPlaces(location.getY());
         String z = twoPlaces(location.getZ());
