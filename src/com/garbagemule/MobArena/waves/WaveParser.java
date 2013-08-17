@@ -379,9 +379,11 @@ public class WaveParser
         String path = "upgrades.";
         
         for (String className : classes) {
+            String itemList;
             // Legacy support
-            String itemList = config.getString(path + className, null);
-            if (itemList != null) {
+            Object val = config.get(path + className, null);
+            if (val instanceof String) {
+                itemList = (String) val;
                 List<ItemStack> stacks = ItemParser.parseItems(itemList);
                 List<Upgrade> list = new ArrayList<Upgrade>();
                 for (ItemStack stack : stacks) {
@@ -390,11 +392,12 @@ public class WaveParser
                 upgrades.put(className.toLowerCase(), list);
             }
             // New complex setup
-            else {
+            else if (val instanceof ConfigurationSection) {
+                ConfigurationSection section = (ConfigurationSection) val;
                 List<Upgrade> list = new ArrayList<Upgrade>();
 
                 // Items (Generic + Weapons)
-                itemList = config.getString(path + className + ".items", null);
+                itemList = section.getString("items", null);
                 if (itemList != null) {
                     for (ItemStack stack : ItemParser.parseItems(itemList)) {
                         list.add(ArenaClass.isWeapon(stack) ? new WeaponUpgrade(stack) : new GenericUpgrade(stack));
@@ -402,7 +405,7 @@ public class WaveParser
                 }
 
                 // Armor
-                itemList = config.getString(path + className + ".armor", null);
+                itemList = section.getString("armor", null);
                 if (itemList != null) {
                     for (ItemStack stack : ItemParser.parseItems(itemList)) {
                         list.add(new ArmorUpgrade(stack));
@@ -410,7 +413,7 @@ public class WaveParser
                 }
 
                 // Permissions
-                List<String> perms = config.getStringList(path + className + ".permissions");
+                List<String> perms = section.getStringList("permissions");
                 if (!perms.isEmpty()) {
                     for (String perm : perms) {
                         list.add(new PermissionUpgrade(perm));
