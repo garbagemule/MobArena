@@ -650,8 +650,12 @@ public class ArenaImpl implements Arena
     @Override
     public void playerDeath(Player p)
     {
+        // Check if we're the last player standing
+        boolean last = arenaPlayers.size() == 1;
+        if (last) lastStanding = p;
+
         // Fire the event
-        ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, arenaPlayers.size() == 1);
+        ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, last);
         plugin.getServer().getPluginManager().callEvent(event);
 
         arenaPlayers.remove(p);
