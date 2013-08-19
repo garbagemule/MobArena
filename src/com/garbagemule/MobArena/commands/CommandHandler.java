@@ -194,6 +194,7 @@ public class CommandHandler implements CommandExecutor
         register(SetRegionCommand.class);
         register(SetWarpCommand.class);
         register(ShowRegionCommand.class);
+        register(ShowLobbyRegionCommand.class);
         register(ShowSpawnsCommand.class);
         register(SpawnpointsCommand.class);
         register(AutoGenerateCommand.class);

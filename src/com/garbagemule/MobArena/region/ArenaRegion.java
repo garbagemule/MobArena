@@ -593,7 +593,14 @@ public class ArenaRegion
         if (!isDefined()) {
             return;
         }
-        showBlocks(p, getFramePoints());
+        showBlocks(p, getFramePoints(p1, p2));
+    }
+
+    public void showLobbyRegion(final Player p) {
+        if (!isLobbyDefined()) {
+            return;
+        }
+        showBlocks(p, getFramePoints(l1, l2));
     }
 
     public void showSpawns(final Player p) {
@@ -661,26 +668,26 @@ public class ArenaRegion
             }
         }, 100);
     }
-    
-    private List<Location> getFramePoints() {
+
+    private List<Location> getFramePoints(Location loc1, Location loc2) {
         List<Location> result = new ArrayList<Location>();
-        int x1 = p1.getBlockX(); int y1 = p1.getBlockY(); int z1 = p1.getBlockZ();
-        int x2 = p2.getBlockX(); int y2 = p2.getBlockY(); int z2 = p2.getBlockZ();
-        
+        int x1 = loc1.getBlockX(); int y1 = loc1.getBlockY(); int z1 = loc1.getBlockZ();
+        int x2 = loc2.getBlockX(); int y2 = loc2.getBlockY(); int z2 = loc2.getBlockZ();
+
         for (int i = x1; i <= x2; i++) {
             result.add(world.getBlockAt(i, y1, z1).getLocation());
             result.add(world.getBlockAt(i, y1, z2).getLocation());
             result.add(world.getBlockAt(i, y2, z1).getLocation());
             result.add(world.getBlockAt(i, y2, z2).getLocation());
         }
-        
+
         for (int j = y1; j <= y2; j++) {
             result.add(world.getBlockAt(x1, j, z1).getLocation());
             result.add(world.getBlockAt(x1, j, z2).getLocation());
             result.add(world.getBlockAt(x2, j, z1).getLocation());
             result.add(world.getBlockAt(x2, j, z2).getLocation());
         }
-        
+
         for (int k = z1; k <= z2; k++) {
             result.add(world.getBlockAt(x1, y1, k).getLocation());
             result.add(world.getBlockAt(x1, y2, k).getLocation());

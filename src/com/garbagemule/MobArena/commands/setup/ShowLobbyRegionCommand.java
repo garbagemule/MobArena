@@ -1,21 +1,23 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.Command;
+import com.garbagemule.MobArena.commands.CommandInfo;
+import com.garbagemule.MobArena.commands.Commands;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.*;
-import com.garbagemule.MobArena.commands.*;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.framework.ArenaMaster;
-
 @CommandInfo(
-    name    = "showregion",
-    pattern = "showregion",
-    usage   = "/ma showregion (<arena>)",
-    desc    = "show an arena region",
-    permission = "mobarena.setup.showregion"
+    name    = "showlobbyregion",
+    pattern = "showlobbyregion",
+    usage   = "/ma showlobbyregion (<arena>)",
+    desc    = "show a lobby region",
+    permission = "mobarena.setup.showlobbyregion"
 )
-public class ShowRegionCommand implements Command
+public class ShowLobbyRegionCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
@@ -47,8 +49,8 @@ public class ShowRegionCommand implements Command
             }
         }
 
-        if (!arena.getRegion().isDefined()) {
-            Messenger.tell(sender, "The region is not defined for the selected arena.");
+        if (!arena.getRegion().isLobbyDefined()) {
+            Messenger.tell(sender, "The lobby region is not defined for the selected arena.");
             return false;
         }
         
@@ -60,7 +62,7 @@ public class ShowRegionCommand implements Command
             return false;
         }
         
-        arena.getRegion().showRegion(p);
+        arena.getRegion().showLobbyRegion(p);
         
         return true;
     }
