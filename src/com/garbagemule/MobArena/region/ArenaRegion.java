@@ -230,31 +230,31 @@ public class ArenaRegion
     
     // Region expand
     public void expandUp(int amount) {
-        Location l = new Location(p2.getWorld(), p2.getX(), Math.min(p2.getWorld().getMaxHeight(), p2.getY() + amount), p2.getZ());
-        setLocation(coords, "p2", l);
-        save();
-        reloadRegion();
+        int x = p2.getBlockX();
+        int y = Math.min(p2.getWorld().getMaxHeight(), p2.getBlockY() + amount);
+        int z = p2.getBlockZ();
+        setSaveReload(coords, "p2", p2.getWorld(), x ,y ,z);
     }
     
     public void expandDown(int amount) {
-        Location l = new Location(p1.getWorld(), p1.getX(), Math.max(0D, p1.getY() - amount), p1.getZ());
-        setLocation(coords, "p1", l);
-        save();
-        reloadRegion();
+        int x = p1.getBlockX();
+        int y = Math.max(0, p1.getBlockY() - amount);
+        int z = p1.getBlockZ();
+        setSaveReload(coords, "p1", p1.getWorld(), x ,y ,z);
     }
     
-    public void expandP1(int x, int z) {
-        Location l = new Location(p1.getWorld(), p1.getX() - x, p1.getY(), p1.getZ() - z);
-        setLocation(coords, "p1", l);
-        save();
-        reloadRegion();
+    public void expandP1(int dx, int dz) {
+        int x = p1.getBlockX() - dx;
+        int y = p1.getBlockY();
+        int z = p1.getBlockZ() - dz;
+        setSaveReload(coords, "p1", p1.getWorld(), x ,y ,z);
     }
     
-    public void expandP2(int x, int z) {
-        Location l = new Location(p2.getWorld(), p2.getX() + x, p2.getY(), p2.getZ() + z);
-        setLocation(coords, "p2", l);
-        save();
-        reloadRegion();
+    public void expandP2(int dx, int dz) {
+        int x = p2.getBlockX() + dx;
+        int y = p2.getBlockY();
+        int z = p2.getBlockZ() + dz;
+        setSaveReload(coords, "p2", p2.getWorld(), x ,y ,z);
     }
     
     public void expandOut(int amount) {
@@ -264,30 +264,43 @@ public class ArenaRegion
     
     // Lobby expand
     public void expandLobbyUp(int amount) {
-        l2.setY(Math.min(arena.getWorld().getMaxHeight(), l2.getY() + amount));
-        set(RegionPoint.L2, l2);
+        int x = l2.getBlockX();
+        int y = Math.min(l2.getWorld().getMaxHeight(), l2.getBlockY() + amount);
+        int z = l2.getBlockZ();
+        setSaveReload(coords, "l2", l2.getWorld(), x ,y ,z);
     }
     
     public void expandLobbyDown(int amount) {
-        l1.setY(Math.max(0D, l1.getY() + amount));
-        set(RegionPoint.L1, l1);
+        int x = l1.getBlockX();
+        int y = Math.max(0, l1.getBlockY() - amount);
+        int z = l1.getBlockZ();
+        setSaveReload(coords, "l1", l1.getWorld(), x ,y ,z);
     }
     
-    public void expandL1(int x, int z) {
-        l1.setX(l1.getX() - x);
-        l1.setZ(l1.getZ() - z);
-        set(RegionPoint.L1, l1);
+    public void expandL1(int dx, int dz) {
+        int x = l1.getBlockX() - dx;
+        int y = l1.getBlockY();
+        int z = l1.getBlockZ() - dz;
+        setSaveReload(coords, "l1", l1.getWorld(), x ,y ,z);
     }
     
-    public void expandL2(int x, int z) {
-        l2.setX(l2.getX() + x);
-        l2.setZ(l2.getZ() + z);
-        set(RegionPoint.L2, l2);
+    public void expandL2(int dx, int dz) {
+        int x = l2.getBlockX() + dx;
+        int y = l2.getBlockY();
+        int z = l2.getBlockZ() + dz;
+        setSaveReload(coords, "l2", l2.getWorld(), x ,y ,z);
     }
     
     public void expandLobbyOut(int amount) {
         expandL1(amount, amount);
         expandL2(amount, amount);
+    }
+
+    private void setSaveReload(ConfigurationSection section, String key, World w, double x, double y, double z) {
+        Location loc = new Location(w, x, y, z);
+        setLocation(section, key, loc);
+        save();
+        reloadRegion();
     }
     
     public void fixRegion() {
