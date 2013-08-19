@@ -526,7 +526,7 @@ public class ArenaListener
 
     public void onEntityDamage(EntityDamageEvent event) {
         Entity damagee = event.getEntity();
-        if (!arena.isRunning() || !arena.getRegion().contains(damagee.getLocation())) {
+        if (!arena.isRunning() && !arena.getRegion().contains(damagee.getLocation())) {
             return;
         }
 
