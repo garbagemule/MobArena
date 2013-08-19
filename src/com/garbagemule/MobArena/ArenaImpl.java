@@ -15,9 +15,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.*;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
@@ -624,6 +623,11 @@ public class ArenaImpl implements Arena
         if (event.isCancelled()) {
             return false;
         }
+
+        // Clear inventory if player is an arena player
+        if (arenaPlayers.contains(p)) {
+            clearInv(p);
+        }
         
         removeClassPermissions(p);
         removePotionEffects(p);
@@ -658,7 +662,10 @@ public class ArenaImpl implements Arena
         ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, last);
         plugin.getServer().getPluginManager().callEvent(event);
 
-        arenaPlayers.remove(p);
+        // Clear the player's inventory
+        if (arenaPlayers.remove(p)) {
+            clearInv(p);
+        }
         
         if (!settings.getBoolean("auto-respawn", true)) {
             deadPlayers.add(p);
@@ -669,6 +676,15 @@ public class ArenaImpl implements Arena
         setHealth(p, p.getMaxHealth());
         Delays.revivePlayer(plugin, this, p);
         endArena();
+    }
+
+    private void clearInv(Player p) {
+        InventoryView view = p.getOpenInventory();
+        if (view != null) {
+            view.setCursor(new ItemStack(0));
+            view.getBottomInventory().clear();
+            view.close();
+        }
     }
 
     @Override
