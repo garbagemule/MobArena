@@ -235,12 +235,14 @@ public class ArenaImpl implements Arena
     public void setEditMode(boolean value) {
         edit = value;
     }
-    
-    private int getMinPlayers() {
+
+    @Override
+    public int getMinPlayers() {
         return settings.getInt("min-players");
     }
-    
-    private int getMaxPlayers() {
+
+    @Override
+    public int getMaxPlayers() {
         return settings.getInt("max-players");
     }
     

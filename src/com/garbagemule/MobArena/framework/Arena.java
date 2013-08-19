@@ -53,6 +53,10 @@ public interface Arena
     public boolean inEditMode();
     
     public void setEditMode(boolean value);
+
+    public int getMinPlayers();
+
+    public int getMaxPlayers();
     
     public List<ItemStack> getEntryFee();
     
