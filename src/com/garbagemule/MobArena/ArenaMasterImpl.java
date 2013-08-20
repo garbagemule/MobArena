@@ -566,7 +566,23 @@ public class ArenaMasterImpl implements ArenaMaster
         return arena;
     }
 
+    @Override
+    public boolean reloadArena(String name) {
+        Arena arena = getArenaWithName(name);
+        if (arena == null) return false;
+
+        arena.forceEnd();
+        arenas.remove(arena);
+
+        plugin.reloadConfig();
+        config = plugin.getConfig();
+
+        loadArena(name);
+        return true;
+    }
+
     // Create and load a new arena node
+    @Override
     public Arena createArenaNode(String arenaName, World world) {
         ConfigurationSection section = makeSection(config, "arenas");
         return createArenaNode(section, arenaName, world, true);
