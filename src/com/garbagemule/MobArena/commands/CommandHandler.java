@@ -188,6 +188,7 @@ public class CommandHandler implements CommandExecutor
         
         // mobarena.setup
         register(ConfigCommand.class);
+        register(SettingCommand.class);
 
         register(AddArenaCommand.class);
         register(RemoveArenaCommand.class);
