@@ -562,7 +562,7 @@ public class ArenaImpl implements Arena
         }
 
         // Announce globally (must happen before moving player)
-        if (settings.getBoolean("global-first-join-announce", false)) {
+        if (settings.getBoolean("global-join-announce", false)) {
             if (lobbyPlayers.isEmpty()) {
                 for (Player q : Bukkit.getOnlinePlayers()) {
                     Messenger.tell(q, Msg.ARENA_JOIN_GLOBAL, configName());

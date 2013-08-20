@@ -39,5 +39,5 @@ display-waves-as-level: false
 display-timer-as-level: false
 use-scoreboards: true
 isolated-chat: false
-global-first-join-announce: false
+global-join-announce: false
 global-end-announce: false
