@@ -86,7 +86,6 @@ public class CommandHandler implements CommandExecutor
         // Otherwise, execute the command!
         String[] params = trimFirstArg(args);
         command.execute(am, sender, params);
-        
         return true;
     }
     
@@ -117,8 +116,8 @@ public class CommandHandler implements CommandExecutor
     private void showUsage(Command cmd, CommandSender sender) {
         CommandInfo info = cmd.getClass().getAnnotation(CommandInfo.class);
         if (!plugin.has(sender, info.permission())) return;
-        
-        Messenger.tell(sender, info.usage() + " " + ChatColor.YELLOW + info.desc());
+
+        sender.sendMessage(info.usage() + " " + ChatColor.YELLOW + info.desc());
     }
     
     /**
