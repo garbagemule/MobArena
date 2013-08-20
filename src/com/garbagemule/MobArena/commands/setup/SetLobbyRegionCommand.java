@@ -24,17 +24,12 @@ public class SetLobbyRegionCommand implements Command
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
-        
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+
+        // Require a region point
+        if (args.length != 1 || !args[0].matches("l1|l2")) return false;
         
         // Cast the sender.
         Player p = (Player) sender;
-        
-        if (!(arg1.equals("l1") || arg1.equals("l2"))) {
-            Messenger.tell(sender, "Usage: /ma setlobbyregion l1|l2");
-            return true;
-        }
 
         Arena arena = am.getSelectedArena();
         World aw = arena.getWorld();
@@ -46,8 +41,8 @@ public class SetLobbyRegionCommand implements Command
         }
 
         arena.setWorld(p.getWorld());
-        arena.getRegion().set(arg1, p.getLocation());
-        Messenger.tell(sender, "Lobby region point " + arg1 + " for arena '" + am.getSelectedArena().configName() + "' set.");
+        arena.getRegion().set(args[0], p.getLocation());
+        Messenger.tell(sender, "Lobby region point " + args[0] + " for arena '" + am.getSelectedArena().configName() + "' set.");
         return true;
     }
 }
