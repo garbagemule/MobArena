@@ -17,23 +17,18 @@ public class ConfigCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-        
-        if (arg1.equals("reload")) {
+        // Require reload/save
+        if (args.length != 1) return false;
+
+        if (args[0].equals("reload")) {
             am.reloadConfig();
             Messenger.tell(sender, "Config reloaded.");
-            return true;
-        }
-        
-        if (arg1.equals("save")) {
+        } else if (args[0].equals("save")) {
             am.saveConfig();
             Messenger.tell(sender, "Config saved.");
-            return true;
+        } else {
+            return false;
         }
-
-        // Requires an argument.
-        Messenger.tell(sender, "Usage: /ma config reload|save");
-        return false;
+        return true;
     }
 }

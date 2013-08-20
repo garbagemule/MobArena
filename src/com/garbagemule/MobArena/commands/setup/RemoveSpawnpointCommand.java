@@ -17,19 +17,14 @@ public class RemoveSpawnpointCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+        // Require a point name
+        if (args.length != 1 || !args[0].matches("^[a-zA-Z][a-zA-Z0-9]*$")) return false;
 
-        // Require an argument
-        if (!arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
-            Messenger.tell(sender, "Usage: /ma removespawn <point name>");
-            return true;
+        if (am.getSelectedArena().getRegion().removeSpawn(args[0])) {
+            Messenger.tell(sender, "Spawnpoint " + args[0] + " removed for arena '" + am.getSelectedArena().configName() + "'");
+        } else {
+            Messenger.tell(sender, "Could not find the spawnpoint " + args[0] + "for the arena '" + am.getSelectedArena().configName() + "'");
         }
-
-        if (am.getSelectedArena().getRegion().removeSpawn(arg1))
-            Messenger.tell(sender, "Spawnpoint " + arg1 + " removed for arena '" + am.getSelectedArena().configName() + "'");
-        else
-            Messenger.tell(sender, "Could not find the spawnpoint " + arg1 + "for the arena '" + am.getSelectedArena().configName() + "'");
         return true;
     }
 }

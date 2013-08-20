@@ -21,8 +21,11 @@ public class SetClassCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
+
+        // Require at least a class name
+        if (args.length < 1) return false;
         
         // Grab the argument, if any.
         String arg1 = (args.length > 0 ? args[0] : "");
@@ -31,19 +34,9 @@ public class SetClassCommand implements Command
         // Cast the sender.
         Player p = (Player) sender;
         
-        // Require an argument.
-        if (arg1.equals("")) {
-            Messenger.tell(p, "Usage: /ma setclass (safe) <classname>");
-            return true;
-        }
-        
         // Check if we're overwriting.
         boolean safe = arg1.equals("safe");
-
-        if (safe && arg2.equals("")) {
-            Messenger.tell(p, "Usage: /ma setclass (safe) <classname>");
-            return true;
-        }
+        if (safe && arg2.equals("")) return false;
         
         // If so, use arg2, otherwise, use arg1
         String className = TextUtils.camelCase(safe ? arg2 : arg1);

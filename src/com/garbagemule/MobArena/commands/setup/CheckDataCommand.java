@@ -10,7 +10,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 @CommandInfo(
     name    = "checkdata",
     pattern = "checkdata",
-    usage   = "/ma checkdata",
+    usage   = "/ma checkdata (<arena>)",
     desc    = "check if all required points are set up",
     permission = "mobarena.setup.checkdata"
 )
@@ -24,7 +24,7 @@ public class CheckDataCommand implements Command
         Arena arena = arg1.equals("") ? am.getSelectedArena() : am.getArenaWithName(arg1);
         if (arena == null) {
             Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
-            return false;
+            return true;
         }
         
         arena.getRegion().checkData(am.getPlugin(), sender, true, true, true, true);

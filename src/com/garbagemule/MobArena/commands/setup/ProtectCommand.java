@@ -43,8 +43,6 @@ public class ProtectCommand implements Command
                 arena = am.getArenaWithName(arg1);
                 if (arena == null) {
                     Messenger.tell(sender, "There is no arena with that name.");
-                    Messenger.tell(sender, "Usage: /ma protect (true|false)");
-                    Messenger.tell(sender, "    or /ma protect <arena> (true|false)");
                     return true;
                 }
                 arena.setProtected(!arena.isProtected());
@@ -54,18 +52,14 @@ public class ProtectCommand implements Command
         // Two arguments
         else  {
             if (!(arg2.matches("true|on") || arg2.matches("false|off"))) {
-                Messenger.tell(sender, "Usage: /ma protect (true|false)");
-                Messenger.tell(sender, "    or /ma protect <arena name> (true|false)");
-                return true;
+                return false;
             }
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
                 Messenger.tell(sender, "There is no arena with that name.");
-                Messenger.tell(sender, "Usage: /ma protect (true|false)");
-                Messenger.tell(sender, "    or /ma protect <arena name> (true|false)");
                 return true;
             }
-            arena.setProtected(arg2.equals("true"));
+            arena.setProtected(arg2.matches("true|on"));
         }
 
         arena.getPlugin().saveConfig();

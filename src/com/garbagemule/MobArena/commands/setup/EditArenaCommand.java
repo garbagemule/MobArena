@@ -36,15 +36,13 @@ public class EditArenaCommand implements Command
             // Argument is [true|false]
             if (arg1.matches("true|on") || arg1.matches("false|off")) {
                 arena = am.getSelectedArena();
-                arena.setEditMode(arg1.equals("true"));
+                arena.setEditMode(arg1.matches("true|on"));
             }
             // Argument is <arena name>
             else {
                 arena = am.getArenaWithName(arg1);
                 if (arena == null) {
                     Messenger.tell(sender, "There is no arena with that name.");
-                    Messenger.tell(sender, "Usage: /ma editarena (true|false)");
-                    Messenger.tell(sender, "    or /ma editarena <arena> (true|false)");
                     return true;
                 }
                 arena.setEditMode(!arena.inEditMode());
@@ -54,18 +52,14 @@ public class EditArenaCommand implements Command
         // Two arguments
         else {
             if (!(arg2.matches("true|on") || arg2.matches("false|off"))) {
-                Messenger.tell(sender, "Usage: /ma editarena (true|false)");
-                Messenger.tell(sender, "    or /ma editarena <arena> (true|false)");
-                return true;
+                return false;
             }
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
                 Messenger.tell(sender, "There is no arena with that name.");
-                Messenger.tell(sender, "Usage: /ma editarena (true|false)");
-                Messenger.tell(sender, "    or /ma editarena <arena> (true|false)");
                 return true;
             }
-            arena.setEditMode(arg2.equals("true"));
+            arena.setEditMode(arg2.matches("true|on"));
         }
         
         Messenger.tell(sender, "Edit mode for arena '" + arena.configName() + "': " + ((arena.inEditMode()) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));

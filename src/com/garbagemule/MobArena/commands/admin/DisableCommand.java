@@ -33,9 +33,8 @@ public class DisableCommand implements Command
             Arena arena = am.getArenaWithName(arg1);
             if (arena == null) {
                 Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
-                return false;
+                return true;
             }
-
             disable(arena, sender);
             return true;
         }
@@ -43,7 +42,6 @@ public class DisableCommand implements Command
         am.setEnabled(false);
         am.saveConfig();
         Messenger.tell(sender, "MobArena " + ChatColor.RED + "disabled");
-        
         return true;
     }
     

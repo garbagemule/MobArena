@@ -19,28 +19,21 @@ public class KickCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+        // Require a player name
+        if (args.length != 1) return false;
         
-        // Require an argument
-        if (arg1.equals("")) {
-            Messenger.tell(sender, "Usage: /ma kick <player>");
-            return false;
-        }
-        
-        Arena arena = am.getArenaWithPlayer(arg1);
+        Arena arena = am.getArenaWithPlayer(args[0]);
         if (arena == null) {
             Messenger.tell(sender, "That player is not in an arena.");
-            return false;
+            return true;
         }
         
         // Grab the Player object.
-        Player bp = am.getPlugin().getServer().getPlayer(arg1);
+        Player bp = am.getPlugin().getServer().getPlayer(args[0]);
         
         // Force leave.
         arena.playerLeave(bp);
-        
-        Messenger.tell(sender, "Player '" + arg1 + "' was kicked from arena '" + arena.configName() + "'.");
+        Messenger.tell(sender, "Player '" + args[0] + "' was kicked from arena '" + arena.configName() + "'.");
         Messenger.tell(bp, "You were kicked by " + sender.getName() + ".");
         return true;
     }

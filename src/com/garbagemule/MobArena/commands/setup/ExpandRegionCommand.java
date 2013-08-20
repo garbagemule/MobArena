@@ -17,40 +17,29 @@ public class ExpandRegionCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-        String arg2 = (args.length > 1 ? args[1] : "");
-
-        if (args.length != 2 || !arg1.matches("(-)?[0-9]+")) {
-            Messenger.tell(sender, "Usage: /ma expandregion <amount> up|down|out");
-            return false;
-        }
+        // Require amount and direction
+        if (args.length != 2 || !args[0].matches("(-)?[0-9]+")) return false;
         
         if (!am.getSelectedArena().getRegion().isDefined()) {
             Messenger.tell(sender, "You must first define p1 and p2");
             return true;
         }
-        
-        if (arg2.equals("up")) {
-            am.getSelectedArena().getRegion().expandUp(Integer.parseInt(arg1));
-        }
-        else if (arg2.equals("down")) {
-            am.getSelectedArena().getRegion().expandDown(Integer.parseInt(arg1));
-        }
-        else if (arg2.equals("out")) {
-            am.getSelectedArena().getRegion().expandOut(Integer.parseInt(arg1));
-        }
-        else {
-            Messenger.tell(sender, "Usage: /ma expandregion <amount> up|down|out");
-            return true;
+
+        if (args[1].equals("up")) {
+            am.getSelectedArena().getRegion().expandUp(Integer.parseInt(args[0]));
+        } else if (args[1].equals("down")) {
+            am.getSelectedArena().getRegion().expandDown(Integer.parseInt(args[0]));
+        } else if (args[1].equals("out")) {
+            am.getSelectedArena().getRegion().expandOut(Integer.parseInt(args[0]));
+        } else {
+            return false;
         }
         
         // In case of a "negative" region, fix it!
         am.getSelectedArena().getRegion().fixRegion();
         
-        Messenger.tell(sender, "Region for '" + am.getSelectedArena().configName() + "' expanded " + arg2 + " by " + arg1 + " blocks.");
+        Messenger.tell(sender, "Region for '" + am.getSelectedArena().configName() + "' expanded " + args[1] + " by " + args[0] + " blocks.");
         am.getSelectedArena().getRegion().save();
-        
         return true;
     }
 }

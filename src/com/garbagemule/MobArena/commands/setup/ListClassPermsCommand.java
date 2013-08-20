@@ -21,17 +21,11 @@ public class ListClassPermsCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+        // Require a class name
+        if (args.length != 1) return false;
         
-        // Require an argument.
-        if (arg1.equals("")) {
-            Messenger.tell(sender, "Usage: /ma listclassperms <classname>");
-            return true;
-        }
-        
-        ArenaClass arenaClass = am.getClasses().get(arg1);
-        String className = TextUtils.camelCase(arg1);
+        ArenaClass arenaClass = am.getClasses().get(args[0]);
+        String className = TextUtils.camelCase(args[0]);
         
         if (arenaClass == null) {
             Messenger.tell(sender, "The class '" + className + "' does not exist.");

@@ -18,24 +18,16 @@ public class SetArenaCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-
-        // Require an argument
-        if (arg1.equals("")) {
-            Messenger.tell(sender, "Usage: /ma setarena <arena>");
-            return false;
-        }
+        // Require an arena name
+        if (args.length != 1) return false;
         
-        Arena arena = am.getArenaWithName(arg1);
+        Arena arena = am.getArenaWithName(args[0]);
         if (arena != null) {
             am.setSelectedArena(arena);
             Messenger.tell(sender, "Currently selected arena: " + arena.configName());
-        }
-        else {
+        } else {
             Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
         }
-        
         return true;
     }
 }

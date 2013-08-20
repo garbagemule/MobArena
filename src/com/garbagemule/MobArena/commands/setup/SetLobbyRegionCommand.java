@@ -22,7 +22,7 @@ public class SetLobbyRegionCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
         
         // Grab the argument, if any.

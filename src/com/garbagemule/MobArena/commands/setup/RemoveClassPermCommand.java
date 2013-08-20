@@ -18,30 +18,24 @@ public class RemoveClassPermCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-        String arg2 = (args.length > 1 ? args[1] : "");
-        
-        if (arg1.equals("") || arg2.equals("")) {
-            Messenger.tell(sender, "Usage: /ma removeclassperm <classname> <permission>");
-            return false;
-        }
-        
+        // Require class name and permission
+        if (args.length != 2) return false;
+
         // Grab the arena class
-        ArenaClass arenaClass = am.getClasses().get(arg1);
+        ArenaClass arenaClass = am.getClasses().get(args[0]);
         if (arenaClass == null) {
-            Messenger.tell(sender, "The class '" + TextUtils.camelCase(arg1) + "' does not exist.");
-            return false;
+            Messenger.tell(sender, "The class '" + TextUtils.camelCase(args[0]) + "' does not exist.");
+            return true;
         }
         
         // Remove the permission.
-        if (am.removeClassPermission(arg1, arg2)) {
-            Messenger.tell(sender, "Removed permission '" + arg2 + "' from class '" + TextUtils.camelCase(arg1) + "'.");
+        if (am.removeClassPermission(args[0], args[1])) {
+            Messenger.tell(sender, "Removed permission '" + args[1] + "' from class '" + TextUtils.camelCase(args[0]) + "'.");
             return true;
         }
 
         // If it wasn't removed, notify.
-        Messenger.tell(sender, "Permission '" + arg2 + "' was NOT removed from class '" + TextUtils.camelCase(arg1) + "'.");
-        return false;
+        Messenger.tell(sender, "Permission '" + args[1] + "' was NOT removed from class '" + TextUtils.camelCase(args[0]) + "'.");
+        return true;
     }
 }

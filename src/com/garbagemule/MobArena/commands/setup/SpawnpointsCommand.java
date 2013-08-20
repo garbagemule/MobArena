@@ -27,11 +27,9 @@ public class SpawnpointsCommand implements Command
                 buffy.append(s);
                 buffy.append(" ");
             }
-        }
-        else {
+        } else {
             buffy.append(Msg.MISC_NONE);
         }
-        
         Messenger.tell(sender, "Spawnpoints for arena '" + am.getSelectedArena().configName() + "': " + buffy.toString());
         return true;
     }

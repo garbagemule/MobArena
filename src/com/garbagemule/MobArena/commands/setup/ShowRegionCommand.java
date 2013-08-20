@@ -10,7 +10,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 
 @CommandInfo(
     name    = "showregion",
-    pattern = "showregion",
+    pattern = "show(region|arena)",
     usage   = "/ma showregion (<arena>)",
     desc    = "show an arena region",
     permission = "mobarena.setup.showregion"
@@ -21,7 +21,7 @@ public class ShowRegionCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
         
         // Grab the argument, if any.
@@ -31,25 +31,22 @@ public class ShowRegionCommand implements Command
         Player p = (Player) sender;
         
         Arena arena;
-        
         if (arg1.equals("")) {
             arena = am.getArenaAtLocation(p.getLocation());
             if (arena == null) {
                 arena = am.getSelectedArena();
             }
-        }
-        else {
+        } else {
             arena = am.getArenaWithName(arg1);
-            
             if (arena == null) {
                 Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
-                return false;
+                return true;
             }
         }
 
         if (!arena.getRegion().isDefined()) {
             Messenger.tell(sender, "The region is not defined for the selected arena.");
-            return false;
+            return true;
         }
         
         // Show an error message if we aren't in the right world
@@ -57,11 +54,9 @@ public class ShowRegionCommand implements Command
             Messenger.tell(sender, "Arena '" + arena.configName() +
                     "' is in world '" + arena.getWorld().getName() +
                     "' and you are in world '" + p.getWorld().getName() + "'");
-            return false;
+            return true;
         }
-        
         arena.getRegion().showRegion(p);
-        
         return true;
     }
 }

@@ -21,7 +21,7 @@ public class LeaveCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
         
         // Cast the sender.
@@ -32,7 +32,7 @@ public class LeaveCommand implements Command
             arena = am.getArenaWithSpectator(p);
             if (arena == null) {
                 Messenger.tell(p, Msg.LEAVE_NOT_PLAYING);
-                return false;
+                return true;
             }
         }
         

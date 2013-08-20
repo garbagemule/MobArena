@@ -31,18 +31,15 @@ public class NotReadyCommand implements Command
                 Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
-        }
-        else if (Commands.isPlayer(sender)) {
+        } else if (Commands.isPlayer(sender)) {
             Player p = (Player) sender;
             arena = am.getArenaWithPlayer(p);
             
             if (arena == null) {
                 Messenger.tell(sender, Msg.LEAVE_NOT_PLAYING);
-                return false;
+                return true;
             }
-        }
-        else {
-            Messenger.tell(sender, "Usage: /ma notready <arena name>");
+        } else {
             return false;
         }
         

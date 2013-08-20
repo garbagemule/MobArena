@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 @CommandInfo(
     name    = "showlobbyregion",
-    pattern = "showlobbyregion",
+    pattern = "showlobby(region)?",
     usage   = "/ma showlobbyregion (<arena>)",
     desc    = "show a lobby region",
     permission = "mobarena.setup.showlobbyregion"
@@ -23,7 +23,7 @@ public class ShowLobbyRegionCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
         
         // Grab the argument, if any.
@@ -33,25 +33,22 @@ public class ShowLobbyRegionCommand implements Command
         Player p = (Player) sender;
         
         Arena arena;
-        
         if (arg1.equals("")) {
             arena = am.getArenaAtLocation(p.getLocation());
             if (arena == null) {
                 arena = am.getSelectedArena();
             }
-        }
-        else {
+        } else {
             arena = am.getArenaWithName(arg1);
-            
             if (arena == null) {
                 Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
-                return false;
+                return true;
             }
         }
 
         if (!arena.getRegion().isLobbyDefined()) {
             Messenger.tell(sender, "The lobby region is not defined for the selected arena.");
-            return false;
+            return true;
         }
         
         // Show an error message if we aren't in the right world
@@ -59,11 +56,9 @@ public class ShowLobbyRegionCommand implements Command
             Messenger.tell(sender, "Arena '" + arena.configName() +
                     "' is in world '" + arena.getWorld().getName() +
                     "' and you are in world '" + p.getWorld().getName() + "'");
-            return false;
+            return true;
         }
-        
         arena.getRegion().showLobbyRegion(p);
-        
         return true;
     }
 }

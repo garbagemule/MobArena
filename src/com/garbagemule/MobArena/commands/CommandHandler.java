@@ -1,10 +1,6 @@
 package com.garbagemule.MobArena.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.bukkit.ChatColor;
@@ -56,7 +52,7 @@ public class CommandHandler implements CommandExecutor
         if (matches.size() > 1) {
             Messenger.tell(sender, Msg.MISC_MULTIPLE_MATCHES);
             for (Command cmd : matches) {
-                showUsage(cmd, sender);
+                showUsage(cmd, sender, false);
             }
             return true;
         }
@@ -79,13 +75,15 @@ public class CommandHandler implements CommandExecutor
         
         // Check if the last argument is a ?, in which case, display usage and description
         if (last.equals("?") || last.equals("help")) {
-            showUsage(command, sender);
+            showUsage(command, sender, true);
             return true;
         }
         
         // Otherwise, execute the command!
         String[] params = trimFirstArg(args);
-        command.execute(am, sender, params);
+        if (!command.execute(am, sender, params)) {
+            showUsage(command, sender, true);
+        }
         return true;
     }
     
@@ -113,11 +111,11 @@ public class CommandHandler implements CommandExecutor
      * @param cmd a Command
      * @param sender a CommandSender
      */
-    private void showUsage(Command cmd, CommandSender sender) {
+    private void showUsage(Command cmd, CommandSender sender, boolean prefix) {
         CommandInfo info = cmd.getClass().getAnnotation(CommandInfo.class);
         if (!plugin.has(sender, info.permission())) return;
 
-        sender.sendMessage(info.usage() + " " + ChatColor.YELLOW + info.desc());
+        sender.sendMessage((prefix ? "Usage: " : "") + info.usage() + " " + ChatColor.YELLOW + info.desc());
     }
     
     /**
@@ -135,10 +133,33 @@ public class CommandHandler implements CommandExecutor
      * @param sender a player or the console
      */
     private void showHelp(CommandSender sender) {
-        Messenger.tell(sender, "Available MobArena commands:");
-        
+        StringBuilder user = new StringBuilder();
+        StringBuilder admin = new StringBuilder();
+        StringBuilder setup = new StringBuilder();
+
         for (Command cmd : commands.values()) {
-            showUsage(cmd, sender);
+            CommandInfo info = cmd.getClass().getAnnotation(CommandInfo.class);
+            if (!plugin.has(sender, info.permission())) continue;
+
+            StringBuilder buffy;
+            if (info.permission().startsWith("mobarena.admin")) {
+                buffy = admin;
+            } else if (info.permission().startsWith("mobarena.setup")) {
+                buffy = setup;
+            } else {
+                buffy = user;
+            }
+            buffy.append("\n")
+                 .append(ChatColor.RESET).append(info.usage()).append(" ")
+                 .append(ChatColor.YELLOW).append(info.desc());
+        }
+
+        if (admin.length() == 0 && setup.length() == 0) {
+            Messenger.tell(sender, "Available commands: " + user.toString());
+        } else {
+            Messenger.tell(sender, "User commands: " + user.toString());
+            if (admin.length() > 0) Messenger.tell(sender, "Admin commands: " + admin.toString());
+            if (setup.length() > 0) Messenger.tell(sender, "Setup commands: " + setup.toString());
         }
     }
     
@@ -148,57 +169,64 @@ public class CommandHandler implements CommandExecutor
      * method, but this is neater, albeit more manual work.
      */
     private void registerCommands() {
-        commands = new HashMap<String,Command>();
+        commands = new LinkedHashMap<String,Command>();
         
         // mobarena.use
-        register(ArenaListCommand.class);
         register(JoinCommand.class);
         register(LeaveCommand.class);
-        register(NotReadyCommand.class);
         register(SpecCommand.class);
+        register(ArenaListCommand.class);
         register(PlayerListCommand.class);
-        
+        register(NotReadyCommand.class);
+
         // mobarena.admin
-        register(DisableCommand.class);
         register(EnableCommand.class);
+        register(DisableCommand.class);
         register(ForceCommand.class);
         register(KickCommand.class);
         register(RestoreCommand.class);
         
         // mobarena.setup
-        register(AddArenaCommand.class);
-        register(AddClassPermCommand.class);
-        register(AddContainerCommand.class);
-        register(AddSpawnpointCommand.class);
-        register(ArenaCommand.class);
-        register(CheckDataCommand.class);
-        register(CheckSpawnsCommand.class);
         register(ConfigCommand.class);
-        register(ContainersCommand.class);
-        register(EditArenaCommand.class);
-        register(ExpandLobbyRegionCommand.class);
-        register(ExpandRegionCommand.class);
-        register(ListClassesCommand.class);
-        register(ListClassPermsCommand.class);
-        register(ProtectCommand.class);
+
+        register(AddArenaCommand.class);
         register(RemoveArenaCommand.class);
-        register(RemoveClassCommand.class);
-        register(RemoveClassPermCommand.class);
-        register(RemoveContainerCommand.class);
-        register(RemoveLeaderboardCommand.class);
-        register(RemoveSpawnpointCommand.class);
+        register(EditArenaCommand.class);
+
+        register(ArenaCommand.class);
         register(SetArenaCommand.class);
-        register(SetClassCommand.class);
-        register(SetLobbyRegionCommand.class);
-        register(SetRegionCommand.class);
+
         register(SetWarpCommand.class);
+        register(SetRegionCommand.class);
+        register(SetLobbyRegionCommand.class);
+        register(ExpandRegionCommand.class);
+        register(ExpandLobbyRegionCommand.class);
         register(ShowRegionCommand.class);
         register(ShowLobbyRegionCommand.class);
+        register(CheckDataCommand.class);
+
         register(ShowSpawnsCommand.class);
         register(SpawnpointsCommand.class);
+        register(AddSpawnpointCommand.class);
+        register(RemoveSpawnpointCommand.class);
+        register(CheckSpawnsCommand.class);
+
+        register(ContainersCommand.class);
+        register(AddContainerCommand.class);
+        register(RemoveContainerCommand.class);
+
+        register(ListClassesCommand.class);
+        register(SetClassCommand.class);
+        register(RemoveClassCommand.class);
+        register(ClassChestCommand.class);
+        register(ListClassPermsCommand.class);
+        register(AddClassPermCommand.class);
+        register(RemoveClassPermCommand.class);
+
+        register(ProtectCommand.class);
+        register(RemoveLeaderboardCommand.class);
         register(AutoGenerateCommand.class);
         register(AutoDegenerateCommand.class);
-        register(ClassChestCommand.class);
     }
     
     /**

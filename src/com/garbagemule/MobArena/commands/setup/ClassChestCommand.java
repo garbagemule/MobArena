@@ -26,13 +26,11 @@ public class ClassChestCommand implements Command {
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
-        }
-
-        if (args.length != 1) {
-            Messenger.tell(sender, "Usage: /ma classchest <class>");
             return true;
         }
+
+        // Require a class name
+        if (args.length != 1) return false;
 
         ArenaClass ac = am.getClasses().get(args[0].toLowerCase());
         if (ac == null) {

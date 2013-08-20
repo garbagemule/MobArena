@@ -21,7 +21,7 @@ public class JoinCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
         
         // Cast the sender, grab the argument, if any.
@@ -30,20 +30,20 @@ public class JoinCommand implements Command
         
         // Run some rough sanity checks, and grab the arena to join.
         Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
-        Arena fromArena = am.getArenaWithPlayer(p);
         if (toArena == null) {
-            return false;
+            return true;
         }
         
         // Deny joining from other arenas
+        Arena fromArena = am.getArenaWithPlayer(p);
         if (fromArena != null && (fromArena.inArena(p) || fromArena.inLobby(p))) {
             Messenger.tell(p, Msg.JOIN_ALREADY_PLAYING);
-            return false;
+            return true;
         }
         
         // Per-arena sanity checks
         if (!toArena.canJoin(p)) {
-            return false;
+            return true;
         }
 
         // Force leave previous arena

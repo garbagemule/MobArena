@@ -23,7 +23,7 @@ public class CheckSpawnsCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
         
         // Grab the argument, if any.
@@ -33,29 +33,23 @@ public class CheckSpawnsCommand implements Command
         Player p = (Player) sender;
         
         Arena arena;
-        
         if (arg1.equals("")) {
             arena = am.getArenaAtLocation(p.getLocation());
             if (arena == null) {
                 arena = am.getSelectedArena();
             }
-
             if (arena.getRegion().getSpawnpoints().isEmpty()) {
                 Messenger.tell(sender, "There are no spawnpoints in the selected arena.");
-                return false;
+                return true;
             }
-        }
-        else {
+        } else {
             arena = am.getArenaWithName(arg1);
-            
             if (arena == null) {
                 Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
-                return false;
+                return true;
             }
         }
-
         arena.getRegion().checkSpawns(p);
-        
         return true;
     }
 }

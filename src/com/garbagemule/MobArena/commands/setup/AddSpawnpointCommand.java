@@ -22,19 +22,14 @@ public class AddSpawnpointCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
-        
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+
+        // Require a point name
+        if (args.length != 1 || args[0].matches("^[a-zA-Z][a-zA-Z0-9]*$")) return false;
         
         // Cast the sender.
         Player p = (Player) sender;
-        
-        if (!arg1.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
-            Messenger.tell(sender, "Usage: /ma addspawn <point name>");
-            return true;
-        }
 
         // Make a world check first
         Arena arena = am.getSelectedArena();
@@ -57,7 +52,7 @@ public class AddSpawnpointCommand implements Command
             if (changeWorld) arena.setWorld(aw);
         } else {
             // Add the spawnpoint
-            am.getSelectedArena().getRegion().addSpawn(arg1, p.getLocation());
+            am.getSelectedArena().getRegion().addSpawn(args[0], p.getLocation());
 
             // Notify the player if world changed
             if (changeWorld) {
@@ -67,7 +62,7 @@ public class AddSpawnpointCommand implements Command
             }
             
             // Then notify about point set
-            Messenger.tell(sender, "Spawnpoint '" + arg1 + "' added for arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Spawnpoint '" + args[0] + "' added for arena '" + am.getSelectedArena().configName() + "'");
             arena.getRegion().checkData(am.getPlugin(), sender, false, false, false, true);
         }
         return true;

@@ -21,34 +21,28 @@ public class AutoGenerateCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            return true;
         }
-        
-        // Grab the arguments, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
+
+        // Require an arena name
+        if (args.length != 1) return false;
         
         // Cast the sender.
         Player p = (Player) sender;
-
-        // Require an argument
-        if (arg1.equals("")) {
-            Messenger.tell(sender, "Usage: /ma autogenerate <arena>");
-            return true;
-        }
         
         // Check if arena already exists.
-        Arena arena = am.getArenaWithName(arg1);
+        Arena arena = am.getArenaWithName(args[0]);
         if (arena != null) {
             Messenger.tell(sender, "An arena with that name already exists.");
             return true;
         }
         
-        if (!MAUtils.doooooItHippieMonster(p.getLocation(), 13, arg1, am.getPlugin())) {
+        if (!MAUtils.doooooItHippieMonster(p.getLocation(), 13, args[0], am.getPlugin())) {
             Messenger.tell(sender, "Could not auto-generate arena.");
             return true;
         }
         
-        Messenger.tell(sender, "Arena with name '" + arg1 + "' generated.");
+        Messenger.tell(sender, "Arena with name '" + args[0] + "' generated.");
         return true;
     }
 }
