@@ -848,8 +848,7 @@ public class ArenaListener
 
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player p = event.getPlayer();
-        if (arena.inArena(p) || !arena.inLobby(p))
-            return;
+        if (!arena.inLobby(p)) return;
 
         // Player is in the lobby, so disallow using items.
         Action a = event.getAction();
@@ -868,9 +867,6 @@ public class ArenaListener
         }
         // Sign
         else if (event.getClickedBlock().getState() instanceof Sign) {
-            // Make sure to allow clicking signs
-            event.setCancelled(false);
-
             Sign sign = (Sign) event.getClickedBlock().getState();
             handleSign(sign, p);
         }

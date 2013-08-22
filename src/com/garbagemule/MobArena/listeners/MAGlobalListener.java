@@ -228,7 +228,8 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onPlayerDropItem(event);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    // HIGHEST => after SignShop
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void playerInteract(PlayerInteractEvent event) {
         if (!am.isEnabled()) return;
         for (Arena arena : am.getArenas())
