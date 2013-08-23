@@ -44,6 +44,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -167,6 +168,17 @@ public class ArenaListener
         if (onBlockDestroy(event))
             return;
 
+        event.setCancelled(true);
+    }
+
+    public void onHangingBreak(HangingBreakEvent event) {
+        Location l = event.getEntity().getLocation();
+        if (!arena.getRegion().contains(l)) {
+            return;
+        }
+        if (arena.inEditMode()) {
+            return;
+        }
         event.setCancelled(true);
     }
 

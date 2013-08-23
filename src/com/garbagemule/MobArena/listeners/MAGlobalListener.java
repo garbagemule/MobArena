@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -35,7 +36,6 @@ public class MAGlobalListener implements Listener
         this.am = am;
     }
     
-    
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                            BLOCK EVENTS                               //
@@ -47,6 +47,12 @@ public class MAGlobalListener implements Listener
     public void blockBreak(BlockBreakEvent event) {
         for (Arena arena : am.getArenas())
             arena.getEventListener().onBlockBreak(event);
+    }
+
+    @EventHandler
+    public void hangingBreak(HangingBreakEvent event) {
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onHangingBreak(event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
