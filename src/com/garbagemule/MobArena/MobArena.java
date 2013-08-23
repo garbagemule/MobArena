@@ -174,6 +174,7 @@ public class MobArena extends JavaPlugin
         
         if (e != null) {
             economy = e.getProvider();
+            Messenger.info("Vault found; economy rewards enabled.");
         } else {
             Messenger.warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
         }
@@ -182,7 +183,8 @@ public class MobArena extends JavaPlugin
     private void setupHeroes() {
         Plugin heroesPlugin = this.getServer().getPluginManager().getPlugin("Heroes");
         if (heroesPlugin == null) return;
-        
+
+        Messenger.info("Heroes found; using different health strategy.");
         hasHeroes = true;
     }
     
@@ -190,6 +192,7 @@ public class MobArena extends JavaPlugin
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) return;
 
+        Messenger.info("MagicSpells found, loading config-file.");
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
     }
     

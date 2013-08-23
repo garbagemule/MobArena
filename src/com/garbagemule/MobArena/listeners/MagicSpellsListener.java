@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.listeners;
 
 import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 
+import com.garbagemule.MobArena.Messenger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.*;
 import com.garbagemule.MobArena.MobArena;
+
 import com.nisovin.magicspells.events.SpellCastEvent;
 
 public class MagicSpellsListener implements Listener
@@ -26,10 +27,14 @@ public class MagicSpellsListener implements Listener
         this.plugin = plugin;
 
         // Set up the MagicSpells config-file.
-        plugin.saveResource("res/magicspells.yml", false);
-        FileConfiguration config = new YamlConfiguration();
+        File file = new File(plugin.getDataFolder(), "magicspells.yml");
+        if (!file.exists()) {
+            plugin.saveResource("magicspells.yml", false);
+            Messenger.info("magicspells.yml created.");
+        }
         try {
-            config.load(new File(plugin.getDataFolder(), "magicspells.yml"));
+            FileConfiguration config = new YamlConfiguration();
+            config.load(file);
             setupSpells(config);
         } catch (Exception e) {
             e.printStackTrace();
