@@ -307,9 +307,10 @@ public class ArenaListener
                 }
             case LIGHTNING:
             case SPREAD:
+            case FIREBALL:
+            case EXPLOSION:
+            case LAVA:
                 event.setCancelled(true);
-                break;
-            default:
                 break;
         }
     }
