@@ -10,7 +10,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
     name    = "delspawn",
     pattern = "(del(.)*|r(e)?m(ove)?)spawn(point)?",
     usage   = "/ma delspawn <point name>",
-    desc    = "add a new arena",
+    desc    = "delete a spawnpoint",
     permission = "mobarena.setup.spawnpoints"
 )
 public class RemoveSpawnpointCommand implements Command
@@ -23,7 +23,7 @@ public class RemoveSpawnpointCommand implements Command
         if (am.getSelectedArena().getRegion().removeSpawn(args[0])) {
             Messenger.tell(sender, "Spawnpoint " + args[0] + " removed for arena '" + am.getSelectedArena().configName() + "'");
         } else {
-            Messenger.tell(sender, "Could not find the spawnpoint " + args[0] + "for the arena '" + am.getSelectedArena().configName() + "'");
+            Messenger.tell(sender, "Could not find the spawnpoint " + args[0] + " for the arena '" + am.getSelectedArena().configName() + "'");
         }
         return true;
     }
