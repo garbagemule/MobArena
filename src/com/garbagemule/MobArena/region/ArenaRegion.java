@@ -586,25 +586,32 @@ public class ArenaRegion
         arena.getPlugin().saveConfig();
     }
     
-    public void showRegion(final Player p) {
+    public void showRegion(Player p) {
         if (!isDefined()) {
             return;
         }
         showBlocks(p, getFramePoints(p1, p2));
     }
 
-    public void showLobbyRegion(final Player p) {
+    public void showLobbyRegion(Player p) {
         if (!isLobbyDefined()) {
             return;
         }
         showBlocks(p, getFramePoints(l1, l2));
     }
 
-    public void showSpawns(final Player p) {
+    public void showSpawns(Player p) {
         if (spawnpoints.isEmpty()) {
             return;
         }
         showBlocks(p, spawnpoints.values());
+    }
+
+    public void showChests(Player p) {
+        if (containers.isEmpty()) {
+            return;
+        }
+        showBlocks(p, containers.values());
     }
 
     public void checkSpawns(Player p) {
@@ -635,6 +642,19 @@ public class ArenaRegion
 
         // And show the blocks
         showBlocks(p, map.values());
+    }
+
+    public void showBlock(final Player p, final Location loc, int id, byte data) {
+        p.sendBlockChange(loc, id, data);
+        arena.scheduleTask(new Runnable() {
+            @Override
+            public void run() {
+                if (!p.isOnline()) return;
+
+                Block b = loc.getBlock();
+                p.sendBlockChange(loc, b.getTypeId(), b.getData());
+            }
+        }, 100);
     }
 
     private void showBlocks(final Player p, Collection<Location> points) {
