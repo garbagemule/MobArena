@@ -479,19 +479,16 @@ public class ArenaRegion
         if (lower != null && upper != null) {
             double tmp;
             if (lower.getX() > upper.getX()) {
-                System.out.println("Swapping x values " + lower.getX() + " and " + upper.getX());
                 tmp = lower.getX();
                 lower.setX(upper.getX());
                 upper.setX(tmp);
             }
             if (lower.getY() > upper.getY()) {
-                System.out.println("Swapping y values " + lower.getY() + " and " + upper.getY());
                 tmp = lower.getY();
                 lower.setY(upper.getY());
                 upper.setY(tmp);
             }
             if (lower.getZ() > upper.getZ()) {
-                System.out.println("Swapping z values " + lower.getZ() + " and " + upper.getZ());
                 tmp = lower.getZ();
                 lower.setZ(upper.getZ());
                 upper.setZ(tmp);
