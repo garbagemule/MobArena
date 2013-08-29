@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.command.CommandSender;
 
 import com.garbagemule.MobArena.Messenger;
@@ -11,7 +12,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 @CommandInfo(
     name    = "removeleaderboard",
     pattern = "(del(.)*|r(e)?m(ove)?)leaderboard",
-    usage   = "/ma removeleaderboard (<arena>)",
+    usage   = "/ma removeleaderboard <arena>",
     desc    = "remove the selected arena's leaderboard",
     permission = "mobarena.setup.leaderboards"
 )
@@ -19,30 +20,26 @@ public class RemoveLeaderboardCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-        
-        // If no argument, use the currently selected arena
-        if (arg1.equals("")) {
-            if (am.getSelectedArena().getRegion().getLeaderboard() != null) {
-                am.getSelectedArena().getRegion().set("leaderboard", null);
-                Messenger.tell(sender, "Leaderboard for " + am.getSelectedArena().arenaName() + " successfully removed!");
+        Arena arena;
+        if (args.length == 0) {
+            if (am.getArenas().size() > 1) {
+                Messenger.tell(sender, "There are multiple arenas.");
                 return true;
-            } else {
-                Messenger.tell(sender, Msg.ARENA_LBOARD_NOT_FOUND);
             }
+            arena = am.getArenas().get(0);
         } else {
-            if (am.getArenaWithName(arg1) != null) {
-                if (am.getSelectedArena().getRegion().getLeaderboard() != null) {
-                    am.getArenaWithName(arg1).getRegion().set("leaderboard", null);
-                    Messenger.tell(sender, "Leaderboard for " + am.getArenaWithName(arg1).arenaName() + " successfully removed!");
-                    return true;
-                } else {
-                    Messenger.tell(sender, Msg.ARENA_LBOARD_NOT_FOUND);
-                }
-            } else {
-                Messenger.tell(sender, "No arena with that name exists.");
+            arena = am.getArenaWithName(args[0]);
+            if (arena == null) {
+                Messenger.tell(sender, "There is no arena named " + args[0]);
+                return true;
             }
+        }
+
+        if (arena.getRegion().getLeaderboard() != null) {
+            arena.getRegion().set("leaderboard", null);
+            Messenger.tell(sender, "Leaderboard for " + arena.configName() + " successfully removed!");
+        } else {
+            Messenger.tell(sender, Msg.ARENA_LBOARD_NOT_FOUND);
         }
         return true;
     }

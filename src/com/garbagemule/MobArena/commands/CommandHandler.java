@@ -194,27 +194,10 @@ public class CommandHandler implements CommandExecutor
         register(AddArenaCommand.class);
         register(RemoveArenaCommand.class);
         register(EditArenaCommand.class);
-
-        register(ArenaCommand.class);
-        register(SetArenaCommand.class);
-
-        register(SetWarpCommand.class);
-        register(SetRegionCommand.class);
-        register(SetLobbyRegionCommand.class);
-        register(ExpandRegionCommand.class);
-        register(ExpandLobbyRegionCommand.class);
-        register(ShowRegionCommand.class);
-        register(ShowLobbyRegionCommand.class);
         register(CheckDataCommand.class);
 
-        register(ShowSpawnsCommand.class);
-        register(SpawnpointsCommand.class);
-        register(AddSpawnpointCommand.class);
         register(RemoveSpawnpointCommand.class);
         register(CheckSpawnsCommand.class);
-
-        register(ContainersCommand.class);
-        register(AddContainerCommand.class);
         register(RemoveContainerCommand.class);
 
         register(ListClassesCommand.class);
@@ -225,7 +208,6 @@ public class CommandHandler implements CommandExecutor
         register(AddClassPermCommand.class);
         register(RemoveClassPermCommand.class);
 
-        register(ProtectCommand.class);
         register(RemoveLeaderboardCommand.class);
         register(AutoGenerateCommand.class);
         register(AutoDegenerateCommand.class);

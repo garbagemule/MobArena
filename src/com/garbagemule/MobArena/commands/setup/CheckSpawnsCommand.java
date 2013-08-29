@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 @CommandInfo(
     name    = "checkspawns",
     pattern = "checkspawn(point)?s",
-    usage   = "/ma checkspawns (<arena>)",
+    usage   = "/ma checkspawns <arena>",
     desc    = "show spawnpoints that cover your location",
     permission = "mobarena.setup.checkspawns"
 )
@@ -25,30 +25,28 @@ public class CheckSpawnsCommand implements Command
             Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
-        
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-        
-        // Cast the sender.
-        Player p = (Player) sender;
-        
+
         Arena arena;
-        if (arg1.equals("")) {
-            arena = am.getArenaAtLocation(p.getLocation());
-            if (arena == null) {
-                arena = am.getSelectedArena();
-            }
-            if (arena.getRegion().getSpawnpoints().isEmpty()) {
-                Messenger.tell(sender, "There are no spawnpoints in the selected arena.");
+        if (args.length == 1) {
+            if (am.getArenas().size() > 1) {
+                Messenger.tell(sender, "There are multiple arenas.");
                 return true;
+            } else {
+                arena = am.getArenas().get(0);
             }
         } else {
-            arena = am.getArenaWithName(arg1);
+            arena = am.getArenaWithName(args[0]);
             if (arena == null) {
-                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, "There is no arena named " + args[0]);
                 return true;
             }
         }
+
+        if (arena.getRegion().getSpawnpoints().isEmpty()) {
+            Messenger.tell(sender, "There are no spawnpoints in the selected arena.");
+            return true;
+        }
+        Player p = (Player) sender;
         arena.getRegion().checkSpawns(p);
         return true;
     }

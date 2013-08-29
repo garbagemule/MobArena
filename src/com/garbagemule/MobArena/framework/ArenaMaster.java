@@ -30,10 +30,6 @@ public interface ArenaMaster
     public void setEnabled(boolean value);
     
     public boolean notifyOnUpdates();
-
-    public Arena getSelectedArena();
-
-    public void setSelectedArena(Arena arena);
     
     public List<Arena> getArenas();
     

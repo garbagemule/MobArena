@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.command.CommandSender;
 
 import com.garbagemule.MobArena.*;
@@ -9,7 +10,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 @CommandInfo(
     name    = "removecontainer",
     pattern = "(del(.)*|r(e)?m(ove)?)(container|chest)",
-    usage   = "/ma removecontainer <point name>",
+    usage   = "/ma removecontainer <arena> <chest>",
     desc    = "remove a container from the selected arena",
     permission = "mobarena.setup.containers"
 )
@@ -17,13 +18,30 @@ public class RemoveContainerCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Require a point name
-        if (args.length != 1 || !args[0].matches("^[a-zA-Z][a-zA-Z0-9]*$")) return false;
+        if (args.length < 1) return false;
 
-        if (am.getSelectedArena().getRegion().removeChest(args[0])) {
-            Messenger.tell(sender, "Container " + args[0] + " removed for arena '" + am.getSelectedArena().configName() + "'");
+        Arena arena;
+        String chest;
+        if (args.length == 1) {
+            if (am.getArenas().size() > 1) {
+                Messenger.tell(sender, "There are multiple arenas.");
+                return true;
+            }
+            arena = am.getArenas().get(0);
+            chest = args[0];
         } else {
-            Messenger.tell(sender, "Could not find the container " + args[0] + "for the arena '" + am.getSelectedArena().configName() + "'");
+            arena = am.getArenaWithName(args[0]);
+            if (arena == null) {
+                Messenger.tell(sender, "There is no arena named " + args[0]);
+                return true;
+            }
+            chest = args[1];
+        }
+
+        if (arena.getRegion().removeChest(chest)) {
+            Messenger.tell(sender, "Container " + chest + " removed for arena '" + arena.configName() + "'");
+        } else {
+            Messenger.tell(sender, "Could not find the container " + chest + " for the arena '" + arena.configName() + "'");
         }
         return true;
     }

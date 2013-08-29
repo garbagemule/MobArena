@@ -283,7 +283,6 @@ public class MAUtils
         // Create the arena node in the config-file.
         World world = loc.getWorld();
         Arena arena = am.createArenaNode(name, world);
-        am.setSelectedArena(arena);
         
         // Get the hippie bounds.
         int x1 = (int)loc.getX() - radius;

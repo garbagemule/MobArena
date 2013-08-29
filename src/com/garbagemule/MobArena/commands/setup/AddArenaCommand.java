@@ -35,10 +35,7 @@ public class AddArenaCommand implements Command
             Messenger.tell(sender, "An arena with that name already exists.");
             return true;
         }
-        
-        arena = am.createArenaNode(args[0], p.getWorld());
-        am.setSelectedArena(arena);
-        
+        am.createArenaNode(args[0], p.getWorld());
         Messenger.tell(sender, "New arena with name '" + args[0] + "' created!");
         return true;
     }

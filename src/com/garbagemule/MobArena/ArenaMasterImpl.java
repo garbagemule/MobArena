@@ -86,17 +86,6 @@ public class ArenaMasterImpl implements ArenaMaster
         return config.getBoolean("global-settings.update-notification", false);
     }
 
-    public Arena getSelectedArena() {
-        if (selectedArena == null && !arenas.isEmpty()) {
-            selectedArena = arenas.get(0);
-        }
-        return selectedArena;
-    }
-
-    public void setSelectedArena(Arena arena) {
-        selectedArena = arena;
-    }
-
     public List<Arena> getArenas() {
         return arenas;
     }

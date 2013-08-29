@@ -31,13 +31,7 @@ public class RemoveArenaCommand implements Command
             Messenger.tell(sender, "There is no arena with that name.");
             return true;
         }
-        
         am.removeArenaNode(arena);
-        
-        if (am.getSelectedArena().equals(arena)) {
-            am.setSelectedArena(am.getArenas().get(0));
-        }
-        
         Messenger.tell(sender, "Arena '" + arena.configName() + "' deleted.");
         return true;
     }
