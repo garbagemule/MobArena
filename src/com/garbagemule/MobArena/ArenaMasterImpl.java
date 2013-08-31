@@ -383,8 +383,9 @@ public class ArenaMasterImpl implements ArenaMaster
         // Create the node.
         config.set(path, "");
 
-        // Grab the section.
+        // Grab the section, create if missing
         ConfigurationSection section = config.getConfigurationSection(path);
+        if (section == null) section = config.createSection(path);
 
         // Take the current items and armor.
         section.set("items", ItemParser.parseString(inv.getContents()));
