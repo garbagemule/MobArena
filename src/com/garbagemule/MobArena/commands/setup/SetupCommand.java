@@ -161,9 +161,9 @@ public class SetupCommand implements Command, Listener {
         private ItemStack[] getToolbox() {
             // Arena region tool
             ItemStack areg = makeTool(
-                    Material.GOLD_AXE, AREG_NAME,
-                    color("Set &ep1"),
-                    color("Set &ep2")
+                Material.GOLD_AXE, AREG_NAME,
+                color("Set &ep1"),
+                color("Set &ep2")
             );
             // Warps tool
             ItemStack warps = makeTool(
@@ -185,9 +185,9 @@ public class SetupCommand implements Command, Listener {
             );
             // Lobby region tool
             ItemStack lreg = makeTool(
-                    Material.GOLD_AXE, LREG_NAME,
-                    color("Set &el1"),
-                    color("Set &el2")
+                Material.GOLD_AXE, LREG_NAME,
+                color("Set &el1"),
+                color("Set &el2")
             );
             // Round 'em up.
             return new ItemStack[] {
