@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +53,7 @@ public class ArenaMasterImpl implements ArenaMaster
         this.plugin = plugin;
         this.config = plugin.getConfig();
 
-        this.arenas = new LinkedList<Arena>();
+        this.arenas = new ArrayList<Arena>();
         this.arenaMap = new HashMap<Player, Arena>();
 
         this.classes = new HashMap<String, ArenaClass>();
@@ -122,7 +121,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
     
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
-        List<Arena> result = new LinkedList<Arena>();
+        List<Arena> result = new ArrayList<Arena>(arenas.size());
         for (Arena arena : arenas)
             if (arena.isEnabled()) 
                 result.add(arena);
@@ -130,7 +129,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Arena> getPermittedArenas(Player p) {
-        List<Arena> result = new LinkedList<Arena>();
+        List<Arena> result = new ArrayList<Arena>(arenas.size());
         for (Arena arena : arenas)
             if (plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
@@ -138,7 +137,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Arena> getEnabledAndPermittedArenas(Player p) {
-        List<Arena> result = new LinkedList<Arena>();
+        List<Arena> result = new ArrayList<Arena>(arenas.size());
         for (Arena arena : arenas)
             if (arena.isEnabled() && plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
@@ -153,7 +152,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Arena> getArenasInWorld(World world) {
-        List<Arena> result = new LinkedList<Arena>();
+        List<Arena> result = new ArrayList<Arena>(arenas.size());
         for (Arena arena : arenas)
             if (arena.getWorld().equals(world))
                 result.add(arena);
@@ -161,7 +160,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Player> getAllPlayers() {
-        List<Player> result = new LinkedList<Player>();
+        List<Player> result = new ArrayList<Player>(arenas.size());
         for (Arena arena : arenas)
             result.addAll(arena.getAllPlayers());
         return result;
@@ -169,11 +168,11 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getAllPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new LinkedList<Player>(arena.getPlayersInArena()) : new LinkedList<Player>();
+        return (arena != null) ? new ArrayList<Player>(arena.getPlayersInArena()) : new ArrayList<Player>();
     }
 
     public List<Player> getAllLivingPlayers() {
-        List<Player> result = new LinkedList<Player>();
+        List<Player> result = new ArrayList<Player>();
         for (Arena arena : arenas)
             result.addAll(arena.getPlayersInArena());
         return result;
@@ -181,7 +180,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getLivingPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new LinkedList<Player>(arena.getPlayersInArena()) : new LinkedList<Player>();
+        return (arena != null) ? new ArrayList<Player>(arena.getPlayersInArena()) : new ArrayList<Player>();
     }
 
     public Arena getArenaWithPlayer(Player p) {
@@ -500,7 +499,7 @@ public class ArenaMasterImpl implements ArenaMaster
             createArenaNode(section, "default", plugin.getServer().getWorlds().get(0), false);
         }
         
-        arenas = new LinkedList<Arena>();
+        arenas = new ArrayList<Arena>();
         for (World w : Bukkit.getServer().getWorlds()) {
             loadArenasInWorld(w.getName());
         }
