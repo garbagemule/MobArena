@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -297,9 +298,19 @@ public class ArenaMasterImpl implements ArenaMaster
         ArenaClass arenaClass = new ArenaClass(classname, weps, arms);
 
         // Parse the items-node
-        String items = section.getString("items", "");
-        if (!items.equals("")) {
-            List<ItemStack> stacks = ItemParser.parseItems(items);
+        List<String> items = section.getStringList("items");
+        if (items == null || items.isEmpty()) {
+            String str = section.getString("items", "");
+            List<ItemStack> stacks = ItemParser.parseItems(str);
+            arenaClass.setItems(stacks);
+        } else {
+            List<ItemStack> stacks = new ArrayList<ItemStack>();
+            for (String item : items) {
+                ItemStack stack = ItemParser.parseItem(item);
+                if (stack != null) {
+                    stacks.add(stack);
+                }
+            }
             arenaClass.setItems(stacks);
         }
 
