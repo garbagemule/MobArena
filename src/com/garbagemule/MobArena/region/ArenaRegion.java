@@ -644,46 +644,55 @@ public class ArenaRegion
         showBlocks(p, map.values());
     }
 
-    public void showBlock(final Player p, final Location loc, int id, byte data) {
-        p.sendBlockChange(loc, id, data);
+    public void showBlock(final Player p, final Location loc, final int id, final byte data) {
         arena.scheduleTask(new Runnable() {
             @Override
             public void run() {
-                if (!p.isOnline()) return;
+                p.sendBlockChange(loc, id, data);
+                arena.scheduleTask(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!p.isOnline()) return;
 
-                Block b = loc.getBlock();
-                p.sendBlockChange(loc, b.getTypeId(), b.getData());
+                        Block b = loc.getBlock();
+                        p.sendBlockChange(loc, b.getTypeId(), b.getData());
+                    }
+                }, 100);
             }
-        }, 100);
+        }, 0);
     }
 
-    private void showBlocks(final Player p, Collection<Location> points) {
-        // Grab all the blocks, and send block change events.
-        final Map<Location,BlockState> blocks = new HashMap<Location,BlockState>();
-        for (Location l : points) {
-            Block b = l.getBlock();
-            blocks.put(l, b.getState());
-            p.sendBlockChange(l, 35, (byte) 14);
-        }
-
+    private void showBlocks(final Player p, final Collection<Location> points) {
         arena.scheduleTask(new Runnable() {
+            @Override
             public void run() {
-                // If the player isn't online, just forget it.
-                if (!p.isOnline()) {
-                    return;
+                // Grab all the blocks, and send block change events.
+                final Map<Location,BlockState> blocks = new HashMap<Location,BlockState>();
+                for (Location l : points) {
+                    Block b = l.getBlock();
+                    blocks.put(l, b.getState());
+                    p.sendBlockChange(l, 35, (byte) 14);
                 }
+                arena.scheduleTask(new Runnable() {
+                    public void run() {
+                        // If the player isn't online, just forget it.
+                        if (!p.isOnline()) {
+                            return;
+                        }
 
-                // Send block "restore" events.
-                for (Map.Entry<Location,BlockState> entry : blocks.entrySet()) {
-                    Location l   = entry.getKey();
-                    BlockState b = entry.getValue();
-                    int id       = b.getTypeId();
-                    byte data    = b.getRawData();
+                        // Send block "restore" events.
+                        for (Map.Entry<Location,BlockState> entry : blocks.entrySet()) {
+                            Location l   = entry.getKey();
+                            BlockState b = entry.getValue();
+                            int id       = b.getTypeId();
+                            byte data    = b.getRawData();
 
-                    p.sendBlockChange(l, id, data);
-                }
+                            p.sendBlockChange(l, id, data);
+                        }
+                    }
+                }, 100);
             }
-        }, 100);
+        }, 0);
     }
 
     private List<Location> getFramePoints(Location loc1, Location loc2) {
