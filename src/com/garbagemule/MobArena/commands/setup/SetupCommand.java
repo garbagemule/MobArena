@@ -382,10 +382,14 @@ public class SetupCommand implements Command, Listener {
             arena.setEnabled(enabled);
             arena.getRegion().save();
             arena.getRegion().reloadAll();
-            player.setFlying(flying);
-            player.setAllowFlight(allowFlight);
             player.getInventory().setContents(items);
             player.getInventory().setArmorContents(armor);
+
+            // setAllowFlight(false) also handles setFlying(false)
+            player.setAllowFlight(allowFlight);
+            if (allowFlight) {
+                player.setFlying(flying);
+            }
         }
 
 
