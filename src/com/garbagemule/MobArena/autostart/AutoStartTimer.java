@@ -1,22 +1,25 @@
 package com.garbagemule.MobArena.autostart;
 
+import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.Msg;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class AutoStartTimer {
+    private MobArena plugin;
     private Arena arena;
     private int seconds;
     private Timer timer;
-    private boolean started;
     private boolean useLevels;
     
     public AutoStartTimer(Arena arena, int seconds) {
+        this.plugin    = arena.getPlugin();
         this.arena     = arena;
         this.seconds   = seconds;
-        this.started   = false;
         this.useLevels = arena.getSettings().getBoolean("display-timer-as-level", false);
     }
     
@@ -26,19 +29,27 @@ public class AutoStartTimer {
      * started, nothing happens if the method is called again.
      */
     public void start() {
-        if (seconds > 5 && !started) {
+        if (seconds > 5 && timer == null) {
             timer = new Timer(seconds);
-            timer.start();
-            started = true;
+            timer.runTaskTimer(plugin, 20, 20);
+        }
+    }
+
+    /**
+     * Stops the timer.
+     */
+    public void stop() {
+        if (timer != null) {
+            timer.stop();
         }
     }
     
     public boolean isRunning() {
-        return (timer != null && started);
+        return (timer != null);
     }
     
     public int getRemaining() {
-        return (timer != null ? timer.getRemaining() : -1);
+        return (isRunning() ? timer.getRemaining() : -1);
     }
     
     /**
@@ -47,7 +58,7 @@ public class AutoStartTimer {
      * timer, followed by the creation of a new. Thus, no timers should
      * ever interfere with each other.
      */
-    private class Timer implements Runnable {
+    private class Timer extends BukkitRunnable {
         private int remaining;
         private int countdownIndex;
         private int[] intervals = new int[]{1, 2, 3, 4, 5, 10, 30};
@@ -66,54 +77,43 @@ public class AutoStartTimer {
         }
         
         /**
-         * Start the timer
-         */
-        public synchronized void start() {
-            arena.scheduleTask(this, 20);
-        }
-        
-        /**
          * Get the remaining number of seconds
          * @return number of seconds left
          */
-        public synchronized int getRemaining() {
+        public int getRemaining() {
             return remaining;
+        }
+
+        public void stop() {
+            cancel();
+            AutoStartTimer.this.timer = null;
         }
     
         @Override
         public void run() {
-            synchronized(this) {
-                // Abort if the arena is running, or if players have left
-                if (arena.isRunning() || arena.getPlayersInLobby().isEmpty()) {
-                    started = false;
-                    this.notifyAll();
-                    return;
+            // Abort if the arena is running, or if players have left
+            if (arena.isRunning() || arena.getPlayersInLobby().isEmpty()) {
+                stop();
+                return;
+            }
+
+            // Count down and start if 0
+            if (--remaining <= 0) {
+                stop();
+                arena.forceStart();
+                return;
+            }
+
+            // If using levels, update 'em
+            if (useLevels) {
+                for (Player p : arena.getPlayersInLobby()) {
+                    p.setLevel(remaining);
                 }
-                
-                // Count down
-                remaining--;
-                
-                // Start if 0
-                if (remaining <= 0) {
-                    arena.forceStart();
-                    started = false;
-                } else {
-                    // If using levels, update 'em
-                    if (useLevels) {
-                        for (Player p : arena.getPlayersInLobby()) {
-                            p.setLevel(remaining);
-                        }
-                    }
-                    // Otherwise, warn at x seconds left
-                    else if (remaining == intervals[countdownIndex]) {
-                        Messenger.announce(arena, Msg.ARENA_AUTO_START, ""+remaining);
-                        countdownIndex--;
-                    }
-                    
-                    // Reschedule
-                    arena.scheduleTask(this, 20);
-                }
-                this.notifyAll();
+            }
+            // Otherwise, warn at x seconds left
+            else if (remaining == intervals[countdownIndex]) {
+                Messenger.announce(arena, Msg.ARENA_AUTO_START, String.valueOf(remaining));
+                countdownIndex--;
             }
         }
     }

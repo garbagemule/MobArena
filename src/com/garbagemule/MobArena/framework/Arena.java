@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.framework;
 
 import java.util.*;
 
+import com.garbagemule.MobArena.autostart.AutoStartTimer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -243,4 +244,6 @@ public interface Arena
     public boolean hasIsolatedChat();
 
     public Player getLastPlayerStanding();
+
+    public AutoStartTimer getAutoStartTimer();
 }

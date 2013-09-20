@@ -50,6 +50,7 @@ public class InventoryManager
         
         // And clear the inventory
         clearInventory(p);
+        p.updateInventory();
     }
     
     public void restoreInv(Player p) throws FileNotFoundException, IOException, InvalidConfigurationException {

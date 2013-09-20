@@ -637,10 +637,15 @@ public class ArenaImpl implements Arena
             refund(p);
         }
 
-        ArenaPlayer ap = arenaPlayerMap.get(p);
         if (inLobby(p)) {
+            ArenaPlayer ap = arenaPlayerMap.get(p);
             if (ap.getArenaClass() != null) {
                 limitManager.playerLeftClass(ap.getArenaClass(), ap.getPlayer());
+            }
+
+            // Last lobby player leaving? Stop the timer
+            if (lobbyPlayers.size() == 1) {
+                autoStartTimer.stop();
             }
         }
         
@@ -1288,6 +1293,11 @@ public class ArenaImpl implements Arena
     public Collection<ArenaPlayer> getArenaPlayerSet()
     {
         return arenaPlayerMap.values();
+    }
+
+    @Override
+    public AutoStartTimer getAutoStartTimer() {
+        return autoStartTimer;
     }
 
     /*@Override
