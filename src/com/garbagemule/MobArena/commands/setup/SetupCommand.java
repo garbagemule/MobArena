@@ -135,16 +135,10 @@ public class SetupCommand implements Command, Listener {
                     missing.add("p2");
                 }
 
-                // Arena and lobby warps
+                // Arena, lobby, and spectator warps
                 if (region.getArenaWarp() == null) missing.add("arena");
                 if (region.getLobbyWarp() == null) missing.add("lobby");
-
-                // Conditionally optional spectator warp
-                if (arena.getSettings().getBoolean("spectate-on-death", true)) {
-                    if (region.getSpecWarp()  == null) {
-                        missing.add("spectator");
-                    }
-                }
+                if (region.getSpecWarp()  == null) missing.add("spectator");
 
                 // Spawnpoints
                 if (region.getSpawnpoints().isEmpty()) {
