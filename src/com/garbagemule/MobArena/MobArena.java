@@ -28,6 +28,7 @@ import com.garbagemule.MobArena.health.HealthStrategyHeroes;
 import com.garbagemule.MobArena.health.HealthStrategyStandard;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
+import com.garbagemule.MobArena.metrics.Metrics;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
@@ -81,6 +82,9 @@ public class MobArena extends JavaPlugin
 
         // Register event listeners
         registerListeners();
+
+        // Go go Metrics
+        startMetrics();
 
         // Announce enable!
         Messenger.info("v" + this.getDescription().getVersion() + " enabled.");
@@ -202,6 +206,15 @@ public class MobArena extends JavaPlugin
 
         AbilityManager.loadCoreAbilities();
         AbilityManager.loadCustomAbilities(dir);
+    }
+    
+    private void startMetrics() {
+        try {
+            Metrics m = new Metrics(this);
+            m.start();
+        } catch (Exception e) {
+            Messenger.warning("y u disable stats :(");
+        }
     }
     
     public HealthStrategy getHealthStrategy() {
