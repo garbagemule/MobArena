@@ -624,8 +624,9 @@ public class ArenaImpl implements Arena
             return false;
         }
 
-        // Clear inventory if player is an arena player
+        // Clear inventory if player is an arena player, and unmount
         if (arenaPlayers.contains(p)) {
+            unmount(p);
             clearInv(p);
         }
         
@@ -667,8 +668,9 @@ public class ArenaImpl implements Arena
         ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, last);
         plugin.getServer().getPluginManager().callEvent(event);
 
-        // Clear the player's inventory
+        // Clear the player's inventory, and unmount
         if (arenaPlayers.remove(p)) {
+            unmount(p);
             clearInv(p);
         }
         
@@ -689,6 +691,15 @@ public class ArenaImpl implements Arena
             view.setCursor(new ItemStack(0));
             view.getBottomInventory().clear();
             view.close();
+        }
+    }
+
+    private void unmount(Player p) {
+        Entity v = p.getVehicle();
+        if (v != null) {
+            monsterManager.removeMount(v);
+            v.eject();
+            v.remove();
         }
     }
 
@@ -774,21 +785,60 @@ public class ArenaImpl implements Arena
     }
     
     private void spawnMounts() {
-        /* TODO: Uncomment for 1.6
-        for (Map.Entry<Player,ArenaPlayer> entry : arenaPlayerMap.entrySet()) {
-            ArenaClass arenaClass = entry.getValue().getArenaClass();
-            if (!arenaClass.hasMount()) continue;
+        for (Player p : arenaPlayers) {
+            // Skip players who are either null or offline
+            if (p == null || !p.isOnline()) continue;
 
-            // Remove the hay bale
-            Player p = entry.getKey();
-            p.getInventory().removeItem(new ItemStack(Material.HAY_BLOCK, 1));
+            // Grab the inventory
+            PlayerInventory inv = p.getInventory();
+            if (inv == null) continue;
 
-            // Spawn the horse
+            // Find the first slot containing a haybale
+            int hay = inv.first(Material.HAY_BLOCK);
+            if (hay == -1) continue;
+
+            // Grab the amount and calculate the configuration
+            int amount = inv.getItem(hay).getAmount();
+
+            // Variant
+            Horse.Variant variant = Horse.Variant.HORSE;
+            switch (amount % 8) {
+                case 2:  variant = Horse.Variant.DONKEY;         break;
+                case 3:  variant = Horse.Variant.MULE;           break;
+                case 4:  variant = Horse.Variant.SKELETON_HORSE; break;
+                case 5:  variant = Horse.Variant.UNDEAD_HORSE;   break;
+                default: break;
+            }
+
+            // Barding
+            Material barding = null;
+            switch ((amount >> 3) % 4) {
+                case 1: barding = Material.IRON_BARDING;    break;
+                case 2: barding = Material.GOLD_BARDING;    break;
+                case 3: barding = Material.DIAMOND_BARDING; break;
+                default: break;
+            }
+
+            // Spawn the horse, set its variant, tame it, etc.
             Horse horse = (Horse) world.spawnEntity(p.getLocation(), EntityType.HORSE);
+            horse.setVariant(variant);
+            horse.setTamed(true);
+            horse.setOwner(p);
             horse.setPassenger(p);
             horse.setHealth(horse.getMaxHealth());
+
+            // Give it a saddle and possibly barding
+            horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+            if (barding != null) {
+                horse.getInventory().setArmor(new ItemStack(barding));
+            }
+
+            // Add to monster manager
             monsterManager.addMount(horse);
-        }*/
+
+            // Remove the hay
+            inv.setItem(hay, null);
+        }
     }
     
     private void removePotionEffects(Player p) {

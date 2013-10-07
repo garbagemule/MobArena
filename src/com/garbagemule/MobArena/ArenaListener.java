@@ -457,7 +457,7 @@ public class ArenaListener
     }
     
     private void onMountDeath(EntityDeathEvent event) {
-        
+        // Shouldn't ever happen
     }
     
     private void onMonsterDeath(EntityDeathEvent event) {
@@ -566,10 +566,9 @@ public class ArenaListener
             onPetDamage(event, (Wolf) damagee, damager);
         }
         // Mount
-        /* TODO: Uncomment for 1.6
         else if (damagee instanceof Horse && monsters.hasMount(damagee)) {
             onMountDamage(event, (Horse) damagee, damager);
-        }*/
+        }
         // Player
         else if (damagee instanceof Player) {
             onPlayerDamage(event, (Player) damagee, damager);
@@ -613,11 +612,10 @@ public class ArenaListener
     private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager) {
         event.setCancelled(true);
     }
-    
-    /* TODO: Uncomment for 1.6
-    private void onMountDamage(EntityDamageEvent event, Horse mount, Entity damager) {
 
-    }*/
+    private void onMountDamage(EntityDamageEvent event, Horse mount, Entity damager) {
+        event.setCancelled(true);
+    }
     
     private void onMonsterDamage(EntityDamageEvent event, Entity monster, Entity damager) {
         if (damager instanceof Player) {
