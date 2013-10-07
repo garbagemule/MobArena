@@ -7,17 +7,8 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.PigZombie;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.*;
 import org.bukkit.entity.Skeleton.SkeletonType;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.MobArena;
@@ -86,8 +77,15 @@ public enum MACreature
     BABYZOMBIE(EntityType.ZOMBIE),        BABYZOMBIES(EntityType.ZOMBIE),
     BABYPIGMAN(EntityType.PIG_ZOMBIE),    BABYPIGMEN(EntityType.PIG_ZOMBIE),
     ZOMBIEVILLAGER(EntityType.ZOMBIE),    ZOMBIEVILLAGERS(EntityType.ZOMBIE),
-    BABYZOMBIEVILLAGER(EntityType.ZOMBIE),BABYZOMBIEVILLAGERS(EntityType.ZOMBIE);
-    
+    BABYZOMBIEVILLAGER(EntityType.ZOMBIE),BABYZOMBIEVILLAGERS(EntityType.ZOMBIE),
+
+    // 1.6 creatures
+    HORSE(EntityType.HORSE),              HORSES(EntityType.HORSE),
+    DONKEY(EntityType.HORSE),             DONKEYS(EntityType.HORSE),
+    MULE(EntityType.HORSE),               MULES(EntityType.HORSE),
+    SKELETONHORSE(EntityType.HORSE),      SKELETONHORSES(EntityType.HORSE),
+    UNDEADHORSE(EntityType.HORSE),        UNDEADHORSES(EntityType.HORSE);
+
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private EntityType type;
     
@@ -175,6 +173,26 @@ public enum MACreature
             case WITHERSKELETONS:
                 ((Skeleton) e).getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD, 1));
                 ((Skeleton) e).setSkeletonType(SkeletonType.WITHER);
+                break;
+            case HORSE:
+            case HORSES:
+                ((Horse) e).setVariant(Horse.Variant.HORSE);
+                break;
+            case DONKEY:
+            case DONKEYS:
+                ((Horse) e).setVariant(Horse.Variant.DONKEY);
+                break;
+            case MULE:
+            case MULES:
+                ((Horse) e).setVariant(Horse.Variant.MULE);
+                break;
+            case SKELETONHORSE:
+            case SKELETONHORSES:
+                ((Horse) e).setVariant(Horse.Variant.SKELETON_HORSE);
+                break;
+            case UNDEADHORSE:
+            case UNDEADHORSES:
+                ((Horse) e).setVariant(Horse.Variant.UNDEAD_HORSE);
                 break;
             default:
                 break;
