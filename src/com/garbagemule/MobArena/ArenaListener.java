@@ -440,6 +440,10 @@ public class ArenaListener
                 callKillEvent(player.getKiller(), player);
             }
             arena.playerDeath(player);
+        } else if (arena.inSpec(player)) {
+            event.getDrops().clear();
+            event.setDroppedExp(0);
+            arena.playerLeave(player);
         }
     }
 
