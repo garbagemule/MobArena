@@ -61,7 +61,8 @@ public class SetupCommand implements Command, Listener {
         } else {
             arena = am.getArenaWithName(args[0]);
             if (arena == null) {
-                tell(sender, "There is no arena with the name " + args[0] + ".");
+                tell(sender, "There is no arena with the name " + ChatColor.RED + args[0] + ChatColor.RESET + ".");
+                tell(sender, "Type " + ChatColor.YELLOW + "/ma addarena " + args[0] + ChatColor.RESET + " to create it!");
                 return true;
             }
         }
