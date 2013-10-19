@@ -23,9 +23,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.health.HealthStrategy;
-import com.garbagemule.MobArena.health.HealthStrategyHeroes;
-import com.garbagemule.MobArena.health.HealthStrategyStandard;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.metrics.Metrics;
@@ -46,10 +43,6 @@ public class MobArena extends JavaPlugin
     // Inventories from disconnects
     private Set<String> inventoriesToRestore;
     
-    // Heroes
-    private boolean hasHeroes;
-    private HealthStrategy healthStrategy;
-    
     // Vault
     private Economy economy;
     
@@ -69,9 +62,7 @@ public class MobArena extends JavaPlugin
 
         // Set up soft dependencies
         setupVault();
-        setupHeroes();
         setupMagicSpells();
-        setupStrategies();
 
         // Set up the ArenaMaster
         arenaMaster = new ArenaMasterImpl(this);
@@ -180,24 +171,12 @@ public class MobArena extends JavaPlugin
         }
     }
     
-    private void setupHeroes() {
-        Plugin heroesPlugin = this.getServer().getPluginManager().getPlugin("Heroes");
-        if (heroesPlugin == null) return;
-
-        Messenger.info("Heroes found; using different health strategy.");
-        hasHeroes = true;
-    }
-    
     private void setupMagicSpells() {
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) return;
 
         Messenger.info("MagicSpells found, loading config-file.");
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
-    }
-    
-    private void setupStrategies() {
-        healthStrategy = (hasHeroes ? new HealthStrategyHeroes() : new HealthStrategyStandard());
     }
     
     private void loadAbilities() {
@@ -215,10 +194,6 @@ public class MobArena extends JavaPlugin
         } catch (Exception e) {
             Messenger.warning("y u disable stats :(");
         }
-    }
-    
-    public HealthStrategy getHealthStrategy() {
-        return healthStrategy;
     }
     
     public ArenaMaster getArenaMaster() {

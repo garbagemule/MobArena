@@ -15,7 +15,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
@@ -1029,7 +1028,7 @@ public class ArenaImpl implements Arena
     }
     
     private void setHealth(Player p, double health) {
-        plugin.getHealthStrategy().setHealth(p, health);
+        p.setHealth(health);
     }
 
     @Override
