@@ -1384,7 +1384,7 @@ public class ArenaImpl implements Arena
             }
             // Normal stack
             else {
-                if (!inv.contains(stack.getTypeId(), stack.getAmount())) {
+                if (!inv.contains(stack.getType(), stack.getAmount())) {
                     return false;
                 }
             }
