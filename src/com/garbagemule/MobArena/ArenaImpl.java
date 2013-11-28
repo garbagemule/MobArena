@@ -1404,8 +1404,19 @@ public class ArenaImpl implements Arena
         }
         
         // Take any other items
-        for (ItemStack stack : entryFee) {
-            inv.removeItem(stack);
+        for (ItemStack fee : entryFee) {
+            int remaining = fee.getAmount();
+            while (remaining > 0) {
+                int slot = inv.first(fee.getType());
+                ItemStack item = inv.getItem(slot);
+                remaining -= item.getAmount();
+                if (remaining >= 0) {
+                    inv.setItem(slot, null);
+                } else {
+                    item.setAmount(-remaining);
+                    inv.setItem(slot, item);
+                }
+            }
         }
         
         Messenger.tell(p, Msg.JOIN_FEE_PAID.format(MAUtils.listToString(entryFee, plugin)));
