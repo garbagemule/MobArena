@@ -43,8 +43,9 @@ public class WaveManager
         
         recurrentWaves = WaveParser.parseWaves(arena, rConfig, WaveBranch.RECURRENT);
         singleWaves    = WaveParser.parseWaves(arena, sConfig, WaveBranch.SINGLE);
-        
-        finalWave = section.getInt("arenas." + arena.configName() + ".settings.final-wave", 0);
+
+        // getParent() => go back to the arena-node to access settings
+        finalWave = section.getParent().getInt("settings.final-wave", 0);
         
         if (recurrentWaves.isEmpty()) {
             Messenger.warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));
