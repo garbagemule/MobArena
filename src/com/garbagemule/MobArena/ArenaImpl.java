@@ -1405,9 +1405,13 @@ public class ArenaImpl implements Arena
         
         // Take any other items
         for (ItemStack fee : entryFee) {
+            if (fee.getTypeId() < 0) continue;
+
             int remaining = fee.getAmount();
             while (remaining > 0) {
                 int slot = inv.first(fee.getType());
+                if (slot < 0) break;
+
                 ItemStack item = inv.getItem(slot);
                 remaining -= item.getAmount();
                 if (remaining >= 0) {
