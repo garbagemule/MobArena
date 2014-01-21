@@ -11,28 +11,22 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.garbagemule.MobArena.ArenaMasterImpl;
-import com.garbagemule.MobArena.MAMessages;
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.health.HealthStrategy;
-import com.garbagemule.MobArena.health.HealthStrategyHeroes;
-import com.garbagemule.MobArena.health.HealthStrategyStandard;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
-import com.garbagemule.MobArena.listeners.SpoutScreenListener;
 import com.garbagemule.MobArena.metrics.Metrics;
-import com.garbagemule.MobArena.util.FileUtils;
 import com.garbagemule.MobArena.util.VersionChecker;
-import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
@@ -43,51 +37,40 @@ import com.garbagemule.MobArena.waves.ability.AbilityManager;
  */
 public class MobArena extends JavaPlugin
 {
-    private Config config;
     private ArenaMaster arenaMaster;
+    private CommandHandler commandHandler;
     
     // Inventories from disconnects
     private Set<String> inventoriesToRestore;
     
-    // Heroes
-    private boolean hasHeroes;
-    private HealthStrategy healthStrategy;
-    
     // Vault
     private Economy economy;
-    
-    // Spout stuff
-    public static boolean hasSpout;
     
     public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
     public static final int ECONOMY_MONEY_ID = -29;
     public static Random random = new Random();
 
     public void onEnable() {
-        // Create default files and initialize config-file
-        FileUtils.extractResource(this.getDataFolder(), "config.yml");
+        // Initialize config-file
         loadConfigFile();
+
+        // Initialize announcements-file
+        loadAnnouncementsFile();
         
         // Load boss abilities
         loadAbilities();
-        
+
         // Set up soft dependencies
         setupVault();
-        setupHeroes();
-        setupSpout();
         setupMagicSpells();
-        setupStrategies();
-        
+
         // Set up the ArenaMaster
         arenaMaster = new ArenaMasterImpl(this);
         arenaMaster.initialize();
-        
+
         // Register any inventories to restore.
         registerInventories();
-        
-        // Make sure all the announcements are configured.
-        MAMessages.init(this);
-        
+
         // Register event listeners
         registerListeners();
         
@@ -96,20 +79,17 @@ public class MobArena extends JavaPlugin
         
         // Go go Metrics
         startMetrics();
-        
+
         // Announce enable!
         Messenger.info("v" + this.getDescription().getVersion() + " enabled.");
-        
+
         // Check for updates
-        if (config.getBoolean("global-settings.update-notification", false)) {
+        if (getConfig().getBoolean("global-settings.update-notification", false)) {
             VersionChecker.checkForUpdates(this, null);
         }
     }
     
     public void onDisable() {
-        // Disable Spout features.
-        hasSpout = false;
-        
         // Force all arenas to end.
         if (arenaMaster == null) return;
         for (Arena arena : arenaMaster.getArenas()) {
@@ -121,33 +101,47 @@ public class MobArena extends JavaPlugin
     }
     
     private void loadConfigFile() {
-        File dir  = this.getDataFolder();
-        if (!dir.exists()) dir.mkdir();
-        
-        File file = new File(this.getDataFolder(), "config.yml");
-        config = new Config(file);
-        if (!config.load()) {
-            this.getServer().getPluginManager().disablePlugin(this);
-            throw new IllegalStateException("The config-file could not be loaded! Read further up to find the actual bug!");
+        // Create if missing
+        saveDefaultConfig();
+
+        // Set the header and save
+        getConfig().options().header(getHeader());
+        saveConfig();
+    }
+
+    private void loadAnnouncementsFile() {
+        // Create if missing
+        File file = new File(getDataFolder(), "announcements.yml");
+        try {
+            if (file.createNewFile()) {
+                Messenger.info("announcements.yml created.");
+                YamlConfiguration yaml = Msg.toYaml();
+                yaml.save(file);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
-        updateSettings(config);
-        config.setHeader(getHeader());
-        config.save();
+
+        // Otherwise, load the announcements from the file
+        try {
+            YamlConfiguration yaml = new YamlConfiguration();
+            yaml.load(file);
+            ConfigUtils.addMissingRemoveObsolete(file, Msg.toYaml(), yaml);
+            Msg.load(yaml);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     private void registerListeners() {
         // Bind the /ma, /mobarena commands to MACommands.
-        CommandHandler handler = new CommandHandler(this);
-        getCommand("ma").setExecutor(handler);
-        getCommand("mobarena").setExecutor(handler);
+        commandHandler = new CommandHandler(this);
+        getCommand("ma").setExecutor(commandHandler);
+        getCommand("mobarena").setExecutor(commandHandler);
         
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
-        
-        if (hasSpout) {
-            pm.registerEvents(new SpoutScreenListener(this), this);
-        }
     }
     
     // Permissions stuff
@@ -174,41 +168,26 @@ public class MobArena extends JavaPlugin
         
         if (e != null) {
             economy = e.getProvider();
+            Messenger.info("Vault found; economy rewards enabled.");
         } else {
             Messenger.warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
         }
     }
     
-    private void setupHeroes() {
-        Plugin heroesPlugin = this.getServer().getPluginManager().getPlugin("Heroes");
-        if (heroesPlugin == null) return;
-        
-        hasHeroes = true;
-    }
-    
-    private void setupSpout() {
-        Plugin spoutPlugin = this.getServer().getPluginManager().getPlugin("Spout");
-        if (spoutPlugin == null) return;
-        
-        hasSpout = true;
-    }
-    
     private void setupMagicSpells() {
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) return;
-        
+
+        Messenger.info("MagicSpells found, loading config-file.");
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
-    }
-    
-    private void setupStrategies() {
-        healthStrategy = (hasHeroes ? new HealthStrategyHeroes() : new HealthStrategyStandard());
     }
     
     private void loadAbilities() {
         File dir = new File(this.getDataFolder(), "abilities");
         if (!dir.exists()) dir.mkdir();
-        
-        AbilityManager.loadAbilities(dir);
+
+        AbilityManager.loadCoreAbilities();
+        AbilityManager.loadCustomAbilities(dir);
     }
     
     private void startMetrics() {
@@ -220,33 +199,19 @@ public class MobArena extends JavaPlugin
         }
     }
     
-    public HealthStrategy getHealthStrategy() {
-        return healthStrategy;
-    }
-    
-    public Config getMAConfig() {
-        return config;
-    }
-    
     public ArenaMaster getArenaMaster() {
         return arenaMaster;
     }
-    
-    private void updateSettings(Config config) {
-        Set<String> arenas = config.getKeys("arenas");
-        if (arenas == null) return;
-        
-        for (String arena : arenas) {
-            String path = "arenas." + arena + ".settings";
-            ConfigUtils.replaceAllNodes(this, config, path, "settings.yml");
-        }
+
+    public CommandHandler getCommandHandler() {
+        return commandHandler;
     }
     
     private String getHeader() {
         String sep = System.getProperty("line.separator");
         return "MobArena v" + this.getDescription().getVersion() + " - Config-file" + sep + 
                "Read the Wiki for details on how to set up this file: http://goo.gl/F5TTc" + sep +
-               "Note: You -must- use spaces instead of tabs!\r";
+               "Note: You -must- use spaces instead of tabs!";
     }
     
     private void registerInventories() {
@@ -275,33 +240,39 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    public boolean giveMoney(Player p, int amount) {
+    public boolean giveMoney(Player p, ItemStack item) {
         if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p.getName(), amount);
+            EconomyResponse result = economy.depositPlayer(p.getName(), getAmount(item));
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
     }
     
-    public boolean takeMoney(Player p, int amount) {
+    public boolean takeMoney(Player p, ItemStack item) {
         if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p.getName(), amount);
+            EconomyResponse result = economy.withdrawPlayer(p.getName(), getAmount(item));
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
     }
 
-    public boolean hasEnough(Player p, double amount) {
+    public boolean hasEnough(Player p, ItemStack item) {
         if (economy != null) {
-            return (economy.getBalance(p.getName()) >= amount);
+            return (economy.getBalance(p.getName()) >= getAmount(item));
         }
         return true;
     }
     
-    public String economyFormat(double amount) {
+    public String economyFormat(ItemStack item) {
         if (economy != null) {
-            return economy.format(amount);
+            return economy.format(getAmount(item));
         }
         return null;
+    }
+
+    private double getAmount(ItemStack item) {
+        double major = item.getAmount();
+        double minor = item.getDurability() / 100D;
+        return major + minor;
     }
 }

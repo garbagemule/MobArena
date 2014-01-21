@@ -31,7 +31,7 @@ public class ArenaListCommand implements Command
         }
         
         String list = MAUtils.listToString(arenas, am.getPlugin());
-        Messenger.tellPlayer(sender, Msg.MISC_LIST_ARENAS.toString(list));
+        Messenger.tell(sender, Msg.MISC_LIST_ARENAS.format(list));
         return true;
     }
 }

@@ -18,25 +18,19 @@ public class RemoveClassCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-
-        // Require an argument.
-        if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removeclass <classname>");
-            return false;
-        }
+        // Require a class name
+        if (args.length != 1) return false;
         
         // Find the class
-        ArenaClass arenaClass = am.getClasses().get(arg1);
-        String className = TextUtils.camelCase(arg1);
+        ArenaClass arenaClass = am.getClasses().get(args[0]);
+        String className = TextUtils.camelCase(args[0]);
         if (arenaClass == null) {
-            Messenger.tellPlayer(sender, "The class '" + className + "' does not exist.");
-            return false;
+            Messenger.tell(sender, "The class '" + className + "' does not exist.");
+            return true;
         }
         
         am.removeClassNode(className);
-        Messenger.tellPlayer(sender, "Removed class '" + className + "'.");
+        Messenger.tell(sender, "Removed class '" + className + "'.");
         return true;
     }
 }

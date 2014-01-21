@@ -9,37 +9,70 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
+import javax.tools.*;
 
 import com.garbagemule.MobArena.Messenger;
-import com.garbagemule.MobArena.util.FileUtils;
+import com.garbagemule.MobArena.waves.ability.core.*;
 
 public class AbilityManager
 {
-    private static final String jarpath = "." + File.separator + "plugins" + File.separator + "MobArena.jar";
-    private static final String classpath = jarpath + ";" + System.getProperty("java.class.path");
+    private static final String ma = "plugins" + File.separator + "MobArena.jar";
+    private static final String cb = System.getProperty("java.class.path");
+    private static final String classpath = ma + System.getProperty("path.separator") + cb;
     
-    private static Map<String,Ability> abilities;
-    
+    private static Map<String,Class<? extends Ability>> abilities;
+
     /**
-     * Get an Ability by one of its aliases.
-     * @param name an Ability alias
-     * @return an Ability, if one exists with the given alias, false otherwise
+     * Get an instance of an ability by alias
+     * @param alias the alias of an ability
+     * @return a new Ability object, or null
      */
-    public static Ability fromString(String name) {
-        return abilities.get(name.toLowerCase().replaceAll("[-_.]", ""));
+    public static Ability getAbility(String alias) {
+        try {
+            Class<? extends Ability> cls = abilities.get(alias.toLowerCase().replaceAll("[-_.]", ""));
+            return cls.newInstance();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Load all the core abilities included in MobArena
+     */
+    public static void loadCoreAbilities() {
+        if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
+
+        register(ChainLightning.class);
+        register(DisorientDistant.class);
+        register(DisorientNearby.class);
+        register(DisorientTarget.class);
+        register(FetchDistant.class);
+        register(FetchNearby.class);
+        register(FetchTarget.class);
+        register(FireAura.class);
+        register(Flood.class);
+        register(LightningAura.class);
+        register(LivingBomb.class);
+        register(ObsidianBomb.class);
+        register(PullDistant.class);
+        register(PullNearby.class);
+        register(PullTarget.class);
+        register(RootTarget.class);
+        register(ShootArrow.class);
+        register(ShootFireball.class);
+        register(ShufflePositions.class);
+        register(ThrowDistant.class);
+        register(ThrowNearby.class);
+        register(ThrowTarget.class);
+        register(WarpToPlayer.class);
     }
     
     /**
-     * Load the known abilities as well as all custom abilities from
-     * the specified directory.
-     * @param dir a directory of .class (and/or .java) files
+     * Load the custom abilities from the specified directory.
+     * @param classDir a directory of .class (and/or .java) files
      */
-    public static void loadAbilities(File classDir) {
-        abilities = new HashMap<String,Ability>();
+    public static void loadCustomAbilities(File classDir) {
+        if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
         
         // Grab the source directory.
         File javaDir = new File(classDir, "src");
@@ -52,36 +85,33 @@ public class AbilityManager
             if (ToolProvider.getSystemJavaCompiler() != null) {
                 compileAbilities(javaDir, classDir);
             } else {
-                Messenger.warning("Found plugins/MobArena/abilites/src/ folder, but no Java compiler. The source files will not be compiled!");
+                Messenger.warning("Found plugins/MobArena/abilities/src/ folder, but no Java compiler. The source files will not be compiled!");
             }
-        }
-        
-        /* If there is only one file in the directory, make sure it isn't the
-         * src/ folder, in which case there will be no .class files to load.
-         * In the case of no .class files, extract the defaults. */
-        String[] files = classDir.list();
-        if (files.length == 0 || (files.length == 1 && files[0].equals("src"))) {
-            Messenger.info("No boss abilities found. Extracting defaults...");
-            extractDefaultAbilities(classDir);
         }
         
         // Load all the custom abilities.
         loadClasses(classDir);
     }
-    
-    private static void extractDefaultAbilities(File classDir) {
-        // Grab a list of all the class files.
-        List<String> resources = FileUtils.listFilesOnPath("res/abilities/", ".class");
-        
-        // Check that there is stuff to extract.
-        if (resources == null || resources.isEmpty()) {
-            Messenger.severe("Couldn't extract the default boss abilities!");
-            return;
+
+    private static void register(Class<? extends Ability> cls) {
+        register(cls, false);
+    }
+
+    /**
+     * Register an ability by its class object
+     * @param cls the ability class
+     */
+    private static void register(Class<? extends Ability> cls, boolean announce) {
+        AbilityInfo info = cls.getAnnotation(AbilityInfo.class);
+        if (info == null) return;
+
+        // Map all the aliases
+        for (String alias : info.aliases()) {
+            abilities.put(alias, cls);
         }
         
-        // Extract everything.
-        List<File> files = FileUtils.extractResources(classDir, "abilities/", resources);
-        Messenger.info("Extracted abilities: " + fileListToString(files, "$"));
+        // Announce custom abilities
+        if (announce) Messenger.info("Loaded custom ability '" + info.name() + "'");
     }
     
     private static void compileAbilities(File javaDir, File classDir) {
@@ -175,14 +205,12 @@ public class AbilityManager
     
     /**
      * (Compiles and) loads all custom abilities in the given directory.
-     * @param dir a directory
+     * @param classDir a directory
      */
     private static void loadClasses(File classDir) {
         // Grab the class loader
         ClassLoader loader = getLoader(classDir);
         if (loader == null) return;
-        
-        StringBuffer buffy = new StringBuffer();
         
         for (File file : classDir.listFiles()) {
             String filename = file.getName();
@@ -194,60 +222,16 @@ public class AbilityManager
             // Trim off the .class extension
             String name = filename.substring(0, file.getName().lastIndexOf("."));
             
-            // And make an Ability.
-            Ability ability = makeAbility(loader, name);
-            if (ability == null) continue;
-            
-            // Then load the ability into the map.
-            String abilityName = loadAbility(ability);
-            
-            if (abilityName != null) {
-                buffy.append(", " + abilityName);
-            }
+            try {
+                // Load the class
+                Class<?> cls = loader.loadClass(name);
+                
+                // Verify that it's an Ability, then register it
+                if (Ability.class.isAssignableFrom(cls)) {
+                    register(cls.asSubclass(Ability.class), true);
+                }
+            } catch (Exception e) {}
         }
-    }
-    
-    /**
-     * Loads an Ability into the abilities map by all of its aliases.
-     * @param ability an Ability
-     * @return the first alias of 
-     */
-    private static String loadAbility(Ability ability) {
-        // Grab the annotation.
-        AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
-        if (info == null) return null;
-        
-        // Put the command in the map with each of its aliases.
-        for (String name : info.aliases()) {
-            abilities.put(name, ability);
-        }
-        
-        return info.aliases()[0];
-    }
-    
-    /**
-     * Ask the given ClassLoader to load the ability with the given name.
-     * @param loader a ClassLoader
-     * @param name a class name
-     * @return an Ability, if the ClassLoader found one with the given name, null otherwise
-     */
-    private static Ability makeAbility(ClassLoader loader, String name) {
-        try {
-            // Load the class.
-            Class<?> c = loader.loadClass(name);
-            
-            // Create an instance of it.
-            Object o = c.newInstance();
-            
-            // If it's an ability, return it.
-            if (o instanceof Ability) {
-                return (Ability) o;
-            }
-        }
-        catch (Exception e) {}
-        
-        // Otherwise, return null.
-        return null;
     }
     
     /**

@@ -18,33 +18,21 @@ public class RemoveArenaCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-
-        // Require an argument
-        if (arg1.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma removearena <arena>");
-            return false;
-        }
+        // Require an arena name
+        if (args.length != 1) return false;
         
         if (am.getArenas().size() == 1) {
-            Messenger.tellPlayer(sender, "At least one arena must exist.");
-            return false;
+            Messenger.tell(sender, "At least one arena must exist.");
+            return true;
         }
         
-        Arena arena = am.getArenaWithName(arg1);
+        Arena arena = am.getArenaWithName(args[0]);
         if (arena == null) {
-            Messenger.tellPlayer(sender, "There is no arena with that name.");
-            return false;
+            Messenger.tell(sender, "There is no arena with that name.");
+            return true;
         }
-        
         am.removeArenaNode(arena);
-        
-        if (am.getSelectedArena().equals(arena)) {
-            am.setSelectedArena(am.getArenas().get(0));
-        }
-        
-        Messenger.tellPlayer(sender, "Arena '" + arena.configName() + "' deleted.");
+        Messenger.tell(sender, "Arena '" + arena.configName() + "' deleted.");
         return true;
     }
 }

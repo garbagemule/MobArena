@@ -42,7 +42,12 @@ public class WaveUtils
         
         // If no spawnpoints in range, just return all of them.
         if (result.isEmpty()) {
-            Messenger.warning("Spawnpoints of arena '" + arena.configName() + "' may be too far apart!");
+            String locs = "";
+            for (Player p : players) {
+                Location l = p.getLocation();
+                locs += "(" + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ") ";
+            }
+            Messenger.warning("The following locations in arena '" + arena.configName() + "' are not covered by any spawnpoints:" + locs);
             return spawnpoints;
         }
         return result;

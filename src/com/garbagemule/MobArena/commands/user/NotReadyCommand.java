@@ -12,8 +12,8 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
     name    = "notready",
     pattern = "notr.*|ready",
     usage   = "/ma notready (<arena>)",
-    desc    = "lists all available arenas",
-    permission = "mobarena.use.arenalist"
+    desc    = "see which players aren't ready",
+    permission = "mobarena.use.notready"
 )
 public class NotReadyCommand implements Command
 {
@@ -28,26 +28,23 @@ public class NotReadyCommand implements Command
         if (!arg1.equals("")) {
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
-        }
-        else if (Commands.isPlayer(sender)) {
+        } else if (Commands.isPlayer(sender)) {
             Player p = (Player) sender;
             arena = am.getArenaWithPlayer(p);
             
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.LEAVE_NOT_PLAYING);
-                return false;
+                Messenger.tell(sender, Msg.LEAVE_NOT_PLAYING);
+                return true;
             }
-        }
-        else {
-            Messenger.tellPlayer(sender, "Usage: /ma notready <arena name>");
+        } else {
             return false;
         }
         
         String list = MAUtils.listToString(arena.getNonreadyPlayers(), am.getPlugin());
-        Messenger.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(list));
+        Messenger.tell(sender, Msg.MISC_LIST_PLAYERS.format(list));
         return true;
     }
 }

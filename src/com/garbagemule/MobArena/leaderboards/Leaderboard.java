@@ -60,8 +60,10 @@ public class Leaderboard
             return;
         }
         
-        if (!(topLeft.getBlock().getState() instanceof Sign))
-            throw new IllegalArgumentException("Block must be a sign!");
+        if (!(topLeft.getBlock().getState() instanceof Sign)) {
+            Messenger.warning("The leaderboard-node for arena '" + arena.configName() + "' does not point to a sign!");
+            return;
+        }
         
         this.topLeft = topLeft;
     }

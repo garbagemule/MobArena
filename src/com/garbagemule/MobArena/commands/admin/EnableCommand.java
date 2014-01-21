@@ -32,24 +32,22 @@ public class EnableCommand implements Command
         if (!arg1.equals("")) {
             Arena arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
-                return false;
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+                return true;
             }
-
             enable(arena, sender);
             return true;
         }
         
         am.setEnabled(true);
         am.saveConfig();
-        Messenger.tellPlayer(sender, "MobArena " + ChatColor.GREEN + "enabled");
-        
+        Messenger.tell(sender, "MobArena " + ChatColor.GREEN + "enabled");
         return true;
     }
     
     private void enable(Arena arena, CommandSender sender) {
         arena.setEnabled(true);
-        arena.getSettings().getParent().save();
-        Messenger.tellPlayer(sender, "Arena '" + arena.configName() + "' " + ChatColor.GREEN + "enabled");
+        arena.getPlugin().saveConfig();
+        Messenger.tell(sender, "Arena '" + arena.configName() + "' " + ChatColor.GREEN + "enabled");
     }
 }

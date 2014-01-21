@@ -30,14 +30,13 @@ public class PlayerListCommand implements Command
             Arena arena = am.getArenaWithName(arg1);
             
             if (arena == null) {
-                Messenger.tellPlayer(sender, Msg.ARENA_DOES_NOT_EXIST);
+                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
             
             list = MAUtils.listToString(arena.getPlayersInArena(), am.getPlugin());
-        }
-        else {
-            StringBuffer buffy = new StringBuffer();
+        } else {
+            StringBuilder buffy = new StringBuilder();
             List<Player> players = new LinkedList<Player>();
             
             for (Arena arena : am.getArenas()) {
@@ -48,7 +47,7 @@ public class PlayerListCommand implements Command
             list = buffy.toString();
         }
         
-        Messenger.tellPlayer(sender, Msg.MISC_LIST_PLAYERS.toString(list));
+        Messenger.tell(sender, Msg.MISC_LIST_PLAYERS.format(list));
         return true;
     }
 }

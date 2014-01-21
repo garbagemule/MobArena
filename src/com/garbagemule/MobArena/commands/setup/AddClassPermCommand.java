@@ -18,30 +18,24 @@ public class AddClassPermCommand implements Command
 {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
-        // Grab the argument, if any.
-        String arg1 = (args.length > 0 ? args[0] : "");
-        String arg2 = (args.length > 1 ? args[1] : "");
-        
-        if (arg1.equals("") || arg2.equals("")) {
-            Messenger.tellPlayer(sender, "Usage: /ma addclassperm <classname> <permission>");
-            return false;
-        }
-        
+        // Require classname and permission
+        if (args.length != 2) return false;
+
         // Grab the arena class
-        ArenaClass arenaClass = am.getClasses().get(arg1);
+        ArenaClass arenaClass = am.getClasses().get(args[0]);
         if (arenaClass == null) {
-            Messenger.tellPlayer(sender, "The class '" + TextUtils.camelCase(arg1) + "' does not exist.");
-            return false;
+            Messenger.tell(sender, "The class '" + TextUtils.camelCase(args[0]) + "' does not exist.");
+            return true;
         }
         
         // Try to add the permission.
-        if (am.addClassPermission(arg1, arg2)) {
-            Messenger.tellPlayer(sender, "Added permission '" + arg2 + "' to class '" + TextUtils.camelCase(arg1) + "'.");
+        if (am.addClassPermission(args[0], args[1])) {
+            Messenger.tell(sender, "Added permission '" + args[1] + "' to class '" + TextUtils.camelCase(args[0]) + "'.");
             return true;
         }
         
         // If it wasn't added, notify.
-        Messenger.tellPlayer(sender, "Permission '" + arg2 + "' was NOT added to class '" + TextUtils.camelCase(arg1) + "'.");
-        return false;
+        Messenger.tell(sender, "Permission '" + args[1] + "' was NOT added to class '" + TextUtils.camelCase(args[0]) + "'.");
+        return true;
     }
 }

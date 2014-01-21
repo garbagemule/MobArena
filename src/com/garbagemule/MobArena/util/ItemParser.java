@@ -16,6 +16,9 @@ import com.garbagemule.MobArena.MobArena;
 
 public class ItemParser
 {
+    private static final int WOOL_ID = Material.WOOL.getId();
+    private static final int DYE_ID  = Material.INK_SACK.getId();
+    
     public static String parseString(ItemStack... stacks) {
         String result = "";
         
@@ -42,11 +45,16 @@ public class ItemParser
 
         // <data> part
         MaterialData md = stack.getData();
-        byte data = (md != null ? md.getData() : 0);
+        short data = (md != null ? md.getData() : 0);
         
         // Take wool into account
         if (stack.getType() == Material.WOOL) {
             data = (byte) (15 - data);
+        }
+        
+        // Take potions into account
+        else if (stack.getType() == Material.POTION) {
+            data = stack.getDurability();
         }
         
         // <amount> part
@@ -143,42 +151,50 @@ public class ItemParser
     }
     
     private static ItemStack singleItem(String item) {
-        if (item.matches("\\$[1-9][0-9]*")) {
-            int amount = Integer.parseInt(item.substring(1));
-            return new ItemStack(MobArena.ECONOMY_MONEY_ID, amount);
+        if (item.matches("\\$([1-9]|([0-9].[0-9]))[0-9]*")) {
+            double amount = Double.parseDouble(item.substring(1));
+
+            int major = (int) amount;
+            int minor = ((int) (amount * 100D)) % 100;
+            return new ItemStack(MobArena.ECONOMY_MONEY_ID, major, (short) minor);
         }
-        Material m = getMaterial(item);
-        return m == null ? null : new ItemStack(m,1);
+        int id = getTypeId(item);
+        return new ItemStack(id);
     }
     
     private static ItemStack withAmount(String item, String amount) {
-        Material m = getMaterial(item);
-        int      a = getAmount(amount);
-        return m == null ? null : new ItemStack(m,a);
+        int id = getTypeId(item);
+        int a  = getAmount(amount);
+        return new ItemStack(id,a);
     }
     
     private static ItemStack withDataAndAmount(String item, String data, String amount) {
-        Material m = getMaterial(item);
-        short    d = getData(data, m);
-        int      a = getAmount(amount);
-        
-        if (m == null) {
-            return null;
-        }
-        
-        if (m.getId() == 35) {
-            d = (byte) (15-d);
-        }
-        
-        return new ItemStack(m,a,d);
+        int   id = getTypeId(item);
+        short d  = getData(data, id);
+        int   a  = getAmount(amount);
+        return new ItemStack(id,a,d);
     }
     
-    private static Material getMaterial(String item) {
-        if (item.matches("[0-9]*")) {
-            return Material.getMaterial(Integer.parseInt(item));
+    private static int getTypeId(String item) {
+        if (item.matches("(-)?[0-9]*")) {
+            return Integer.parseInt(item);
         }
-        
-        return Material.getMaterial(item.toUpperCase());
+        Material m = Enums.getEnumFromString(Material.class, item);
+        return (m != null ? m.getId() : 0);
+    }
+    
+    private static short getData(String data, int id) {
+        // Wool and ink are special
+        if (id == WOOL_ID) {
+            DyeColor dye = Enums.getEnumFromString(DyeColor.class, data);
+            if (dye == null) dye = DyeColor.getByWoolData(Byte.parseByte(data));
+            return dye.getWoolData();
+        } else if (id == DYE_ID) {
+            DyeColor dye = Enums.getEnumFromString(DyeColor.class, data);
+            if (dye == null) dye = DyeColor.getByDyeData(Byte.parseByte(data));
+            return dye.getDyeData();
+        }
+        return (data.matches("(-)?[0-9]+") ? Short.parseShort(data) : 0);
     }
     
     private static int getAmount(String amount) {
@@ -187,22 +203,6 @@ public class ItemParser
         }
         
         return 1;
-    }
-    
-    private static short getData(String data, Material m) {
-        // If ink sack or wool, parse wisely.
-        if (m == Material.INK_SACK || m == Material.WOOL) {
-            // Ink sacks must be offset.
-            byte offset = (m == Material.INK_SACK ? (byte) 15 : (byte) 0);
-            
-            DyeColor dye = (data.matches("[0-9]+")) ?
-                DyeColor.getByData((byte) Math.abs(offset - Integer.parseInt(data))) :
-                DyeColor.valueOf(data.toUpperCase());
-            
-            return (short) Math.abs(offset - dye.getData());
-        }
-        
-        return Short.parseShort(data);
     }
     
     private static void addEnchantments(ItemStack stack, String list) {

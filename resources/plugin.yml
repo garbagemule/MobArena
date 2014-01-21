@@ -1,8 +1,8 @@
 name: MobArena
 author: garbagemule
 main: com.garbagemule.MobArena.MobArena
-version: 0.94.4.95.1
-softdepend: [Spout,Towny,Heroes,MagicSpells,Vault]
+version: 0.96.1.1
+softdepend: [Multiverse-Core,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:
         description: Base command for MobArena
@@ -64,31 +64,29 @@ permissions:
         description: Gives access to all setup commands
         default: op
         children:
-            mobarena.setup.arena: true
-            mobarena.setup.setarena: true
+            mobarena.setup.config: true
+            mobarena.setup.setup: true
+            mobarena.setup.setting: true
             mobarena.setup.addarena: true
             mobarena.setup.removearena: true
-            mobarena.setup.protect: true
             mobarena.setup.editarena: true
-            mobarena.setup.setregion: true
-            mobarena.setup.expandregion: true
-            mobarena.setup.showregion: true
-            mobarena.setup.setlobbyregion: true
-            mobarena.setup.expandlobbyregion: true
-            mobarena.setup.setwarp: true
             mobarena.setup.spawnpoints: true
             mobarena.setup.containers: true
-            mobarena.setup.leaderboards: true
             mobarena.setup.checkdata: true
+            mobarena.setup.checkspawns: true
+            mobarena.setup.classchest: true
             mobarena.setup.classes: true
-            mobarena.setup.config: true
+            mobarena.setup.leaderboards: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
-    mobarena.setup.arena:
-        description: Check which arena is the currently selected arena.
+    mobarena.setup.config:
+        description: Save or reload the config-file
         default: false
-    mobarena.setup.setarena:
-        description: Select a new arena.
+    mobarena.setup.setup:
+        description: Setup Mode.
+        default: false
+    mobarena.setup.setting:
+        description: Setting command.
         default: false
     mobarena.setup.addarena:
         description: Add a new arena node.
@@ -96,29 +94,8 @@ permissions:
     mobarena.setup.removearena:
         description: Remove an arena.
         default: false
-    mobarena.setup.protect:
-        description: Turn arena protection on/off.
-        default: false
     mobarena.setup.editarena:
         description: Turn editmode on/off.
-        default: false
-    mobarena.setup.setregion:
-        description: Set region points p1/p2.
-        default: false
-    mobarena.setup.expandregion:
-        description: Expand arena region.
-        default: false
-    mobarena.setup.showregion:
-        description: Show arena region.
-        default: false
-    mobarena.setup.setlobbyregion:
-        description: Set lobby region points l1/l2.
-        default: false
-    mobarena.setup.expandlobbyregion:
-        description: Expand lobby region.
-        default: false
-    mobarena.setup.setwarp:
-        description: Set warp points arena/lobby/spectator.
         default: false
     mobarena.setup.spawnpoints:
         description: List all spawnpoints.
@@ -126,17 +103,20 @@ permissions:
     mobarena.setup.containers:
         description: List all containers.
         default: false
-    mobarena.setup.leaderboards:
-        description: Set up leaderboards.
-        default: false
     mobarena.setup.checkdata:
         description: Check which points need to be set up.
+        default: false
+    mobarena.setup.checkspawns:
+        description: Check which spawnpoints cover your location.
+        default: false
+    mobarena.setup.classchest:
+        description: Classchest command.
         default: false
     mobarena.setup.classes:
         description: Allows setting up classes from in-game
         default: false
-    mobarena.setup.config:
-        description: Save or reload the config-file
+    mobarena.setup.leaderboards:
+        description: Set up leaderboards.
         default: false
     mobarena.setup.autogenerate:
         description: Auto-generate an arena.

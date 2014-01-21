@@ -20,9 +20,12 @@ public class SetClassCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tellPlayer(sender, Msg.MISC_NOT_FROM_CONSOLE);
-            return false;
+            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            return true;
         }
+
+        // Require at least a class name
+        if (args.length < 1) return false;
         
         // Grab the argument, if any.
         String arg1 = (args.length > 0 ? args[0] : "");
@@ -31,19 +34,9 @@ public class SetClassCommand implements Command
         // Cast the sender.
         Player p = (Player) sender;
         
-        // Require an argument.
-        if (arg1.equals("")) {
-            Messenger.tellPlayer(p, "Usage: /ma setclass (safe) <classname>");
-            return true;
-        }
-        
         // Check if we're overwriting.
         boolean safe = arg1.equals("safe");
-
-        if (safe && arg2.equals("")) {
-            Messenger.tellPlayer(p, "Usage: /ma setclass (safe) <classname>");
-            return true;
-        }
+        if (safe && arg2.equals("")) return false;
         
         // If so, use arg2, otherwise, use arg1
         String className = TextUtils.camelCase(safe ? arg2 : arg1);
@@ -53,13 +46,13 @@ public class SetClassCommand implements Command
         
         // If the class is null, it was not created.
         if (arenaClass == null) {
-            Messenger.tellPlayer(p, "That class already exists!");
-            Messenger.tellPlayer(p, "To overwrite, omit the 'safe' parameter.");
+            Messenger.tell(p, "That class already exists!");
+            Messenger.tell(p, "To overwrite, omit the 'safe' parameter.");
             return true;
         }
         
         // Otherwise, yay!
-        Messenger.tellPlayer(p, "Class '" + className + "' set with your current inventory.");
+        Messenger.tell(p, "Class '" + className + "' set with your current inventory.");
         return true;
     }
 }

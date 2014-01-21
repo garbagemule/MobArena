@@ -1,7 +1,7 @@
 package com.garbagemule.MobArena.waves.ability;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;;
+import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AbilityInfo

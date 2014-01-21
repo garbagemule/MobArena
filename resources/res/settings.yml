@@ -5,8 +5,6 @@ entry-fee: ''
 clear-wave-before-next: false
 clear-boss-before-next: false
 clear-wave-before-boss: false
-lightning: true
-auto-equip-armor: true
 soft-restore: false
 soft-restore-drops: false
 require-empty-inv-join: false
@@ -29,9 +27,14 @@ monster-exp: false
 keep-exp: true
 food-regen: false
 lock-food-level: true
-spout-class-select: false
 player-time-in-arena: world
 auto-ignite-tnt: false
 auto-start-timer: 0
+auto-ready: false
 use-class-chests: false
 display-waves-as-level: false
+display-timer-as-level: false
+use-scoreboards: true
+isolated-chat: false
+global-join-announce: false
+global-end-announce: false

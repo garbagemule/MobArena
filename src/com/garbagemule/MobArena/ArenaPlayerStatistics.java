@@ -64,7 +64,7 @@ public class ArenaPlayerStatistics
         ints.get(s).inc();
     }
 
-    public void add(String s, int amount) {
+    public void add(String s, double amount) {
         ints.get(s).add(amount);
     }
 

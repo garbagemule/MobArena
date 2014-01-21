@@ -30,10 +30,6 @@ public interface ArenaMaster
     public void setEnabled(boolean value);
     
     public boolean notifyOnUpdates();
-
-    public Arena getSelectedArena();
-
-    public void setSelectedArena(Arena arena);
     
     public List<Arena> getArenas();
     
@@ -126,6 +122,8 @@ public interface ArenaMaster
     public void loadArenasInWorld(String worldName);
     
     public void unloadArenasInWorld(String worldName);
+
+    public boolean reloadArena(String name);
     
     public Arena createArenaNode(String configName, World world);
     

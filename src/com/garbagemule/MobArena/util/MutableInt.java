@@ -23,7 +23,7 @@ public class MutableInt
      * Add the given amount to the internal int value.
      * @param amount the amount to add
      */
-    public void add(int amount) {
+    public void add(double amount) {
         this.value += amount;
     }
     

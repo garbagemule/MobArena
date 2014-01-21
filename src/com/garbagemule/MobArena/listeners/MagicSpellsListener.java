@@ -1,18 +1,20 @@
 package com.garbagemule.MobArena.listeners;
 
 import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 
+import com.garbagemule.MobArena.Messenger;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.FileUtils;
-import com.garbagemule.MobArena.util.config.Config;
 import com.garbagemule.MobArena.waves.enums.*;
 import com.garbagemule.MobArena.MobArena;
+
 import com.nisovin.magicspells.events.SpellCastEvent;
 
 public class MagicSpellsListener implements Listener
@@ -23,12 +25,20 @@ public class MagicSpellsListener implements Listener
     public MagicSpellsListener(MobArena plugin)
     {
         this.plugin = plugin;
-        
+
         // Set up the MagicSpells config-file.
-        File spellFile = FileUtils.extractResource(plugin.getDataFolder(), "magicspells.yml");
-        Config spellConfig = new Config(spellFile);
-        spellConfig.load();
-        setupSpells(spellConfig);
+        File file = new File(plugin.getDataFolder(), "magicspells.yml");
+        if (!file.exists()) {
+            plugin.saveResource("magicspells.yml", false);
+            Messenger.info("magicspells.yml created.");
+        }
+        try {
+            FileConfiguration config = new YamlConfiguration();
+            config.load(file);
+            setupSpells(config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     @EventHandler(priority = EventPriority.NORMAL)
@@ -38,7 +48,7 @@ public class MagicSpellsListener implements Listener
         if (arena == null || !arena.isRunning()) return;
         
         String spell = event.getSpell().getName();
-        WaveType type = (arena.getWave() != null) ? arena.getWave().getType() : null;
+        WaveType type = (arena.getWaveManager().getCurrent() != null) ? arena.getWaveManager().getCurrent().getType() : null;
         
         if (disabled.contains(spell) ||
            (type == WaveType.BOSS && disabledOnBoss.contains(spell)) ||
@@ -47,10 +57,10 @@ public class MagicSpellsListener implements Listener
         }
     }
     
-    private void setupSpells(Config config)
+    private void setupSpells(ConfigurationSection config)
     {
-        this.disabled        = config.getStringList("disabled-spells", new LinkedList<String>());
-        this.disabledOnBoss  = config.getStringList("disabled-on-bosses", new LinkedList<String>());
-        this.disabledOnSwarm = config.getStringList("disabled-on-swarms", new LinkedList<String>());
+        this.disabled        = config.getStringList("disabled-spells");
+        this.disabledOnBoss  = config.getStringList("disabled-on-bosses");
+        this.disabledOnSwarm = config.getStringList("disabled-on-swarms");
     }
 }

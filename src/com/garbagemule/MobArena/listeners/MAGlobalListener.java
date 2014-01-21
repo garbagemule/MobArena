@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -35,7 +36,6 @@ public class MAGlobalListener implements Listener
         this.am = am;
     }
     
-    
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                            BLOCK EVENTS                               //
@@ -47,6 +47,12 @@ public class MAGlobalListener implements Listener
     public void blockBreak(BlockBreakEvent event) {
         for (Arena arena : am.getArenas())
             arena.getEventListener().onBlockBreak(event);
+    }
+
+    @EventHandler
+    public void hangingBreak(HangingBreakEvent event) {
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onHangingBreak(event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -93,7 +99,7 @@ public class MAGlobalListener implements Listener
         }
         else if ((stat = Stats.getByShortName(text)) != null) {
             setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
-            Messenger.tellPlayer(event.getPlayer(), "Stat sign created.");
+            Messenger.tell(event.getPlayer(), "Stat sign created.");
         }
     }
     
@@ -204,6 +210,16 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onPlayerBucketEmpty(event);
     }
 
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void playerChat(AsyncPlayerChatEvent event) {
+        if (!am.isEnabled()) return;
+
+        Arena arena = am.getArenaWithPlayer(event.getPlayer());
+        if (arena == null || !arena.hasIsolatedChat()) return;
+
+        event.getRecipients().retainAll(arena.getAllPlayers());
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void playerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if (!am.isEnabled()) return;
@@ -218,7 +234,8 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onPlayerDropItem(event);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    // HIGHEST => after SignShop
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void playerInteract(PlayerInteractEvent event) {
         if (!am.isEnabled()) return;
         for (Arena arena : am.getArenas())

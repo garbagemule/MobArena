@@ -4,18 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.garbagemule.MobArena.events.ArenaCompleteEvent;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-import com.garbagemule.MobArena.ArenaPlayer;
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.events.NewWaveEvent;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
@@ -106,11 +102,15 @@ public class MASpawnThread implements Runnable
 
         // Check if this is the final wave, in which case, end instead of spawn
         if (nextWave > 1 && (nextWave - 1) == waveManager.getFinalWave()) {
+            // Fire the complete event
+            ArenaCompleteEvent complete = new ArenaCompleteEvent(arena);
+            plugin.getServer().getPluginManager().callEvent(complete);
+
+            // Then force leave everyone
             List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
             for (Player p : players) {
                 arena.playerLeave(p);
             }
-
             return;
         }
 
@@ -128,6 +128,8 @@ public class MASpawnThread implements Runnable
         Wave w = waveManager.next();
 
         w.announce(arena, wave);
+        
+        arena.getScoreboard().updateWave(wave);
         
         // Set the players' level to the wave number
         if (wavesAsLevel) {
@@ -178,8 +180,13 @@ public class MASpawnThread implements Runnable
                         BossWave bw = (BossWave) w;
                         int maxHealth = bw.getMaxHealth(playerCount);
                         MABoss boss = monsterManager.addBoss(e, maxHealth);
+                        boss.setReward(bw.getReward());
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
+                        if (bw.getBossName() != null) {
+                            e.setCustomName(bw.getBossName());
+                            e.setCustomNameVisible(true);
+                        }
                         break;
                     case SWARM:
                         health = (int) (mul < 1D ? e.getMaxHealth() * mul : 1);
@@ -202,8 +209,8 @@ public class MASpawnThread implements Runnable
 
         for (Player p : arena.getPlayersInArena()) {
             String className = arena.getArenaPlayer(p).getArenaClass().getLowercaseName();
-            uw.grantItems(p, className);
-            uw.grantItems(p, "All");
+            uw.grantItems(arena, p, className);
+            uw.grantItems(arena, p, "all");
         }
     }
 
@@ -211,7 +218,6 @@ public class MASpawnThread implements Runnable
      * Check if the wave is clear for new spawns.
      * If clear-boss-before-next: true, bosses must be dead.
      * If clear-wave-before-next: true, all monsters must be dead.
-     * @param wave the next wave number
      * @return true, if the wave is "clear" for new spawns.
      */
     private boolean isWaveClear() {
@@ -264,7 +270,7 @@ public class MASpawnThread implements Runnable
                 continue;
             }
             
-            Messenger.tellPlayer(p, "Leaving so soon?");
+            Messenger.tell(p, "Leaving so soon?");
             p.getInventory().clear();
             arena.playerLeave(p);
         }
@@ -312,47 +318,20 @@ public class MASpawnThread implements Runnable
             rewardManager.addReward(p, reward);
 
             if (reward == null) {
-                Messenger.tellPlayer(p, "ERROR! Problem with rewards. Notify server host!");
+                Messenger.tell(p, "ERROR! Problem with rewards. Notify server host!");
                 Messenger.warning("Could not add null reward. Please check the config-file!");
             }
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                if (plugin.giveMoney(p, reward.getAmount())) { // Money already awarded here, not needed at end of match as well
-                    Messenger.tellPlayer(p, Msg.WAVE_REWARD, plugin.economyFormat(reward.getAmount()));
+                if (plugin.giveMoney(p, reward)) { // Money already awarded here, not needed at end of match as well
+                    Messenger.tell(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
                 }
                 else {
                     Messenger.warning("Tried to add money, but no economy plugin detected!");
                 }
             }
             else {
-                Messenger.tellPlayer(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount(), reward.getType());
+                Messenger.tell(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
             }
-        }
-    }
-
-    /**
-     * Update the targets of all monsters, if their targets aren't alive.
-     */
-    public void updateTargets() {
-        Creature c;
-        Entity target;
-        for (Entity e : monsterManager.getMonsters()) {
-            if (!(e instanceof Creature))
-                continue;
-
-            // TODO: Remove the try-catch when Bukkit API is fixed.
-            c = (Creature) e;
-            try {
-                target = c.getTarget();
-            }
-            catch (ClassCastException cce) {
-                continue;
-            }
-
-            if (target instanceof Player && arena.getPlayersInArena().contains((Player) target)) {
-                continue;
-            }
-
-            c.setTarget(MAUtils.getClosestPlayer(plugin, e, arena));
         }
     }
 }

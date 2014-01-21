@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -18,23 +19,19 @@ import org.bukkit.block.Sign;
 import org.bukkit.World;
 import org.bukkit.Material;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.util.config.Config;
-import com.garbagemule.MobArena.util.config.ConfigUtils;
 
 public class MAUtils
 {         
@@ -53,30 +50,16 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */    
-    public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, Config config, String arena, String type)
+    public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
     {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
-        String typePath = ConfigUtils.waveRewardList(arena, type);
         Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
-        
-        if (config.getKeys(typePath) == null)
-        {
-            if (type.equals("every"))
-            {
-                config.set(typePath + ".3", "feather, bone, stick");
-                config.set(typePath + ".5", "dirt:4, gravel:4, stone:4");
-                config.set(typePath + ".10", "iron_ingot:10, gold_ingot:8");
-            }
-            else if (type.equals("after"))
-            {
-                config.set(typePath + ".7", "minecart, storage_minecart, powered_minecart");
-                config.set(typePath + ".13", "iron_sword, iron_pickaxe, iron_spade");
-                config.set(typePath + ".16", "diamond_sword");
-            }
-        }
+
+        String typePath = "rewards.waves." + type;
+        if (!config.contains(typePath)) return result;
         
         //Set<String> waves = config.getKeys(arenaPath + type);
-        Set<String> waves = config.getKeys(typePath);
+        Set<String> waves = config.getConfigurationSection(typePath).getKeys(false);
         if (waves == null) return result;
         
         for (String n : waves)
@@ -85,7 +68,7 @@ public class MAUtils
                 continue;
             
             int wave = Integer.parseInt(n);
-            String path = ConfigUtils.waveReward(arena, type, wave);
+            String path = typePath + "." + wave;
             String rewards = config.getString(path);
             
             result.put(wave, ItemParser.parseItems(rewards));
@@ -155,12 +138,12 @@ public class MAUtils
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        //for (Player p : arena.livePlayers)
-        for (Player p : arena.getPlayersInArena()) {
+        List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+        for (Player p : players) {
             if (!arena.getWorld().equals(p.getWorld())) {
                 Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
-                Messenger.tellPlayer(p, "You warped out of the arena world.");
+                Messenger.tell(p, "You warped out of the arena world.");
                 continue;
             }
             
@@ -242,7 +225,7 @@ public class MAUtils
             for (E e : list) {
                 stack = (ItemStack) e;
                 if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                    String formatted = plugin.economyFormat(stack.getAmount());
+                    String formatted = plugin.economyFormat(stack);
                     if (formatted != null) {
                         buffy.append(formatted);
                         buffy.append(", ");
@@ -300,7 +283,6 @@ public class MAUtils
         // Create the arena node in the config-file.
         World world = loc.getWorld();
         Arena arena = am.createArenaNode(name, world);
-        am.setSelectedArena(arena);
         
         // Get the hippie bounds.
         int x1 = (int)loc.getX() - radius;
@@ -493,10 +475,9 @@ public class MAUtils
         {
             world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
         }
-        
-        Config config = plugin.getMAConfig();
-        config.remove("arenas." + name);
-        config.save();
+
+        plugin.getConfig().set("arenas." + name, null);
+        plugin.saveConfig();
         
         file.delete();
         

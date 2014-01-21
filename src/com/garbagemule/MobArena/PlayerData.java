@@ -11,17 +11,18 @@ public class PlayerData
 {
     private Player player;
     
-    private int health, food, level;
+    private double health;
+    private int food, level;
     private float exp;
     private GameMode mode  = null;
     private Location entry = null;
     private Collection<PotionEffect> potions;
     
-    public PlayerData(Player player) {
+    public PlayerData(Player player, Location loc) {
         this.player  = player;
         this.mode    = player.getGameMode();
-        this.entry   = player.getLocation();
         this.potions = player.getActivePotionEffects();
+        this.entry   = loc;
         
         update();
     }
@@ -54,7 +55,7 @@ public class PlayerData
         return player;
     }
     
-    public int health() {
+    public double health() {
         return health;
     }
     

@@ -1,12 +1,9 @@
 package com.garbagemule.MobArena;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,23 +16,25 @@ public class ArenaClass
     private ItemStack helmet, chestplate, leggings, boots;
     private List<ItemStack> items, armor;
     private Map<String,Boolean> perms;
-    private int pets;
-    private boolean unbreakableWeapons;
-    
+    private Map<String,Boolean> lobbyperms;
+    private boolean unbreakableWeapons, unbreakableArmor;
+    private Location classchest;
+
     /**
      * Create a new, empty arena class with the given name.
      * @param name the class name as it appears in the config-file
      */
-    public ArenaClass(String name, boolean unbreakableWeapons) {
+    public ArenaClass(String name, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
         this.lowercaseName = name.toLowerCase();
         
         this.items = new ArrayList<ItemStack>();
         this.armor = new ArrayList<ItemStack>(4);
         this.perms = new HashMap<String,Boolean>();
-        this.pets  = 0;
-        
+        this.lobbyperms = new HashMap<String,Boolean>();
+
         this.unbreakableWeapons = unbreakableWeapons;
+        this.unbreakableArmor = unbreakableArmor;
     }
     
     /**
@@ -100,26 +99,17 @@ public class ArenaClass
     
     /**
      * Add an item to the items list.
-     * If the item is a weapon-type, its durability will be set to "infinite".
-     * If the item is a bone, the pets counter will be incremented.
      * @param stack an item
      */
     public void addItem(ItemStack stack) {
         if (stack == null) return;
         
-        if (unbreakableWeapons && isWeapon(stack)) {
-            stack.setDurability(Short.MIN_VALUE);
-        }
-        else if (stack.getType() == Material.BONE) {
-            pets += stack.getAmount();
-        }
-        else if (stack.getAmount() > 64) {
+        if (stack.getAmount() > 64) {
             while (stack.getAmount() > 64) {
                 items.add(new ItemStack(stack.getType(), 64));
                 stack.setAmount(stack.getAmount() - 64);
             }
         }
-        
         items.add(stack);
     }
     
@@ -207,6 +197,14 @@ public class ArenaClass
     public Map<String,Boolean> getPermissions() {
         return Collections.unmodifiableMap(perms);
     }
+
+    public void addLobbyPermission(String perm, boolean value) {
+        lobbyperms.put(perm, value);
+    }
+
+    public Map<String,Boolean> getLobbyPermissions() {
+        return Collections.unmodifiableMap(lobbyperms);
+    }
     
     /**
      * Grant the given player all the permissions of the class.
@@ -220,38 +218,53 @@ public class ArenaClass
         if (perms.isEmpty()) return null;
         
         PermissionAttachment pa = p.addAttachment(plugin);
-        
-        for (Entry<String,Boolean> entry : perms.entrySet()) {
+        grantPerms(pa, perms, p);
+        return pa;
+    }
+
+    public PermissionAttachment grantLobbyPermissions(MobArena plugin, Player p) {
+        if (lobbyperms.isEmpty()) return null;
+
+        PermissionAttachment pa = p.addAttachment(plugin);
+        grantPerms(pa, lobbyperms, p);
+        return pa;
+    }
+
+    private void grantPerms(PermissionAttachment pa, Map<String,Boolean> map, Player p) {
+        for (Entry<String,Boolean> entry : map.entrySet()) {
             try {
                 pa.setPermission(entry.getKey(), entry.getValue());
             }
             catch (Exception e) {
                 String perm   = entry.getKey() + ":" + entry.getValue();
                 String player = p.getName();
-                
+
                 Messenger.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.configName
                                 + "'.\nPlease verify that your class permissions are well-formed.");
             }
         }
-        return pa;
     }
-    
-    /**
-     * Get the amount of pets this class is given upon starting the arena.
-     * @return the number of pets this class has
-     */
-    public int getPetAmount() {
-        return pets;
+
+    public Location getClassChest() {
+        return classchest;
     }
-    
+
+    public void setClassChest(Location loc) {
+        classchest = loc;
+    }
+
     public boolean hasUnbreakableWeapons() {
         return unbreakableWeapons;
+    }
+
+    public boolean hasUnbreakableArmor() {
+        return unbreakableArmor;
     }
     
     /**
      * Used by isWeapon() to determine if an ItemStack is a weapon type.
      */
-    private static int[] weaponTypes = new int[]{256,257,258,261,267,268,269,270,271,272,273,274,275,276,277,278,279,283,284,285,286,290,291,292,293,294};
+    private static int[] weaponTypes = {256,257,258,259,261,267,268,269,270,271,272,273,274,275,276,277,278,279,283,284,285,286,290,291,292,293,294,346,398};
     
     /**
      * Returns true, if the ItemStack appears to be a weapon, in which case
@@ -260,17 +273,11 @@ public class ArenaClass
      * @param stack an ItemStack
      * @return true, if the item is a weapon
      */
-    public boolean isWeapon(ItemStack stack) {
-        int id = stack.getTypeId();
-        
-        for (int type : weaponTypes) {
-            if (id == type) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean isWeapon(ItemStack stack) {
+        if (stack == null) return false;
+        return Arrays.binarySearch(weaponTypes, stack.getTypeId()) > -1;
     }
-    
+
     /**
      * Used by the grantItems() method to determine the armor type of a given
      * ItemStack. Armor pieces are auto-equipped.

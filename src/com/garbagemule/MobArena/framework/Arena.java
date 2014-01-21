@@ -2,10 +2,12 @@ package com.garbagemule.MobArena.framework;
 
 import java.util.*;
 
+import com.garbagemule.MobArena.autostart.AutoStartTimer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,12 +20,11 @@ import com.garbagemule.MobArena.MASpawnThread;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.MonsterManager;
 import com.garbagemule.MobArena.RewardManager;
+import com.garbagemule.MobArena.ScoreboardManager;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
-import com.garbagemule.MobArena.util.config.ConfigSection;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
-import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.WaveManager;
 
 public interface Arena
@@ -33,8 +34,8 @@ public interface Arena
     //      NEW METHODS IN REFACTORING
     //
     /////////////////////////////////////////////////////////////////////////*/
-    
-    public ConfigSection getSettings();
+
+    public ConfigurationSection getSettings();
     
     public World getWorld();
     
@@ -53,8 +54,10 @@ public interface Arena
     public boolean inEditMode();
     
     public void setEditMode(boolean value);
-    
-    public Material getClassLogo(String classname);
+
+    public int getMinPlayers();
+
+    public int getMaxPlayers();
     
     public List<ItemStack> getEntryFee();
     
@@ -103,6 +106,8 @@ public interface Arena
     public ClassLimitManager getClassLimitManager();
 
     public void revivePlayer(Player p);
+    
+    public ScoreboardManager getScoreboard();
     
     
     
@@ -181,6 +186,8 @@ public interface Arena
     public void assignClassPermissions(Player p);
     
     public void removeClassPermissions(Player p);
+
+    public void addPermission(Player p, String perm, boolean value);
     
     
     
@@ -214,8 +221,6 @@ public interface Arena
     
     public MobArena getPlugin();
     
-    public Wave getWave();
-    
     public Map<String,ArenaClass> getClasses();
     
     public int getPlayerCount();
@@ -235,4 +240,10 @@ public interface Arena
     public boolean canJoin(Player p);
     
     public boolean canSpec(Player p);
+
+    public boolean hasIsolatedChat();
+
+    public Player getLastPlayerStanding();
+
+    public AutoStartTimer getAutoStartTimer();
 }
