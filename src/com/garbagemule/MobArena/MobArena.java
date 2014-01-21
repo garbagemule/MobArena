@@ -93,7 +93,9 @@ public class MobArena extends JavaPlugin
             arena.forceEnd();
         }
         arenaMaster.resetArenaMap();
-        
+
+        VersionChecker.shutDown();
+
         Messenger.info("disabled.");
     }
     
@@ -210,6 +212,10 @@ public class MobArena extends JavaPlugin
                "Read the Wiki for details on how to set up this file: http://goo.gl/F5TTc" + sep +
                "Note: You -must- use spaces instead of tabs!";
     }
+
+	public File getPluginFile() {
+		return getFile();
+	}
     
     private void registerInventories() {
         this.inventoriesToRestore = new HashSet<String>();
