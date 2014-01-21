@@ -558,9 +558,9 @@ public class ArenaImpl implements Arena
         plugin.getServer().getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return false;
-            }
-        // Announce globally (must happen before moving player)
+        }
 
+        // Announce globally (must happen before moving player)
         if (settings.getBoolean("global-join-announce", false)) {
             if (lobbyPlayers.isEmpty()) {
                 for (Player q : Bukkit.getOnlinePlayers()) {
@@ -568,9 +568,8 @@ public class ArenaImpl implements Arena
                 }
             }
         }
-        
+
         movePlayerToLobby(p);
-        
         takeFee(p);
         storePlayerData(p, loc);
         removePotionEffects(p);
@@ -667,7 +666,7 @@ public class ArenaImpl implements Arena
         // Fire the event
         ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, last);
         plugin.getServer().getPluginManager().callEvent(event);
-        
+
         // Clear the player's inventory, and unmount
         if (arenaPlayers.remove(p)) {
             unmount(p);
