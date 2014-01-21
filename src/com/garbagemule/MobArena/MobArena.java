@@ -73,7 +73,7 @@ public class MobArena extends JavaPlugin
 
         // Register event listeners
         registerListeners();
-        
+
         // Go go Metrics
         startMetrics();
 
