@@ -93,8 +93,13 @@ public class MobArena extends JavaPlugin
             arena.forceEnd();
         }
         arenaMaster.resetArenaMap();
+        VersionChecker.shutdown();
         
         Messenger.info("disabled.");
+    }
+
+    public File getPluginFile() {
+        return getFile();
     }
     
     private void loadConfigFile() {
