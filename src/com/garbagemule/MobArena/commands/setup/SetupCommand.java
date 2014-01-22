@@ -17,10 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -367,11 +364,7 @@ public class SetupCommand implements Command, Listener {
         @Override
         public void conversationAbandoned(ConversationAbandonedEvent event) {
             // Unregister listener
-            PlayerInteractEvent.getHandlerList().unregister(this);
-            PlayerDropItemEvent.getHandlerList().unregister(this);
-            BlockBreakEvent.getHandlerList().unregister(this);
-            PlayerQuitEvent.getHandlerList().unregister(this);
-            PluginDisableEvent.getHandlerList().unregister(this);
+            HandlerList.unregisterAll(this);
 
             // Restore player and arena state
             arena.setEnabled(enabled);
