@@ -440,6 +440,9 @@ public class ArenaListener
                 callKillEvent(player.getKiller(), player);
             }
             arena.playerDeath(player);
+            if (!arena.getSettings().getBoolean("show-death-messages", true)) {
+                event.setDeathMessage(null);
+            }
         } else if (arena.inSpec(player)) {
             event.getDrops().clear();
             event.setDroppedExp(0);
