@@ -34,6 +34,9 @@ permissions:
     mobarena.use.playerlist:
         description: Player list command
         default: true
+    mobarena.use.notready:
+        description: Check who is not ready yet
+        default: true
     
     mobarena.admin:
         description: Gives access to all admin commands
