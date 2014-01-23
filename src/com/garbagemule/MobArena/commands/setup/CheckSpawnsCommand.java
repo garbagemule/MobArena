@@ -27,7 +27,7 @@ public class CheckSpawnsCommand implements Command
         }
 
         Arena arena;
-        if (args.length == 1) {
+        if (args.length == 0) {
             if (am.getArenas().size() > 1) {
                 Messenger.tell(sender, "There are multiple arenas.");
                 return true;

@@ -19,7 +19,7 @@ public class CheckDataCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         Arena arena;
-        if (args.length == 1) {
+        if (args.length == 0) {
             if (am.getArenas().size() > 1) {
                 Messenger.tell(sender, "There are multiple arenas.");
                 return true;
