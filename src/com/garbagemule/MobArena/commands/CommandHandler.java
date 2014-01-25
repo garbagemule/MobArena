@@ -202,6 +202,7 @@ public class CommandHandler implements CommandExecutor
 
         register(ListClassesCommand.class);
         register(SetClassCommand.class);
+        register(SetClassPriceCommand.class);
         register(RemoveClassCommand.class);
         register(ClassChestCommand.class);
         register(ListClassPermsCommand.class);
