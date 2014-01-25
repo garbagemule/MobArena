@@ -318,7 +318,12 @@ public class WaveParser
      * @return a "reverse" map of monsters and numbers
      */
     private static SortedMap<Integer,MACreature> getMonsterMap(ConfigurationSection config) {
-        Set<String> monsters = config.getConfigurationSection("monsters").getKeys(false);
+        ConfigurationSection section = config.getConfigurationSection("monsters");
+        if (section == null) {
+            return null;
+        }
+
+        Set<String> monsters = section.getKeys(false);
         if (monsters == null || monsters.isEmpty()) {
             return null;
         }
