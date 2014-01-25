@@ -151,7 +151,7 @@ public class ItemParser
     }
     
     private static ItemStack singleItem(String item) {
-        if (item.matches("\\$([1-9]|([0-9].[0-9]))[0-9]*")) {
+        if (item.matches("\\$(([1-9]\\d*)|(\\d*.\\d\\d?))")) {
             double amount = Double.parseDouble(item.substring(1));
 
             int major = (int) amount;
