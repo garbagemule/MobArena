@@ -20,7 +20,7 @@ public class Messenger
 
     public static boolean tell(CommandSender p, String msg) {
         // If the input sender is null or the string is empty, return.
-        if (p == null || msg.equals(" ")) {
+        if (p == null || msg.equals("")) {
             return false;
         }
 
