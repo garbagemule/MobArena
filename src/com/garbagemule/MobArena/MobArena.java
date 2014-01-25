@@ -249,27 +249,33 @@ public class MobArena extends JavaPlugin
         }
         return false;
     }
-    
+
     public boolean takeMoney(Player p, ItemStack item) {
+        return takeMoney(p, getAmount(item));
+    }
+
+    public boolean takeMoney(Player p, double amount) {
         if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p.getName(), getAmount(item));
+            EconomyResponse result = economy.withdrawPlayer(p.getName(), amount);
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
     }
 
     public boolean hasEnough(Player p, ItemStack item) {
-        if (economy != null) {
-            return (economy.getBalance(p.getName()) >= getAmount(item));
-        }
-        return true;
+        return hasEnough(p, getAmount(item));
+    }
+
+    public boolean hasEnough(Player p, double amount) {
+        return economy == null || (economy.getBalance(p.getName()) >= amount);
     }
     
     public String economyFormat(ItemStack item) {
-        if (economy != null) {
-            return economy.format(getAmount(item));
-        }
-        return null;
+        return economyFormat(getAmount(item));
+    }
+
+    public String economyFormat(double amount) {
+        return economy == null ? null : economy.format(amount);
     }
 
     private double getAmount(ItemStack item) {

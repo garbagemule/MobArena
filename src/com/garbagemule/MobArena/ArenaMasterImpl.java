@@ -293,8 +293,21 @@ public class ArenaMasterImpl implements ArenaMaster
         boolean weps = section.getBoolean("unbreakable-weapons", true);
         boolean arms = section.getBoolean("unbreakable-armor", true);
 
+        // Grab the class price, if any
+        double price = -1D;
+        String priceString = section.getString("price", null);
+        if (priceString != null) {
+            ItemStack priceItem = ItemParser.parseItem(priceString);
+            if (priceItem != null && priceItem.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
+                price = (priceItem.getAmount() + (priceItem.getDurability() / 100D));
+            } else {
+                Messenger.warning("The price for class '" + classname + "' could not be parsed!");
+                Messenger.warning("- expected e.g. '$10',  found '" + priceString + "'");
+            }
+        }
+
         // Create an ArenaClass with the config-file name.
-        ArenaClass arenaClass = new ArenaClass(classname, weps, arms);
+        ArenaClass arenaClass = new ArenaClass(classname, price, weps, arms);
 
         // Parse the items-node
         List<String> items = section.getStringList("items");

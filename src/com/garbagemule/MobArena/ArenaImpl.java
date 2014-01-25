@@ -436,6 +436,11 @@ public class ArenaImpl implements Arena
             }
             assignClassPermissions(p);
             arenaPlayerMap.get(p).resetStats();
+
+            double price = arenaPlayerMap.get(p).getArenaClass().getPrice();
+            if (price > 0D) {
+                plugin.takeMoney(p, price);
+            }
             
             scoreboard.addPlayer(p);
         }

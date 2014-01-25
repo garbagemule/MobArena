@@ -57,6 +57,8 @@ public enum Msg {
     LOBBY_CLASS_PICKED("You have chosen &e%&r as your class!"),
     LOBBY_CLASS_RANDOM("You will get a random class on arena start."),
     LOBBY_CLASS_PERMISSION("You don't have permission to use this class!"),
+    LOBBY_CLASS_PRICE("This class costs &c%&r (paid on arena start)."),
+    LOBBY_CLASS_TOO_EXPENSIVE("You can't afford that class (&c%&r)"),
     WARP_TO_ARENA("Warping to the arena not allowed!"),
     WARP_FROM_ARENA("Warping from the arena not allowed!"),
     WAVE_DEFAULT("Wave &b#%&r!"),

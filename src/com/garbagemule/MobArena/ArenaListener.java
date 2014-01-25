@@ -926,13 +926,22 @@ public class ArenaListener
             Messenger.tell(p, Msg.LOBBY_CLASS_FULL);
             return;
         }
+
+        // Check price, balance, and inform
+        double price = newAC.getPrice();
+        if (price > 0D) {
+            if (!plugin.hasEnough(p, price)) {
+                Messenger.tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, plugin.economyFormat(price));
+                return;
+            }
+        }
         
         // Otherwise, leave the old class, and pick the new!
         classLimits.playerLeftClass(oldAC, p);
         classLimits.playerPickedClass(newAC, p);
 
         // Delay the inventory stuff to ensure that right-clicking works.
-        delayAssignClass(p, className, sign);
+        delayAssignClass(p, className, price, sign);
     }
     
     /*private boolean cansPlayerJoinClass(ArenaClass ac, Player p) {
@@ -947,7 +956,7 @@ public class ArenaListener
         return true;
     }*/
 
-    private void delayAssignClass(final Player p, final String className, final Sign sign) {
+    private void delayAssignClass(final Player p, final String className, final double price, final Sign sign) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {
             public void run() {
                 if (!className.equalsIgnoreCase("random")) {
@@ -996,12 +1005,18 @@ public class ArenaListener
                             arena.assignClassGiveInv(p, className, contents);
                             p.getInventory().setContents(contents);
                             Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
+                            if (price > 0D) {
+                                Messenger.tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));
+                            }
                             return;
                         }
                         // Otherwise just fall through and use the items from the config-file
                     }
                     arena.assignClass(p, className);
                     Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
+                    if (price > 0D) {
+                        Messenger.tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));
+                    }
                 }
                 else {
                     arena.addRandomPlayer(p);

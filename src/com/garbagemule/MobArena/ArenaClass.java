@@ -18,13 +18,14 @@ public class ArenaClass
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
+    private double price;
     private Location classchest;
 
     /**
      * Create a new, empty arena class with the given name.
      * @param name the class name as it appears in the config-file
      */
-    public ArenaClass(String name, boolean unbreakableWeapons, boolean unbreakableArmor) {
+    public ArenaClass(String name, double price, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
         this.lowercaseName = name.toLowerCase();
         
@@ -35,6 +36,8 @@ public class ArenaClass
 
         this.unbreakableWeapons = unbreakableWeapons;
         this.unbreakableArmor = unbreakableArmor;
+
+        this.price = price;
     }
     
     /**
@@ -259,6 +262,10 @@ public class ArenaClass
 
     public boolean hasUnbreakableArmor() {
         return unbreakableArmor;
+    }
+
+    public double getPrice() {
+        return price;
     }
     
     /**
