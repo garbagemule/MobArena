@@ -356,8 +356,8 @@ public class WaveParser
             return result;
         }
         
-        // Split the string by commas
-        String[] spawns = spawnString.split(",");
+        // Split the string by semicolons
+        String[] spawns = spawnString.split(";");
         
         ArenaRegion region = arena.getRegion();
         for (String spawn : spawns) {
