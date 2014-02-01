@@ -1,7 +1,7 @@
 name: MobArena
 author: garbagemule
 main: com.garbagemule.MobArena.MobArena
-version: 0.96.2.7
+version: 0.96.2.8
 softdepend: [Multiverse-Core,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:
@@ -36,6 +36,9 @@ permissions:
         default: true
     mobarena.use.notready:
         description: Check who is not ready yet
+        default: true
+    mobarena.use.class:
+        description: Pick a class by name
         default: true
     
     mobarena.admin:
