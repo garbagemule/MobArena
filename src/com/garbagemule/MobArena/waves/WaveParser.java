@@ -375,7 +375,12 @@ public class WaveParser
     }
     
     private static Map<String,List<Upgrade>> getUpgradeMap(ConfigurationSection config) {
-        Set<String> classes = config.getConfigurationSection("upgrades").getKeys(false);
+        ConfigurationSection section = config.getConfigurationSection("upgrades");
+        if (section == null) {
+            return null;
+        }
+
+        Set<String> classes = section.getKeys(false);
         if (classes == null || classes.isEmpty()) {
             return null;
         }
@@ -398,11 +403,11 @@ public class WaveParser
             }
             // New complex setup
             else if (val instanceof ConfigurationSection) {
-                ConfigurationSection section = (ConfigurationSection) val;
+                ConfigurationSection classSection = (ConfigurationSection) val;
                 List<Upgrade> list = new ArrayList<Upgrade>();
 
                 // Items (Generic + Weapons)
-                itemList = section.getString("items", null);
+                itemList = classSection.getString("items", null);
                 if (itemList != null) {
                     for (ItemStack stack : ItemParser.parseItems(itemList)) {
                         list.add(ArenaClass.isWeapon(stack) ? new WeaponUpgrade(stack) : new GenericUpgrade(stack));
@@ -410,7 +415,7 @@ public class WaveParser
                 }
 
                 // Armor
-                itemList = section.getString("armor", null);
+                itemList = classSection.getString("armor", null);
                 if (itemList != null) {
                     for (ItemStack stack : ItemParser.parseItems(itemList)) {
                         list.add(new ArmorUpgrade(stack));
@@ -418,7 +423,7 @@ public class WaveParser
                 }
 
                 // Permissions
-                List<String> perms = section.getStringList("permissions");
+                List<String> perms = classSection.getStringList("permissions");
                 if (!perms.isEmpty()) {
                     for (String perm : perms) {
                         list.add(new PermissionUpgrade(perm));
