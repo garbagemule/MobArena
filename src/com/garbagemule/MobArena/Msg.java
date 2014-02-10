@@ -20,7 +20,7 @@ public enum Msg {
     JOIN_ARENA_PERMISSION("You don't have permission to join this arena."),
     JOIN_FEE_REQUIRED("Insufficient funds. Price: &c%&r"),
     JOIN_FEE_PAID("Price to join was: &c%&r"),
-    JOIN_ARENA_IS_RUNNING("This arena is in already progress."),
+    JOIN_ARENA_IS_RUNNING("This arena is already in progress."),
     JOIN_ALREADY_PLAYING("You are already playing!"),
     JOIN_ARG_NEEDED("You must specify an arena."),
     JOIN_NO_PERMISSION("You don't have permission to join any arenas."),
