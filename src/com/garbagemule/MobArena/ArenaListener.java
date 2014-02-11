@@ -154,6 +154,9 @@ public class ArenaListener
                 arena.getRegion().set("leaderboard", null);
             }
         }
+
+        // If the arena isn't protected, care
+        if (!protect) return;
         
         if (!arena.getRegion().contains(event.getBlock().getLocation()))
             return;
@@ -172,6 +175,9 @@ public class ArenaListener
     }
 
     public void onHangingBreak(HangingBreakEvent event) {
+        // If the arena isn't protected, care
+        if (!protect) return;
+
         Location l = event.getEntity().getLocation();
         if (!arena.getRegion().contains(l)) {
             return;
@@ -183,6 +189,9 @@ public class ArenaListener
     }
 
     public void onBlockBurn(BlockBurnEvent event) {
+        // If the arena isn't protected, care
+        if (!protect) return;
+
         if (!arena.getRegion().contains(event.getBlock().getLocation()) || onBlockDestroy(event))
             return;
 
@@ -227,6 +236,9 @@ public class ArenaListener
     }
 
     public void onBlockPlace(BlockPlaceEvent event) {
+        // If the arena isn't protected, care
+        if (!protect) return;
+
         Block b = event.getBlock();
 
         // If the event didn't happen in the region, or if in edit mode, ignore
@@ -276,6 +288,9 @@ public class ArenaListener
     }
 
     public void onBlockForm(BlockFormEvent event) {
+        // If the arena isn't protected, care
+        if (!protect) return;
+
         if (!arena.getRegion().contains(event.getBlock().getLocation()))
             return;
 
@@ -285,6 +300,9 @@ public class ArenaListener
     }
 
     public void onBlockIgnite(BlockIgniteEvent event) {
+        // If the arena isn't protected, care
+        if (!protect) return;
+
         Block b = event.getBlock();
         if (!arena.getRegion().contains(b.getLocation()))
             return;
