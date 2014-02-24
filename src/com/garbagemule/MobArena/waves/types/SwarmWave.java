@@ -5,6 +5,7 @@ import java.util.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.*;
 
 public class SwarmWave extends AbstractWave
@@ -36,5 +37,11 @@ public class SwarmWave extends AbstractWave
     
     public void setAmount(SwarmAmount amount) {
         this.amount = amount;
+    }
+
+    public Wave copy() {
+        SwarmWave result = new SwarmWave(monster);
+        result.amount = this.amount;
+        return result;
     }
 }

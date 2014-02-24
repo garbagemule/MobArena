@@ -5,6 +5,7 @@ import java.util.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 
 public class SpecialWave extends AbstractWave
@@ -47,5 +48,9 @@ public class SpecialWave extends AbstractWave
         }
         
         return result;
+    }
+
+    public Wave copy() {
+        return new SpecialWave(monsterMap);
     }
 }

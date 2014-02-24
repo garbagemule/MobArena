@@ -5,6 +5,7 @@ import java.util.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.*;
 
 public class DefaultWave extends AbstractWave
@@ -83,5 +84,12 @@ public class DefaultWave extends AbstractWave
 
     public void setFixed(boolean fixed) {
         this.fixed = fixed;
+    }
+
+    public Wave copy() {
+        DefaultWave result = new DefaultWave(monsterMap);
+        result.growth = this.growth;
+        result.fixed = this.fixed;
+        return result;
     }
 }

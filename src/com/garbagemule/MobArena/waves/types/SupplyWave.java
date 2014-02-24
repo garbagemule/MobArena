@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves.types;
 
 import java.util.*;
 
+import com.garbagemule.MobArena.waves.Wave;
 import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.framework.Arena;
@@ -57,5 +58,11 @@ public class SupplyWave extends AbstractWave
     
     public void setDropList(List<ItemStack> drops) {
         this.drops = drops;
+    }
+
+    public Wave copy() {
+        SupplyWave result = new SupplyWave(monsterMap);
+        result.drops = new ArrayList<ItemStack>(this.drops);
+        return result;
     }
 }

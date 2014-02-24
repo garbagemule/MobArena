@@ -12,12 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.AbstractWave;
-import com.garbagemule.MobArena.waves.BossAbilityThread;
-import com.garbagemule.MobArena.waves.MABoss;
-import com.garbagemule.MobArena.waves.MACreature;
-import com.garbagemule.MobArena.waves.ability.Ability;
-import com.garbagemule.MobArena.waves.ability.AbilityInfo;
+import com.garbagemule.MobArena.waves.*;
+import com.garbagemule.MobArena.waves.ability.*;
 import com.garbagemule.MobArena.waves.enums.*;
 
 public class BossWave extends AbstractWave
@@ -140,5 +136,20 @@ public class BossWave extends AbstractWave
             AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
             Messenger.announce(arena, Msg.WAVE_BOSS_ABILITY, info.name());
         }
+    }
+
+    public Wave copy() {
+        BossWave result = new BossWave(this.monster);
+        for (Ability ability : this.abilities) {
+            result.addBossAbility(ability);
+        }
+        result.abilityInterval = this.abilityInterval;
+        result.abilityAnnounce = this.abilityAnnounce;
+        result.useHealthMultiplier = this.useHealthMultiplier;
+        result.healthMultiplier = this.healthMultiplier;
+        result.flatHealth = this.flatHealth;
+        result.reward = this.reward;
+        result.bossName = this.bossName;
+        return result;
     }
 }

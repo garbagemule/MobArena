@@ -152,4 +152,14 @@ public interface Wave
      * @return true, if the wave should spawn, false otherwise
      */
     public boolean matches(int wave);
+
+    /**
+     * Make a copy of the wave.
+     * <p>
+     * This method is used by the WaveManager in the {@code next()} method to
+     * ensure that boss waves in particular do not share state.
+     *
+     * @return a copy of the wave
+     */
+    public Wave copy();
 }

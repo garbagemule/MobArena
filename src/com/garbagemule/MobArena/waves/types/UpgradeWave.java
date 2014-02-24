@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves.types;
 
 import java.util.*;
 
+import com.garbagemule.MobArena.waves.Wave;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -42,6 +43,16 @@ public class UpgradeWave extends AbstractWave
     
     public void setGiveAll(boolean giveAll) {
         this.giveAll = giveAll;
+    }
+
+    public Wave copy() {
+        Map<String,List<Upgrade>> upgrades = new HashMap<String,List<Upgrade>>();
+        for (Map.Entry<String,List<Upgrade>> entry : this.upgrades.entrySet()) {
+            upgrades.put(entry.getKey(), new ArrayList<Upgrade>(entry.getValue()));
+        }
+        UpgradeWave result = new UpgradeWave(upgrades);
+        result.giveAll = this.giveAll;
+        return result;
     }
 
     /**

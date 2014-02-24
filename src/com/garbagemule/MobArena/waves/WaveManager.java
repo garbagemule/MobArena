@@ -66,11 +66,11 @@ public class WaveManager
         wave++;
         
         if (!singleWavesInstance.isEmpty() && singleWavesInstance.first().matches(wave)) {
-            currentWave = singleWavesInstance.pollFirst();
+            currentWave = singleWavesInstance.pollFirst().copy();
         }
         else {
             SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);
-            currentWave = (matches.isEmpty() ? defaultWave : matches.last());
+            currentWave = (matches.isEmpty() ? defaultWave : matches.last()).copy();
         }
         
         return currentWave;
