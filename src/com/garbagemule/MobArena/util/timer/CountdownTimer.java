@@ -212,8 +212,9 @@ public class CountdownTimer extends AbstractTimer {
             synchronized (CountdownTimer.this) {
                 remaining -= interval;
 
-                // If we're done, call onFinish() and bail
+                // If we're done, null timer, call onFinish(), and bail
                 if (remaining <= 0l) {
+                    timer = null;
                     callback.onFinish();
                     return;
                 }
