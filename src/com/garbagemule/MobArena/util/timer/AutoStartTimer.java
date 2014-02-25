@@ -50,7 +50,7 @@ public class AutoStartTimer extends CountdownTimer implements TimerCallback {
             internalCallback = new LevelCallback(arena, this);
         } else {
             int[] triggers = {30, 10, 5, 4, 3, 2, 1};
-            internalCallback = new ChatCallback(arena, Msg.ARENA_JOIN_PERIOD, this, triggers);
+            internalCallback = new ChatCallback(arena, Msg.ARENA_AUTO_START, this, triggers);
         }
     }
 
