@@ -35,6 +35,7 @@ import com.garbagemule.MobArena.util.*;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.inventory.InventoryUtils;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
+import com.garbagemule.MobArena.util.timer.StartDelayTimer;
 import com.garbagemule.MobArena.waves.*;
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 
@@ -92,6 +93,7 @@ public class ArenaImpl implements Arena
     private List<ItemStack> entryFee;
     private TimeStrategy timeStrategy;
     private AutoStartTimer autoStartTimer;
+    private StartDelayTimer startDelayTimer;
     private boolean isolatedChat;
     
     // Scoreboards
@@ -159,6 +161,7 @@ public class ArenaImpl implements Arena
         this.allowAnimals  = world.getAllowAnimals();
 
         this.autoStartTimer  = new AutoStartTimer(this);
+        this.startDelayTimer = new StartDelayTimer(this, autoStartTimer);
 
         this.isolatedChat  = settings.getBoolean("isolated-chat", false);
         
@@ -384,7 +387,12 @@ public class ArenaImpl implements Arena
             return false;
         }
 
-        // Stop the auto-start-timer
+        // Check if start-delay is over
+        if (startDelayTimer.isRunning()) {
+            return false;
+        }
+
+        // Stop the auto-start-timer regardless
         autoStartTimer.stop();
 
         // Fire the event and check if it's been cancelled.
@@ -545,6 +553,8 @@ public class ArenaImpl implements Arena
             Messenger.tell(p, Msg.LEAVE_NOT_READY);
         }
 
+        // Stop start-delay-timer and start arena
+        startDelayTimer.stop();
         startArena();
     }
 
@@ -591,14 +601,18 @@ public class ArenaImpl implements Arena
         
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
 
-        // Start the auto-start-timer
-        autoStartTimer.start();
+        // Start the start-delay-timer if applicable
+        if (!autoStartTimer.isRunning()) {
+            startDelayTimer.start();
+        }
         
         // Notify player of joining
         Messenger.tell(p, Msg.JOIN_PLAYER_JOINED);
         
         // Notify player of time left
-        if (autoStartTimer.isRunning()) {
+        if (startDelayTimer.isRunning()) {
+            Messenger.tell(p, Msg.ARENA_START_DELAY, "" + startDelayTimer.getRemaining() / 20l);
+        } else if (autoStartTimer.isRunning()) {
             Messenger.tell(p, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
         }
         
