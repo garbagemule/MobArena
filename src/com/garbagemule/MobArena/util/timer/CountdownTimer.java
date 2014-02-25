@@ -45,10 +45,7 @@ public class CountdownTimer extends AbstractTimer {
     public CountdownTimer(Plugin plugin, long duration, long interval, TimerCallback callback) {
         super(plugin, interval, callback);
 
-        if (duration < 0l) {
-            throw new IllegalArgumentException("Duration must be non-negative.");
-        }
-        this.duration = duration;
+        setDuration(duration);
         this.remaining = 0l;
         this.timer = null;
     }
@@ -97,6 +94,22 @@ public class CountdownTimer extends AbstractTimer {
      */
     public CountdownTimer(Plugin plugin, long duration) {
         this(plugin, duration, duration, null);
+    }
+
+    /**
+     * Create an uninitialized (0 duration) CountdownTimer.
+     * <p>
+     * This constructor leaves the timer in an inconsistent state until the
+     * {@link #setCallback(TimerCallback)} method is called with a valid
+     * callback object.
+     * <p>
+     * The CountdownTimer acts as a Null Object until a positive duration
+     * is set via the {@link #setDuration(long)} method.
+     *
+     * @param plugin the plugin responsible for the timer
+     */
+    public CountdownTimer(Plugin plugin) {
+        this(plugin, 0, 1, null);
     }
 
     /**
@@ -152,6 +165,24 @@ public class CountdownTimer extends AbstractTimer {
      */
     public synchronized long getDuration() {
         return duration;
+    }
+
+    /**
+     * Set the duration of the timer.
+     * <p>
+     * This method should only be used to set the duration post-construction
+     * if it is inconvenient (or impossible) to set it during construction.
+     * <p>
+     * Changing the duration while the timer is running is not recommended,
+     * because external classes may depend on it remaining constant.
+     *
+     * @param duration the duration of the timer; must be non-negative
+     */
+    public synchronized void setDuration(long duration) {
+        if (duration < 0l) {
+            throw new IllegalArgumentException("Duration must be non-negative: " + duration);
+        }
+        this.duration = duration;
     }
 
     /**

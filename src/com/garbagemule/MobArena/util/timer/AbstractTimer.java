@@ -33,7 +33,7 @@ public abstract class AbstractTimer implements Timer {
     @Override
     public void setInterval(long interval) {
         if (interval <= 0l) {
-            throw new IllegalArgumentException("Tick interval must be positive.");
+            throw new IllegalArgumentException("Tick interval must be positive: " + interval);
         }
         this.interval = interval;
     }
