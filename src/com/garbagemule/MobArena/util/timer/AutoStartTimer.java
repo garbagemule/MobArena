@@ -1,8 +1,5 @@
 package com.garbagemule.MobArena.util.timer;
 
-import org.bukkit.entity.Player;
-
-import static com.garbagemule.MobArena.util.timer.Common.*;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
@@ -49,7 +46,12 @@ public class AutoStartTimer extends CountdownTimer implements TimerCallback {
 
         // Choose level- or chat-callback
         boolean level = arena.getSettings().getBoolean("display-timer-as-level", false);
-        internalCallback = level ? new LevelCallback() : new ChatCallback();
+        if (level) {
+            internalCallback = new LevelCallback(arena, this);
+        } else {
+            int[] triggers = {30, 10, 5, 4, 3, 2, 1};
+            internalCallback = new ChatCallback(arena, Msg.ARENA_JOIN_PERIOD, this, triggers);
+        }
     }
 
     @Override
@@ -86,60 +88,5 @@ public class AutoStartTimer extends CountdownTimer implements TimerCallback {
     @Override
     public void onFinish() {
         arena.forceStart();
-    }
-
-    /**
-     * The LevelCallback is used for arenas that display the countdown as
-     * the player level, i.e. {@code display-timer-as-level: true}.
-     */
-    private class LevelCallback extends TimerCallbackAdapter {
-        public void onStart() {
-            setInterval(20);
-        }
-
-        public void onTick() {
-            int remaining = toSeconds(getRemaining());
-
-            for (Player p : arena.getPlayersInLobby()) {
-                p.setLevel(remaining);
-            }
-        }
-    }
-
-    /**
-     * The ChatCallback is used for arenas that announce the countdown in
-     * the chat periodically, i.e. {@code display-timer-as-level: false}.
-     */
-    private class ChatCallback extends TimerCallbackAdapter {
-        private int[] triggers = {30, 10, 5, 4, 3, 2, 1};
-        private int index = 0;
-
-        @Override
-        public void onStart() {
-            long duration = getDuration();
-
-            for (index = 0; index < triggers.length; index++) {
-                long trigger = toTicks(triggers[index]);
-                if (trigger < duration) {
-                    setInterval(duration - trigger);
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public void onTick() {
-            // Announce remaining seconds
-            long ticks  = getRemaining();
-            int seconds = toSeconds(ticks);
-            Messenger.announce(arena, Msg.ARENA_AUTO_START, String.valueOf(seconds));
-
-            // Calculate the new interval
-            index++;
-            if (index < triggers.length) {
-                long trigger = toTicks(triggers[index]);
-                setInterval(ticks - trigger);
-            }
-        }
     }
 }
