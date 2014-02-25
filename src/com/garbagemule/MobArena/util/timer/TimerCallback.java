@@ -1,5 +1,11 @@
 package com.garbagemule.MobArena.util.timer;
 
+/**
+ * The TimerCallback interface provides hooks for various events in the
+ * timer framework. When given a valid callback instance, the timers will
+ * call its methods when it starts, stops, finishes and ticks, when
+ * applicable.
+ */
 public interface TimerCallback {
     /**
      * Called when the timer is started.
