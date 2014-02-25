@@ -22,7 +22,6 @@ import org.bukkit.potion.PotionEffect;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
-import com.garbagemule.MobArena.autostart.AutoStartTimer;
 import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
@@ -35,6 +34,7 @@ import com.garbagemule.MobArena.time.TimeStrategyNull;
 import com.garbagemule.MobArena.util.*;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.inventory.InventoryUtils;
+import com.garbagemule.MobArena.util.timer.AutoStartTimer;
 import com.garbagemule.MobArena.waves.*;
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 
@@ -157,9 +157,8 @@ public class ArenaImpl implements Arena
         this.entryFee      = ItemParser.parseItems(settings.getString("entry-fee", ""));
         this.allowMonsters = world.getAllowMonsters();
         this.allowAnimals  = world.getAllowAnimals();
-        
-        int autoStart       = settings.getInt("auto-start-timer", 0);
-        this.autoStartTimer = new AutoStartTimer(this, autoStart);
+
+        this.autoStartTimer  = new AutoStartTimer(this);
 
         this.isolatedChat  = settings.getBoolean("isolated-chat", false);
         
@@ -385,6 +384,9 @@ public class ArenaImpl implements Arena
             return false;
         }
 
+        // Stop the auto-start-timer
+        autoStartTimer.stop();
+
         // Fire the event and check if it's been cancelled.
         ArenaStartEvent event = new ArenaStartEvent(this);
         plugin.getServer().getPluginManager().callEvent(event);
@@ -542,7 +544,7 @@ public class ArenaImpl implements Arena
             playerLeave(p);
             Messenger.tell(p, Msg.LEAVE_NOT_READY);
         }
-        
+
         startArena();
     }
 
@@ -588,7 +590,7 @@ public class ArenaImpl implements Arena
         p.setGameMode(GameMode.SURVIVAL);
         
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
-        
+
         // Start the auto-start-timer
         autoStartTimer.start();
         
@@ -597,7 +599,7 @@ public class ArenaImpl implements Arena
         
         // Notify player of time left
         if (autoStartTimer.isRunning()) {
-            Messenger.tell(p, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining());
+            Messenger.tell(p, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
         }
         
         return true;
