@@ -42,6 +42,12 @@ public class SwarmWave extends AbstractWave
     public Wave copy() {
         SwarmWave result = new SwarmWave(monster);
         result.amount = this.amount;
+
+        // From AbstractWave
+        result.setAmountMultiplier(getAmountMultiplier());
+        result.setHealthMultiplier(getHealthMultiplier());
+        result.setName(getName());
+        result.setSpawnpoints(getSpawnpoints());
         return result;
     }
 }

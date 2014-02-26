@@ -52,6 +52,12 @@ public class UpgradeWave extends AbstractWave
         }
         UpgradeWave result = new UpgradeWave(upgrades);
         result.giveAll = this.giveAll;
+
+        // From AbstractWave
+        result.setAmountMultiplier(getAmountMultiplier());
+        result.setHealthMultiplier(getHealthMultiplier());
+        result.setName(getName());
+        result.setSpawnpoints(getSpawnpoints());
         return result;
     }
 

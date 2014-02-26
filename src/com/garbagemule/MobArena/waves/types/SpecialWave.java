@@ -51,6 +51,13 @@ public class SpecialWave extends AbstractWave
     }
 
     public Wave copy() {
-        return new SpecialWave(monsterMap);
+        SpecialWave result = new SpecialWave(monsterMap);
+
+        // From AbstractWave
+        result.setAmountMultiplier(getAmountMultiplier());
+        result.setHealthMultiplier(getHealthMultiplier());
+        result.setName(getName());
+        result.setSpawnpoints(getSpawnpoints());
+        return result;
     }
 }

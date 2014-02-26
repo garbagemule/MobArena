@@ -28,6 +28,10 @@ public abstract class AbstractWave implements Wave
     public List<Location> getSpawnpoints(Arena arena) {
         return WaveUtils.getValidSpawnpoints(arena, spawnpoints, arena.getPlayersInArena());
     }
+
+    protected List<Location> getSpawnpoints() {
+        return spawnpoints;
+    }
     
     @Override
     public void setSpawnpoints(List<Location> spawnpoints) {

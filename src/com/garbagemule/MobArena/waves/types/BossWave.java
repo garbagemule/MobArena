@@ -150,6 +150,12 @@ public class BossWave extends AbstractWave
         result.flatHealth = this.flatHealth;
         result.reward = this.reward;
         result.bossName = this.bossName;
+
+        // From AbstractWave
+        result.setAmountMultiplier(getAmountMultiplier());
+        result.setHealthMultiplier(getHealthMultiplier());
+        result.setName(getName());
+        result.setSpawnpoints(getSpawnpoints());
         return result;
     }
 }

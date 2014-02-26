@@ -90,6 +90,12 @@ public class DefaultWave extends AbstractWave
         DefaultWave result = new DefaultWave(monsterMap);
         result.growth = this.growth;
         result.fixed = this.fixed;
+
+        // From AbstractWave
+        result.setAmountMultiplier(getAmountMultiplier());
+        result.setHealthMultiplier(getHealthMultiplier());
+        result.setName(getName());
+        result.setSpawnpoints(getSpawnpoints());
         return result;
     }
 }

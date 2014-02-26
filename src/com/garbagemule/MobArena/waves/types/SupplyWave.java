@@ -63,6 +63,12 @@ public class SupplyWave extends AbstractWave
     public Wave copy() {
         SupplyWave result = new SupplyWave(monsterMap);
         result.drops = new ArrayList<ItemStack>(this.drops);
+
+        // From AbstractWave
+        result.setAmountMultiplier(getAmountMultiplier());
+        result.setHealthMultiplier(getHealthMultiplier());
+        result.setName(getName());
+        result.setSpawnpoints(getSpawnpoints());
         return result;
     }
 }
