@@ -9,8 +9,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
-import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.Set;
 
 public class ConfigUtils
@@ -111,12 +112,8 @@ public class ConfigUtils
 
         String world = location.getWorld().getName();
 
-        StringBuilder buffy = new StringBuilder();
-        buffy.append(x).append(",").append(y).append(",").append(z);
-        buffy.append(",").append(yaw).append(",").append(pit);
-        buffy.append(",").append(world);
-
-        config.set(path, buffy.toString());
+        String value = x + "," + y + "," + z + "," + yaw + "," + pit + "," + world;
+        config.set(path, value);
     }
 
     private static String twoPlaces(double value, boolean force) {
@@ -126,6 +123,11 @@ public class ConfigUtils
     private static String twoPlaces(double value) {
         return twoPlaces(value, false);
     }
+
     private static final DecimalFormat DF_NORMAL = new DecimalFormat("0.##");
     private static final DecimalFormat DF_FORCE  = new DecimalFormat("0.0#");
+    static {
+        DF_FORCE.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        DF_NORMAL.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    }
 }
