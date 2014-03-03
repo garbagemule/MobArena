@@ -1255,12 +1255,17 @@ public class ArenaImpl implements Arena
         
         for (Chunk c : chunks) {
             for (Entity e : c.getEntities()) {
-                if (!(e instanceof Item || e instanceof Vehicle || e instanceof Slime || e instanceof ExperienceOrb)) {
+                if (e == null) {
                     continue;
                 }
-                
-                if (e != null) {
-                    e.remove();
+
+                switch (e.getType()) {
+                    case DROPPED_ITEM:
+                    case EXPERIENCE_ORB:
+                    case ARROW:
+                    case MINECART:
+                    case BOAT:
+                        e.remove();
                 }
             }
         }
