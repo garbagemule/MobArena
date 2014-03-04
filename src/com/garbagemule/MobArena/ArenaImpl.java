@@ -588,6 +588,7 @@ public class ArenaImpl implements Arena
 
         movePlayerToLobby(p);
         takeFee(p);
+        p.setGameMode(GameMode.SURVIVAL);
         storePlayerData(p, loc);
         removePotionEffects(p);
         MAUtils.sitPets(p);
@@ -597,7 +598,6 @@ public class ArenaImpl implements Arena
             p.setLevel(0);
             p.setExp(0.0f);
         }
-        p.setGameMode(GameMode.SURVIVAL);
         
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
 
