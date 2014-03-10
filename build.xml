@@ -10,11 +10,11 @@
     To build MobArena, you need the following dependencies, which can all be
     found on their respective websites/Bukkit pages/whatever:
 
-        - Craftbukkit
-        - Vault            by Sleaker
-        - Heroes           by the HeroCraft team
-        - SpoutPlugin      by the Spout team
-        - MagicSpells      by nisovin
+        - Bukkit           by the Bukkit team       http://dl.bukkit.org/downloads/bukkit/
+        - Vault            by Sleaker               http://dev.bukkit.org/bukkit-plugins/vault/
+        - Heroes           by the HeroCraft team    http://dev.bukkit.org/bukkit-plugins/heroes/
+        - SpoutPlugin      by the Spout team        http://dev.bukkit.org/bukkit-plugins/spoutcraft-plugin/
+        - MagicSpells      by nisovin               http://dev.bukkit.org/bukkit-plugins/magicspells/
 
     The dependencies (jar-files) should be placed in a lib-folder at the root
     of the project file structure, i.e. in the same folder as 'src'.
