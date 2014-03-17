@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.waves.ability.core;
 
+import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.ability.Ability;
@@ -9,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 
 @AbilityInfo(
@@ -28,12 +30,25 @@ public class ObsidianBomb implements Ability
         LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), true);
         
         final World world = arena.getWorld();
-        final Location loc = target.getLocation();
-        
-        Block b = world.getBlockAt(loc); 
+        final Location loc;
+
+        Block b = world.getBlockAt(target.getLocation());
+        for (int i = 0; i < 3; i++) {
+            if (b.getType() == Material.AIR) {
+                break;
+            }
+            b = b.getRelative(BlockFace.UP);
+        }
+        loc = b.getLocation();
+
+        if (b.getType() != Material.AIR) {
+            Messenger.warning("Failed to place Obsidian Bomb at: " + target.getLocation());
+            return;
+        }
+
         b.setType(Material.OBSIDIAN);
         arena.addBlock(b);
-        
+
         arena.scheduleTask(new Runnable() {
             public void run() {
                 if (!arena.isRunning())
