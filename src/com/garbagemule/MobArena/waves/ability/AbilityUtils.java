@@ -27,7 +27,7 @@ public class AbilityUtils
         if (entity instanceof Creature) {
             LivingEntity target = ((Creature) entity).getTarget();
             
-            if (target instanceof Player) {
+            if (target instanceof Player && arena.inArena((Player) target)) {
                 return target;
             }
         }
