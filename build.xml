@@ -13,7 +13,6 @@
         - Bukkit           by the Bukkit team       http://dl.bukkit.org/downloads/bukkit/
         - Vault            by Sleaker               http://dev.bukkit.org/bukkit-plugins/vault/
         - Heroes           by the HeroCraft team    http://dev.bukkit.org/bukkit-plugins/heroes/
-        - SpoutPlugin      by the Spout team        http://dev.bukkit.org/bukkit-plugins/spoutcraft-plugin/
         - MagicSpells      by nisovin               http://dev.bukkit.org/bukkit-plugins/magicspells/
 
     The dependencies (jar-files) should be placed in a lib-folder at the root
