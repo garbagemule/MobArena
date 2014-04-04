@@ -494,7 +494,10 @@ public class ArenaListener
 
         // Make sure to grab the owner of a projectile/pet
         if (damager instanceof Projectile) {
-            damager = ((Projectile) damager).getShooter();
+            ProjectileSource ps = ((Projectile) damager).getShooter();
+            if (ps instanceof LivingEntity) {
+            	damager = (Entity) ps;
+            }
         }
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
             damager = (Player) ((Wolf) damager).getOwner();
@@ -576,7 +579,10 @@ public class ArenaListener
             damager = edbe.getDamager();
 
             if (damager instanceof Projectile) {
-                damager = ((Projectile) damager).getShooter();
+                ProjectileSource ps = ((Projectile) damager).getShooter();
+                if (ps instanceof LivingEntity) {
+            	    damager = (Entity) ps;
+                }
             }
 
             // Repair weapons if necessary
