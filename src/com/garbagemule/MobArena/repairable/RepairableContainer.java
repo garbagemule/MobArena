@@ -15,7 +15,13 @@ public class RepairableContainer extends RepairableBlock
 
         // Grab the inventory of the block
         Inventory inv = ((InventoryHolder) state).getInventory();
-        contents = inv.getContents();
+        ItemStack[] stacks = inv.getContents();
+
+        // Manual copy is necessary due to "reduce to 0" bug in Bukkit
+        contents = new ItemStack[stacks.length];
+        for (int i = 0; i < contents.length; i++) {
+            contents[i] = (stacks[i] != null) ? stacks[i].clone() : null;
+        }
         
         // Clear the inventory if prompted
         if (clear) inv.clear();
