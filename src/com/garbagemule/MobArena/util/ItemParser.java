@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.garbagemule.MobArena.Messenger;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -142,11 +143,15 @@ public class ItemParser
                 result = withDataAndAmount(parts[0], parts[1], parts[2]);
                 break;
         }
-        
+        if (result == null || result.getTypeId() == 0) {
+            Messenger.warning("Failed to parse item: " + item);
+            return null;
+        }
+
         if (space.length == 2) {
             addEnchantments(result, space[1]);
         }
-        
+
         return result;
     }
     
