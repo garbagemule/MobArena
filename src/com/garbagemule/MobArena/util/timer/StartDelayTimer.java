@@ -65,6 +65,7 @@ public class StartDelayTimer extends CountdownTimer implements TimerCallback {
         if (super.getDuration() > 0) {
             super.start();
         } else {
+            // Idempotent
             autoStartTimer.start();
         }
     }
