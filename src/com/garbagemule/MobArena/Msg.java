@@ -98,7 +98,7 @@ public enum Msg {
     }
 
     public String format(String s) {
-        return toString().replace("%", s);
+        return (s == null) ? "" : toString().replace("%", s);
     }
 
     static void load(ConfigurationSection config) {
