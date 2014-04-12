@@ -622,6 +622,12 @@ public class ArenaImpl implements Arena
     @Override
     public void playerReady(Player p)
     {
+        ArenaPlayerReadyEvent event = new ArenaPlayerReadyEvent(p, this);
+        plugin.getServer().getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            return;
+        }
+
         readyPlayers.add(p);
         
         int minPlayers = getMinPlayers();
