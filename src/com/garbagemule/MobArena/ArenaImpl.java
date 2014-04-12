@@ -666,7 +666,7 @@ public class ArenaImpl implements Arena
 
             // Last lobby player leaving? Stop the timer
             if (lobbyPlayers.size() == 1) {
-                autoStartTimer.stop();
+                startDelayTimer.stop();
             }
         }
         
