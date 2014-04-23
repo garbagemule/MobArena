@@ -771,13 +771,11 @@ public class ArenaListener
         for (PotionEffect effect : potion.getEffects()) {
             PotionEffectType type = effect.getType();
             if (type.equals(PotionEffectType.HARM) || type.equals(PotionEffectType.POISON)) {
-                Set<LivingEntity> players = new HashSet<LivingEntity>();
                 for (LivingEntity le : event.getAffectedEntities()) {
                     if (le instanceof Player) {
-                        players.add(le);
+                        event.setIntensity(le, 0.0);
                     }
                 }
-                event.getAffectedEntities().removeAll(players);
                 break;
             }
         }
