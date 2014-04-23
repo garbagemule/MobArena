@@ -61,12 +61,21 @@ public class StartDelayTimer extends CountdownTimer implements TimerCallback {
 
     @Override
     public synchronized void start() {
-        // Start auto-start-timer if arena has no start-delay
+        // Start auto-start-timer if arena has no start-delay (both idempotent)
         if (super.getDuration() > 0) {
             super.start();
         } else {
-            // Idempotent
             autoStartTimer.start();
+        }
+    }
+
+    @Override
+    public synchronized void stop() {
+        // Stop auto-start-timer if arena has no start-delay (both idempotent)
+        if (super.getDuration() > 0) {
+            super.stop();
+        } else {
+            autoStartTimer.stop();
         }
     }
 
