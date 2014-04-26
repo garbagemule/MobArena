@@ -56,6 +56,14 @@ public class ScoreboardManager {
         Score score = kills.getScore(player);
         score.setScore(score.getScore() + 1);
     }
+
+    /**
+     * Signal a player death.
+     * @param player a player
+     */
+    void death(Player player) {
+        scoreboard.resetScores(player);
+    }
     
     /**
      * Update the scoreboard to display the given wave number.

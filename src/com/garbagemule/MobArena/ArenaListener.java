@@ -461,6 +461,7 @@ public class ArenaListener
                 Messenger.announce(arena, event.getDeathMessage());
             }
             event.setDeathMessage(null);
+            arena.getScoreboard().death(player);
             arena.playerDeath(player);
         } else if (arena.inSpec(player)) {
             event.getDrops().clear();
