@@ -574,7 +574,23 @@ public class SetupCommand implements Command, Listener {
             String toShow = s.split(" ")[1].trim();
 
             // Regions
-            if (toShow.equalsIgnoreCase("ar")) {
+            if (toShow.equalsIgnoreCase("r") || toShow.equalsIgnoreCase("regions")) {
+                if (region.isDefined()) {
+                    region.showRegion(player);
+                    if (region.isLobbyDefined()) {
+                        region.showLobbyRegion(player);
+                        next = formatYellow("Showing both %s.", "regions");
+                    } else {
+                        next = formatYellow("Showing %s (lobby region not defined).", "arena region");
+                    }
+                } else if (region.isLobbyDefined()) {
+                    region.showLobbyRegion(player);
+                    next = formatYellow("Showing %s (arena region not defined).", "lobby region");
+                } else {
+                    next = "No regions have been defined yet.";
+                }
+                return this;
+            } else if (toShow.equalsIgnoreCase("ar")) {
                 if (region.isDefined()) {
                     next = formatYellow("Showing %s.", "arena region");
                     region.showRegion(player);
@@ -662,7 +678,7 @@ public class SetupCommand implements Command, Listener {
             buffy.append("\nUsage: &eshow <thing>");
 
             buffy.append("\n\n&r&7Possible things to show:");
-            buffy.append("\n&r&7 regions: &rar&7 (arena region) or &rlr&7 (lobby region)");
+            buffy.append("\n&r&7 regions: &rar&7 (arena region) or &rlr&7 (lobby region) or &rr&7 (both)");
             buffy.append("\n&r&7 warps: &rarena&7, &rlobby&7, &rspec&7, or &rexit");
             buffy.append("\n&r&7 points: &rspawns&7 or &rchests&7");
 
@@ -735,7 +751,7 @@ public class SetupCommand implements Command, Listener {
         private static final String MISSING  = "miss(ing)?";
         private static final String EXPAND   = "exp(and)? (a|l)r [1-9][0-9]* (up|down|out)";
         private static final String EXPHELP  = "exp(and)?";
-        private static final String SHOW     = "show (ar|lr|arena|lobby|spec(tator)?|exit|sp(awn(point)?s?)?|c((hest(s)?)?|on(tainer(s)?)?))";
+        private static final String SHOW     = "show (r|ar|lr|arena|lobby|spec(tator)?|exit|sp(awn(point)?s?)?|c((hest(s)?)?|on(tainer(s)?)?))";
         private static final String SHOWHELP = "show";
         private static final String DONE     = "done|quit|stop|end";
     }
