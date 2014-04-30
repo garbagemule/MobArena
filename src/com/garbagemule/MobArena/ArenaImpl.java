@@ -654,6 +654,7 @@ public class ArenaImpl implements Arena
         if (arenaPlayers.contains(p)) {
             unmount(p);
             clearInv(p);
+            scoreboard.death(p);
         }
         
         removeClassPermissions(p);

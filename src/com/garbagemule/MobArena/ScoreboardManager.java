@@ -62,7 +62,16 @@ public class ScoreboardManager {
      * @param player a player
      */
     void death(Player player) {
+        String name = ChatColor.GRAY + player.getName();
+        if (name.length() > 16) {
+            name = name.substring(0, 15);
+        }
+
+        int value = kills.getScore(player).getScore();
         scoreboard.resetScores(player);
+
+        Score fake = kills.getScore(Bukkit.getOfflinePlayer(name));
+        fake.setScore(value);
     }
     
     /**
