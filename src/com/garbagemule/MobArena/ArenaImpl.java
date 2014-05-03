@@ -848,6 +848,11 @@ public class ArenaImpl implements Arena
 
             // Spawn the horse, set its variant, tame it, etc.
             Horse horse = (Horse) world.spawnEntity(p.getLocation(), EntityType.HORSE);
+            if (MobArena.random.nextInt(20) == 0) {
+                horse.setBaby();
+            } else {
+                horse.setAdult();
+            }
             horse.setVariant(variant);
             horse.setTamed(true);
             horse.setOwner(p);
