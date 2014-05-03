@@ -51,6 +51,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -1175,5 +1176,20 @@ public class ArenaListener
         if (arena == null) return;
         
         arena.playerLeave(p);
+    }
+
+    public void onVehicleExit(VehicleExitEvent event) {
+        LivingEntity entity = event.getExited();
+        if (!(entity instanceof Player)) return;
+
+        Player p = (Player) entity;
+        if (!arena.inArena(p)) return;
+
+        Vehicle vehicle = event.getVehicle();
+        if (!(vehicle instanceof Horse)) return;
+
+        if (monsters.hasMount(vehicle)) {
+            event.setCancelled(true);
+        }
     }
 }
