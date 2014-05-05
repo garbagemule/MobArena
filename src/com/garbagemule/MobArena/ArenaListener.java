@@ -463,6 +463,7 @@ public class ArenaListener
         } else if (arena.inSpec(player)) {
             event.getDrops().clear();
             event.setDroppedExp(0);
+            arena.getScoreboard().death(player);
             arena.playerLeave(player);
         }
     }
