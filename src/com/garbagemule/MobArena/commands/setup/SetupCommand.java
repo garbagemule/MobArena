@@ -257,46 +257,54 @@ public class SetupCommand implements Command, Listener {
             ItemStack tool = p.getItemInHand();
             if (!isTool(tool)) return;
 
+            String name = tool.getItemMeta().getDisplayName();
+            if (name.equals(AREG_NAME)) {
+                if (!arena(event)) return;
+            } else if (name.equals(LREG_NAME)) {
+                if (!lobby(event)) return;
+            } else if (name.equals(WARPS_NAME)) {
+                if (!warps(event)) return;
+            } else if (name.equals(SPAWNS_NAME)) {
+                if (!spawns(event)) return;
+            } else if (name.equals(CHESTS_NAME)) {
+                if (!chests(event)) return;
+            }
+
             event.setUseItemInHand(Event.Result.DENY);
             event.setCancelled(true);
 
-            String name = tool.getItemMeta().getDisplayName();
-            if (name.equals(AREG_NAME)) {
-                arena(event);
-            } else if (name.equals(LREG_NAME)) {
-                lobby(event);
-            } else if (name.equals(WARPS_NAME)) {
-                warps(event);
-            } else if (name.equals(SPAWNS_NAME)) {
-                spawns(event);
-            } else if (name.equals(CHESTS_NAME)) {
-                chests(event);
-            }
             player.sendRawMessage(getPromptText(null));
         }
 
-        private void arena(PlayerInteractEvent event) {
-            if (event.hasBlock()) {
-                Location loc = event.getClickedBlock().getLocation();
-                region(event.getAction(), "p1", "p2", loc);
+        private boolean arena(PlayerInteractEvent event) {
+            if (!event.hasBlock()) {
+                return false;
             }
+
+            Location loc = event.getClickedBlock().getLocation();
+            region(event.getAction(), "p1", "p2", loc);
+            return true;
         }
 
-        private void lobby(PlayerInteractEvent event) {
-            if (event.hasBlock()) {
-                Location loc = event.getClickedBlock().getLocation();
-                region(event.getAction(), "l1", "l2", loc);
+        private boolean lobby(PlayerInteractEvent event) {
+            if (!event.hasBlock()) {
+                return false;
             }
+
+            Location loc = event.getClickedBlock().getLocation();
+            region(event.getAction(), "l1", "l2", loc);
+            return true;
         }
 
-        private void region(Action action, String lower, String upper, Location loc) {
+        private boolean region(Action action, String lower, String upper, Location loc) {
             switch (action) {
-                case LEFT_CLICK_BLOCK:  regions(lower, loc); break;
-                case RIGHT_CLICK_BLOCK: regions(upper, loc); break;
+                case LEFT_CLICK_BLOCK:  regions(lower, loc); return true;
+                case RIGHT_CLICK_BLOCK: regions(upper, loc); return true;
             }
+            return false;
         }
 
-        private void warps(PlayerInteractEvent event) {
+        private boolean warps(PlayerInteractEvent event) {
             switch (event.getAction()) {
                 case LEFT_CLICK_BLOCK:
                     Location loc = event.getClickedBlock().getLocation();
@@ -305,7 +313,7 @@ public class SetupCommand implements Command, Listener {
                     fix(loc);
                     String warp = warpArray[warpIndex];
                     warps(warp, loc);
-                    break;
+                    return true;
                 case RIGHT_CLICK_BLOCK:
                 case RIGHT_CLICK_AIR:
                     warpIndex++;
@@ -313,31 +321,36 @@ public class SetupCommand implements Command, Listener {
                         warpIndex = 0;
                     }
                     next = formatYellow("Current warp: %s", warpArray[warpIndex]);
-                    break;
+                    return true;
             }
+            return false;
         }
 
-        private void spawns(PlayerInteractEvent event) {
+        private boolean spawns(PlayerInteractEvent event) {
             if (!event.hasBlock()) {
-                return;
+                return false;
             }
+
             Location l = event.getClickedBlock().getLocation();
             fix(l);
             switch (event.getAction()) {
-                case LEFT_CLICK_BLOCK:  spawns(l, true);  break;
-                case RIGHT_CLICK_BLOCK: spawns(l, false); break;
+                case LEFT_CLICK_BLOCK:  spawns(l, true);  return true;
+                case RIGHT_CLICK_BLOCK: spawns(l, false); return true;
             }
+            return false;
         }
 
-        private void chests(PlayerInteractEvent event) {
+        private boolean chests(PlayerInteractEvent event) {
             if (!event.hasBlock()) {
-                return;
+                return false;
             }
+
             Block b = event.getClickedBlock();
             switch (event.getAction()) {
-                case LEFT_CLICK_BLOCK:  chests(b, true);  break;
-                case RIGHT_CLICK_BLOCK: chests(b, false); break;
+                case LEFT_CLICK_BLOCK:  chests(b, true);  return true;
+                case RIGHT_CLICK_BLOCK: chests(b, false); return true;
             }
+            return false;
         }
 
         private void fix(Location loc) {
