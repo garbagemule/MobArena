@@ -12,6 +12,8 @@ import com.garbagemule.MobArena.commands.user.*;
 import com.garbagemule.MobArena.commands.admin.*;
 import com.garbagemule.MobArena.commands.setup.*;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import org.bukkit.conversations.Conversable;
+import org.bukkit.entity.Player;
 
 public class CommandHandler implements CommandExecutor
 {
@@ -32,6 +34,11 @@ public class CommandHandler implements CommandExecutor
         // Grab the base and arguments.
         String base = (args.length > 0 ? args[0] : "");
         String last = (args.length > 0 ? args[args.length - 1] : "");
+
+        // If the player is in a convo (Setup Mode), bail
+        if (sender instanceof Conversable && ((Conversable) sender).isConversing()) {
+            return true;
+        }
         
         // If there's no base argument, show a helpful message.
         if (base.equals("")) {
