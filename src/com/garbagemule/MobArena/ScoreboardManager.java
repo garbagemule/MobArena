@@ -70,8 +70,23 @@ public class ScoreboardManager {
         int value = kills.getScore(player).getScore();
         scoreboard.resetScores(player);
 
-        Score fake = kills.getScore(Bukkit.getOfflinePlayer(name));
-        fake.setScore(value);
+        /* In case the player has no kills, they will not show up on the
+         * scoreboard unless they are first given a different score.
+         * If zero kills, the score is set to 8 (which looks a bit like
+         * 0), and then in the next tick, it's set to 0. Otherwise, the
+         * score is just set to its current value.
+         */
+        final Score fake = kills.getScore(Bukkit.getOfflinePlayer(name));
+        if (value == 0) {
+            fake.setScore(8);
+            arena.scheduleTask(new Runnable() {
+                public void run() {
+                    fake.setScore(0);
+                }
+            }, 1);
+        } else {
+            fake.setScore(value);
+        }
     }
     
     /**
