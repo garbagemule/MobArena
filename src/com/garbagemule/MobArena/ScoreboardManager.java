@@ -132,6 +132,7 @@ public class ScoreboardManager {
         void addPlayer(Player player) {}
         void removePlayer(Player player) {}
         void addKill(Player player) {}
+        void death(Player player) {}
         void updateWave(int wave) {}
         void initialize() {}
     }
