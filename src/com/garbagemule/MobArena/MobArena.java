@@ -1,6 +1,6 @@
 package com.garbagemule.MobArena;
 
-import java.io.File;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -52,11 +52,11 @@ public class MobArena extends JavaPlugin
 
     public void onEnable() {
         // Initialize config-file
-        loadConfigFile();
+        reloadConfigFile();
 
         // Initialize announcements-file
         loadAnnouncementsFile();
-        
+
         // Load boss abilities
         loadAbilities();
 
@@ -102,9 +102,49 @@ public class MobArena extends JavaPlugin
         return getFile();
     }
     
-    private void loadConfigFile() {
-        // Create if missing
-        saveDefaultConfig();
+    void reloadConfigFile() {
+        // Check for tab characters in config-file
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(new File(getDataFolder(), "config.yml")));
+            int row = 0;
+            String line;
+            while ((line = in.readLine()) != null) {
+                row++;
+                if (line.indexOf('\t') != -1) {
+                    StringBuilder buffy = new StringBuilder();
+                    buffy.append("Found tab in config-file on line ").append(row).append(".");
+                    buffy.append('\n').append("NEVER use tabs! ALWAYS use spaces!");
+                    buffy.append('\n').append(line);
+                    buffy.append('\n');
+                    for (int i = 0; i < line.indexOf('\t'); i++) {
+                        buffy.append(' ');
+                    }
+                    buffy.append('^');
+                    throw new IllegalArgumentException(buffy.toString());
+                }
+            }
+
+            // Actually reload the config-file
+            reloadConfig();
+        } catch (FileNotFoundException e) {
+            // If the config-file doesn't exist, create the default
+            Messenger.info("No config-file found, creating default...");
+            saveDefaultConfig();
+        } catch (IOException e) {
+            // Error reading the file, just re-throw
+            Messenger.severe("There was an error reading the config-file.");
+            throw new RuntimeException(e);
+        } finally {
+            // Java 6 <3
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         // Set the header and save
         getConfig().options().header(getHeader());

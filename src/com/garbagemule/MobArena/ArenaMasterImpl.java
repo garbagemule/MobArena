@@ -633,7 +633,7 @@ public class ArenaMasterImpl implements ArenaMaster
         for (Arena a : arenas) {
             a.forceEnd();
         }
-        plugin.reloadConfig();
+        plugin.reloadConfigFile();
         config = plugin.getConfig();
         initialize();
         if (wasEnabled) setEnabled(true);
