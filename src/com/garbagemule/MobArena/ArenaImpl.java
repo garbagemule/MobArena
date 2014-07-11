@@ -1041,7 +1041,8 @@ public class ArenaImpl implements Arena
         PlayerData mp = playerData.remove(p);
         
         // Health must be handled in a certain way because of Heroes
-        setHealth(p, mp.health());
+        // Math.min to guard for ItemLoreStats weirdness
+        setHealth(p, Math.min(p.getMaxHealth(), mp.health()));
         
         // Put out fire.
         Delays.douse(plugin, p, 3);
