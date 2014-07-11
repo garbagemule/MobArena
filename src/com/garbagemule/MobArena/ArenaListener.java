@@ -776,20 +776,38 @@ public class ArenaListener
     
     public void onPotionSplash(PotionSplashEvent event) {
         ThrownPotion potion = event.getPotion();
-        if (!region.contains(potion.getLocation()) || pvpEnabled) {
+        if (!region.contains(potion.getLocation())) {
             return;
         }
 
-        // If a potion has harmful effects, remove all players.
-        for (PotionEffect effect : potion.getEffects()) {
-            PotionEffectType type = effect.getType();
-            if (type.equals(PotionEffectType.HARM) || type.equals(PotionEffectType.POISON)) {
-                for (LivingEntity le : event.getAffectedEntities()) {
-                    if (le instanceof Player) {
-                        event.setIntensity(le, 0.0);
+        if (potion.getShooter() instanceof Player) {
+            // Check for PvP stuff if the shooter is a player
+            if (!pvpEnabled) {
+                // If a potion has harmful effects, remove all players.
+                for (PotionEffect effect : potion.getEffects()) {
+                    PotionEffectType type = effect.getType();
+                    if (type.equals(PotionEffectType.HARM) || type.equals(PotionEffectType.POISON)) {
+                        for (LivingEntity le : event.getAffectedEntities()) {
+                            if (le instanceof Player) {
+                                event.setIntensity(le, 0.0);
+                            }
+                        }
+                        break;
                     }
                 }
-                break;
+            }
+        } else if (!monsterInfight) {
+            // Otherwise, check for monster infighting
+            for (PotionEffect effect : potion.getEffects()) {
+                PotionEffectType type = effect.getType();
+                if (type.equals(PotionEffectType.HARM) || type.equals(PotionEffectType.POISON)) {
+                    for (LivingEntity le : event.getAffectedEntities()) {
+                        if (!(le instanceof Player)) {
+                            event.setIntensity(le, 0.0);
+                        }
+                    }
+                    break;
+                }
             }
         }
     }
