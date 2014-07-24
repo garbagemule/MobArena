@@ -11,6 +11,8 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -45,6 +47,9 @@ public class MobArena extends JavaPlugin
     
     // Vault
     private Economy economy;
+
+    private File configFile;
+    private FileConfiguration config;
     
     public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
     public static final int ECONOMY_MONEY_ID = -29;
@@ -52,7 +57,13 @@ public class MobArena extends JavaPlugin
 
     public void onEnable() {
         // Initialize config-file
-        reloadConfigFile();
+        configFile = new File(getDataFolder(), "config.yml");
+        config = new YamlConfiguration();
+        reloadConfig();
+
+        // Set the header and save
+        getConfig().options().header(getHeader());
+        saveConfig();
 
         // Initialize announcements-file
         loadAnnouncementsFile();
@@ -101,8 +112,20 @@ public class MobArena extends JavaPlugin
     public File getPluginFile() {
         return getFile();
     }
-    
-    void reloadConfigFile() {
+
+    @Override
+    public FileConfiguration getConfig() {
+        return config;
+    }
+
+    @Override
+    public void reloadConfig() {
+        // Check if the config-file exists
+        if (!configFile.exists()) {
+            Messenger.info("No config-file found, creating default...");
+            saveDefaultConfig();
+        }
+
         // Check for tab characters in config-file
         BufferedReader in = null;
         try {
@@ -126,29 +149,33 @@ public class MobArena extends JavaPlugin
             }
 
             // Actually reload the config-file
-            reloadConfig();
+            config.load(configFile);
+        } catch (InvalidConfigurationException e) {
+            throw new RuntimeException("\n\n>>>\n>>> There is an error in your config-file! Handle it!\n>>> Here is what snakeyaml says:\n>>>\n\n" + e.getMessage());
         } catch (FileNotFoundException e) {
-            // If the config-file doesn't exist, create the default
-            Messenger.info("No config-file found, creating default...");
-            saveDefaultConfig();
+            throw new IllegalStateException("Config-file could not be created for some reason! <o>");
         } catch (IOException e) {
             // Error reading the file, just re-throw
-            Messenger.severe("There was an error reading the config-file.");
-            throw new RuntimeException(e);
+            Messenger.severe("There was an error reading the config-file:\n" + e.getMessage());
         } finally {
             // Java 6 <3
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    // Swallow
                 }
             }
         }
+    }
 
-        // Set the header and save
-        getConfig().options().header(getHeader());
-        saveConfig();
+    @Override
+    public void saveConfig() {
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadAnnouncementsFile() {
