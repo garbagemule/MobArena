@@ -300,12 +300,14 @@ public class MobArena extends JavaPlugin
     }
 
     public void restoreInventory(Player p) {
-        if (!inventoriesToRestore.contains(p.getName())) {
+        if (!inventoriesToRestore.contains(p.getUniqueId().toString())
+                && !inventoriesToRestore.contains(p.getName())) {
             return;
         }
         
         if (InventoryManager.restoreFromFile(this, p)) {
             inventoriesToRestore.remove(p.getName());
+            inventoriesToRestore.remove(p.getUniqueId().toString());
         }
     }
 

@@ -127,7 +127,14 @@ public class InventoryManager
         try {
             // Grab the file and load the config
             File dir = new File(plugin.getDataFolder(), "inventories");
-            File file = new File(dir, p.getName());
+
+            File file = new File(dir, p.getUniqueId().toString());
+            if (!file.exists()) {
+                // fallback to old backup
+                file = new File(dir, p.getName());
+            }
+
+
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
             
