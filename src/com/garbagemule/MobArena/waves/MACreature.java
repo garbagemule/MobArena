@@ -103,6 +103,7 @@ public enum MACreature
     
     public LivingEntity spawn(Arena arena, World world, Location loc) {
         LivingEntity e = (LivingEntity) world.spawnEntity(loc, type);
+        e.getEquipment().clear();
         
         switch (this) {
             case SHEEP:
