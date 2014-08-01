@@ -6,6 +6,7 @@ import com.garbagemule.MobArena.events.ArenaKillEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -529,17 +530,21 @@ public class ArenaListener
             }
             callKillEvent(p, damagee);
         }
-        
-        MABoss boss = monsters.removeBoss(damagee);
-        if (boss != null) {
-            boss.setDead(true);
-        }
 
         if (!monsterExp) {
             event.setDroppedExp(0);
         }
 
         event.getDrops().clear();
+
+        MABoss boss = monsters.removeBoss(damagee);
+        if (boss != null) {
+            List<ItemStack> drops = boss.getDrops();
+            if (drops != null && !drops.isEmpty()) {
+                event.getDrops().addAll(drops);
+            }
+            boss.setDead(true);
+        }
 
         List<ItemStack> loot = monsters.getLoot(damagee);
         if (loot != null && !loot.isEmpty()) {

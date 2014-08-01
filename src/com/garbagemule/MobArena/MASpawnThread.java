@@ -180,6 +180,7 @@ public class MASpawnThread implements Runnable
                         double maxHealth = bw.getMaxHealth(playerCount);
                         MABoss boss = monsterManager.addBoss(e, maxHealth);
                         boss.setReward(bw.getReward());
+                        boss.setDrops(bw.getDrops());
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
                         if (bw.getBossName() != null) {

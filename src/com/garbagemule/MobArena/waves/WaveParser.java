@@ -291,6 +291,11 @@ public class WaveParser
             ItemStack item = ItemParser.parseItem(rew);
             if (item != null) result.setReward(item);
         }
+
+        // Drops!
+        String drp = config.getString("drops");
+        List<ItemStack> drops = ItemParser.parseItems(drp);
+        result.setDrops(drops);
         
         return result;
     }
