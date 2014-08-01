@@ -160,7 +160,7 @@ public class MonsterManager
         return suppliers.get(e);
     }
     
-    public MABoss addBoss(LivingEntity e, int maxHealth) {
+    public MABoss addBoss(LivingEntity e, double maxHealth) {
         MABoss b = new MABoss(e, maxHealth);
         bosses.put(e, b);
         return b;

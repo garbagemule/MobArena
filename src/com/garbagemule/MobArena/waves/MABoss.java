@@ -14,7 +14,7 @@ public class MABoss
      * @param entity an entity
      * @param maxHealth a max health value
      */
-    public MABoss(LivingEntity entity, int maxHealth) {
+    public MABoss(LivingEntity entity, double maxHealth) {
         entity.setMaxHealth(maxHealth);
         entity.setHealth(maxHealth);
         this.entity    = entity;
