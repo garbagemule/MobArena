@@ -232,11 +232,7 @@ public class ArenaListener
 
         return false;
     }
-
     public void onBlockPlace(BlockPlaceEvent event) {
-        // If the arena isn't protected, care
-        if (!protect) return;
-
         Block b = event.getBlock();
 
         // If the event didn't happen in the region, or if in edit mode, ignore
@@ -246,12 +242,16 @@ public class ArenaListener
 
         // If the arena isn't running, or if the player isn't in the arena, cancel.
         if (!arena.isRunning() || !arena.inArena(event.getPlayer())) {
-            event.setCancelled(true);
+            // But only if we're protecting the region
+            if (protect) {
+                event.setCancelled(true);
+            }
             return;
         }
-        
+
         // If the block is TNT, set its planter
         if (b.getType() == Material.TNT) {
+            // If auto-igniting, set the planter of the primed TNT instead
             if (autoIgniteTNT) {
                 event.setCancelled(true);
                 event.getPlayer().getInventory().removeItem(new ItemStack(Material.TNT, 1));
@@ -260,6 +260,11 @@ public class ArenaListener
                 return;
             }
             setPlanter(b, event.getPlayer());
+        }
+
+        // Any other block we don't care about if we're not protecting
+        if (!protect) {
+            return;
         }
 
         // Otherwise, block was placed during a session.
