@@ -232,6 +232,7 @@ public class ArenaListener
 
         return false;
     }
+
     public void onBlockPlace(BlockPlaceEvent event) {
         Block b = event.getBlock();
 
