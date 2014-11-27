@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
@@ -34,11 +35,13 @@ public class BossWave extends AbstractWave
 
     private ItemStack reward;
     private List<ItemStack> drops;
+    private List<PotionEffect> potions;
     
     public BossWave(MACreature monster) {
         this.monster   = monster;
         this.bosses    = new HashSet<MABoss>();
         this.abilities = new ArrayList<Ability>();
+        this.potions = new ArrayList<PotionEffect>();
         this.activated = false;
         this.abilityAnnounce = false;
         this.setType(WaveType.BOSS);
@@ -130,6 +133,14 @@ public class BossWave extends AbstractWave
         this.drops = drops;
     }
     
+    public List<PotionEffect> getPotions() {
+        return potions;
+    }
+    
+    public void setPotions(List<PotionEffect> potions) {
+        this.potions = potions;
+    }
+    
     public void activateAbilities(Arena arena) {
         if (activated) {
             return;
@@ -159,6 +170,7 @@ public class BossWave extends AbstractWave
         result.flatHealth = this.flatHealth;
         result.reward = this.reward;
         result.drops = this.drops;
+        result.potions = this.potions;
         result.bossName = this.bossName;
 
         // From AbstractWave

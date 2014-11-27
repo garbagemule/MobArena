@@ -183,6 +183,7 @@ public class MASpawnThread implements Runnable
                         boss.setDrops(bw.getDrops());
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
+                        e.addPotionEffects(bw.getPotions());
                         if (bw.getBossName() != null) {
                             e.setCustomName(bw.getBossName());
                             e.setCustomNameVisible(true);

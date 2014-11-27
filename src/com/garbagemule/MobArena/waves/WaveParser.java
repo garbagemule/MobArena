@@ -3,14 +3,17 @@ package com.garbagemule.MobArena.waves;
 import java.util.*;
 
 import com.garbagemule.MobArena.ArenaClass;
+
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import com.garbagemule.MobArena.waves.enums.*;
@@ -296,6 +299,13 @@ public class WaveParser
         String drp = config.getString("drops");
         List<ItemStack> drops = ItemParser.parseItems(drp);
         result.setDrops(drops);
+        
+        // Potions!
+        String pots = config.getString("potions");
+        if (pots != null) {
+            List<PotionEffect> potions = PotionEffectParser.parsePotionEffects(pots);
+            if (potions != null) result.setPotions(potions);
+        }
         
         return result;
     }
