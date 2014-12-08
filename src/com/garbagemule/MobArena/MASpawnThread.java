@@ -170,7 +170,14 @@ public class MASpawnThread implements Runnable
                 // Set the health.
                 e.resetMaxHealth(); // Avoid conflicts/enormous multiplications from other plugins handling Mob health
                 int health = (int) Math.max(1D, e.getMaxHealth() * mul);
-                e.setMaxHealth(health);
+                try {
+                    e.setMaxHealth(health);
+                } catch (IllegalArgumentException ex) {
+                    // Spigot... *facepalm*
+                    Messenger.severe("Can't set health to " + health + ", using 2000. If you are running Spigot, set 'maxHealth' higher.");
+                    ex.printStackTrace();
+                    health = 2000;
+                }
                 e.setHealth(health);
 
                 // Switch on the type.
