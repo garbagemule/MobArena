@@ -95,7 +95,7 @@ public class PotionEffectParser
         if (type.matches("[0-9]*")) {
             effect = PotionEffectType.getById(Integer.parseInt(type));
         } else {
-            effect = PotionEffectType.getByName(type);
+            effect = PotionEffectType.getByName(type.toUpperCase());
         }
         
         return effect;
