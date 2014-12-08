@@ -11,8 +11,8 @@ import com.garbagemule.MobArena.Messenger;
 public class PotionEffectParser
 {
     private static final int TICKS_PER_SECOND = 20;
-    private static final int DEFAULT_POTION_DURATION = Integer.MAX_VALUE;
     private static final int DEFAULT_POTION_AMPLIFIER = 0;
+    private static final int DEFAULT_POTION_DURATION = Integer.MAX_VALUE;
     
     public static List<PotionEffect> parsePotionEffects(String s) {
         if (s == null || s.isEmpty())
@@ -41,10 +41,10 @@ public class PotionEffectParser
                 result = parseSingle(parts[0]);
                 break;
             case 2:
-                result = withDuration(parts[0], parts[1]);
+                result = withAmplifier(parts[0], parts[1]);
                 break;
             case 3:
-                result = withDurationAndAmplifier(parts[0], parts[1], parts[2]);
+                result = withAmplifierAndDuration(parts[0], parts[1], parts[2]);
                 break;
         }
         
@@ -66,21 +66,21 @@ public class PotionEffectParser
         }
     }
     
-    private static PotionEffect withDuration(String type, String duration) {
+    private static PotionEffect withAmplifier(String type, String amplifier) {
         PotionEffectType effect = getType(type);
-        int dur = getDuration(duration);
+        int amp = getAmplification(amplifier);
         
-        if (effect == null || dur == -1) {
+        if (effect == null || amp == -1) {
             return null;
         } else {
-            return new PotionEffect(effect, dur * TICKS_PER_SECOND, DEFAULT_POTION_AMPLIFIER);
+            return new PotionEffect(effect, DEFAULT_POTION_DURATION, amp);
         }
     }
     
-    private static PotionEffect withDurationAndAmplifier(String type, String duration, String amplifier) {
+    private static PotionEffect withAmplifierAndDuration(String type, String amplifier, String duration) {
         PotionEffectType effect = getType(type);
-        int dur = getDuration(duration);
         int amp = getAmplification(amplifier);
+        int dur = getDuration(duration);
         
         if (effect == null || dur == -1 || amp == -1) {
             return null;
