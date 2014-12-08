@@ -6,7 +6,6 @@ import com.garbagemule.MobArena.events.ArenaKillEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -14,14 +13,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockEvent;
-import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -42,16 +34,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.player.PlayerAnimationEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -301,6 +284,64 @@ public class ArenaListener
         // If a snowman forms some snow on its path, add the block
         if (event.getNewState().getType() == Material.SNOW)
             arena.addBlock(event.getBlock());
+    }
+
+    /*
+     * TODO: Figure out a solution to this problem with soft-restore.
+     *
+     * When a player empties a water bucket, and the flowing water creates a
+     * new source block somewhere else because of it, currently, this source
+     * block is not added to the set of blocks to clear at arena end.
+     *
+     * This method fixes this, but it is currently not called from the global
+     * listener, because it introduces a new issue; source blocks formed when
+     * a player FILLS a water bucket (due to the other source blocks flowing
+     * back in) are also caught, which means the arena region will restore
+     * incorrectly, i.e. the method is not specific enough.
+     */
+    public void onBlockFromTo(BlockFromToEvent event) {
+        if (!protect) return;
+
+        if (!arena.isRunning())
+            return;
+
+        if (!arena.getRegion().contains(event.getBlock().getLocation()))
+            return;
+
+        Block from = event.getBlock();
+        Block to = event.getToBlock();
+
+        if (isWaterSource(from) && isWaterNonSource(to)) {
+            for (BlockFace face : EnumSet.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
+                Block adj = to.getRelative(face);
+                if (!adj.equals(from) && isWaterSource(adj)) {
+                    arena.addBlock(to);
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean isWater(Block block) {
+        switch (block.getType()) {
+            case WATER:
+            case STATIONARY_WATER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isSource(Block block) {
+        return block.getData() == 0x0;
+    }
+
+    private boolean isWaterSource(Block block) {
+        return isWater(block) && isSource(block);
+    }
+
+    private boolean isWaterNonSource(Block block) {
+        return isWater(block) && !isSource(block);
     }
 
     public void onBlockIgnite(BlockIgniteEvent event) {
