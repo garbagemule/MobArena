@@ -20,7 +20,7 @@ public class PotionEffectParser
         
         List<PotionEffect> potions = new ArrayList<PotionEffect>();
         for (String potion : s.split(",")) {
-            PotionEffect eff = parsePotionEffect(potion);
+            PotionEffect eff = parsePotionEffect(potion.trim());
             if (eff != null) {
                 potions.add(eff);
             }
