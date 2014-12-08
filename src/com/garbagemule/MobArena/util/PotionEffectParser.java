@@ -92,7 +92,7 @@ public class PotionEffectParser
     private static PotionEffectType getType(String type) {
         PotionEffectType effect = null;
         
-        if (type.matches("[0-9]*")) {
+        if (type.matches("[0-9]+")) {
             effect = PotionEffectType.getById(Integer.parseInt(type));
         } else {
             effect = PotionEffectType.getByName(type.toUpperCase());
@@ -104,7 +104,7 @@ public class PotionEffectParser
     private static int getDuration(String duration) {
         int dur = -1;
         
-        if (duration.matches("[0-9]*")) {
+        if (duration.matches("[0-9]+")) {
             dur = Integer.parseInt(duration);
         }
         
@@ -114,7 +114,7 @@ public class PotionEffectParser
     private static int getAmplification(String amplifier) {
         int amp = -1;
         
-        if (amplifier.matches("[0-9]*")) {
+        if (amplifier.matches("[0-9]+")) {
             amp = Integer.parseInt(amplifier);
         }
         
