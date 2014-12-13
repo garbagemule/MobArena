@@ -31,7 +31,6 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
@@ -790,32 +789,26 @@ public class ArenaListener
             return;
 
         if (arena.hasPet(event.getEntity())) {
-            if (event.getReason() != TargetReason.TARGET_ATTACKED_OWNER && event.getReason() != TargetReason.OWNER_ATTACKED_TARGET)
-                return;
-
-            if (!(event.getTarget() instanceof Player))
-                return;
-
-            // If the target is a player, cancel.
-            event.setCancelled(true);
+            // Pets should never attack players
+            if (event.getTarget() instanceof Player) {
+                event.setCancelled(true);
+            }
         }
 
         else if (monsters.getMonsters().contains(event.getEntity())) {
-            if (event.getReason() == TargetReason.FORGOT_TARGET) {
+            // If the target is null, we probably forgot or the target died
+            if (event.getTarget() == null) {
                 event.setTarget(MAUtils.getClosestPlayer(plugin, event.getEntity(), arena));
             }
-            else if (event.getReason() == TargetReason.TARGET_DIED) {
-                event.setTarget(MAUtils.getClosestPlayer(plugin, event.getEntity(), arena));
+
+            // Pets are untargetable
+            else if (arena.hasPet(event.getTarget())) {
+                event.setCancelled(true);
             }
-            else if (event.getReason() == TargetReason.TARGET_ATTACKED_ENTITY) {
-                if (arena.hasPet(event.getTarget())) {
-                    event.setCancelled(true);
-                }
-            }
-            else if (event.getReason() == TargetReason.CLOSEST_PLAYER) {
-                if (!arena.inArena((Player) event.getTarget())) {
-                    event.setCancelled(true);
-                }
+
+            // So are non-arena players
+            else if (event.getTarget() instanceof Player && !arena.inArena((Player) event.getTarget())) {
+                event.setCancelled(true);
             }
         }
     }
