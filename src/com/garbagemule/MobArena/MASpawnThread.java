@@ -172,13 +172,17 @@ public class MASpawnThread implements Runnable
                 int health = (int) Math.max(1D, e.getMaxHealth() * mul);
                 try {
                     e.setMaxHealth(health);
+                    e.setHealth(health);
                 } catch (IllegalArgumentException ex) {
                     // Spigot... *facepalm*
-                    Messenger.severe("Can't set health to " + health + ", using 2000. If you are running Spigot, set 'maxHealth' higher.");
-                    ex.printStackTrace();
-                    health = 2000;
+                    Messenger.severe("Can't set health to " + health + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
+                    Messenger.severe(ex.getLocalizedMessage());
+                    if (w.getType() == WaveType.BOSS) {
+                        ((BossWave) w).setBossName("SPIGOT ERROR");
+                    } else {
+                        e.setCustomName("SPIGOT ERROR");
+                    }
                 }
-                e.setHealth(health);
 
                 // Switch on the type.
                 switch (w.getType()){

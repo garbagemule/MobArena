@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.waves;
 
+import com.garbagemule.MobArena.Messenger;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,8 +19,14 @@ public class MABoss
      * @param maxHealth a max health value
      */
     public MABoss(LivingEntity entity, double maxHealth) {
-        entity.setMaxHealth(maxHealth);
-        entity.setHealth(maxHealth);
+        try {
+            entity.setMaxHealth(maxHealth);
+            entity.setHealth(maxHealth);
+        } catch (IllegalArgumentException ex) {
+            // Spigot... *facepalm*
+            Messenger.severe("Can't set health to " + maxHealth + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
+            Messenger.severe(ex.getLocalizedMessage());
+        }
         this.entity    = entity;
         this.dead      = false;
     }
