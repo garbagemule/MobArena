@@ -12,7 +12,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 
 @CommandInfo(
     name    = "arenalist",
-    pattern = "arenas|arenal.*|lista.*",
+    pattern = "arenas|arenal.*|list.*",
     usage   = "/ma arenas",
     desc    = "lists all available arenas",
     permission = "mobarena.use.arenalist"
