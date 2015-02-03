@@ -1,0 +1,77 @@
+arena-start: Che il massacro abbia inizio!
+arena-end: Arena conclusa.
+arena-does-not-exist: Quella arena non esiste. Digita &e/ma arenas&r per una lista
+arena-end-global: Arena &e%&r conclusa! Digita &e/ma j %&r per entrare in un nuova partita!
+arena-join-global: La Arena &e%&r sta per iniziare! Digita &e/ma j %&r per entrare!
+arena-lboard-not-found: Quella arena non ha una classifica settata.
+arena-auto-start: La arena inizierà tra &c%&r secondi.
+arena-start-delay: La arena può iniziare tra &e%&r secondi.
+join-not-enabled: MobArena non è abilitato.
+join-in-other-arena: Tu sei già in una arena! Lasciala prima di entrare in un altra.
+join-arena-not-enabled: Questa arena non è abilitata.
+join-arena-not-setup: Questa arena non è stata editata.
+join-arena-edit-mode: Questa arena è in manutenzione.
+join-arena-permission: Non hai i permessi per entrare in questa arena.
+join-fee-required: 'Soldi insufficienti. Prezzo: &c%&r'
+join-fee-paid: 'Il prezzo per entrare è di: &c%&r'
+join-arena-is-running: Questa arena è già in progresso.
+join-already-playing: Stai già giocando!
+join-arg-needed: Devi specificare una arena.
+join-no-permission: Non hai il permesso per entrare in nessuna arena.
+join-too-far: Sei troppo distante dalla arena per entrare/osservare.
+join-empty-inv: Devi svuotare l'inventario prima di entrare nella arena.
+join-player-limit-reached: Il numero massimo dei giocatori è stata raggiunto per questa arena.
+join-store-inv-fail: Salvataggio inventario fallito. Riprova.
+join-existing-inv-restored: I tuoi oggetti precedenti sono stati ripristinati.
+join-player-joined: Sei entrato nella arena. Buona fortuna!
+leave-not-playing: Non sei nella arena.
+leave-not-ready: Non eri ancora pronto! La prowssima volta clicca sul blocco di ferro per essere pronto.
+leave-player-left: Hai lasciato la arena. Grazie per aver giocato!
+player-died: '&c%&r è caduto in arena!'
+golem-died: Un golem amico è caduto!
+spec-player-spectate: Gustati lo spettacolo!
+spec-from-arena: Gustati il resto della partita!
+spec-not-running: Questa arena non sta andando.
+spec-empty-inv: Svuota il tuo inventario prima!
+spec-already-playing: Non puoi fare lo spettatore in arena!
+not-ready-players: 'Non pronti: &c%&r'
+force-start-running: La Arena è già iniziata.
+force-start-not-ready: Impossibile sforzare l'avvio della arena, nessun giocatore pronto.
+force-start-started: Arena forzata iniziata.
+force-end-empty: Nessuno è nella arena.
+force-end-ended: Arena forzata terminata.
+force-end-idle: Non sei stato abbastanza veloce!
+rewards-give: Qui c'è la tua ricompensa!
+lobby-drop-item: Impossibile scambiare oggetti per ora!
+lobby-player-ready: Devi essere marchiato come pronto!
+lobby-pick-class: Devi prima scegliere una classe!
+lobby-class-full: Questa classe non può essere più scelta, limite di classe raggiunta!
+lobby-not-enough-players: Non ci sono abbastanza giocatori. Hai bisogno di &c%&r giocatori.
+lobby-right-click: Picchia il cartello. Non cliccarlo con il destro.
+lobby-class-picked: Hai scelto la classe &e%&r !
+lobby-class-random: Diventarai una classe casuale a inizio arena.
+lobby-class-permission: Non hai i permessi per usare quella classe!
+lobby-class-price: Quella classe costa &c%&r (prelevati a inizio partita).
+lobby-class-too-expensive: Non puoi pagare quella classe (&c%&r)
+lobby-no-such-class: Nessuna classe chiamata &c%&r.
+warp-to-arena: Usare i warp nella arena non è permesso!
+warp-from-arena: Usare i warp dalla arena non è permesso!
+wave-default: Ondata &b#%&r!
+wave-special: Ondata &b#%&r! [SPECIALE]
+wave-swarm: Ondata &b#%&r! [SCIAME]
+wave-supply: Ondata &b#%&r! [RIFORNIMENTI]
+wave-upgrade: Ondata &b#%&r! [UPGRADE]
+wave-boss: Ondata &b#%&r! [BOSS]
+wave-boss-ability: 'Boss usa abilità: &c%&r!'
+wave-boss-low-health: Il Boss è quasi morto!
+wave-reward: 'Hai ottenuto il premio: &e%&r'
+misc-list-players: 'Giocatori vivi: &a%&r'
+misc-list-arenas: 'Arena disponibili: %'
+misc-command-not-allowed: Non puoi usare quel commando in arena!
+misc-no-access: Non hai accesso a quel commando.
+misc-not-from-console: Non puoi usare quel commando dalla console.
+misc-help: Per una lista di commandi, digita &e/ma help&r
+misc-multiple-matches: Volevi dire questi commandi?
+misc-no-matches: Commando non trovato. Digita &e/ma help&r
+misc-ma-leave-reminder: Ricorda di usare &e/ma leave&r quando hai fatto.
+misc-none: '&6<none>&r'
