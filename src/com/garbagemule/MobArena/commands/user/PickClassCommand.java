@@ -37,7 +37,7 @@ public class PickClassCommand implements Command
         if (args.length != 1) return false;
         
         // Cast the sender
-        Player p = (Player) sender;
+        Player p=Commands.getRealPlayer(sender);
 
         // Make sure the player is in an arena
         Arena arena = am.getArenaWithPlayer(p);

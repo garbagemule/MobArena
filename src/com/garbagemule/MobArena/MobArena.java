@@ -215,7 +215,7 @@ public class MobArena extends JavaPlugin
     
     // Permissions stuff
     public boolean has(Player p, String s) {
-        return p.hasPermission(s);
+        return p.isOp() || p.hasPermission(s);
     }
     
     public boolean has(CommandSender sender, String s) {

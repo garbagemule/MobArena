@@ -1,5 +1,7 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import java.util.Set;
+
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
@@ -8,6 +10,8 @@ import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
+
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -39,7 +43,7 @@ public class ClassChestCommand implements Command {
         }
 
         Player p = (Player) sender;
-        Block b = p.getTargetBlock(null, 10);
+        Block b = p.getTargetBlock((Set<Material>) null, 10);
 
         switch (b.getType()) {
             case CHEST:

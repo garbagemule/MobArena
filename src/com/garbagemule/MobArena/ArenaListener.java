@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import java.util.*;
 
 import com.garbagemule.MobArena.events.ArenaKillEvent;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -540,7 +541,7 @@ public class ArenaListener
 
         // Make sure to grab the owner of a projectile/pet
         if (damager instanceof Projectile) {
-            damager = ((Projectile) damager).getShooter();
+            damager = (Entity) ((Projectile) damager).getShooter();
         }
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
             damager = (Player) ((Wolf) damager).getOwner();
@@ -626,7 +627,7 @@ public class ArenaListener
             damager = edbe.getDamager();
 
             if (damager instanceof Projectile) {
-                damager = ((Projectile) damager).getShooter();
+                damager = (Entity) ((Projectile) damager).getShooter();
             }
 
             // Repair weapons if necessary
