@@ -1,5 +1,8 @@
 package com.garbagemule.MobArena.commands.user;
 
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -24,8 +27,8 @@ public class JoinCommand implements Command
             return true;
         }
         
-        // Cast the sender, grab the argument, if any.
-        Player p    = (Player) sender;
+        // Get the sender (player), grab the argument, if any.
+        Player p=Commands.getRealPlayer(sender);
         String arg1 = (args.length > 0 ? args[0] : null);
         
         // Run some rough sanity checks, and grab the arena to join.

@@ -1,7 +1,9 @@
 package com.garbagemule.MobArena.commands;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -15,6 +17,14 @@ public class Commands
 {
     public static boolean isPlayer(CommandSender sender) {
         return (sender instanceof Player);
+    }
+    
+    //Sender might be a proxy wrapping a player object. This will get the "real" player object.       
+    public static Player getRealPlayer(CommandSender sender) {
+        Player p    = (Player) sender;
+        UUID uuid = p.getUniqueId();
+        p=Bukkit.getPlayer(uuid);
+        return p;
     }
     
     public static Arena getArenaToJoinOrSpec(ArenaMaster am, Player p, String arg1) {

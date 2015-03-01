@@ -32,7 +32,7 @@ public class NotReadyCommand implements Command
                 return false;
             }
         } else if (Commands.isPlayer(sender)) {
-            Player p = (Player) sender;
+            Player p=Commands.getRealPlayer(sender);
             arena = am.getArenaWithPlayer(p);
             
             if (arena == null) {
