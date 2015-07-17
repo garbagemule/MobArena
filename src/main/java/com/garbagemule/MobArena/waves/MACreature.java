@@ -18,6 +18,16 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class MACreature
 {
+    // This part must come before the constants!
+    private static Map<String,MACreature> map;
+    static {
+        map = new HashMap<>();
+        for (EntityType type : EntityType.values()) {
+            // Instantiating a new creature registers it
+            new MACreature(type);
+        }
+    }
+
     // Default creatures
     public static final MACreature ZOMBIE = new MACreature("zombie", EntityType.ZOMBIE);
     public static final MACreature SKELETON = new MACreature("skeleton", EntityType.SKELETON);
@@ -88,15 +98,6 @@ public class MACreature
     public static final MACreature MULE = new MACreature("mule", EntityType.HORSE);
     public static final MACreature SKELETONHORSE = new MACreature("skeletonhorse", EntityType.HORSE);
     public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.HORSE);
-
-    private static Map<String,MACreature> map;
-    static {
-        map = new HashMap<>();
-        for (EntityType type : EntityType.values()) {
-            // Instantiating a new creature registers it
-            new MACreature(type);
-        }
-    }
 
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private String name;
