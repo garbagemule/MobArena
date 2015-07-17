@@ -36,8 +36,8 @@ public class PickClassCommand implements Command
         // Require a class name
         if (args.length != 1) return false;
         
-        // Cast the sender
-        Player p = (Player) sender;
+        // Unwrap the sender
+        Player p = Commands.unwrap(sender);
 
         // Make sure the player is in an arena
         Arena arena = am.getArenaWithPlayer(p);

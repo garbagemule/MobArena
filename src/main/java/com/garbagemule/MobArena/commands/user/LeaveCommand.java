@@ -24,8 +24,8 @@ public class LeaveCommand implements Command
             return true;
         }
         
-        // Cast the sender.
-        Player p = (Player) sender;
+        // Unwrap the sender.
+        Player p = Commands.unwrap(sender);
 
         Arena arena = am.getArenaWithPlayer(p);  
         if (arena == null) {

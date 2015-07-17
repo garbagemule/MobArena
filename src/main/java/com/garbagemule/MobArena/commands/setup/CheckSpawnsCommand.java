@@ -46,7 +46,7 @@ public class CheckSpawnsCommand implements Command
             Messenger.tell(sender, "There are no spawnpoints in the selected arena.");
             return true;
         }
-        Player p = (Player) sender;
+        Player p = Commands.unwrap(sender);
         arena.getRegion().checkSpawns(p);
         return true;
     }

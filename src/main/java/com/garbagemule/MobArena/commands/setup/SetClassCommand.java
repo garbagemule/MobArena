@@ -31,8 +31,8 @@ public class SetClassCommand implements Command
         String arg1 = (args.length > 0 ? args[0] : "");
         String arg2 = (args.length > 1 ? args[1] : "");
         
-        // Cast the sender.
-        Player p = (Player) sender;
+        // Unwrap the sender.
+        Player p = Commands.unwrap(sender);
         
         // Check if we're overwriting.
         boolean safe = arg1.equals("safe");

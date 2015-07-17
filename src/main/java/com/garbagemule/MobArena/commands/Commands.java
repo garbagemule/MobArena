@@ -1,7 +1,9 @@
 package com.garbagemule.MobArena.commands;
 
 import java.util.List;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,6 +15,24 @@ import com.garbagemule.MobArena.util.TextUtils;
 
 public class Commands
 {
+    /**
+     * Unwrap the given CommandSender reference, in case it is a proxy.
+     * <p>
+     * Because plugins like CommandSigns use horrible proxy hacks to do what
+     * they need to do, a Player reference is not necessarily a real Player,
+     * and using that reference brings MobArena into an inconsistent state.
+     * <p>
+     * The method returns the "real" Player reference by making a UUID lookup.
+     *
+     * @param sender a CommandSender reference, possibly a proxy, non-null
+     * @return the real Player reference, possibly the same as the argument
+     */
+    public static Player unwrap(CommandSender sender) {
+        Player proxy = (Player) sender;
+        UUID id = proxy.getUniqueId();
+        return Bukkit.getPlayer(id);
+    }
+
     public static boolean isPlayer(CommandSender sender) {
         return (sender instanceof Player);
     }

@@ -24,7 +24,7 @@ public class ArenaListCommand implements Command
         List<Arena> arenas;
         
         if (Commands.isPlayer(sender)) {
-            Player p = (Player) sender;
+            Player p = Commands.unwrap(sender);
             arenas = am.getPermittedArenas(p); 
         } else {
             arenas = am.getArenas();

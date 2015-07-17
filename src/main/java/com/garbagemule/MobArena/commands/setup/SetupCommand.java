@@ -63,7 +63,7 @@ public class SetupCommand implements Command, Listener {
                 return true;
             }
         }
-        Player player = (Player) sender;
+        Player player = Commands.unwrap(sender);
 
         // Create the setup object
         Setup setup = new Setup(player, arena);

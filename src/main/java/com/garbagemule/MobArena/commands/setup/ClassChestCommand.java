@@ -40,7 +40,7 @@ public class ClassChestCommand implements Command {
             return true;
         }
 
-        Player p = (Player) sender;
+        Player p = Commands.unwrap(sender);
         Block b = p.getTargetBlock((Set<Material>) null, 10);
 
         switch (b.getType()) {

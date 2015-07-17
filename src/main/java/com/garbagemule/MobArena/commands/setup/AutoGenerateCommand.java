@@ -27,8 +27,8 @@ public class AutoGenerateCommand implements Command
         // Require an arena name
         if (args.length != 1) return false;
         
-        // Cast the sender.
-        Player p = (Player) sender;
+        // Unwrap the sender.
+        Player p = Commands.unwrap(sender);
         
         // Check if arena already exists.
         Arena arena = am.getArenaWithName(args[0]);

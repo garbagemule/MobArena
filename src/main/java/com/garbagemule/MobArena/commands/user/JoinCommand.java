@@ -24,8 +24,8 @@ public class JoinCommand implements Command
             return true;
         }
         
-        // Cast the sender, grab the argument, if any.
-        Player p    = (Player) sender;
+        // Unwrap the sender, grab the argument, if any.
+        Player p    = Commands.unwrap(sender);
         String arg1 = (args.length > 0 ? args[0] : null);
         
         // Run some rough sanity checks, and grab the arena to join.
