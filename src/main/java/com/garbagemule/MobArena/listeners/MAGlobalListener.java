@@ -163,6 +163,19 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onEntityExplode(event);
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void blockExplode(BlockExplodeEvent event) {
+        // Account for Spigot's messy extra event
+        EntityExplodeEvent fake = new EntityExplodeEvent(null, event.getBlock().getLocation(), event.blockList(), event.getYield());
+        entityExplode(fake);
+
+        // Copy the values over
+        event.setCancelled(fake.isCancelled());
+        event.blockList().clear();
+        event.blockList().addAll(fake.blockList());
+        event.setYield(fake.getYield());
+    }
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void entityRegainHealth(EntityRegainHealthEvent event) {
         for (Arena arena : am.getArenas())
