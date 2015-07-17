@@ -32,14 +32,14 @@ public class SpecialWave extends AbstractWave
             }
             
             int amount;
-            switch (entry.getValue()) {
-                case POWEREDCREEPERS:
-                case ZOMBIEPIGMEN:
-                case ANGRYWOLVES:   amount = playerCount * 2; break;
-                case SLIMES:        amount = playerCount * 4; break;
-                case GIANTS:
-                case GHASTS:        amount = 2;
-                default:            amount = playerCount + 1; break;
+            switch (entry.getValue().getName()) {
+                case "poweredcreeper":
+                case "zombiepigman":
+                case "angrywolf":     amount = playerCount * 2; break;
+                case "slime":         amount = playerCount * 4; break;
+                case "giant":
+                case "ghast":         amount = 2;               break;
+                default:              amount = playerCount + 1; break;
             }
             
             amount = (int) Math.max(1D, amount * super.getAmountMultiplier());
