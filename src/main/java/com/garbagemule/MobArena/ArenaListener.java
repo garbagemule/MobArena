@@ -56,6 +56,7 @@ import com.garbagemule.MobArena.region.RegionPoint;
 import com.garbagemule.MobArena.repairable.*;
 import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.waves.MABoss;
+import org.bukkit.projectiles.ProjectileSource;
 
 public class ArenaListener
 {
@@ -540,7 +541,10 @@ public class ArenaListener
 
         // Make sure to grab the owner of a projectile/pet
         if (damager instanceof Projectile) {
-            damager = ((Projectile) damager).getShooter();
+            ProjectileSource shooter = ((Projectile) damager).getShooter();
+            if (shooter instanceof Entity) {
+                damager = (Entity) shooter;
+            }
         }
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
             damager = (Player) ((Wolf) damager).getOwner();
@@ -626,7 +630,10 @@ public class ArenaListener
             damager = edbe.getDamager();
 
             if (damager instanceof Projectile) {
-                damager = ((Projectile) damager).getShooter();
+                ProjectileSource shooter = ((Projectile) damager).getShooter();
+                if (shooter instanceof Entity) {
+                    damager = (Entity) shooter;
+                }
             }
 
             // Repair weapons if necessary

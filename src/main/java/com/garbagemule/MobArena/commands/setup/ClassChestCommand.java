@@ -8,9 +8,12 @@ import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.HashSet;
 
 import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
 
@@ -39,11 +42,10 @@ public class ClassChestCommand implements Command {
         }
 
         Player p = (Player) sender;
-        Block b = p.getTargetBlock(null, 10);
+        Block b = p.getTargetBlock(new HashSet<Material>(), 10);
 
         switch (b.getType()) {
             case CHEST:
-            case LOCKED_CHEST:
             case ENDER_CHEST:
             case TRAPPED_CHEST:
                 break;

@@ -18,6 +18,7 @@ build/
 misc/
 lib/
 test/
+target/
 
 # Misc files
 MobArena.jar

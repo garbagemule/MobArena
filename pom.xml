@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.garbagemule</groupId>
+  <artifactId>mobarena</artifactId>
+  <name>MobArena</name>
+  <version>0.96.10-SNAPSHOT</version>
+
+  <build>
+    <plugins>
+      <!-- Use Java 7 for compilation -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+      <!-- Rename the final jar-file to MobArena.jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <finalName>MobArena</finalName>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <resources>
+      <!-- Resource filtering; use Maven version in plugin.yml -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
+  <repositories>
+    <!-- Spigot repo -->
+    <repository>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+    </repository>
+    <!-- Vault repo -->
+    <repository>
+      <id>vault-repo</id>
+      <url>http://nexus.theyeticave.net/content/repositories/pub_releases/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Spigot API -->
+    <dependency>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>1.8.7-R0.1-SNAPSHOT</version>
+    </dependency>
+    <!-- Vault -->
+    <dependency>
+      <groupId>net.milkbowl.vault</groupId>
+      <artifactId>VaultAPI</artifactId>
+      <version>1.5</version>
+    </dependency>
+    <!-- Magic Spells (tentative) -->
+    <dependency>
+      <groupId>com.nisovin</groupId>
+      <artifactId>magicspells</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/MagicSpells.jar</systemPath>
+    </dependency>
+  </dependencies>
+</project>
