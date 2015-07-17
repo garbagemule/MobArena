@@ -249,23 +249,24 @@ public class WaveParser
         }
         
         // Grab the boss health
-        String hlth = config.getString("health");
-        BossHealth health = BossHealth.fromString(hlth);
-        if (health != null) {
-            result.setHealth(health);
+        String healthString = config.getString("health");
+        if (healthString == null) {
+            String warning = "No health value found for boss '%s' in arena '%s'. Defaulting to medium.";
+            Messenger.warning(String.format(warning, name, arena.configName()));
+            result.setHealth(BossHealth.MEDIUM);
         } else {
-            try {
-                int flatHealth;
-                if (hlth != null) {
-                    flatHealth = Integer.parseInt(hlth);
+            BossHealth health = BossHealth.fromString(healthString);
+            if (health != null) {
+                result.setHealth(health);
+            } else {
+                int flatHealth = config.getInt("health", 0);
+                if (flatHealth <= 0) {
+                    String warning = "Unable to parse health of boss '%s' in arena '%s'. Defaulting to medium. Value was '%s'";
+                    Messenger.warning(String.format(warning, name, arena.configName(), healthString));
+                    result.setHealth(BossHealth.MEDIUM);
                 } else {
-                    flatHealth = config.getInt("health");
+                    result.setFlatHealth(flatHealth);
                 }
-                result.setFlatHealth(flatHealth);
-            } catch (Exception e) {
-                String warning = "Unable to parse health of boss '%s' in arena '%s'. Defaulting to medium. Value was '%s'";
-                Messenger.warning(String.format(warning, name, arena.configName(), hlth));
-                result.setHealth(BossHealth.MEDIUM);
             }
         }
         
