@@ -138,7 +138,7 @@ public class MACreature
     }
     
     public static MACreature fromString(String string) {
-        return map.get(string.replaceAll("[-_\\.]", ""));
+        return map.get(string.toLowerCase().replaceAll("[-_\\.]", ""));
     }
     
     public LivingEntity spawn(Arena arena, World world, Location loc) {
