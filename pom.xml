@@ -21,6 +21,7 @@
           <target>1.7</target>
         </configuration>
       </plugin>
+
       <!-- Rename the final jar-file to MobArena.jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -47,6 +48,7 @@
       <id>spigot-repo</id>
       <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
     </repository>
+
     <!-- Vault repo -->
     <repository>
       <id>vault-repo</id>
@@ -61,12 +63,14 @@
       <artifactId>bukkit</artifactId>
       <version>1.8.7-R0.1-SNAPSHOT</version>
     </dependency>
+
     <!-- Vault -->
     <dependency>
       <groupId>net.milkbowl.vault</groupId>
       <artifactId>VaultAPI</artifactId>
       <version>1.5</version>
     </dependency>
+
     <!-- Magic Spells (tentative) -->
     <dependency>
       <groupId>com.nisovin</groupId>
@@ -74,6 +78,20 @@
       <version>1.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/lib/MagicSpells.jar</systemPath>
+    </dependency>
+
+    <!-- JUnit -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+
+    <!-- Hamcrest matchers -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.3</version>
     </dependency>
   </dependencies>
 </project>
