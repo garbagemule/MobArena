@@ -93,5 +93,12 @@
       <artifactId>hamcrest-all</artifactId>
       <version>1.3</version>
     </dependency>
+
+    <!-- Mockito -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.10.19</version>
+    </dependency>
   </dependencies>
 </project>
