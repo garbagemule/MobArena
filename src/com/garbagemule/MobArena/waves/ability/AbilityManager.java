@@ -42,10 +42,19 @@ public class AbilityManager
     public static void loadCoreAbilities() {
         if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
 
+        register(BlindDistant.class);
+        register(BlindNearby.class);
+        register(BlindTarget.class);
         register(ChainLightning.class);
+        register(ConfuseDistant.class);
+        register(ConfuseNearby.class);
+        register(ConfuseTarget.class);
         register(DisorientDistant.class);
         register(DisorientNearby.class);
         register(DisorientTarget.class);
+        register(FatigueDistant.class);
+        register(FatigueNearby.class);
+        register(FatigueTarget.class);
         register(FetchDistant.class);
         register(FetchNearby.class);
         register(FetchTarget.class);
@@ -54,6 +63,7 @@ public class AbilityManager
         register(LightningAura.class);
         register(LivingBomb.class);
         register(ObsidianBomb.class);
+        register(Overwhelm.class);
         register(PullDistant.class);
         register(PullNearby.class);
         register(PullTarget.class);
@@ -61,10 +71,16 @@ public class AbilityManager
         register(ShootArrow.class);
         register(ShootFireball.class);
         register(ShufflePositions.class);
+        register(SlowDistant.class);
+        register(SlowNearby.class);
+        register(SlowTarget.class);
         register(ThrowDistant.class);
         register(ThrowNearby.class);
         register(ThrowTarget.class);
         register(WarpToPlayer.class);
+        register(WeakenDistant.class);
+        register(WeakenNearby.class);
+        register(WeakenTarget.class);
     }
     
     /**
