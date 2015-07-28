@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,23 +13,18 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Blind Nearby", aliases = { "blindnearby" })
 public class BlindNearby implements Ability {
 
-	public static final int RADIUS = 5;
+    // how close players have to be to the boss to be targeted by the ability
+    private final int RADIUS = 5;
 
-	public static final int DURATION = 60;
+    // duration that players will be blinded for, in ticks
+    private final int DURATION = 60;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
-
-		if (AbilityUtils.getTarget(arena, boss.getEntity(), false) == null) {
-			return;
-		}
-
-		for (Player e : AbilityUtils.getNearbyPlayers(arena, boss.getEntity(),
-				RADIUS)) {
-			e.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,
-					DURATION, 0));
-		}
-
-	}
-
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        // get all nearby players
+        for (Player e : AbilityUtils.getNearbyPlayers(arena, boss.getEntity(), RADIUS)) {
+            // and blind them
+            e.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, DURATION, 0));
+        }
+    }
 }

@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,23 +13,21 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Fatigue Target", aliases = { "fatiguetarget" })
 public class FatigueTarget implements Ability {
 
-	public static final int DURATION = 60;
+    // how long to apply mining fatigue for, in ticks
+    private final int DURATION = 60;
 
-	public static final int AMPLIFIER = 0;
+    // the amplifier for the mining fatigue affect, 0 means level 1
+    private final int AMPLIFIER = 0;
 
-	public static final boolean RANDOM = false;
+    // should a random player be used if a target isn't found?
+    private final boolean RANDOM = false;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
-
-		LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(),
-				RANDOM);
-		if (target == null) {
-			return;
-		}
-
-		target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING,
-				DURATION, AMPLIFIER));
-	}
-
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
+        if (target == null) {
+            return;
+        }
+        target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, DURATION, AMPLIFIER));
+    }
 }

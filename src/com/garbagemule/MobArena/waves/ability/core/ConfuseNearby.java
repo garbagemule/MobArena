@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,23 +13,17 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Confuse Nearby", aliases = { "confusenearby" })
 public class ConfuseNearby implements Ability {
 
-	public static final int RADIUS = 5;
+    // how close player need to be to be targeted
+    private final int RADIUS = 5;
 
-	public static final int DURATION = 120;
+    // how long players should get nausea for, in ticks
+    private final int DURATION = 120;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
-
-		if (AbilityUtils.getTarget(arena, boss.getEntity(), false) == null) {
-			return;
-		}
-
-		for (Player e : AbilityUtils.getNearbyPlayers(arena, boss.getEntity(),
-				RADIUS)) {
-			e.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION,
-					DURATION, 0));
-		}
-
-	}
-
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        // get the nearby players and apply nausea
+        for (Player e : AbilityUtils.getNearbyPlayers(arena, boss.getEntity(), RADIUS)) {
+            e.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, DURATION, 0));
+        }
+    }
 }

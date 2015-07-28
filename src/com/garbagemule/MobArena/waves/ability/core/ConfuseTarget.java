@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,21 +13,18 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Confuse Target", aliases = { "confusetarget" })
 public class ConfuseTarget implements Ability {
 
-	public static final int DURATION = 120;
+    // how long to apply nausea for, in ticks
+    private final int DURATION = 120;
 
-	public static final boolean RANDOM = false;
+    // use a random player if no target is found?
+    private final boolean RANDOM = false;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
-
-		LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(),
-				RANDOM);
-		if (target == null) {
-			return;
-		}
-
-		target.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION,
-				DURATION, 0));
-	}
-
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
+        if (target == null) {
+            return;
+        }
+        target.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, DURATION, 0));
+    }
 }

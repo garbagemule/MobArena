@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,21 +13,22 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Blind Target", aliases = { "blindtarget" })
 public class BlindTarget implements Ability {
 
-	public static final int DURATION = 60;
+    // duration that the target should be blinded for, in ticks
+    private final int DURATION = 60;
 
-	public static final boolean RANDOM = false;
+    // should a random player be selected if no target is found?
+    private final boolean RANDOM = false;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        // get a target
+        LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
+        if (target == null) {
+            // if boss is targeting null, abandon ship
+            return;
+        }
 
-		LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(),
-				RANDOM);
-		if (target == null) {
-			return;
-		}
-
-		target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,
-				DURATION, 0));
-	}
-
+        // blind the target!
+        target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, DURATION, 0));
+    }
 }

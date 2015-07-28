@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,23 +13,21 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Weaken Target", aliases = { "weakentarget" })
 public class WeakenTarget implements Ability {
 
-	public static final int DURATION = 60;
+    // how long to weaken the target for, in ticks
+    private final int DURATION = 60;
 
-	public static final int AMPLIFIER = 0;
+    // the amplifier for the weakness affect, 0 means level 1
+    private final int AMPLIFIER = 0;
 
-	public static final boolean RANDOM = false;
+    // should a random player be selected if no target is found?
+    private final boolean RANDOM = false;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
-
-		LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(),
-				RANDOM);
-		if (target == null) {
-			return;
-		}
-
-		target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,
-				DURATION, AMPLIFIER));
-	}
-
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
+        if (target == null) {
+            return;
+        }
+        target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, DURATION, AMPLIFIER));
+    }
 }

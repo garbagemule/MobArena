@@ -1,3 +1,5 @@
+package com.garbagemule.MobArena.waves.ability.core;
+
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,18 +13,19 @@ import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 @AbilityInfo(name = "Fatigue Distant", aliases = { "fatiguedistant" })
 public class FatigueDistant implements Ability {
 
-	public static final int RADIUS = 8;
-	public static final int DURATION = 60;
-	public static final int AMPLIFIER = 0;
+    // how far players have to be to be targeted by this ability
+    private final int RADIUS = 8;
 
-	@Override
-	public void execute(Arena arena, MABoss boss) {
+    // duration to apply mining fatigue for, in ticks
+    private final int DURATION = 60;
 
-		for (Player e : AbilityUtils.getDistantPlayers(arena, boss.getEntity(),
-				RADIUS)) {
-			e.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING,
-					DURATION, AMPLIFIER));
-		}
-	}
+    // amplifier for the mining fatigue affect, 0 means level 1
+    private final int AMPLIFIER = 0;
 
+    @Override
+    public void execute(Arena arena, MABoss boss) {
+        for (Player e : AbilityUtils.getDistantPlayers(arena, boss.getEntity(), RADIUS)) {
+            e.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, DURATION, AMPLIFIER));
+        }
+    }
 }
