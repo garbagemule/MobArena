@@ -7,7 +7,7 @@
   <groupId>com.garbagemule</groupId>
   <artifactId>mobarena</artifactId>
   <name>MobArena</name>
-  <version>0.97</version>
+  <version>0.97.1-SNAPSHOT</version>
 
   <build>
     <plugins>
