@@ -99,6 +99,9 @@ public class MACreature
     public static final MACreature SKELETONHORSE = new MACreature("skeletonhorse", EntityType.HORSE);
     public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.HORSE);
 
+    // 1.8 creatures
+    public static final MACreature ELDERGUARDIAN = new MACreature("elderguardian", EntityType.GUARDIAN);
+
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private String name;
     private String plural;
@@ -213,6 +216,8 @@ public class MACreature
             case "undeadhorse":
                 ((Horse) e).setVariant(Horse.Variant.UNDEAD_HORSE);
                 break;
+            case "elderguardian":
+                ((Guardian) e).setElder(true);
             default:
                 break;
         }
