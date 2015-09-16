@@ -101,6 +101,7 @@ public class MACreature
 
     // 1.8 creatures
     public static final MACreature ELDERGUARDIAN = new MACreature("elderguardian", EntityType.GUARDIAN);
+    public static final MACreature KILLERBUNNY = new MACreature("killerbunny", "killerbunnies", EntityType.RABBIT);
 
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private String name;
@@ -218,6 +219,10 @@ public class MACreature
                 break;
             case "elderguardian":
                 ((Guardian) e).setElder(true);
+                break;
+            case "killerbunny":
+                ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
+                break;
             default:
                 break;
         }
