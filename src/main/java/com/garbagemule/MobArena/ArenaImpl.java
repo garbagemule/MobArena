@@ -1118,13 +1118,20 @@ public class ArenaImpl implements Arena
         arenaPlayer.setArenaClass(arenaClass);
         
         PlayerInventory inv = p.getInventory();
+
+        // Collect armor items, because setContents() now overwrites everyhing
+        ItemStack helmet = null;
+        ItemStack chestplate = null;
+        ItemStack leggings = null;
+        ItemStack boots = null;
         
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
         if (contents[last] != null) {
-            inv.setHelmet(contents[last]);
+            helmet = contents[last].clone();
             contents[last] = null;
         }
+
         // Check the remaining three of the four last slots for armor
         for (int i = contents.length-1; i > contents.length-5; i--) {
             if (contents[i] == null) continue;
@@ -1132,9 +1139,9 @@ public class ArenaImpl implements Arena
             if (type == null || type == ArmorType.HELMET) continue;
             
             switch (type) {
-                case CHESTPLATE: inv.setChestplate(contents[i]);  break;
-                case LEGGINGS:   inv.setLeggings(contents[i]);    break;
-                case BOOTS:      inv.setBoots(contents[i]);       break;
+                case CHESTPLATE: chestplate = contents[i].clone(); break;
+                case LEGGINGS:   leggings   = contents[i].clone(); break;
+                case BOOTS:      boots      = contents[i].clone(); break;
                 default: break;
             }
             contents[i] = null;
@@ -1148,7 +1155,13 @@ public class ArenaImpl implements Arena
                 }
             }
         }
-        p.getInventory().setContents(contents);
+
+        // Set contents, THEN set armor contents
+        inv.setContents(contents);
+        inv.setHelmet(helmet);
+        inv.setChestplate(chestplate);
+        inv.setLeggings(leggings);
+        inv.setBoots(boots);
 
         PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
         replacePermissions(p, pa);
