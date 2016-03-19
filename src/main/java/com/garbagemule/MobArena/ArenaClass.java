@@ -13,7 +13,7 @@ import org.bukkit.permissions.PermissionAttachment;
 public class ArenaClass
 {
     private String configName, lowercaseName;
-    private ItemStack helmet, chestplate, leggings, boots;
+    private ItemStack helmet, chestplate, leggings, boots, offhand;
     private List<ItemStack> items, armor;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
@@ -101,6 +101,14 @@ public class ArenaClass
     }
     
     /**
+     * Set the off-hand slot for the class.
+     * @param offHand
+     */
+    public void setOffHand(ItemStack offHand) {
+        this.offhand = offHand;
+    }
+
+    /**
      * Add an item to the items list.
      * @param stack an item
      */
@@ -182,6 +190,7 @@ public class ArenaClass
         if (chestplate != null) inv.setChestplate(chestplate);
         if (leggings   != null) inv.setLeggings(leggings);
         if (boots      != null) inv.setBoots(boots);
+        if (offhand    != null) inv.setItemInOffHand(offhand);
     }
     
     /**

@@ -1124,6 +1124,7 @@ public class ArenaImpl implements Arena
         ItemStack chestplate = null;
         ItemStack leggings = null;
         ItemStack boots = null;
+        ItemStack offhand = null;
         
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
@@ -1147,6 +1148,13 @@ public class ArenaImpl implements Arena
             contents[i] = null;
         }
         
+        // Equip the fifth last slot as the off-hand
+        ItemStack fifth = contents[contents.length - 5];
+        if (fifth != null) {
+            offhand = fifth.clone();
+            contents[contents.length - 5] = null;
+        }
+
         // Check the remaining slots for weapons
         if (arenaClass.hasUnbreakableWeapons()) {
             for (ItemStack stack : contents) {
@@ -1162,6 +1170,7 @@ public class ArenaImpl implements Arena
         inv.setChestplate(chestplate);
         inv.setLeggings(leggings);
         inv.setBoots(boots);
+        inv.setItemInOffHand(offhand);
 
         PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
         replacePermissions(p, pa);
