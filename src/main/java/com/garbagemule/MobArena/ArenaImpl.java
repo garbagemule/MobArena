@@ -1299,6 +1299,7 @@ public class ArenaImpl implements Arena
                     case ARROW:
                     case MINECART:
                     case BOAT:
+                    case SHULKER_BULLET:
                         e.remove();
                 }
             }
