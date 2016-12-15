@@ -108,15 +108,14 @@ public class InventoryManager
         ItemStack[] inventory = p.getInventory().getContents();
         ItemStack[] armor     = p.getInventory().getArmorContents();
         
-        // For inventory, check for null
+        // Check for null or id 0, or AIR
         for (ItemStack stack : inventory) {
-            if (stack != null)
+            if (stack != null && stack.getTypeId() != 0)
                 return false;
         }
-        
-        // For armor, check for id 0, or AIR
+
         for (ItemStack stack : armor) {
-            if (stack.getTypeId() != 0)
+            if (stack != null && stack.getTypeId() != 0)
                 return false;
         }
         
