@@ -7,11 +7,8 @@ import java.util.Map;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.*;
-import org.bukkit.entity.Skeleton.SkeletonType;
-import org.bukkit.inventory.ItemStack;
 
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
@@ -39,68 +36,41 @@ public class MACreature
     public static final MACreature ZOMBIEPIGMAN = new MACreature("zombiepigman", "zombiepigmen", EntityType.PIG_ZOMBIE);
     public static final MACreature POWEREDCREEPER = new MACreature("poweredcreeper", EntityType.CREEPER);
     public static final MACreature ANGRYWOLF = new MACreature("angrywolf", "angrywolves", EntityType.WOLF);
-    public static final MACreature GIANT = new MACreature("giant", EntityType.GIANT);
-    public static final MACreature GHAST = new MACreature("ghast", EntityType.GHAST);
     public static final MACreature ENDERMAN = new MACreature("enderman", "endermen", EntityType.ENDERMAN);
-    public static final MACreature CAVESPIDER = new MACreature("cavespider", EntityType.CAVE_SPIDER);
-    public static final MACreature SILVERFISH = new MACreature("silverfish", null, EntityType.SILVERFISH);
 
     // 1.0 creatures
-    public static final MACreature BLAZE = new MACreature("blaze", EntityType.BLAZE);
-    public static final MACreature ENDERDRAGON = new MACreature("enderdragon", EntityType.ENDER_DRAGON);
     public static final MACreature SNOWMAN = new MACreature("snowman", "snowmen", EntityType.SNOWMAN);
     public static final MACreature SNOWGOLEM = new MACreature("snowgolem", EntityType.SNOWMAN);
-    public static final MACreature MUSHROOMCOW = new MACreature("mushroomcow", EntityType.MUSHROOM_COW);
     public static final MACreature MOOSHROOM = new MACreature("mooshroom", EntityType.MUSHROOM_COW);
-    public static final MACreature VILLAGER = new MACreature("villager", EntityType.VILLAGER);
-
-    // 1.2 creatures
-    public static final MACreature OCELOT = new MACreature("ocelot", EntityType.OCELOT);
-    public static final MACreature IRONGOLEM = new MACreature("irongolem", EntityType.IRON_GOLEM);
 
     // Passive creatures
-    public static final MACreature CHICKEN = new MACreature("chicken", EntityType.CHICKEN);
-    public static final MACreature COW = new MACreature("cow", EntityType.COW);
-    public static final MACreature PIG = new MACreature("pig", EntityType.PIG);
     public static final MACreature SHEEP = new MACreature("sheep", null, EntityType.SHEEP);
-    public static final MACreature SQUID = new MACreature("squid", EntityType.SQUID);
 
     // Extended creatures
     public static final MACreature EXPLODINGSHEEP = new MACreature("explodingsheep", null, EntityType.SHEEP);
 
     // Slimes
-    public static final MACreature SLIME = new MACreature("slime", EntityType.SLIME);
     public static final MACreature SLIMETINY = new MACreature("slimetiny", "slimestiny", EntityType.SLIME);
     public static final MACreature SLIMESMALL = new MACreature("slimesmall", "slimessmall", EntityType.SLIME);
     public static final MACreature SLIMEBIG = new MACreature("slimebig", "slimesbig", EntityType.SLIME);
     public static final MACreature SLIMEHUGE = new MACreature("slimehuge", "slimeshuge", EntityType.SLIME);
 
     // Magma cubes
-    public static final MACreature MAGMACUBE = new MACreature("magmacube", EntityType.MAGMA_CUBE);
     public static final MACreature MAGMACUBETINY = new MACreature("magmacubetiny", "magmacubestiny", EntityType.MAGMA_CUBE);
     public static final MACreature MAGMACUBESMALL = new MACreature("magmacubesmall", "magmacubessmall", EntityType.MAGMA_CUBE);
     public static final MACreature MAGMACUBEBIG = new MACreature("magmacubebig", "magmacubesbig", EntityType.MAGMA_CUBE);
     public static final MACreature MAGMACUBEHUGE = new MACreature("magmacubehuge", "magmacubeshuge", EntityType.MAGMA_CUBE);
 
     // 1.4 creatures
-    public static final MACreature BAT = new MACreature("bat", EntityType.BAT);
     public static final MACreature WITCH = new MACreature("witch", "witches", EntityType.WITCH);
-    public static final MACreature WITHER = new MACreature("wither", EntityType.WITHER);
-    public static final MACreature WITHERSKELETON = new MACreature("witherskeleton", EntityType.SKELETON);
     public static final MACreature BABYZOMBIE = new MACreature("babyzombie", EntityType.ZOMBIE);
     public static final MACreature BABYPIGMAN = new MACreature("babypigman", "babypigmen", EntityType.PIG_ZOMBIE);
-    public static final MACreature ZOMBIEVILLAGER = new MACreature("zombievillager", EntityType.ZOMBIE);
-    public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE);
+    public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE_VILLAGER);
 
     // 1.6 creatures
-    public static final MACreature HORSE = new MACreature("horse", EntityType.HORSE);
-    public static final MACreature DONKEY = new MACreature("donkey", EntityType.HORSE);
-    public static final MACreature MULE = new MACreature("mule", EntityType.HORSE);
-    public static final MACreature SKELETONHORSE = new MACreature("skeletonhorse", EntityType.HORSE);
-    public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.HORSE);
+    public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.ZOMBIE_HORSE);
 
     // 1.8 creatures
-    public static final MACreature ELDERGUARDIAN = new MACreature("elderguardian", EntityType.GUARDIAN);
     public static final MACreature KILLERBUNNY = new MACreature("killerbunny", "killerbunnies", EntityType.RABBIT);
 
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
@@ -183,42 +153,10 @@ public class MACreature
             case "magmacubehuge":
                 ((Slime) e).setSize(4);
                 break;
-            case "skeleton":
-                e.getEquipment().setItemInHand(new ItemStack(Material.BOW, 1));
-                break;
-            case "zombiepigman":
-                e.getEquipment().setItemInHand(new ItemStack(Material.GOLD_SWORD, 1));
-                break;
-            case "zombievillager":
-                ((Zombie) e).setVillager(true);
-                break;
             case "babyzombievillager":
-                ((Zombie) e).setVillager(true);
             case "babyzombie":
             case "babypigman":
                 ((Zombie) e).setBaby(true);
-                break;
-            case "witherskeleton":
-                e.getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD, 1));
-                ((Skeleton) e).setSkeletonType(SkeletonType.WITHER);
-                break;
-            case "horse":
-                ((Horse) e).setVariant(Horse.Variant.HORSE);
-                break;
-            case "donkey":
-                ((Horse) e).setVariant(Horse.Variant.DONKEY);
-                break;
-            case "mule":
-                ((Horse) e).setVariant(Horse.Variant.MULE);
-                break;
-            case "skeletonhorse":
-                ((Horse) e).setVariant(Horse.Variant.SKELETON_HORSE);
-                break;
-            case "undeadhorse":
-                ((Horse) e).setVariant(Horse.Variant.UNDEAD_HORSE);
-                break;
-            case "elderguardian":
-                ((Guardian) e).setElder(true);
                 break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
