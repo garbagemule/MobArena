@@ -22,6 +22,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -113,12 +114,15 @@ public class MAUtils
         List<Entity> entities = p.getNearbyEntities(80, 40, 80);
         for (Entity e : entities)
         {
-            if (!(e instanceof Wolf))
-                continue;
-            
-            Wolf w = (Wolf) e;            
-            if (w.isTamed() && w.getOwner() != null && w.getOwner().equals(p))
-                w.setSitting(true);
+            if (e instanceof Ocelot) {
+                Ocelot w = (Ocelot) e;
+                if (w.isTamed() && w.getOwner() != null && w.getOwner().equals(p))
+                    w.setSitting(true);
+            } else if (e instanceof Wolf) {
+                Wolf w = (Wolf) e;
+                if (w.isTamed() && w.getOwner() != null && w.getOwner().equals(p))
+                    w.setSitting(true);
+            }
         }
     }
     
