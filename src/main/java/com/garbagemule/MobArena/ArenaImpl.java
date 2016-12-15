@@ -586,11 +586,11 @@ public class ArenaImpl implements Arena
             }
         }
 
+        MAUtils.sitPets(p);
         movePlayerToLobby(p);
         takeFee(p);
         storePlayerData(p, loc);
         removePotionEffects(p);
-        MAUtils.sitPets(p);
         setHealth(p, p.getMaxHealth());
         p.setFoodLevel(20);
         if (settings.getBoolean("display-timer-as-level", false)) {
