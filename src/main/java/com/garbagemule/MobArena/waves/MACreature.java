@@ -7,11 +7,13 @@ import java.util.Map;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.*;
 
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.inventory.ItemStack;
 
 public class MACreature
 {
@@ -152,6 +154,9 @@ public class MACreature
             case "slimehuge":
             case "magmacubehuge":
                 ((Slime) e).setSize(4);
+                break;
+            case "skeleton":
+                e.getEquipment().setItemInMainHand(new ItemStack(Material.BOW, 1));
                 break;
             case "babyzombievillager":
             case "babyzombie":
