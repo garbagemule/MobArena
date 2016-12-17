@@ -1103,7 +1103,6 @@ public class ArenaListener
                                 contents = newContents;
                             }
                             arena.assignClassGiveInv(p, className, contents);
-                            p.getInventory().setContents(contents);
                             Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
                             if (price > 0D) {
                                 Messenger.tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));

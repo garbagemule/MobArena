@@ -1118,11 +1118,13 @@ public class ArenaImpl implements Arena
         arenaPlayer.setArenaClass(arenaClass);
         
         PlayerInventory inv = p.getInventory();
+
+        ItemStack[] armors = new ItemStack[4];
         
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
         if (contents[last] != null) {
-            inv.setHelmet(contents[last]);
+            armors[0] = contents[last].clone();
             contents[last] = null;
         }
         // Check the remaining three of the four last slots for armor
@@ -1132,9 +1134,9 @@ public class ArenaImpl implements Arena
             if (type == null || type == ArmorType.HELMET) continue;
             
             switch (type) {
-                case CHESTPLATE: inv.setChestplate(contents[i]);  break;
-                case LEGGINGS:   inv.setLeggings(contents[i]);    break;
-                case BOOTS:      inv.setBoots(contents[i]);       break;
+                case CHESTPLATE: armors[1] = contents[i].clone();  break;
+                case LEGGINGS:   armors[2] = contents[i].clone();  break;
+                case BOOTS:      armors[3] = contents[i].clone();  break;
                 default: break;
             }
             contents[i] = null;
@@ -1148,7 +1150,12 @@ public class ArenaImpl implements Arena
                 }
             }
         }
-        p.getInventory().setContents(contents);
+        inv.setContents(contents);
+
+        inv.setHelmet(armors[0]);
+        inv.setChestplate(armors[1]);
+        inv.setLeggings(armors[2]);
+        inv.setBoots(armors[3]);
 
         PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
         replacePermissions(p, pa);
