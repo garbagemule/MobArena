@@ -156,6 +156,7 @@ public class MACreature
                 ((Slime) e).setSize(4);
                 break;
             case "skeleton":
+            case "stray":
                 e.getEquipment().setItemInMainHand(new ItemStack(Material.BOW, 1));
                 break;
             case "babyzombievillager":
