@@ -1,8 +1,14 @@
 package com.garbagemule.MobArena;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.events.ArenaKillEvent;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.leaderboards.Leaderboard;
+import com.garbagemule.MobArena.listeners.MAGlobalListener.TeleportResponse;
+import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.region.RegionPoint;
+import com.garbagemule.MobArena.repairable.*;
+import com.garbagemule.MobArena.util.TextUtils;
+import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,24 +20,10 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.*;
-import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityCombustByBlockEvent;
-import org.bukkit.event.entity.EntityCombustByEntityEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.EntityTeleportEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
@@ -47,16 +39,9 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.leaderboards.Leaderboard;
-import com.garbagemule.MobArena.listeners.MAGlobalListener.TeleportResponse;
-import com.garbagemule.MobArena.region.ArenaRegion;
-import com.garbagemule.MobArena.region.RegionPoint;
-import com.garbagemule.MobArena.repairable.*;
-import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.projectiles.ProjectileSource;
+
+import java.util.*;
 
 public class ArenaListener
 {
@@ -1103,7 +1088,7 @@ public class ArenaListener
                                 contents = newContents;
                             }
                             arena.assignClassGiveInv(p, className, contents);
-                            p.getInventory().setContents(contents);
+                            //p.getInventory().setContents(contents); this already happens in assignClassGiveInv()
                             Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
                             if (price > 0D) {
                                 Messenger.tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));

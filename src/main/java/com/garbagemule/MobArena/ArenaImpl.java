@@ -1,43 +1,45 @@
 package com.garbagemule.MobArena;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.PriorityBlockingQueue;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.*;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.potion.PotionEffect;
-
-import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
-
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
+import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
-import com.garbagemule.MobArena.repairable.*;
+import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.repairable.RepairableComparator;
+import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.time.Time;
 import com.garbagemule.MobArena.time.TimeStrategy;
 import com.garbagemule.MobArena.time.TimeStrategyLocked;
 import com.garbagemule.MobArena.time.TimeStrategyNull;
-import com.garbagemule.MobArena.util.*;
+import com.garbagemule.MobArena.util.Delays;
+import com.garbagemule.MobArena.util.Enums;
+import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.inventory.InventoryUtils;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
 import com.garbagemule.MobArena.util.timer.StartDelayTimer;
-import com.garbagemule.MobArena.waves.*;
-import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
+import com.garbagemule.MobArena.waves.SheepBouncer;
+import com.garbagemule.MobArena.waves.WaveManager;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.*;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.potion.PotionEffect;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.PriorityBlockingQueue;
+
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 public class ArenaImpl implements Arena
 {
@@ -1118,11 +1120,13 @@ public class ArenaImpl implements Arena
         arenaPlayer.setArenaClass(arenaClass);
         
         PlayerInventory inv = p.getInventory();
+
+        ItemStack[] armors = new ItemStack[4];
         
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
         if (contents[last] != null) {
-            inv.setHelmet(contents[last]);
+            armors[0] = contents[last].clone();
             contents[last] = null;
         }
         // Check the remaining three of the four last slots for armor
@@ -1132,9 +1136,15 @@ public class ArenaImpl implements Arena
             if (type == null || type == ArmorType.HELMET) continue;
             
             switch (type) {
-                case CHESTPLATE: inv.setChestplate(contents[i]);  break;
-                case LEGGINGS:   inv.setLeggings(contents[i]);    break;
-                case BOOTS:      inv.setBoots(contents[i]);       break;
+                case CHESTPLATE:
+                    armors[1] = contents[i].clone();
+                    break;
+                case LEGGINGS:
+                    armors[2] = contents[i].clone();
+                    break;
+                case BOOTS:
+                    armors[3] = contents[i].clone();
+                    break;
                 default: break;
             }
             contents[i] = null;
@@ -1148,7 +1158,12 @@ public class ArenaImpl implements Arena
                 }
             }
         }
-        p.getInventory().setContents(contents);
+        inv.setContents(contents);
+
+        inv.setHelmet(armors[0]);
+        inv.setChestplate(armors[1]);
+        inv.setLeggings(armors[2]);
+        inv.setBoots(armors[3]);
 
         PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
         replacePermissions(p, pa);
