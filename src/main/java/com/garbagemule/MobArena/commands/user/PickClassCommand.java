@@ -101,7 +101,6 @@ public class PickClassCommand implements Command
                         contents = newContents;
                     }
                     arena.assignClassGiveInv(p, lowercase, contents);
-                    p.getInventory().setContents(contents);
                     Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(lowercase));
                     if (price > 0D) {
                         Messenger.tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
