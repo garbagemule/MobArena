@@ -865,7 +865,6 @@ public class ArenaImpl implements Arena
             case 3:  return EntityType.MULE;
             case 4:  return EntityType.SKELETON_HORSE;
             case 5:  return EntityType.ZOMBIE_HORSE;
-            case 6:  return EntityType.LLAMA;
             default: return EntityType.HORSE;
         }
     }
