@@ -827,48 +827,55 @@ public class ArenaImpl implements Arena
             int amount = inv.getItem(hay).getAmount();
 
             // Variant
-            Horse.Variant variant = Horse.Variant.HORSE;
-            switch (amount % 8) {
-                case 2:  variant = Horse.Variant.DONKEY;         break;
-                case 3:  variant = Horse.Variant.MULE;           break;
-                case 4:  variant = Horse.Variant.SKELETON_HORSE; break;
-                case 5:  variant = Horse.Variant.UNDEAD_HORSE;   break;
-                default: break;
-            }
-
-            // Barding
-            Material barding = null;
-            switch ((amount >> 3) % 4) {
-                case 1: barding = Material.IRON_BARDING;    break;
-                case 2: barding = Material.GOLD_BARDING;    break;
-                case 3: barding = Material.DIAMOND_BARDING; break;
-                default: break;
-            }
+            EntityType type = horseTypeFromAmount(amount);
 
             // Spawn the horse, set its variant, tame it, etc.
-            Horse horse = (Horse) world.spawnEntity(p.getLocation(), EntityType.HORSE);
+            AbstractHorse mount = (AbstractHorse) world.spawnEntity(p.getLocation(), type);
             if (MobArena.random.nextInt(20) == 0) {
-                horse.setBaby();
+                mount.setBaby();
             } else {
-                horse.setAdult();
+                mount.setAdult();
             }
-            horse.setVariant(variant);
-            horse.setTamed(true);
-            horse.setOwner(p);
-            horse.setPassenger(p);
-            horse.setHealth(horse.getMaxHealth());
+            mount.setTamed(true);
+            mount.setOwner(p);
+            mount.setPassenger(p);
+            mount.setHealth(mount.getMaxHealth());
 
-            // Give it a saddle and possibly barding
-            horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-            if (barding != null) {
-                horse.getInventory().setArmor(new ItemStack(barding));
+            // If normal horse, barding and saddle
+            if (type == EntityType.HORSE) {
+                Horse horse = (Horse) mount;
+                horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+                Material barding = bardingFromAmount(amount);
+                if (barding != null) {
+                    horse.getInventory().setArmor(new ItemStack(barding));
+                }
             }
 
             // Add to monster manager
-            monsterManager.addMount(horse);
+            monsterManager.addMount(mount);
 
             // Remove the hay
             inv.setItem(hay, null);
+        }
+    }
+
+    private EntityType horseTypeFromAmount(int amount) {
+        switch (amount % 8) {
+            case 2:  return EntityType.DONKEY;
+            case 3:  return EntityType.MULE;
+            case 4:  return EntityType.SKELETON_HORSE;
+            case 5:  return EntityType.ZOMBIE_HORSE;
+            case 6:  return EntityType.LLAMA;
+            default: return EntityType.HORSE;
+        }
+    }
+
+    private Material bardingFromAmount(int amount) {
+        switch ((amount >> 3) % 4) {
+            case 1:  return Material.IRON_BARDING;
+            case 2:  return Material.GOLD_BARDING;
+            case 3:  return Material.DIAMOND_BARDING;
+            default: return null;
         }
     }
     
