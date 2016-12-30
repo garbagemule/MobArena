@@ -649,7 +649,7 @@ public class ArenaListener
             onPetDamage(event, (Wolf) damagee, damager);
         }
         // Mount
-        else if (damagee instanceof Horse && monsters.hasMount(damagee)) {
+        else if (damagee instanceof AbstractHorse && monsters.hasMount(damagee)) {
             onMountDamage(event, (Horse) damagee, damager);
         }
         // Player
