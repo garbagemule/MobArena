@@ -841,13 +841,14 @@ public class ArenaImpl implements Arena
             mount.setPassenger(p);
             mount.setHealth(mount.getMaxHealth());
 
-            // If normal horse, barding and saddle
+            // Add saddle
+            mount.getInventory().addItem(new ItemStack(Material.SADDLE));
+
+            // Normal horses may have barding
             if (type == EntityType.HORSE) {
-                Horse horse = (Horse) mount;
-                horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
                 Material barding = bardingFromAmount(amount);
                 if (barding != null) {
-                    horse.getInventory().setArmor(new ItemStack(barding));
+                    ((Horse) mount).getInventory().setArmor(new ItemStack(barding));
                 }
             }
 
