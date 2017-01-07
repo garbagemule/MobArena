@@ -515,7 +515,6 @@ public class ArenaImpl implements Arena
         // Announce and clean arena floor, etc.
         if (settings.getBoolean("global-end-announce", false)) {
              for (Player p : Bukkit.getOnlinePlayers()) {
- -                Messenger.tell(p, Msg.ARENA_END_GLOBAL, configName());
  +                String arenaName = configName();
  +                if (arenaName.equalsIgnoreCase("default")) {
  +                    arenaName = "";
@@ -586,7 +585,6 @@ public class ArenaImpl implements Arena
         if (settings.getBoolean("global-join-announce", false)) {
             if (lobbyPlayers.isEmpty()) {
                 for (Player q : Bukkit.getOnlinePlayers()) {
- -                    Messenger.tell(q, Msg.ARENA_JOIN_GLOBAL, configName());
  +                    String arenaName = configName();
  +                    if (arenaName.equalsIgnoreCase("default")) {
  +                        arenaName = "";
