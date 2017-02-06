@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 
+import com.garbagemule.MobArena.events.RewardMapPopulateEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.World;
 import org.bukkit.Material;
@@ -74,6 +76,12 @@ public class MAUtils
             
             result.put(wave, ItemParser.parseItems(rewards));
         }
+    
+        // let's let other plugins add to the map
+        RewardMapPopulateEvent event = new RewardMapPopulateEvent(result, RewardMapPopulateEvent.RewardMapType.getType(type), arena);
+        Bukkit.getPluginManager().callEvent(event);
+        result = event.getMap();
+        
         return result;
     }
 
