@@ -62,12 +62,21 @@ public class ScoreboardManager {
      * @param player a player
      */
     void death(Player player) {
+        if (kills == null) {
+            return;
+        }
+
         String name = ChatColor.GRAY + player.getName();
         if (name.length() > 16) {
             name = name.substring(0, 15);
         }
 
-        int value = kills.getScore(player).getScore();
+        Score score = kills.getScore(player);
+        if (score == null) {
+            return;
+        }
+
+        int value = score.getScore();
         scoreboard.resetScores(player);
 
         /* In case the player has no kills, they will not show up on the
