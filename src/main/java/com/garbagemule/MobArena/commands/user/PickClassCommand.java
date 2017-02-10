@@ -9,6 +9,7 @@ import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -89,22 +90,7 @@ public class PickClassCommand implements Command
 
         if (!lowercase.equalsIgnoreCase("random")) {
             if (arena.getSettings().getBoolean("use-class-chests", false)) {
-                Location loc = ac.getClassChest();
-                if (loc != null) {
-                    Block blockChest = loc.getBlock();
-                    InventoryHolder holder = (InventoryHolder) blockChest.getState();
-                    ItemStack[] contents = holder.getInventory().getContents();
-                    // Guard against double-chests for now
-                    if (contents.length > 36) {
-                        ItemStack[] newContents = new ItemStack[36];
-                        System.arraycopy(contents, 0, newContents, 0, 36);
-                        contents = newContents;
-                    }
-                    arena.assignClassGiveInv(p, lowercase, contents);
-                    Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(lowercase));
-                    if (price > 0D) {
-                        Messenger.tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
-                    }
+                if (ClassChests.assignClassFromStoredClassChest(arena, p, ac)) {
                     return true;
                 }
                 // No linked chest? Fall through to config-file
