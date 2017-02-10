@@ -92,20 +92,22 @@ public class PickClassCommand implements Command
                 Location loc = ac.getClassChest();
                 if (loc != null) {
                     Block blockChest = loc.getBlock();
-                    InventoryHolder holder = (InventoryHolder) blockChest.getState();
-                    ItemStack[] contents = holder.getInventory().getContents();
-                    // Guard against double-chests for now
-                    if (contents.length > 36) {
-                        ItemStack[] newContents = new ItemStack[36];
-                        System.arraycopy(contents, 0, newContents, 0, 36);
-                        contents = newContents;
+                    if (blockChest.getState() instanceof InventoryHolder) {
+                        InventoryHolder holder = (InventoryHolder) blockChest.getState();
+                        ItemStack[] contents = holder.getInventory().getContents();
+                        // Guard against double-chests for now
+                        if (contents.length > 36) {
+                            ItemStack[] newContents = new ItemStack[36];
+                            System.arraycopy(contents, 0, newContents, 0, 36);
+                            contents = newContents;
+                        }
+                        arena.assignClassGiveInv(p, lowercase, contents);
+                        Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(lowercase));
+                        if (price > 0D) {
+                            Messenger.tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
+                        }
+                        return true;
                     }
-                    arena.assignClassGiveInv(p, lowercase, contents);
-                    Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(lowercase));
-                    if (price > 0D) {
-                        Messenger.tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
-                    }
-                    return true;
                 }
                 // No linked chest? Fall through to config-file
             }

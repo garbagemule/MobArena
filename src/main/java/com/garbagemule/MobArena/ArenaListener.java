@@ -1094,7 +1094,7 @@ public class ArenaListener
                         }
                         
                         // If a chest was found, get the contents
-                        if (blockChest != null) {
+                        if (blockChest != null && blockChest.getState() instanceof InventoryHolder) {
                             InventoryHolder holder = (InventoryHolder) blockChest.getState();
                             ItemStack[] contents = holder.getInventory().getContents();
                             // Guard against double-chests for now
