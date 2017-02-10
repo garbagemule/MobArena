@@ -35,6 +35,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -975,8 +976,8 @@ public class ArenaListener
             event.setCancelled(true);
         }
 
-        // If there's no block involved, just return.
-        if (!event.hasBlock())
+        // Bail if off-hand or if there's no block involved.
+        if (event.getHand().equals(EquipmentSlot.OFF_HAND) || !event.hasBlock())
             return;
 
         // Iron block
