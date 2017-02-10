@@ -31,18 +31,18 @@ public class MAGlobalListener implements Listener
 {
     private MobArena plugin;
     private ArenaMaster am;
-    
+
     public MAGlobalListener(MobArena plugin, ArenaMaster am) {
         this.plugin = plugin;
         this.am = am;
     }
-    
+
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                            BLOCK EVENTS                               //
     //                                                                       //
     ///////////////////////////////////////////////////////////////////////////
-    
+
     //TODO watch block physics, piston extend, and piston retract events
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockBreak(BlockBreakEvent event) {
@@ -92,15 +92,15 @@ public class MAGlobalListener implements Listener
         if (!event.getPlayer().hasPermission("mobarena.setup.leaderboards")) {
             return;
         }
-        
+
         if (!event.getLine(0).startsWith("[MA]")) {
             return;
         }
-        
+
         String text = event.getLine(0).substring((4));
         Arena arena;
         Stats stat;
-        
+
         if ((arena = am.getArenaWithName(text)) != null) {
             arena.getEventListener().onSignChange(event);
             setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.arenaName(), ChatColor.AQUA + "Players", "---------------");
@@ -110,23 +110,23 @@ public class MAGlobalListener implements Listener
             Messenger.tell(event.getPlayer(), "Stat sign created.");
         }
     }
-    
+
     private void setSignLines(SignChangeEvent event, String s1, String s2, String s3, String s4) {
         event.setLine(0, s1);
         event.setLine(1, s2);
         event.setLine(2, s3);
         event.setLine(3, s4);
     }
-    
-    
-    
+
+
+
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                           ENTITY EVENTS                               //
     //                                                                       //
     ///////////////////////////////////////////////////////////////////////////
-    
-    
+
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void creatureSpawn(CreatureSpawnEvent event) {
         for (Arena arena : am.getArenas())
@@ -181,7 +181,7 @@ public class MAGlobalListener implements Listener
         for (Arena arena : am.getArenas())
             arena.getEventListener().onEntityRegainHealth(event);
     }
-    
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void entityFoodLevelChange(FoodLevelChangeEvent event) {
         for (Arena arena : am.getArenas())
@@ -193,30 +193,30 @@ public class MAGlobalListener implements Listener
         for (Arena arena : am.getArenas())
             arena.getEventListener().onEntityTarget(event);
     }
-    
+
     @EventHandler(priority = EventPriority.HIGH)
     public void entityTeleport(EntityTeleportEvent event) {
         for (Arena arena : am.getArenas()) {
             arena.getEventListener().onEntityTeleport(event);
         }
     }
-    
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void potionSplash(PotionSplashEvent event) {
         for (Arena arena : am.getArenas()) {
             arena.getEventListener().onPotionSplash(event);
         }
     }
-    
-    
-    
+
+
+
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                           PLAYER EVENTS                               //
     //                                                                       //
     ///////////////////////////////////////////////////////////////////////////
-    
-    
+
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerAnimation(PlayerAnimationEvent event) {
         if (!am.isEnabled()) return;
@@ -290,22 +290,22 @@ public class MAGlobalListener implements Listener
                 return;
             }
         }
-        
+
         plugin.restoreInventory(event.getPlayer());
     }
-    
+
     public enum TeleportResponse {
         ALLOW, REJECT, IDGAF
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGH)
     public void playerTeleport(PlayerTeleportEvent event) {
         if (!am.isEnabled()) return;
-        
+
         boolean allow = true;
         for (Arena arena : am.getArenas()) {
             TeleportResponse r = arena.getEventListener().onPlayerTeleport(event);
-            
+
             // If just one arena allows, uncancel and stop.
             switch (r) {
                 case ALLOW:
@@ -317,13 +317,13 @@ public class MAGlobalListener implements Listener
                 default: break;
             }
         }
-        
+
         // Only cancel if at least one arena has rejected the teleport.
         if (!allow) {
             event.setCancelled(true);
         }
     }
-    
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerPreLogin(PlayerLoginEvent event) {
         for (Arena arena : am.getArenas()) {
@@ -337,21 +337,21 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onVehicleExit(event);
         }
     }
-    
-    
-    
+
+
+
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                            WORLD EVENTS                               //
     //                                                                       //
     ///////////////////////////////////////////////////////////////////////////
-    
-    
+
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void worldLoadEvent(WorldLoadEvent event) {
         am.loadArenasInWorld(event.getWorld().getName());
     }
-    
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void worldUnloadEvent(WorldUnloadEvent event) {
         am.unloadArenasInWorld(event.getWorld().getName());
