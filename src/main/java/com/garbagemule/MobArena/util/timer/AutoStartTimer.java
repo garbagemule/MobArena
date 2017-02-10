@@ -74,11 +74,7 @@ public class AutoStartTimer extends CountdownTimer implements TimerCallback {
 
     @Override
     public void onTick() {
-        // TODO: Remove this if no one reports issues
         if (arena.isRunning() || arena.getPlayersInLobby().isEmpty()) {
-            Messenger.severe("AUTO START TIMER WAS NOT STOPPED!");
-            Messenger.severe("  Please make a ticket and inform me about this at:");
-            Messenger.severe("  http://dev.bukkit.org/bukkit-plugins/mobarena/tickets/");
             stop();
             return;
         }
