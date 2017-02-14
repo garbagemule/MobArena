@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.listeners;
 
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,6 +20,9 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.leaderboards.Stats;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The point of this class is to simply redirect all events to each arena's
@@ -165,8 +169,11 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockExplode(BlockExplodeEvent event) {
+        // Create a copy of the block list so we can clear and re-add
+        List<Block> blocks = new ArrayList<>(event.blockList());
+
         // Account for Spigot's messy extra event
-        EntityExplodeEvent fake = new EntityExplodeEvent(null, event.getBlock().getLocation(), event.blockList(), event.getYield());
+        EntityExplodeEvent fake = new EntityExplodeEvent(null, event.getBlock().getLocation(), blocks, event.getYield());
         entityExplode(fake);
 
         // Copy the values over
