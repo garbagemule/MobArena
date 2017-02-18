@@ -96,7 +96,7 @@ public class PickClassCommand implements Command
                 // No linked chest? Fall through to config-file
             }
             arena.assignClass(p, lowercase);
-            Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(lowercase));
+            Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(lowercase).getConfigName());
             if (price > 0D) {
                 Messenger.tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
             }

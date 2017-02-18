@@ -1073,7 +1073,7 @@ public class ArenaListener
                         // Otherwise just fall through and use the items from the config-file
                     }
                     arena.assignClass(p, className);
-                    Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(className));
+                    Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(className).getConfigName());
                     if (price > 0D) {
                         Messenger.tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));
                     }

@@ -97,7 +97,7 @@ public class ClassChests {
             contents = newContents;
         }
         arena.assignClassGiveInv(player, classname, contents);
-        Messenger.tell(player, Msg.LOBBY_CLASS_PICKED, TextUtils.camelCase(classname));
+        Messenger.tell(player, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(classname).getConfigName());
 
         double price = ac.getPrice();
         if (price > 0D) {
