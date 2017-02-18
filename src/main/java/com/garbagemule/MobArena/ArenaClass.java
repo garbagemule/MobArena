@@ -29,7 +29,7 @@ public class ArenaClass
      */
     public ArenaClass(String name, double price, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
-        this.lowercaseName = name.toLowerCase();
+        this.lowercaseName = name.toLowerCase().replace(" ", "");
         
         this.items = new ArrayList<ItemStack>();
         this.armor = new ArrayList<ItemStack>(4);
@@ -347,18 +347,8 @@ public class ArenaClass
         private ArenaMaster am;
 
         public MyItems(double price, boolean unbreakableWeapons, boolean unbreakableArmor, ArenaMaster am) {
-            super("", price, unbreakableWeapons, unbreakableArmor);
+            super("My Items", price, unbreakableWeapons, unbreakableArmor);
             this.am = am;
-        }
-
-        @Override
-        public String getConfigName() {
-            return "My Items";
-        }
-
-        @Override
-        public String getLowercaseName() {
-            return "myitems";
         }
 
         @Override

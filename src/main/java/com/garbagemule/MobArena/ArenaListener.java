@@ -1004,7 +1004,7 @@ public class ArenaListener
 
     private void handleSign(Sign sign, Player p) {
         // Check if the first line is a class name.
-        String className = ChatColor.stripColor(sign.getLine(0)).toLowerCase();
+        String className = ChatColor.stripColor(sign.getLine(0)).toLowerCase().replace(" ", "");
 
         if (!arena.getClasses().containsKey(className) && !className.equals("random"))
             return;
@@ -1063,7 +1063,7 @@ public class ArenaListener
             public void run() {
                 if (!className.equalsIgnoreCase("random")) {
                     if (useClassChests) {
-                        ArenaClass ac = plugin.getArenaMaster().getClasses().get(className.toLowerCase());
+                        ArenaClass ac = plugin.getArenaMaster().getClasses().get(className.toLowerCase().replace(" ", ""));
                         if (ClassChests.assignClassFromStoredClassChest(arena, p, ac)) {
                             return;
                         }
