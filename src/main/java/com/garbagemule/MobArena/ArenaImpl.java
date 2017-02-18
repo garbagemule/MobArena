@@ -71,6 +71,7 @@ public class ArenaImpl implements Arena
     private Set<Player> randoms;
     
     // Classes stuff
+    private ArenaClass defaultClass;
     private Map<String,ArenaClass> classes;
     private Map<Player,PermissionAttachment> attachments;
     
@@ -139,6 +140,11 @@ public class ArenaImpl implements Arena
         this.classes      = plugin.getArenaMaster().getClasses();
         this.attachments  = new HashMap<Player,PermissionAttachment>();
         this.limitManager = new ClassLimitManager(this, classes, makeSection(section, "class-limits"));
+
+        String defaultClassName = settings.getString("default-class", null);
+        if (defaultClassName != null) {
+            this.defaultClass = classes.get(defaultClassName);
+        }
         
         // Blocks and pets
         this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
@@ -614,6 +620,14 @@ public class ArenaImpl implements Arena
             Messenger.tell(p, Msg.ARENA_START_DELAY, "" + startDelayTimer.getRemaining() / 20l);
         } else if (autoStartTimer.isRunning()) {
             Messenger.tell(p, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
+        }
+
+        if (defaultClass != null) {
+            // Assign default class if applicable
+            if (!ClassChests.assignClassFromStoredClassChest(this, p, defaultClass)) {
+                assignClass(p, defaultClass.getLowercaseName());
+                Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, defaultClass.getConfigName());
+            }
         }
         
         return true;

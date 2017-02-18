@@ -2,6 +2,7 @@ world: ''
 enabled: true
 protect: true
 entry-fee: ''
+default-class: ''
 clear-wave-before-next: false
 clear-boss-before-next: false
 clear-wave-before-boss: false
