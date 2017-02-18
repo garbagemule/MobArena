@@ -3,6 +3,8 @@ package com.garbagemule.MobArena;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -339,5 +341,41 @@ public class ArenaClass
     @Override
     public int hashCode() {
         return lowercaseName.hashCode();
+    }
+
+    public static class MyItems extends ArenaClass {
+        private ArenaMaster am;
+
+        public MyItems(double price, boolean unbreakableWeapons, boolean unbreakableArmor, ArenaMaster am) {
+            super("", price, unbreakableWeapons, unbreakableArmor);
+            this.am = am;
+        }
+
+        @Override
+        public String getConfigName() {
+            return "My Items";
+        }
+
+        @Override
+        public String getLowercaseName() {
+            return "myitems";
+        }
+
+        @Override
+        public void grantItems(Player p) {
+            Arena arena = am.getArenaWithPlayer(p);
+            if (arena != null) {
+                try {
+                    arena.getInventoryManager().restoreInv(p);
+                } catch (Exception e) {
+                    Messenger.severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
+                }
+            }
+        }
+
+        @Override
+        public Location getClassChest() {
+            return null;
+        }
     }
 }

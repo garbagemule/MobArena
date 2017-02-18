@@ -48,21 +48,18 @@ public class InventoryManager
         config.set("armor", armor);
         config.save(file);
         
-        // And clear the inventory
-        clearInventory(p);
         p.updateInventory();
     }
     
     public void restoreInv(Player p) throws FileNotFoundException, IOException, InvalidConfigurationException {
-        // Grab the file on disk
-        File file = new File(dir, p.getName());
-        
         // Try to grab the items from memory first
-        ItemStack[] items = this.items.remove(p);
-        ItemStack[] armor = this.armor.remove(p);
+        ItemStack[] items = this.items.get(p);
+        ItemStack[] armor = this.armor.get(p);
         
         // If we can't restore from memory, restore from file
         if (items == null || armor == null) {
+            File file = new File(dir, p.getName());
+
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
             
@@ -78,9 +75,16 @@ public class InventoryManager
         // Set the player inventory contents
         p.getInventory().setContents(items);
         p.getInventory().setArmorContents(armor);
-        
-        // Delete the file
-        file.delete();
+    }
+
+    public void clearCache(Player p) {
+        items.remove(p);
+        armor.remove(p);
+
+        File file = new File(dir, p.getName());
+        if (file.exists()) {
+            file.delete();
+        }
     }
     
     /**

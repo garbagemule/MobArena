@@ -956,6 +956,7 @@ public class ArenaImpl implements Arena
         // And update the inventory as well.
         try {
             inventoryManager.storeInv(p);
+            inventoryManager.clearInventory(p);
         } catch (Exception e) {
             e.printStackTrace();
             Messenger.severe("Failed to store inventory for player " + p.getName() + "!");
@@ -1017,6 +1018,7 @@ public class ArenaImpl implements Arena
         inventoryManager.clearInventory(p);
         try {
             inventoryManager.restoreInv(p);
+            inventoryManager.clearCache(p);
         } catch (Exception e) {
             e.printStackTrace();
             Messenger.severe("Failed to restore inventory for player " + p.getName() + "!");
