@@ -841,10 +841,11 @@ public class ArenaImpl implements Arena
             int amount = inv.getItem(hay).getAmount();
 
             // Variant
-            EntityType type = horseTypeFromAmount(amount);
+            Horse.Variant variant = horseVariantFromAmount(amount);
 
             // Spawn the horse, set its variant, tame it, etc.
-            AbstractHorse mount = (AbstractHorse) world.spawnEntity(p.getLocation(), type);
+            Horse mount = (Horse) world.spawnEntity(p.getLocation(), EntityType.HORSE);
+            mount.setVariant(variant);
             if (MobArena.random.nextInt(20) == 0) {
                 mount.setBaby();
             } else {
@@ -859,10 +860,10 @@ public class ArenaImpl implements Arena
             mount.getInventory().addItem(new ItemStack(Material.SADDLE));
 
             // Normal horses may have barding
-            if (type == EntityType.HORSE) {
+            if (variant == Horse.Variant.HORSE) {
                 Material barding = bardingFromAmount(amount);
                 if (barding != null) {
-                    ((Horse) mount).getInventory().setArmor(new ItemStack(barding));
+                    mount.getInventory().setArmor(new ItemStack(barding));
                 }
             }
 
@@ -874,13 +875,13 @@ public class ArenaImpl implements Arena
         }
     }
 
-    private EntityType horseTypeFromAmount(int amount) {
+    private Horse.Variant horseVariantFromAmount(int amount) {
         switch (amount % 8) {
-            case 2:  return EntityType.DONKEY;
-            case 3:  return EntityType.MULE;
-            case 4:  return EntityType.SKELETON_HORSE;
-            case 5:  return EntityType.ZOMBIE_HORSE;
-            default: return EntityType.HORSE;
+            case 2:  return Horse.Variant.DONKEY;
+            case 3:  return Horse.Variant.MULE;
+            case 4:  return Horse.Variant.SKELETON_HORSE;
+            case 5:  return Horse.Variant.UNDEAD_HORSE;
+            default: return Horse.Variant.HORSE;
         }
     }
 
@@ -1147,7 +1148,6 @@ public class ArenaImpl implements Arena
         ItemStack chestplate = null;
         ItemStack leggings = null;
         ItemStack boots = null;
-        ItemStack offhand = null;
         
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
@@ -1170,13 +1170,6 @@ public class ArenaImpl implements Arena
             }
             contents[i] = null;
         }
-        
-        // Equip the fifth last slot as the off-hand
-        ItemStack fifth = contents[contents.length - 5];
-        if (fifth != null) {
-            offhand = fifth.clone();
-            contents[contents.length - 5] = null;
-        }
 
         // Check the remaining slots for weapons
         if (arenaClass.hasUnbreakableWeapons()) {
@@ -1193,7 +1186,6 @@ public class ArenaImpl implements Arena
         inv.setChestplate(chestplate);
         inv.setLeggings(leggings);
         inv.setBoots(boots);
-        inv.setItemInOffHand(offhand);
 
         PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
         replacePermissions(p, pa);
@@ -1322,7 +1314,6 @@ public class ArenaImpl implements Arena
                     case ARROW:
                     case MINECART:
                     case BOAT:
-                    case SHULKER_BULLET:
                         e.remove();
                 }
             }

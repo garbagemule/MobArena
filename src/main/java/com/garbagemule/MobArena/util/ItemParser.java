@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,34 +11,14 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.MaterialData;
 
 import com.garbagemule.MobArena.MobArena;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionType;
 
 public class ItemParser
 {
     private static final int WOOL_ID = Material.WOOL.getId();
     private static final int DYE_ID  = Material.INK_SACK.getId();
-
-    private static final Map<Short, PotionType> POTION_TYPE_MAP = new HashMap<>();
-    static {
-        POTION_TYPE_MAP.put((short) 8193, PotionType.REGEN);
-        POTION_TYPE_MAP.put((short) 8194, PotionType.SPEED);
-        POTION_TYPE_MAP.put((short) 8195, PotionType.FIRE_RESISTANCE);
-        POTION_TYPE_MAP.put((short) 8196, PotionType.POISON);
-        POTION_TYPE_MAP.put((short) 8197, PotionType.INSTANT_HEAL);
-        POTION_TYPE_MAP.put((short) 8198, PotionType.NIGHT_VISION);
-        POTION_TYPE_MAP.put((short) 8200, PotionType.WEAKNESS);
-        POTION_TYPE_MAP.put((short) 8201, PotionType.STRENGTH);
-        POTION_TYPE_MAP.put((short) 8202, PotionType.SLOWNESS);
-        POTION_TYPE_MAP.put((short) 8203, PotionType.JUMP);
-        POTION_TYPE_MAP.put((short) 8204, PotionType.INSTANT_DAMAGE);
-        POTION_TYPE_MAP.put((short) 8205, PotionType.WATER_BREATHING);
-        POTION_TYPE_MAP.put((short) 8206, PotionType.INVISIBILITY);
-    }
     
     public static String parseString(ItemStack... stacks) {
         String result = "";
@@ -198,34 +177,7 @@ public class ItemParser
         int   id = getTypeId(item);
         short d  = getData(data, id);
         int   a  = getAmount(amount);
-
-        if (id == Material.LINGERING_POTION.getId() || id == Material.TIPPED_ARROW.getId() || id == Material.SPLASH_POTION.getId()) {
-            return withPotionMeta(id, d, a);
-        }
         return new ItemStack(id,a,d);
-    }
-    
-    private static ItemStack withPotionMeta(int id, short d, int a) {
-        ItemStack result = new ItemStack(id, a);
-        PotionMeta meta = (PotionMeta) result.getItemMeta();
-
-        boolean extended = (d & 64) > 0;
-        boolean upgraded = (d & 32) > 0;
-        if (extended) {
-            d -= 64;
-        }
-        if (upgraded) {
-            d -= 32;
-        }
-
-        PotionType type = POTION_TYPE_MAP.get(d);
-        if (type != null) {
-            PotionData pData = new PotionData(type, extended, upgraded);
-            meta.setBasePotionData(pData);
-            result.setItemMeta(meta);
-            return result;
-        }
-        return null;
     }
 
     private static int getTypeId(String item) {

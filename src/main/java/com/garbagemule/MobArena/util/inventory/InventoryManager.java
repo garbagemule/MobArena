@@ -98,7 +98,6 @@ public class InventoryManager
         inv.setChestplate(null);
         inv.setLeggings(null);
         inv.setBoots(null);
-        inv.setItemInOffHand(null);
         InventoryView view = p.getOpenInventory();
         if (view != null) {
             view.setCursor(null);

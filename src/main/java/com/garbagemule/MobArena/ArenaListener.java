@@ -651,7 +651,7 @@ public class ArenaListener
             onPetDamage(event, (Wolf) damagee, damager);
         }
         // Mount
-        else if (damagee instanceof AbstractHorse && monsters.hasMount(damagee)) {
+        else if (damagee instanceof Horse && monsters.hasMount(damagee)) {
             onMountDamage(event, (Horse) damagee, damager);
         }
         // Player
@@ -977,8 +977,8 @@ public class ArenaListener
             event.setCancelled(true);
         }
 
-        // Bail if off-hand or if there's no block involved.
-        if (event.getHand().equals(EquipmentSlot.OFF_HAND) || !event.hasBlock())
+        // Bail if there's no block involved.
+        if (!event.hasBlock())
             return;
 
         // Iron block

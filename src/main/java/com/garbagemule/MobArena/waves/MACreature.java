@@ -67,10 +67,10 @@ public class MACreature
     public static final MACreature WITCH = new MACreature("witch", "witches", EntityType.WITCH);
     public static final MACreature BABYZOMBIE = new MACreature("babyzombie", EntityType.ZOMBIE);
     public static final MACreature BABYPIGMAN = new MACreature("babypigman", "babypigmen", EntityType.PIG_ZOMBIE);
-    public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE_VILLAGER);
+    public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE);
 
     // 1.6 creatures
-    public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.ZOMBIE_HORSE);
+    public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.HORSE);
 
     // 1.8 creatures
     public static final MACreature KILLERBUNNY = new MACreature("killerbunny", "killerbunnies", EntityType.RABBIT);
@@ -158,15 +158,19 @@ public class MACreature
                 break;
             case "skeleton":
             case "stray":
-                e.getEquipment().setItemInMainHand(new ItemStack(Material.BOW, 1));
+                e.getEquipment().setItemInHand(new ItemStack(Material.BOW, 1));
                 break;
             case "babyzombievillager":
+                ((Zombie) e).setVillager(true);
             case "babyzombie":
             case "babypigman":
                 ((Zombie) e).setBaby(true);
                 break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
+                break;
+            case "undeadhorse":
+                ((Horse) e).setVariant(Horse.Variant.UNDEAD_HORSE);
                 break;
             default:
                 break;
