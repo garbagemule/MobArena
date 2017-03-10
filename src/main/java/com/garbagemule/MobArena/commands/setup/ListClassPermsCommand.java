@@ -28,14 +28,14 @@ public class ListClassPermsCommand implements Command
         String className = TextUtils.camelCase(args[0]);
         
         if (arenaClass == null) {
-            Messenger.tell(sender, "The class '" + className + "' does not exist.");
+            am.getGlobalMessenger().tell(sender, "The class '" + className + "' does not exist.");
             return true;
         }
         
-        Messenger.tell(sender, "Permissions for '" + className + "':");
+        am.getGlobalMessenger().tell(sender, "Permissions for '" + className + "':");
         Map<String,Boolean> perms = arenaClass.getPermissions();
         if (perms.isEmpty()) {
-            Messenger.tell(sender, "<none>");
+            am.getGlobalMessenger().tell(sender, "<none>");
             return true;
         }
         
@@ -44,7 +44,7 @@ public class ListClassPermsCommand implements Command
             if (!entry.getValue()) {
                 perm = "^" + perm;
             }
-            Messenger.tell(sender, "- " + perm);
+            am.getGlobalMessenger().tell(sender, "- " + perm);
         }
         return true;
     }

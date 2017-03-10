@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.Updater.UpdateResult;
 import com.garbagemule.MobArena.util.Updater.UpdateType;
@@ -91,7 +90,7 @@ public class VersionChecker
                     if (player == null) {
                         plugin.getLogger().info(message);
                     } else if (player.isOnline()) {
-                        Messenger.tell(player, message);
+                        plugin.getGlobalMessenger().tell(player, message);
                     }
                 }
             }

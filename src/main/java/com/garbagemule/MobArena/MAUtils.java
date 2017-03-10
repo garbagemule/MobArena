@@ -147,7 +147,7 @@ public class MAUtils
             if (!arena.getWorld().equals(p.getWorld())) {
                 plugin.getLogger().info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
-                Messenger.tell(p, "You warped out of the arena world.");
+                arena.getMessenger().tell(p, "You warped out of the arena world.");
                 continue;
             }
             

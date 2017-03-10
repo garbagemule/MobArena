@@ -20,7 +20,7 @@ public class LeaveCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
         
@@ -31,13 +31,13 @@ public class LeaveCommand implements Command
         if (arena == null) {
             arena = am.getArenaWithSpectator(p);
             if (arena == null) {
-                Messenger.tell(p, Msg.LEAVE_NOT_PLAYING);
+                am.getGlobalMessenger().tell(p, Msg.LEAVE_NOT_PLAYING);
                 return true;
             }
         }
         
         if (arena.playerLeave(p)) {
-            Messenger.tell(p, Msg.LEAVE_PLAYER_LEFT);
+            arena.getMessenger().tell(p, Msg.LEAVE_PLAYER_LEFT);
         }
         return true;
     }

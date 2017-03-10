@@ -20,7 +20,7 @@ public class SetClassCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
 
@@ -46,13 +46,13 @@ public class SetClassCommand implements Command
         
         // If the class is null, it was not created.
         if (arenaClass == null) {
-            Messenger.tell(p, "That class already exists!");
-            Messenger.tell(p, "To overwrite, omit the 'safe' parameter.");
+            am.getGlobalMessenger().tell(p, "That class already exists!");
+            am.getGlobalMessenger().tell(p, "To overwrite, omit the 'safe' parameter.");
             return true;
         }
         
         // Otherwise, yay!
-        Messenger.tell(p, "Class '" + className + "' set with your current inventory.");
+        am.getGlobalMessenger().tell(p, "Class '" + className + "' set with your current inventory.");
         return true;
     }
 }

@@ -282,7 +282,7 @@ public class MASpawnThread implements Runnable
                 continue;
             }
             
-            Messenger.tell(p, "Leaving so soon?");
+            arena.getMessenger().tell(p, "Leaving so soon?");
             p.getInventory().clear();
             arena.playerLeave(p);
         }
@@ -330,19 +330,19 @@ public class MASpawnThread implements Runnable
             rewardManager.addReward(p, reward);
 
             if (reward == null) {
-                Messenger.tell(p, "ERROR! Problem with rewards. Notify server host!");
+                arena.getMessenger().tell(p, "ERROR! Problem with rewards. Notify server host!");
                 plugin.getLogger().warning("Could not add null reward. Please check the config-file!");
             }
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
                 if (plugin.giveMoney(p, reward)) { // Money already awarded here, not needed at end of match as well
-                    Messenger.tell(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
+                    arena.getMessenger().tell(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
                 }
                 else {
                     plugin.getLogger().warning("Tried to add money, but no economy plugin detected!");
                 }
             }
             else {
-                Messenger.tell(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
+                arena.getMessenger().tell(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
             }
         }
     }

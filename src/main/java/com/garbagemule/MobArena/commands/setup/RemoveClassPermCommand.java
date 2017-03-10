@@ -24,18 +24,18 @@ public class RemoveClassPermCommand implements Command
         // Grab the arena class
         ArenaClass arenaClass = am.getClasses().get(args[0]);
         if (arenaClass == null) {
-            Messenger.tell(sender, "The class '" + TextUtils.camelCase(args[0]) + "' does not exist.");
+            am.getGlobalMessenger().tell(sender, "The class '" + TextUtils.camelCase(args[0]) + "' does not exist.");
             return true;
         }
         
         // Remove the permission.
         if (am.removeClassPermission(args[0], args[1])) {
-            Messenger.tell(sender, "Removed permission '" + args[1] + "' from class '" + TextUtils.camelCase(args[0]) + "'.");
+            am.getGlobalMessenger().tell(sender, "Removed permission '" + args[1] + "' from class '" + TextUtils.camelCase(args[0]) + "'.");
             return true;
         }
 
         // If it wasn't removed, notify.
-        Messenger.tell(sender, "Permission '" + args[1] + "' was NOT removed from class '" + TextUtils.camelCase(args[0]) + "'.");
+        am.getGlobalMessenger().tell(sender, "Permission '" + args[1] + "' was NOT removed from class '" + TextUtils.camelCase(args[0]) + "'.");
         return true;
     }
 }

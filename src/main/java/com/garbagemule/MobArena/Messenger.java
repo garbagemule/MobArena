@@ -11,28 +11,35 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class Messenger
 {
-    private Messenger() {}
+    private final String prefix;
 
-    public static boolean tell(CommandSender p, String msg) {
+    public Messenger(String prefix) {
+        if (prefix.contains("&")) {
+            prefix = ChatColor.translateAlternateColorCodes('&', prefix);
+        }
+        this.prefix = prefix;
+    }
+
+    public boolean tell(CommandSender p, String msg) {
         // If the input sender is null or the string is empty, return.
         if (p == null || msg.equals("")) {
             return false;
         }
 
         // Otherwise, send the message with the [MobArena] tag.
-        p.sendMessage(ChatColor.GREEN + "[MobArena] " + ChatColor.RESET + msg);
+        p.sendMessage(prefix + ChatColor.RESET + msg);
         return true;
     }
 
-    public static boolean tell(CommandSender p, Msg msg, String s) {
+    public boolean tell(CommandSender p, Msg msg, String s) {
         return tell(p, msg.format(s));
     }
 
-    public static boolean tell(CommandSender p, Msg msg) {
+    public boolean tell(CommandSender p, Msg msg) {
         return tell(p, msg.toString());
     }
 
-    public static void announce(Arena arena, String msg) {
+    public void announce(Arena arena, String msg) {
         List<Player> players = new ArrayList<Player>();
         players.addAll(arena.getPlayersInArena());
         players.addAll(arena.getPlayersInLobby());
@@ -42,11 +49,11 @@ public class Messenger
         }
     }
 
-    public static void announce(Arena arena, Msg msg, String s) {
+    public void announce(Arena arena, Msg msg, String s) {
         announce(arena, msg.format(s));
     }
 
-    public static void announce(Arena arena, Msg msg) {
+    public void announce(Arena arena, Msg msg) {
         announce(arena, msg.toString());
     }
 }

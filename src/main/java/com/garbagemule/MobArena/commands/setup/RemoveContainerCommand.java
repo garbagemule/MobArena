@@ -24,7 +24,7 @@ public class RemoveContainerCommand implements Command
         String chest;
         if (args.length == 1) {
             if (am.getArenas().size() > 1) {
-                Messenger.tell(sender, "There are multiple arenas.");
+                am.getGlobalMessenger().tell(sender, "There are multiple arenas.");
                 return true;
             }
             arena = am.getArenas().get(0);
@@ -32,16 +32,16 @@ public class RemoveContainerCommand implements Command
         } else {
             arena = am.getArenaWithName(args[0]);
             if (arena == null) {
-                Messenger.tell(sender, "There is no arena named " + args[0]);
+                am.getGlobalMessenger().tell(sender, "There is no arena named " + args[0]);
                 return true;
             }
             chest = args[1];
         }
 
         if (arena.getRegion().removeChest(chest)) {
-            Messenger.tell(sender, "Container " + chest + " removed for arena '" + arena.configName() + "'");
+            am.getGlobalMessenger().tell(sender, "Container " + chest + " removed for arena '" + arena.configName() + "'");
         } else {
-            Messenger.tell(sender, "Could not find the container " + chest + " for the arena '" + arena.configName() + "'");
+            am.getGlobalMessenger().tell(sender, "Could not find the container " + chest + " for the arena '" + arena.configName() + "'");
         }
         return true;
     }

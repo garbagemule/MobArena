@@ -20,7 +20,7 @@ public class AddArenaCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
 
@@ -32,11 +32,11 @@ public class AddArenaCommand implements Command
         
         Arena arena = am.getArenaWithName(args[0]);
         if (arena != null) {
-            Messenger.tell(sender, "An arena with that name already exists.");
+            am.getGlobalMessenger().tell(sender, "An arena with that name already exists.");
             return true;
         }
         am.createArenaNode(args[0], p.getWorld());
-        Messenger.tell(sender, "New arena with name '" + args[0] + "' created!");
+        am.getGlobalMessenger().tell(sender, "New arena with name '" + args[0] + "' created!");
         return true;
     }
 }

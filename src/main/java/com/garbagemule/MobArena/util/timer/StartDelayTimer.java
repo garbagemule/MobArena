@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.util.timer;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 
@@ -106,7 +105,7 @@ public class StartDelayTimer extends CountdownTimer implements TimerCallback {
 
             // Notify players of auto-start-timer duration
             if (autoStartTimer.isRunning()) {
-                Messenger.announce(arena, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
+                arena.getMessenger().announce(arena, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
             }
         }
     }

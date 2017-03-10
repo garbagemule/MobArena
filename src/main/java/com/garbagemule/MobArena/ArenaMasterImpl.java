@@ -73,6 +73,11 @@ public class ArenaMasterImpl implements ArenaMaster
         return plugin;
     }
 
+    @Override
+    public Messenger getGlobalMessenger() {
+        return plugin.getGlobalMessenger();
+    }
+
     public boolean isEnabled() {
         return enabled;
     }

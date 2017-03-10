@@ -20,7 +20,7 @@ public class JoinCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
         
@@ -37,7 +37,7 @@ public class JoinCommand implements Command
         // Deny joining from other arenas
         Arena fromArena = am.getArenaWithPlayer(p);
         if (fromArena != null && (fromArena.inArena(p) || fromArena.inLobby(p))) {
-            Messenger.tell(p, Msg.JOIN_ALREADY_PLAYING);
+            fromArena.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
             return true;
         }
         

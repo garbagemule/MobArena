@@ -11,6 +11,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -57,11 +58,20 @@ public class MobArena extends JavaPlugin
     public static final int ECONOMY_MONEY_ID = -29;
     public static Random random = new Random();
 
+    private Messenger messenger;
+
     public void onEnable() {
         // Initialize config-file
         configFile = new File(getDataFolder(), "config.yml");
         config = new YamlConfiguration();
         reloadConfig();
+
+        // Initialize global messenger
+        String prefix = config.getString("global-settings.prefix", "");
+        if (prefix.isEmpty()) {
+            prefix = ChatColor.GREEN + "[MobArena] ";
+        }
+        messenger = new Messenger(prefix);
 
         // Set the header and save
         getConfig().options().header(getHeader());
@@ -351,5 +361,9 @@ public class MobArena extends JavaPlugin
         double major = item.getAmount();
         double minor = item.getDurability() / 100D;
         return major + minor;
+    }
+
+    public Messenger getGlobalMessenger() {
+        return messenger;
     }
 }

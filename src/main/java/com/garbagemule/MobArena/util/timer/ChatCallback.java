@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.util.timer;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 
@@ -49,7 +48,7 @@ public class ChatCallback extends TimerCallbackAdapter {
         // Announce remaining seconds
         long ticks  = timer.getRemaining();
         int seconds = toSeconds(ticks);
-        Messenger.announce(arena, msg, String.valueOf(seconds));
+        arena.getMessenger().announce(arena, msg, String.valueOf(seconds));
 
         // Calculate the new interval
         index++;
