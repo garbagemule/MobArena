@@ -3,10 +3,9 @@ package com.garbagemule.MobArena.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import com.garbagemule.MobArena.Messenger;
 
 public class PotionEffectParser
 {
@@ -49,7 +48,7 @@ public class PotionEffectParser
         }
         
         if (result == null) {
-            Messenger.warning("Failed to parse potion effect: " + p);
+            Bukkit.getLogger().warning("[MobArena] Failed to parse potion effect: " + p);
             return null;
         }
         

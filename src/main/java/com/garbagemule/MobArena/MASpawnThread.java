@@ -175,8 +175,8 @@ public class MASpawnThread implements Runnable
                     e.setHealth(health);
                 } catch (IllegalArgumentException ex) {
                     // Spigot... *facepalm*
-                    Messenger.severe("Can't set health to " + health + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
-                    Messenger.severe(ex.getLocalizedMessage());
+                    plugin.getLogger().severe("Can't set health to " + health + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
+                    plugin.getLogger().severe(ex.getLocalizedMessage());
                     if (w.getType() == WaveType.BOSS) {
                         ((BossWave) w).setBossName("SPIGOT ERROR");
                     } else {
@@ -331,14 +331,14 @@ public class MASpawnThread implements Runnable
 
             if (reward == null) {
                 Messenger.tell(p, "ERROR! Problem with rewards. Notify server host!");
-                Messenger.warning("Could not add null reward. Please check the config-file!");
+                plugin.getLogger().warning("Could not add null reward. Please check the config-file!");
             }
             else if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
                 if (plugin.giveMoney(p, reward)) { // Money already awarded here, not needed at end of match as well
                     Messenger.tell(p, Msg.WAVE_REWARD, plugin.economyFormat(reward));
                 }
                 else {
-                    Messenger.warning("Tried to add money, but no economy plugin detected!");
+                    plugin.getLogger().warning("Tried to add money, but no economy plugin detected!");
                 }
             }
             else {

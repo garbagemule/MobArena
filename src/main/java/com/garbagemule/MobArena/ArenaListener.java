@@ -947,7 +947,7 @@ public class ArenaListener
          * trying to steal items, if a PlayerDropItemEvent is fired.
          */
         else if (banned.contains(p)) {
-            Messenger.warning("Player " + p.getName() + " tried to steal class items!");
+            plugin.getLogger().warning("Player " + p.getName() + " tried to steal class items!");
             event.setCancelled(true);
         }
     }

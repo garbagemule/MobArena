@@ -2,7 +2,6 @@ package com.garbagemule.MobArena;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -12,10 +11,6 @@ import com.garbagemule.MobArena.framework.Arena;
 
 public class Messenger
 {
-    private static final Logger log = Logger.getLogger("Minecraft");
-    
-    private static final String prefix = "[MobArena] ";
-    
     private Messenger() {}
 
     public static boolean tell(CommandSender p, String msg) {
@@ -53,17 +48,5 @@ public class Messenger
 
     public static void announce(Arena arena, Msg msg) {
         announce(arena, msg.toString());
-    }
-    
-    public static void info(String msg) {
-        log.info(prefix + msg);
-    }
-    
-    public static void warning(String msg) {
-        log.warning(prefix + msg);
-    }
-    
-    public static void severe(String msg) {
-        log.severe(prefix + msg);
     }
 }

@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.waves;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -48,7 +47,7 @@ public class WaveManager
         finalWave = section.getParent().getInt("settings.final-wave", 0);
         
         if (recurrentWaves.isEmpty()) {
-            Messenger.warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));
             
             Wave def = WaveParser.createDefaultWave();
             recurrentWaves.add(def);

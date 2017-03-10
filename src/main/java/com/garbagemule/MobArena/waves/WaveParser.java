@@ -9,7 +9,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.ItemParser;
@@ -33,14 +32,14 @@ public class WaveParser
         
         // If the config is null, return the empty set.
         if (config == null) {
-            Messenger.warning(WaveError.BRANCH_MISSING.format(branch.toString().toLowerCase(), arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.BRANCH_MISSING.format(branch.toString().toLowerCase(), arena.configName()));
             return result;
         }
         
         // If no waves were found, return the empty set.
         Set<String> waves = config.getKeys(false);
         if (waves == null) {
-            Messenger.warning(WaveError.BRANCH_MISSING.format(branch.toString().toLowerCase(), arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.BRANCH_MISSING.format(branch.toString().toLowerCase(), arena.configName()));
             return result;
         }
         
@@ -66,7 +65,7 @@ public class WaveParser
         WaveType type = WaveType.fromString(t);
         
         if (type == null) {
-            Messenger.warning(WaveError.INVALID_TYPE.format(t, name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.INVALID_TYPE.format(t, name, arena.configName()));
             return null;
         }
         
@@ -97,7 +96,7 @@ public class WaveParser
         
         // Check that the result isn't null
         if (result == null) {
-            Messenger.warning(WaveError.INVALID_WAVE.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.INVALID_WAVE.format(name, arena.configName()));
             return null;
         }
         
@@ -122,10 +121,10 @@ public class WaveParser
         
         // Recurrent must have priority + frequency, single must have firstWave
         if (branch == WaveBranch.RECURRENT && (priority == -1 || frequency <= 0)) {
-            Messenger.warning(WaveError.RECURRENT_NODES.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.RECURRENT_NODES.format(name, arena.configName()));
             return null;
         } else if (branch == WaveBranch.SINGLE && firstWave <= 0) {
-            Messenger.warning(WaveError.SINGLE_NODES.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.SINGLE_NODES.format(name, arena.configName()));
             return null;
         }
         
@@ -150,7 +149,7 @@ public class WaveParser
         // Grab the monster map.
         SortedMap<Integer,MACreature> monsters = getMonsterMap(config);
         if (monsters == null || monsters.isEmpty()) {
-            Messenger.warning(WaveError.MONSTER_MAP_MISSING.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.MONSTER_MAP_MISSING.format(name, arena.configName()));
             return null;
         }
         
@@ -175,7 +174,7 @@ public class WaveParser
     private static Wave parseSpecialWave(Arena arena, String name, ConfigurationSection config) {
         SortedMap<Integer,MACreature> monsters = getMonsterMap(config);
         if (monsters == null || monsters.isEmpty()) {
-            Messenger.warning(WaveError.MONSTER_MAP_MISSING.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.MONSTER_MAP_MISSING.format(name, arena.configName()));
             return null;
         }
         
@@ -186,7 +185,7 @@ public class WaveParser
     private static Wave parseSwarmWave(Arena arena, String name, ConfigurationSection config) {
         MACreature monster = getSingleMonster(config);
         if (monster == null) {
-            Messenger.warning(WaveError.SINGLE_MONSTER_MISSING.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.SINGLE_MONSTER_MISSING.format(name, arena.configName()));
             return null;
         }
         
@@ -203,7 +202,7 @@ public class WaveParser
     private static Wave parseSupplyWave(Arena arena, String name, ConfigurationSection config) {
         SortedMap<Integer,MACreature> monsters = getMonsterMap(config);
         if (monsters == null || monsters.isEmpty()) {
-            Messenger.warning(WaveError.MONSTER_MAP_MISSING.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.MONSTER_MAP_MISSING.format(name, arena.configName()));
             return null;
         }
         
@@ -220,7 +219,7 @@ public class WaveParser
     private static Wave parseUpgradeWave(Arena arena, String name, ConfigurationSection config) {
         Map<String,List<Upgrade>> upgrades = getUpgradeMap(config);
         if (upgrades == null || upgrades.isEmpty()) {
-            Messenger.warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
             return null;
         }
 
@@ -236,7 +235,7 @@ public class WaveParser
     private static Wave parseBossWave(Arena arena, String name, ConfigurationSection config) {
         MACreature monster = getSingleMonster(config);
         if (monster == null) {
-            Messenger.warning(WaveError.SINGLE_MONSTER_MISSING.format(name, arena.configName()));
+            arena.getPlugin().getLogger().warning(WaveError.SINGLE_MONSTER_MISSING.format(name, arena.configName()));
             return null;
         }
         
@@ -252,7 +251,7 @@ public class WaveParser
         String healthString = config.getString("health");
         if (healthString == null) {
             String warning = "No health value found for boss '%s' in arena '%s'. Defaulting to medium.";
-            Messenger.warning(String.format(warning, name, arena.configName()));
+            arena.getPlugin().getLogger().warning(String.format(warning, name, arena.configName()));
             result.setHealth(BossHealth.MEDIUM);
         } else {
             BossHealth health = BossHealth.fromString(healthString);
@@ -262,7 +261,7 @@ public class WaveParser
                 int flatHealth = config.getInt("health", 0);
                 if (flatHealth <= 0) {
                     String warning = "Unable to parse health of boss '%s' in arena '%s'. Defaulting to medium. Value was '%s'";
-                    Messenger.warning(String.format(warning, name, arena.configName(), healthString));
+                    arena.getPlugin().getLogger().warning(String.format(warning, name, arena.configName(), healthString));
                     result.setHealth(BossHealth.MEDIUM);
                 } else {
                     result.setFlatHealth(flatHealth);
@@ -277,7 +276,7 @@ public class WaveParser
             for (String ability : parts) {
                 Ability a = AbilityManager.getAbility(ability.trim());
                 if (a == null) {
-                    Messenger.warning(WaveError.BOSS_ABILITY.format(ability.trim(), name, arena.configName()));
+                    arena.getPlugin().getLogger().warning(WaveError.BOSS_ABILITY.format(ability.trim(), name, arena.configName()));
                     continue;
                 }
                 
@@ -380,7 +379,7 @@ public class WaveParser
             Location spawnpoint = region.getSpawnpoint(spawn.trim());
             
             if (spawnpoint == null) {
-                Messenger.warning("Spawnpoint '" + spawn + "' in wave '" + name + "' for arena '" + arena.configName() + "' could not be parsed!");
+                arena.getPlugin().getLogger().warning("Spawnpoint '" + spawn + "' in wave '" + name + "' for arena '" + arena.configName() + "' could not be parsed!");
                 continue;
             }
             

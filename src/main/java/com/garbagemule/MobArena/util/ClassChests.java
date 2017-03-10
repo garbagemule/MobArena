@@ -28,7 +28,7 @@ public class ClassChests {
 
         Block block = loc.getBlock();
         if (!(block.getState() instanceof InventoryHolder)) {
-            Messenger.warning("Class chest location for class '" + ac.getConfigName() + "' is not a chest!");
+            arena.getPlugin().getLogger().warning("Class chest location for class '" + ac.getConfigName() + "' is not a chest!");
             return false;
         }
 

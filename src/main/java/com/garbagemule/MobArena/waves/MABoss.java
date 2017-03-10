@@ -1,6 +1,6 @@
 package com.garbagemule.MobArena.waves;
 
-import com.garbagemule.MobArena.Messenger;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,8 +24,8 @@ public class MABoss
             entity.setHealth(maxHealth);
         } catch (IllegalArgumentException ex) {
             // Spigot... *facepalm*
-            Messenger.severe("Can't set health to " + maxHealth + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
-            Messenger.severe(ex.getLocalizedMessage());
+            Bukkit.getLogger().severe("[MobArena] Can't set health to " + maxHealth + ", using default health. If you are running Spigot, set 'maxHealth' higher in your Spigot settings.");
+            Bukkit.getLogger().severe("[MobArena] " + ex.getLocalizedMessage());
         }
         this.entity    = entity;
         this.dead      = false;

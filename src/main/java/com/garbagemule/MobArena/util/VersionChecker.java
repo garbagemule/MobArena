@@ -84,12 +84,12 @@ public class VersionChecker
         return Integer.parseInt(parts[i]);
     }
 
-    private static void message(MobArena plugin, final Player player, final String... messages) {
+    private static void message(final MobArena plugin, final Player player, final String... messages) {
         Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
             public void run() {
                 for (String message : messages) {
                     if (player == null) {
-                        Messenger.info(message);
+                        plugin.getLogger().info(message);
                     } else if (player.isOnline()) {
                         Messenger.tell(player, message);
                     }

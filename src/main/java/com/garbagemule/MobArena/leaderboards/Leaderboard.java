@@ -12,7 +12,6 @@ import org.bukkit.block.Sign;
 
 import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 
@@ -61,7 +60,7 @@ public class Leaderboard
         }
         
         if (!(topLeft.getBlock().getState() instanceof Sign)) {
-            Messenger.warning("The leaderboard-node for arena '" + arena.configName() + "' does not point to a sign!");
+            plugin.getLogger().warning("The leaderboard-node for arena '" + arena.configName() + "' does not point to a sign!");
             return;
         }
         
@@ -127,7 +126,7 @@ public class Leaderboard
         
         if (!(state instanceof Sign))
         {
-            Messenger.severe("Leaderboards for '" + arena.configName() + "' could not be established!");
+            plugin.getLogger().severe("Leaderboards for '" + arena.configName() + "' could not be established!");
             return false;
         }
         

@@ -4,11 +4,13 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -89,7 +91,7 @@ public class MobArena extends JavaPlugin
         startMetrics();
 
         // Announce enable!
-        Messenger.info("v" + this.getDescription().getVersion() + " enabled.");
+        getLogger().info("v" + this.getDescription().getVersion() + " enabled.");
 
         // Check for updates
         if (getConfig().getBoolean("global-settings.update-notification", false)) {
@@ -105,8 +107,8 @@ public class MobArena extends JavaPlugin
         }
         arenaMaster.resetArenaMap();
         VersionChecker.shutdown();
-        
-        Messenger.info("disabled.");
+
+        getLogger().info("disabled.");
     }
 
     public File getPluginFile() {
@@ -122,7 +124,7 @@ public class MobArena extends JavaPlugin
     public void reloadConfig() {
         // Check if the config-file exists
         if (!configFile.exists()) {
-            Messenger.info("No config-file found, creating default...");
+            getLogger().info("No config-file found, creating default...");
             saveDefaultConfig();
         }
 
@@ -156,7 +158,7 @@ public class MobArena extends JavaPlugin
             throw new IllegalStateException("Config-file could not be created for some reason! <o>");
         } catch (IOException e) {
             // Error reading the file, just re-throw
-            Messenger.severe("There was an error reading the config-file:\n" + e.getMessage());
+            getLogger().severe("There was an error reading the config-file:\n" + e.getMessage());
         } finally {
             // Java 6 <3
             if (in != null) {
@@ -183,7 +185,7 @@ public class MobArena extends JavaPlugin
         File file = new File(getDataFolder(), "announcements.yml");
         try {
             if (file.createNewFile()) {
-                Messenger.info("announcements.yml created.");
+                getLogger().info("announcements.yml created.");
                 YamlConfiguration yaml = Msg.toYaml();
                 yaml.save(file);
                 return;
@@ -228,7 +230,7 @@ public class MobArena extends JavaPlugin
     private void setupVault() {
         Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
         if (vaultPlugin == null) {
-            Messenger.warning("Vault was not found. Economy rewards will not work!");
+            getLogger().warning("Vault was not found. Economy rewards will not work!");
             return;
         }
         
@@ -237,9 +239,9 @@ public class MobArena extends JavaPlugin
         
         if (e != null) {
             economy = e.getProvider();
-            Messenger.info("Vault found; economy rewards enabled.");
+            getLogger().info("Vault found; economy rewards enabled.");
         } else {
-            Messenger.warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
+            getLogger().warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
         }
     }
     
@@ -247,7 +249,7 @@ public class MobArena extends JavaPlugin
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) return;
 
-        Messenger.info("MagicSpells found, loading config-file.");
+        getLogger().info("MagicSpells found, loading config-file.");
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
     }
     
@@ -264,7 +266,7 @@ public class MobArena extends JavaPlugin
             Metrics m = new Metrics(this);
             m.start();
         } catch (Exception e) {
-            Messenger.warning("y u disable stats :(");
+            getLogger().warning("y u disable stats :(");
         }
     }
     

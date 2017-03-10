@@ -973,7 +973,7 @@ public class ArenaImpl implements Arena
             inventoryManager.clearInventory(p);
         } catch (Exception e) {
             e.printStackTrace();
-            Messenger.severe("Failed to store inventory for player " + p.getName() + "!");
+            plugin.getLogger().severe("Failed to store inventory for player " + p.getName() + "!");
         }
     }
 
@@ -1035,7 +1035,7 @@ public class ArenaImpl implements Arena
             inventoryManager.clearCache(p);
         } catch (Exception e) {
             e.printStackTrace();
-            Messenger.severe("Failed to restore inventory for player " + p.getName() + "!");
+            plugin.getLogger().severe("Failed to restore inventory for player " + p.getName() + "!");
         }
         rewardManager.grantRewards(p);
 
@@ -1239,7 +1239,7 @@ public class ArenaImpl implements Arena
         {
             if (classes.isEmpty())
             {
-                Messenger.info("Player '" + p.getName() + "' has no class permissions!");
+                plugin.getLogger().info("Player '" + p.getName() + "' has no class permissions!");
                 playerLeave(p);
                 return;
             }
@@ -1271,7 +1271,7 @@ public class ArenaImpl implements Arena
                 String perm = entry.getKey() + ":" + entry.getValue();
                 String name = p.getName();
 
-                Messenger.warning("[PERM01] Failed to remove permission attachment '" + perm + "' from player '" + name
+                plugin.getLogger().warning("[PERM01] Failed to remove permission attachment '" + perm + "' from player '" + name
                                   + "'.\nThis should not be a big issue, but please verify that the player doesn't have any permissions they shouldn't have.");
             }
         }
