@@ -153,7 +153,7 @@ public class BossWave extends AbstractWave
     public void announceAbility(Ability ability, MABoss boss, Arena arena) {
         if(getAbilityAnnounce()) {
             AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
-            arena.getMessenger().announce(arena, Msg.WAVE_BOSS_ABILITY, info.name());
+            arena.announce(Msg.WAVE_BOSS_ABILITY, info.name());
         }
     }
 

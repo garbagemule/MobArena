@@ -105,7 +105,7 @@ public class StartDelayTimer extends CountdownTimer implements TimerCallback {
 
             // Notify players of auto-start-timer duration
             if (autoStartTimer.isRunning()) {
-                arena.getMessenger().announce(arena, Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
+                arena.announce(Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
             }
         }
     }

@@ -492,7 +492,7 @@ public class ArenaListener
             onMountDeath(event);
         }
         else if (monsters.removeGolem(event.getEntity())) {
-            arena.getMessenger().announce(arena, Msg.GOLEM_DIED);
+            arena.announce(Msg.GOLEM_DIED);
         }
     }
 
@@ -505,7 +505,7 @@ public class ArenaListener
                 callKillEvent(player.getKiller(), player);
             }
             if (arena.getSettings().getBoolean("show-death-messages", true)) {
-                arena.getMessenger().announce(arena, event.getDeathMessage());
+                arena.announce(event.getDeathMessage());
             }
             event.setDeathMessage(null);
             arena.getScoreboard().death(player);

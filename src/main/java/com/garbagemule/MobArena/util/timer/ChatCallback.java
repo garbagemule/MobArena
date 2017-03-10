@@ -48,7 +48,7 @@ public class ChatCallback extends TimerCallbackAdapter {
         // Announce remaining seconds
         long ticks  = timer.getRemaining();
         int seconds = toSeconds(ticks);
-        arena.getMessenger().announce(arena, msg, String.valueOf(seconds));
+        arena.announce(msg, String.valueOf(seconds));
 
         // Calculate the new interval
         index++;

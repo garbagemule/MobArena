@@ -401,6 +401,22 @@ public class ArenaImpl implements Arena
         return plugin.getGlobalMessenger();
     }
 
+    @Override
+    public void announce(String msg) {
+        for (Player p : getAllPlayers()) {
+            messenger.tell(p, msg);
+        }
+    }
+
+    @Override
+    public void announce(Msg msg, String s) {
+        announce(msg.format(s));
+    }
+
+    @Override
+    public void announce(Msg msg) {
+        announce(msg.toString());
+    }
 
     @Override
     public boolean startArena() {
@@ -500,7 +516,7 @@ public class ArenaImpl implements Arena
         leaderboard.initialize();
         leaderboard.startTracking();
         
-        messenger.announce(this, Msg.ARENA_START);
+        announce(Msg.ARENA_START);
         
         return true;
     }
@@ -540,7 +556,7 @@ public class ArenaImpl implements Arena
                 messenger.tell(p, Msg.ARENA_END_GLOBAL, configName());
             }
         } else {
-            messenger.announce(this, Msg.ARENA_END);
+            announce(Msg.ARENA_END);
         }
         cleanup();
         

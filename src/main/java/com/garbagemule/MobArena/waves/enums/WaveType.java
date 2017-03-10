@@ -9,42 +9,42 @@ public enum WaveType
     DEFAULT {
         @Override
         public void announce(Arena arena, int wave) {
-            arena.getMessenger().announce(arena, Msg.WAVE_DEFAULT, "" + wave);
+            arena.announce(Msg.WAVE_DEFAULT, "" + wave);
         }
     },
     
     SPECIAL {
         @Override
         public void announce(Arena arena, int wave) {
-            arena.getMessenger().announce(arena, Msg.WAVE_SPECIAL, "" + wave);
+            arena.announce(Msg.WAVE_SPECIAL, "" + wave);
         }
     },
     
     SWARM {
         @Override
         public void announce(Arena arena, int wave) {
-            arena.getMessenger().announce(arena, Msg.WAVE_SWARM, "" + wave);
+            arena.announce(Msg.WAVE_SWARM, "" + wave);
         }
     },
     
     SUPPLY {
         @Override
         public void announce(Arena arena, int wave) {
-            arena.getMessenger().announce(arena, Msg.WAVE_SUPPLY, "" + wave);
+            arena.announce(Msg.WAVE_SUPPLY, "" + wave);
         }
     },
     
     BOSS {
         @Override
         public void announce(Arena arena, int wave) {
-            arena.getMessenger().announce(arena, Msg.WAVE_BOSS, "" + wave);
+            arena.announce(Msg.WAVE_BOSS, "" + wave);
         }
     },
     
     UPGRADE {
         @Override
         public void announce(Arena arena, int wave) {
-            arena.getMessenger().announce(arena, Msg.WAVE_UPGRADE, "" + wave);
+            arena.announce(Msg.WAVE_UPGRADE, "" + wave);
         }
     };
 
