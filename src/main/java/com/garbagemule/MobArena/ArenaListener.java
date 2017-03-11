@@ -978,7 +978,7 @@ public class ArenaListener
         }
 
         // Bail if off-hand or if there's no block involved.
-        if (event.getHand().equals(EquipmentSlot.OFF_HAND) || !event.hasBlock())
+        if (event.getHand() == EquipmentSlot.OFF_HAND || !event.hasBlock())
             return;
 
         // Iron block

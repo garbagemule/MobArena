@@ -254,7 +254,7 @@ public class SetupCommand implements Command, Listener {
             Player p = event.getPlayer();
             if (!p.equals(player)) return;
 
-            if (event.getHand().equals(EquipmentSlot.OFF_HAND)) return;
+            if (event.getHand() == EquipmentSlot.OFF_HAND) return;
 
             ItemStack tool = p.getItemInHand();
             if (!isTool(tool)) return;
