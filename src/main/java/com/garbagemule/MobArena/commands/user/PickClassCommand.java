@@ -2,7 +2,6 @@ package com.garbagemule.MobArena.commands.user;
 
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.ClassLimitManager;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
@@ -30,7 +29,7 @@ public class PickClassCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
 
@@ -46,7 +45,7 @@ public class PickClassCommand implements Command
 
         // Make sure the player is in the lobby
         if (!arena.inLobby(p)) {
-            Messenger.tell(p, Msg.MISC_NO_ACCESS);
+            arena.getMessenger().tell(p, Msg.MISC_NO_ACCESS);
             return true;
         }
 
@@ -54,13 +53,13 @@ public class PickClassCommand implements Command
         String lowercase = args[0].toLowerCase();
         ArenaClass ac = am.getClasses().get(lowercase);
         if (ac == null) {
-            Messenger.tell(p, Msg.LOBBY_NO_SUCH_CLASS, lowercase);
+            arena.getMessenger().tell(p, Msg.LOBBY_NO_SUCH_CLASS, lowercase);
             return true;
         }
 
         // Check for permission.
         if (!am.getPlugin().has(p, "mobarena.classes." + lowercase) && !lowercase.equals("random")) {
-            Messenger.tell(p, Msg.LOBBY_CLASS_PERMISSION);
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return true;
         }
 
@@ -71,7 +70,7 @@ public class PickClassCommand implements Command
         // If the new class is full, inform the player.
         ClassLimitManager clm = arena.getClassLimitManager();
         if (!clm.canPlayerJoinClass(ac)) {
-            Messenger.tell(p, Msg.LOBBY_CLASS_FULL);
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_FULL);
             return true;
         }
 
@@ -79,7 +78,7 @@ public class PickClassCommand implements Command
         double price = ac.getPrice();
         if (price > 0D) {
             if (!am.getPlugin().hasEnough(p, price)) {
-                Messenger.tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, am.getPlugin().economyFormat(price));
+                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, am.getPlugin().economyFormat(price));
                 return true;
             }
         }
@@ -96,13 +95,13 @@ public class PickClassCommand implements Command
                 // No linked chest? Fall through to config-file
             }
             arena.assignClass(p, lowercase);
-            Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(lowercase).getConfigName());
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(lowercase).getConfigName());
             if (price > 0D) {
-                Messenger.tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
+                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
             }
         } else {
             arena.addRandomPlayer(p);
-            Messenger.tell(p, Msg.LOBBY_CLASS_RANDOM);
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_RANDOM);
         }
         return true;
     }

@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.commands.setup;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.Arena;
@@ -26,7 +25,7 @@ public class SettingCommand implements Command {
         // Find the arena first
         Arena arena = am.getArenaWithName(args[0]);
         if (arena == null) {
-            Messenger.tell(sender, "There's no arena with the name '" + args[0] + "'.");
+            am.getGlobalMessenger().tell(sender, "There's no arena with the name '" + args[0] + "'.");
             return true;
         }
 
@@ -39,7 +38,7 @@ public class SettingCommand implements Command {
                 buffy.append(ChatColor.AQUA).append(entry.getKey()).append(ChatColor.RESET).append(": ");
                 buffy.append(ChatColor.YELLOW).append(entry.getValue());
             }
-            Messenger.tell(sender, buffy.toString());
+            am.getGlobalMessenger().tell(sender, buffy.toString());
             return true;
         }
 
@@ -50,7 +49,7 @@ public class SettingCommand implements Command {
             buffy.append(ChatColor.RED).append(" is not a valid setting.");
             buffy.append("Type ").append(ChatColor.YELLOW).append("/ma setting ").append(args[0]);
             buffy.append(ChatColor.RESET).append(" to see all settings.");
-            Messenger.tell(sender, buffy.toString());
+            am.getGlobalMessenger().tell(sender, buffy.toString());
             return true;
         }
 
@@ -59,14 +58,14 @@ public class SettingCommand implements Command {
             StringBuilder buffy = new StringBuilder();
             buffy.append(ChatColor.AQUA).append(args[1]).append(ChatColor.RESET).append(": ");
             buffy.append(ChatColor.YELLOW).append(val);
-            Messenger.tell(sender, buffy.toString());
+            am.getGlobalMessenger().tell(sender, buffy.toString());
             return true;
         }
 
         // Otherwise, determine the value of the setting
         if (val instanceof Boolean) {
             if (!args[2].matches("on|off|yes|no|true|false")) {
-                Messenger.tell(sender, "Expected a boolean value for that setting");
+                am.getGlobalMessenger().tell(sender, "Expected a boolean value for that setting");
                 return true;
             }
             boolean value = args[2].matches("on|yes|true");
@@ -76,7 +75,7 @@ public class SettingCommand implements Command {
             try {
                 arena.getSettings().set(args[1], Integer.parseInt(args[2]));
             } catch (NumberFormatException e) {
-                Messenger.tell(sender, "Expected a numeric value for that setting.");
+                am.getGlobalMessenger().tell(sender, "Expected a numeric value for that setting.");
                 return true;
             }
         } else {
@@ -93,7 +92,7 @@ public class SettingCommand implements Command {
         buffy.append(" for arena ").append(ChatColor.GREEN).append(args[0]).append(ChatColor.RESET);
         buffy.append(" set to ").append(ChatColor.YELLOW).append(args[2]).append(ChatColor.RESET);
         buffy.append("!");
-        Messenger.tell(sender, buffy.toString());
+        am.getGlobalMessenger().tell(sender, buffy.toString());
         return true;
     }
 }

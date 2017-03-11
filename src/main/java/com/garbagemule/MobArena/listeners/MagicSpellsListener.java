@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.listeners;
 import java.io.File;
 import java.util.List;
 
-import com.garbagemule.MobArena.Messenger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,7 +29,7 @@ public class MagicSpellsListener implements Listener
         File file = new File(plugin.getDataFolder(), "magicspells.yml");
         if (!file.exists()) {
             plugin.saveResource("magicspells.yml", false);
-            Messenger.info("magicspells.yml created.");
+            plugin.getLogger().info("magicspells.yml created.");
         }
         try {
             FileConfiguration config = new YamlConfiguration();

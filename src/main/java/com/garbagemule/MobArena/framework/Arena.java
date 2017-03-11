@@ -2,6 +2,8 @@ package com.garbagemule.MobArena.framework;
 
 import java.util.*;
 
+import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.Msg;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -109,6 +111,15 @@ public interface Arena
     public ScoreboardManager getScoreboard();
     
     
+    public Messenger getMessenger();
+
+    public Messenger getGlobalMessenger();
+
+    public void announce(String msg);
+
+    public void announce(Msg msg, String s);
+
+    public void announce(Msg msg);
     
     
 

@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.region;
 
 import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.util.Enums;
@@ -132,7 +131,7 @@ public class ArenaRegion
             if (p1 == null) list.add("p1");
             if (p2 == null) list.add("p2");
             if (!list.isEmpty()) {
-                Messenger.tell(s, "Missing region points: " + MAUtils.listToString(list, plugin));
+                arena.getGlobalMessenger().tell(s, "Missing region points: " + MAUtils.listToString(list, plugin));
                 list.clear();
             }
         }
@@ -143,7 +142,7 @@ public class ArenaRegion
             if (lobbyWarp == null) list.add("lobby");
             if (specWarp  == null) list.add("spectator");
             if (!list.isEmpty()) {
-                Messenger.tell(s, "Missing warps: " + MAUtils.listToString(list, plugin));
+                arena.getGlobalMessenger().tell(s, "Missing warps: " + MAUtils.listToString(list, plugin));
                 list.clear();
             }
         }
@@ -151,13 +150,13 @@ public class ArenaRegion
         // Spawnpoints
         if (spawns) {
             if (spawnpoints.isEmpty()) {
-                Messenger.tell(s, "Missing spawnpoints");
+                arena.getGlobalMessenger().tell(s, "Missing spawnpoints");
             }
         }
         
         // Ready?
         if (ready && setup) {
-            Messenger.tell(s, "Arena is ready to be used!");
+            arena.getGlobalMessenger().tell(s, "Arena is ready to be used!");
         }
     }
     
@@ -628,12 +627,12 @@ public class ArenaRegion
         }
 
         if (map.isEmpty()) {
-            Messenger.tell(p, "No spawnpoints cover your location!");
+            arena.getGlobalMessenger().tell(p, "No spawnpoints cover your location!");
             return;
         }
 
         // Notify the player
-        Messenger.tell(p, "The following points cover your location:");
+        arena.getGlobalMessenger().tell(p, "The following points cover your location:");
         for (Map.Entry<String,Location> entry : map.entrySet()) {
             Location l = entry.getValue();
             String coords = l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();

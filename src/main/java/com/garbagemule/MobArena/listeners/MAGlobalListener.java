@@ -13,7 +13,6 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -111,7 +110,7 @@ public class MAGlobalListener implements Listener
         }
         else if ((stat = Stats.getByShortName(text)) != null) {
             setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
-            Messenger.tell(event.getPlayer(), "Stat sign created.");
+            am.getGlobalMessenger().tell(event.getPlayer(), "Stat sign created.");
         }
     }
     

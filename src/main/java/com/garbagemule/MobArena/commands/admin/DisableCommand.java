@@ -32,7 +32,7 @@ public class DisableCommand implements Command
         if (!arg1.equals("")) {
             Arena arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+                am.getGlobalMessenger().tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return true;
             }
             disable(arena, sender);
@@ -41,13 +41,13 @@ public class DisableCommand implements Command
         
         am.setEnabled(false);
         am.saveConfig();
-        Messenger.tell(sender, "MobArena " + ChatColor.RED + "disabled");
+        am.getGlobalMessenger().tell(sender, "MobArena " + ChatColor.RED + "disabled");
         return true;
     }
     
     private void disable(Arena arena, CommandSender sender) {
         arena.setEnabled(false);
         arena.getPlugin().saveConfig();
-        Messenger.tell(sender, "Arena '" + arena.configName() + "' " + ChatColor.RED + "disabled");
+        arena.getGlobalMessenger().tell(sender, "Arena '" + arena.configName() + "' " + ChatColor.RED + "disabled");
     }
 }

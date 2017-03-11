@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.commands.setup;
 
-import static com.garbagemule.MobArena.Messenger.*;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
@@ -44,7 +43,7 @@ public class SetupCommand implements Command, Listener {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
 
@@ -59,8 +58,8 @@ public class SetupCommand implements Command, Listener {
         } else {
             arena = am.getArenaWithName(args[0]);
             if (arena == null) {
-                tell(sender, "There is no arena with the name " + ChatColor.RED + args[0] + ChatColor.RESET + ".");
-                tell(sender, "Type " + ChatColor.YELLOW + "/ma addarena " + args[0] + ChatColor.RESET + " to create it!");
+                am.getGlobalMessenger().tell(sender, "There is no arena with the name " + ChatColor.RED + args[0] + ChatColor.RESET + ".");
+                am.getGlobalMessenger().tell(sender, "Type " + ChatColor.YELLOW + "/ma addarena " + args[0] + ChatColor.RESET + " to create it!");
                 return true;
             }
         }

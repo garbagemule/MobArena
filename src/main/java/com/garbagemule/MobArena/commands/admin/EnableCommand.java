@@ -32,7 +32,7 @@ public class EnableCommand implements Command
         if (!arg1.equals("")) {
             Arena arena = am.getArenaWithName(arg1);
             if (arena == null) {
-                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+                am.getGlobalMessenger().tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return true;
             }
             enable(arena, sender);
@@ -41,13 +41,13 @@ public class EnableCommand implements Command
         
         am.setEnabled(true);
         am.saveConfig();
-        Messenger.tell(sender, "MobArena " + ChatColor.GREEN + "enabled");
+        am.getGlobalMessenger().tell(sender, "MobArena " + ChatColor.GREEN + "enabled");
         return true;
     }
     
     private void enable(Arena arena, CommandSender sender) {
         arena.setEnabled(true);
         arena.getPlugin().saveConfig();
-        Messenger.tell(sender, "Arena '" + arena.configName() + "' " + ChatColor.GREEN + "enabled");
+        arena.getGlobalMessenger().tell(sender, "Arena '" + arena.configName() + "' " + ChatColor.GREEN + "enabled");
     }
 }

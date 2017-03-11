@@ -11,8 +11,8 @@ import java.util.Map;
 
 import javax.tools.*;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.waves.ability.core.*;
+import org.bukkit.Bukkit;
 
 public class AbilityManager
 {
@@ -85,7 +85,7 @@ public class AbilityManager
             if (ToolProvider.getSystemJavaCompiler() != null) {
                 compileAbilities(javaDir, classDir);
             } else {
-                Messenger.warning("Found plugins/MobArena/abilities/src/ folder, but no Java compiler. The source files will not be compiled!");
+                Bukkit.getLogger().warning("[MobArena] Found plugins/MobArena/abilities/src/ folder, but no Java compiler. The source files will not be compiled!");
             }
         }
         
@@ -109,9 +109,9 @@ public class AbilityManager
         for (String alias : info.aliases()) {
             abilities.put(alias, cls);
         }
-        
+
         // Announce custom abilities
-        if (announce) Messenger.info("Loaded custom ability '" + info.name() + "'");
+        if (announce) Bukkit.getLogger().info("[MobArena] Loaded custom ability '" + info.name() + "'");
     }
     
     private static void compileAbilities(File javaDir, File classDir) {
@@ -126,7 +126,7 @@ public class AbilityManager
         }
         
         // Notify the console.
-        Messenger.info("Compiling abilities: " + fileListToString(toCompile));
+        Bukkit.getLogger().info("[MobArena] Compiling abilities: " + fileListToString(toCompile));
         
         // Get the compiler
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -149,7 +149,7 @@ public class AbilityManager
             fileManager.close();
         }
         catch (Exception e) {
-            Messenger.severe("Compilation step failed...");
+            Bukkit.getLogger().severe("[MobArena] Compilation step failed...");
             e.printStackTrace();
         }
     }
@@ -168,7 +168,7 @@ public class AbilityManager
         for (File javaFile : javaDir.listFiles()) {
             // Skip if it's not a .java file.
             if (!javaFile.getName().endsWith(".java")) {
-                Messenger.info("Found invalid ability file: " + javaFile.getName());
+                Bukkit.getLogger().info("[MobArena] Found invalid ability file: " + javaFile.getName());
                 continue;
             }
             

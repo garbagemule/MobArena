@@ -73,6 +73,11 @@ public class ArenaMasterImpl implements ArenaMaster
         return plugin;
     }
 
+    @Override
+    public Messenger getGlobalMessenger() {
+        return plugin.getGlobalMessenger();
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -294,7 +299,7 @@ public class ArenaMasterImpl implements ArenaMaster
                 classes.put(lowercase, myItems);
                 return myItems;
             }
-            Messenger.severe("Failed to load class '" + classname + "'.");
+            plugin.getLogger().severe("Failed to load class '" + classname + "'.");
             return null;
         }
         
@@ -310,8 +315,8 @@ public class ArenaMasterImpl implements ArenaMaster
             if (priceItem != null && priceItem.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
                 price = (priceItem.getAmount() + (priceItem.getDurability() / 100D));
             } else {
-                Messenger.warning("The price for class '" + classname + "' could not be parsed!");
-                Messenger.warning("- expected e.g. '$10',  found '" + priceString + "'");
+                plugin.getLogger().warning("The price for class '" + classname + "' could not be parsed!");
+                plugin.getLogger().warning("- expected e.g. '$10',  found '" + priceString + "'");
             }
         }
 
@@ -572,12 +577,12 @@ public class ArenaMasterImpl implements ArenaMaster
         if (!worldName.equals("")) {
             world = plugin.getServer().getWorld(worldName);
             if (world == null) {
-                Messenger.warning("World '" + worldName + "' for arena '" + arenaname + "' was not found...");
+                plugin.getLogger().warning("World '" + worldName + "' for arena '" + arenaname + "' was not found...");
                 return null;
             }
         } else {
             world = plugin.getServer().getWorlds().get(0);
-            Messenger.warning("Could not find the world for arena '" + arenaname + "'. Using default world ('" + world.getName() + "')! Check the config-file!");
+            plugin.getLogger().warning("Could not find the world for arena '" + arenaname + "'. Using default world ('" + world.getName() + "')! Check the config-file!");
         }
 
         ConfigUtils.addMissingRemoveObsolete(plugin, "settings.yml", settings);
