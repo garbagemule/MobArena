@@ -829,6 +829,10 @@ public class ArenaImpl implements Arena
             // Skip players who are either null or offline
             if (p == null || !p.isOnline()) continue;
 
+            // Skip the My Items class
+            ArenaClass ac = arenaPlayerMap.get(p).getArenaClass();
+            if (ac == null || ac.getConfigName().equals("My Items")) continue;
+
             // Grab the inventory
             PlayerInventory inv = p.getInventory();
             if (inv == null) continue;
@@ -860,6 +864,10 @@ public class ArenaImpl implements Arena
         for (Player p : arenaPlayers) {
             // Skip players who are either null or offline
             if (p == null || !p.isOnline()) continue;
+
+            // Skip the My Items class
+            ArenaClass ac = arenaPlayerMap.get(p).getArenaClass();
+            if (ac == null || ac.getConfigName().equals("My Items")) continue;
 
             // Grab the inventory
             PlayerInventory inv = p.getInventory();
