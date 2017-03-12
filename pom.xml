@@ -6,8 +6,8 @@
 
   <groupId>com.garbagemule</groupId>
   <artifactId>mobarena</artifactId>
-  <name>PazArena</name>
-  <version>1.0</version>
+  <name>MobArena</name>
+  <version>0.98.1-SNAPSHOT</version>
 
   <build>
     <plugins>
