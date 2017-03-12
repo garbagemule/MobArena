@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.Updater.UpdateResult;
 import com.garbagemule.MobArena.util.Updater.UpdateType;
@@ -84,14 +83,14 @@ public class VersionChecker
         return Integer.parseInt(parts[i]);
     }
 
-    private static void message(MobArena plugin, final Player player, final String... messages) {
+    private static void message(final MobArena plugin, final Player player, final String... messages) {
         Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
             public void run() {
                 for (String message : messages) {
                     if (player == null) {
-                        Messenger.info(message);
+                        plugin.getLogger().info(message);
                     } else if (player.isOnline()) {
-                        Messenger.tell(player, message);
+                        plugin.getGlobalMessenger().tell(player, message);
                     }
                 }
             }

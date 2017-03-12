@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.util.timer;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 

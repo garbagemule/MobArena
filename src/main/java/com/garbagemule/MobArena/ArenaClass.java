@@ -253,7 +253,7 @@ public class ArenaClass
                 String perm   = entry.getKey() + ":" + entry.getValue();
                 String player = p.getName();
 
-                Messenger.warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.configName
+                pa.getPlugin().getLogger().warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.configName
                                 + "'.\nPlease verify that your class permissions are well-formed.");
             }
         }
@@ -358,7 +358,7 @@ public class ArenaClass
                 try {
                     arena.getInventoryManager().restoreInv(p);
                 } catch (Exception e) {
-                    Messenger.severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
+                    am.getPlugin().getLogger().severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
                 }
             }
         }

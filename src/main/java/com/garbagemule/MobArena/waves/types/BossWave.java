@@ -10,7 +10,6 @@ import java.util.Set;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.*;
@@ -154,7 +153,7 @@ public class BossWave extends AbstractWave
     public void announceAbility(Ability ability, MABoss boss, Arena arena) {
         if(getAbilityAnnounce()) {
             AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);
-            Messenger.announce(arena, Msg.WAVE_BOSS_ABILITY, info.name());
+            arena.announce(Msg.WAVE_BOSS_ABILITY, info.name());
         }
     }
 

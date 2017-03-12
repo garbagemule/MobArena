@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.commands.setup;
 
 import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
@@ -32,7 +31,7 @@ public class SetClassPriceCommand implements Command
         // Grab the class.
         ArenaClass ac = am.getClasses().get(arg1);
         if (ac == null) {
-            Messenger.tell(sender, "No class named '" + arg1 + "'.");
+            am.getGlobalMessenger().tell(sender, "No class named '" + arg1 + "'.");
             return true;
         }
 
@@ -48,7 +47,7 @@ public class SetClassPriceCommand implements Command
 
             // Not a valid number? Bail!
             if (!arg2.matches("([1-9]\\d*)|(\\d*.\\d\\d?)")) {
-                Messenger.tell(sender, "Could not parse price '" + arg2 + "'. Expected e.g. $10 or $2.50 or $.25");
+                am.getGlobalMessenger().tell(sender, "Could not parse price '" + arg2 + "'. Expected e.g. $10 or $2.50 or $.25");
                 return true;
             }
             double price = Double.parseDouble(arg2);
@@ -64,7 +63,7 @@ public class SetClassPriceCommand implements Command
         am.getPlugin().getConfig().set("classes." + ac.getConfigName() + ".price", value);
         am.getPlugin().saveConfig();
         am.loadClasses();
-        Messenger.tell(sender, msg);
+        am.getGlobalMessenger().tell(sender, msg);
         return true;
     }
 }

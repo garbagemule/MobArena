@@ -24,15 +24,15 @@ public class ConfigCommand implements Command
         if (args[0].equals("reload")) {
             try {
                 am.reloadConfig();
-                Messenger.tell(sender, "Config reloaded.");
+                am.getGlobalMessenger().tell(sender, "Config reloaded.");
             } catch (Exception e) {
-                Messenger.tell(sender, ChatColor.RED + "ERROR:" + ChatColor.RESET + "\n" + e.getMessage());
-                Messenger.tell(sender, "MobArena has been " + ChatColor.RED + "disabled" + ChatColor.RESET + ".");
-                Messenger.tell(sender, "Fix the config-file, then reload it again, and then type " + ChatColor.YELLOW + "/ma enable" + ChatColor.RESET + " to re-enable MobArena.");
+                am.getGlobalMessenger().tell(sender, ChatColor.RED + "ERROR:" + ChatColor.RESET + "\n" + e.getMessage());
+                am.getGlobalMessenger().tell(sender, "MobArena has been " + ChatColor.RED + "disabled" + ChatColor.RESET + ".");
+                am.getGlobalMessenger().tell(sender, "Fix the config-file, then reload it again, and then type " + ChatColor.YELLOW + "/ma enable" + ChatColor.RESET + " to re-enable MobArena.");
             }
         } else if (args[0].equals("save")) {
             am.saveConfig();
-            Messenger.tell(sender, "Config saved.");
+            am.getGlobalMessenger().tell(sender, "Config saved.");
         } else {
             return false;
         }

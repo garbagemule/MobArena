@@ -384,7 +384,7 @@ public class ArenaListener
         arena.setLeaderboard(new Leaderboard(plugin, arena, event.getBlock().getLocation()));
         arena.getRegion().set(RegionPoint.LEADERBOARD, event.getBlock().getLocation());
 
-        Messenger.tell(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
+        arena.getPlugin().getGlobalMessenger().tell(event.getPlayer(), "Leaderboard made. Now set up the stat signs!");
     }
 
     public void onCreatureSpawn(CreatureSpawnEvent event) {
@@ -492,7 +492,7 @@ public class ArenaListener
             onMountDeath(event);
         }
         else if (monsters.removeGolem(event.getEntity())) {
-            Messenger.announce(arena, Msg.GOLEM_DIED);
+            arena.announce(Msg.GOLEM_DIED);
         }
     }
 
@@ -505,7 +505,7 @@ public class ArenaListener
                 callKillEvent(player.getKiller(), player);
             }
             if (arena.getSettings().getBoolean("show-death-messages", true)) {
-                Messenger.announce(arena, event.getDeathMessage());
+                arena.announce(event.getDeathMessage());
             }
             event.setDeathMessage(null);
             arena.getScoreboard().death(player);
@@ -575,7 +575,7 @@ public class ArenaListener
                             msg += MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount();
                         }
                         for (Player q : arena.getPlayersInArena()) {
-                            Messenger.tell(q, msg);
+                            arena.getMessenger().tell(q, msg);
                         }
                     }
                 }
@@ -908,25 +908,25 @@ public class ArenaListener
         // If the player is active in the arena, only cancel if sharing is not allowed
         if (arena.inArena(p)) {
             if (!canShare) {
-                Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
+                arena.getMessenger().tell(p, Msg.LOBBY_DROP_ITEM);
                 event.setCancelled(true);
             }
         }
         
         // If the player is in the lobby, just cancel
         else if (arena.inLobby(p)) {
-            Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
+            arena.getMessenger().tell(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
         }
         
         // Same if it's a spectator, but...
         else if (arena.inSpec(p)) {
-            Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
+            arena.getMessenger().tell(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
             
             // If the spectator isn't in the region, force them to leave
             if (!region.contains(p.getLocation())) {
-                Messenger.tell(p, Msg.MISC_MA_LEAVE_REMINDER);
+                arena.getMessenger().tell(p, Msg.MISC_MA_LEAVE_REMINDER);
                 arena.playerLeave(p);
             }
         }
@@ -937,7 +937,7 @@ public class ArenaListener
          * they are trying to drop items when not allowed
          */
         else if (region.contains(p.getLocation())) {
-            Messenger.tell(p, Msg.LOBBY_DROP_ITEM);
+            arena.getMessenger().tell(p, Msg.LOBBY_DROP_ITEM);
             event.setCancelled(true);
         }
 
@@ -947,7 +947,7 @@ public class ArenaListener
          * trying to steal items, if a PlayerDropItemEvent is fired.
          */
         else if (banned.contains(p)) {
-            Messenger.warning("Player " + p.getName() + " tried to steal class items!");
+            plugin.getLogger().warning("Player " + p.getName() + " tried to steal class items!");
             event.setCancelled(true);
         }
     }
@@ -978,7 +978,7 @@ public class ArenaListener
         }
 
         // Bail if off-hand or if there's no block involved.
-        if (event.getHand().equals(EquipmentSlot.OFF_HAND) || !event.hasBlock())
+        if (event.getHand() == EquipmentSlot.OFF_HAND || !event.hasBlock())
             return;
 
         // Iron block
@@ -994,11 +994,11 @@ public class ArenaListener
 
     private void handleReadyBlock(Player p) {
         if (arena.getArenaPlayer(p).getArenaClass() != null) {
-            Messenger.tell(p, Msg.LOBBY_PLAYER_READY);
+            arena.getMessenger().tell(p, Msg.LOBBY_PLAYER_READY);
             arena.playerReady(p);
         }
         else {
-            Messenger.tell(p, Msg.LOBBY_PICK_CLASS);
+            arena.getMessenger().tell(p, Msg.LOBBY_PICK_CLASS);
         }
     }
 
@@ -1011,7 +1011,7 @@ public class ArenaListener
 
         // Check for permission.
         if (!plugin.has(p, "mobarena.classes." + className) && !className.equals("random")) {
-            Messenger.tell(p, Msg.LOBBY_CLASS_PERMISSION);
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
         
@@ -1025,7 +1025,7 @@ public class ArenaListener
         
         // If the new class is full, inform the player.
         if (!classLimits.canPlayerJoinClass(newAC)) {
-            Messenger.tell(p, Msg.LOBBY_CLASS_FULL);
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_FULL);
             return;
         }
 
@@ -1033,7 +1033,7 @@ public class ArenaListener
         double price = newAC.getPrice();
         if (price > 0D) {
             if (!plugin.hasEnough(p, price)) {
-                Messenger.tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, plugin.economyFormat(price));
+                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, plugin.economyFormat(price));
                 return;
             }
         }
@@ -1073,14 +1073,14 @@ public class ArenaListener
                         // Otherwise just fall through and use the items from the config-file
                     }
                     arena.assignClass(p, className);
-                    Messenger.tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(className).getConfigName());
+                    arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(className).getConfigName());
                     if (price > 0D) {
-                        Messenger.tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));
+                        arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));
                     }
                 }
                 else {
                     arena.addRandomPlayer(p);
-                    Messenger.tell(p, Msg.LOBBY_CLASS_RANDOM);
+                    arena.getMessenger().tell(p, Msg.LOBBY_CLASS_RANDOM);
                 }
             }
         });
@@ -1141,7 +1141,7 @@ public class ArenaListener
                 return TeleportResponse.ALLOW;
             }
 
-            Messenger.tell(p, Msg.WARP_FROM_ARENA);
+            arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
             return TeleportResponse.REJECT;
         }
         else if (region.contains(to)) {
@@ -1154,7 +1154,7 @@ public class ArenaListener
                 return TeleportResponse.ALLOW;
             }
 
-            Messenger.tell(p, Msg.WARP_TO_ARENA);
+            arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
             return TeleportResponse.REJECT;
         }
 
@@ -1187,7 +1187,7 @@ public class ArenaListener
 
         // Cancel the event regardless.
         event.setCancelled(true);
-        Messenger.tell(p, Msg.MISC_COMMAND_NOT_ALLOWED);
+        arena.getMessenger().tell(p, Msg.MISC_COMMAND_NOT_ALLOWED);
     }
 
     public void onPlayerPreLogin(PlayerLoginEvent event) {

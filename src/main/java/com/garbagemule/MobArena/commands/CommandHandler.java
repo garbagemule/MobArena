@@ -42,7 +42,7 @@ public class CommandHandler implements CommandExecutor
         
         // If there's no base argument, show a helpful message.
         if (base.equals("")) {
-            Messenger.tell(sender, Msg.MISC_HELP);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_HELP);
             return true;
         }
         
@@ -57,7 +57,7 @@ public class CommandHandler implements CommandExecutor
         
         // If there's more than one match, display them.
         if (matches.size() > 1) {
-            Messenger.tell(sender, Msg.MISC_MULTIPLE_MATCHES);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_MULTIPLE_MATCHES);
             for (Command cmd : matches) {
                 showUsage(cmd, sender, false);
             }
@@ -66,7 +66,7 @@ public class CommandHandler implements CommandExecutor
         
         // If there are no matches at all, notify.
         if (matches.size() == 0) {
-            Messenger.tell(sender, Msg.MISC_NO_MATCHES);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NO_MATCHES);
             return true;
         }
         
@@ -76,7 +76,7 @@ public class CommandHandler implements CommandExecutor
         
         // First check if the sender has permission.
         if (!plugin.has(sender, info.permission())) {
-            Messenger.tell(sender, Msg.MISC_NO_ACCESS);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NO_ACCESS);
             return true;
         }
         
@@ -162,11 +162,11 @@ public class CommandHandler implements CommandExecutor
         }
 
         if (admin.length() == 0 && setup.length() == 0) {
-            Messenger.tell(sender, "Available commands: " + user.toString());
+            am.getGlobalMessenger().tell(sender, "Available commands: " + user.toString());
         } else {
-            Messenger.tell(sender, "User commands: " + user.toString());
-            if (admin.length() > 0) Messenger.tell(sender, "Admin commands: " + admin.toString());
-            if (setup.length() > 0) Messenger.tell(sender, "Setup commands: " + setup.toString());
+            am.getGlobalMessenger().tell(sender, "User commands: " + user.toString());
+            if (admin.length() > 0) am.getGlobalMessenger().tell(sender, "Admin commands: " + admin.toString());
+            if (setup.length() > 0) am.getGlobalMessenger().tell(sender, "Setup commands: " + setup.toString());
         }
     }
     

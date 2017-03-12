@@ -145,9 +145,9 @@ public class MAUtils
         List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
         for (Player p : players) {
             if (!arena.getWorld().equals(p.getWorld())) {
-                Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                plugin.getLogger().info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
-                Messenger.tell(p, "You warped out of the arena world.");
+                arena.getMessenger().tell(p, "You warped out of the arena world.");
                 continue;
             }
             
@@ -167,7 +167,7 @@ public class MAUtils
         catch (Exception e) {
             p.kickPlayer("Banned for life! No, but stop trying to cheat in MobArena!");
             if (plugin != null) {
-                Messenger.warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
+                plugin.getLogger().warning(p.getName() + " tried to cheat in MobArena and has been kicked.");
             }
             return Double.MAX_VALUE;
         }
@@ -235,7 +235,7 @@ public class MAUtils
                         buffy.append(", ");
                     }
                     else {
-                        Messenger.warning("Tried to do some money stuff, but no economy plugin was detected!");
+                        plugin.getLogger().warning("Tried to do some money stuff, but no economy plugin was detected!");
                         return buffy.toString();
                     }
                     continue;
@@ -330,7 +330,7 @@ public class MAUtils
         catch (Exception e)
         {
             e.printStackTrace();
-            Messenger.warning("Couldn't create backup file. Aborting auto-generate...");
+            plugin.getLogger().warning("Couldn't create backup file. Aborting auto-generate...");
             return false;
         }
         
@@ -469,7 +469,7 @@ public class MAUtils
         }
         catch (Exception e)
         {
-            if (error) Messenger.warning("Couldn't find backup file for arena '" + name + "'");
+            if (error) plugin.getLogger().warning("Couldn't find backup file for arena '" + name + "'");
             return false;
         }
         

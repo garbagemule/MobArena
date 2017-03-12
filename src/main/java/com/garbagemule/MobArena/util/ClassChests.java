@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.util;
 
 import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.ChatColor;
@@ -28,7 +27,7 @@ public class ClassChests {
 
         Block block = loc.getBlock();
         if (!(block.getState() instanceof InventoryHolder)) {
-            Messenger.warning("Class chest location for class '" + ac.getConfigName() + "' is not a chest!");
+            arena.getPlugin().getLogger().warning("Class chest location for class '" + ac.getConfigName() + "' is not a chest!");
             return false;
         }
 
@@ -97,11 +96,11 @@ public class ClassChests {
             contents = newContents;
         }
         arena.assignClassGiveInv(player, classname, contents);
-        Messenger.tell(player, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(classname).getConfigName());
+        arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(classname).getConfigName());
 
         double price = ac.getPrice();
         if (price > 0D) {
-            Messenger.tell(player, Msg.LOBBY_CLASS_PRICE, arena.getPlugin().economyFormat(price));
+            arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PRICE, arena.getPlugin().economyFormat(price));
         }
     }
 

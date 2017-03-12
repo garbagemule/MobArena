@@ -22,14 +22,14 @@ public class RestoreCommand implements Command
         if (args.length != 1) return false;
         
         if (am.getArenaWithPlayer(args[0]) != null) {
-            Messenger.tell(sender, "Player is currently in an arena.");
+            am.getGlobalMessenger().tell(sender, "Player is currently in an arena.");
             return true;
         }
         
         if (InventoryManager.restoreFromFile(am.getPlugin(), am.getPlugin().getServer().getPlayer(args[0]))) {
-            Messenger.tell(sender, "Restored " + args[0] + "'s inventory!");
+            am.getGlobalMessenger().tell(sender, "Restored " + args[0] + "'s inventory!");
         } else {
-            Messenger.tell(sender, "Failed to restore " + args[0] + "'s inventory.");
+            am.getGlobalMessenger().tell(sender, "Failed to restore " + args[0] + "'s inventory.");
         }
         return true;
     }

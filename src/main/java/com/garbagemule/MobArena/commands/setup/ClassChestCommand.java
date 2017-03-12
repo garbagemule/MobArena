@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.commands.setup;
 
 import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
@@ -27,7 +26,7 @@ public class ClassChestCommand implements Command {
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
 
@@ -36,7 +35,7 @@ public class ClassChestCommand implements Command {
 
         ArenaClass ac = am.getClasses().get(args[0].toLowerCase());
         if (ac == null) {
-            Messenger.tell(sender, "Class not found.");
+            am.getGlobalMessenger().tell(sender, "Class not found.");
             return true;
         }
 
@@ -49,13 +48,13 @@ public class ClassChestCommand implements Command {
             case TRAPPED_CHEST:
                 break;
             default:
-                Messenger.tell(sender, "You must look at a chest.");
+                am.getGlobalMessenger().tell(sender, "You must look at a chest.");
                 return true;
         }
 
         setLocation(am.getPlugin().getConfig(), "classes." + ac.getConfigName() + ".classchest", b.getLocation());
         am.saveConfig();
-        Messenger.tell(sender, "Class chest updated for class " + ac.getConfigName());
+        am.getGlobalMessenger().tell(sender, "Class chest updated for class " + ac.getConfigName());
         am.loadClasses();
         return true;
     }

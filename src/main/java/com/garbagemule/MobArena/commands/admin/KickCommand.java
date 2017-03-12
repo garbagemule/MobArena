@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.commands.admin;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.*;
 import com.garbagemule.MobArena.commands.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -24,7 +23,7 @@ public class KickCommand implements Command
         
         Arena arena = am.getArenaWithPlayer(args[0]);
         if (arena == null) {
-            Messenger.tell(sender, "That player is not in an arena.");
+            am.getGlobalMessenger().tell(sender, "That player is not in an arena.");
             return true;
         }
         
@@ -33,8 +32,8 @@ public class KickCommand implements Command
         
         // Force leave.
         arena.playerLeave(bp);
-        Messenger.tell(sender, "Player '" + args[0] + "' was kicked from arena '" + arena.configName() + "'.");
-        Messenger.tell(bp, "You were kicked by " + sender.getName() + ".");
+        am.getGlobalMessenger().tell(sender, "Player '" + args[0] + "' was kicked from arena '" + arena.configName() + "'.");
+        am.getGlobalMessenger().tell(bp, "You were kicked by " + sender.getName() + ".");
         return true;
     }
 }

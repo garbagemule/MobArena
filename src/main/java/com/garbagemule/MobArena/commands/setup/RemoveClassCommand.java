@@ -25,12 +25,12 @@ public class RemoveClassCommand implements Command
         ArenaClass arenaClass = am.getClasses().get(args[0]);
         String className = TextUtils.camelCase(args[0]);
         if (arenaClass == null) {
-            Messenger.tell(sender, "The class '" + className + "' does not exist.");
+            am.getGlobalMessenger().tell(sender, "The class '" + className + "' does not exist.");
             return true;
         }
         
         am.removeClassNode(className);
-        Messenger.tell(sender, "Removed class '" + className + "'.");
+        am.getGlobalMessenger().tell(sender, "Removed class '" + className + "'.");
         return true;
     }
 }

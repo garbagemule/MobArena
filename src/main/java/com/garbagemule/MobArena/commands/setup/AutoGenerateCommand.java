@@ -20,7 +20,7 @@ public class AutoGenerateCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         if (!Commands.isPlayer(sender)) {
-            Messenger.tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
+            am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
 
@@ -33,16 +33,16 @@ public class AutoGenerateCommand implements Command
         // Check if arena already exists.
         Arena arena = am.getArenaWithName(args[0]);
         if (arena != null) {
-            Messenger.tell(sender, "An arena with that name already exists.");
+            am.getGlobalMessenger().tell(sender, "An arena with that name already exists.");
             return true;
         }
         
         if (!MAUtils.doooooItHippieMonster(p.getLocation(), 13, args[0], am.getPlugin())) {
-            Messenger.tell(sender, "Could not auto-generate arena.");
+            am.getGlobalMessenger().tell(sender, "Could not auto-generate arena.");
             return true;
         }
         
-        Messenger.tell(sender, "Arena with name '" + args[0] + "' generated.");
+        am.getGlobalMessenger().tell(sender, "Arena with name '" + args[0] + "' generated.");
         return true;
     }
 }

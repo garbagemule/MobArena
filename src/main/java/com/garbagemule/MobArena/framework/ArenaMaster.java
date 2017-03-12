@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.garbagemule.MobArena.Messenger;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -24,6 +25,8 @@ public interface ArenaMaster
     
     
     public MobArena getPlugin();
+
+    public Messenger getGlobalMessenger();
     
     public boolean isEnabled();
     

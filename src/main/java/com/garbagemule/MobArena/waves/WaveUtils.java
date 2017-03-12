@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.*;
 import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 
 public class WaveUtils
@@ -47,7 +46,7 @@ public class WaveUtils
                 Location l = p.getLocation();
                 locs += "(" + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ") ";
             }
-            Messenger.warning("The following locations in arena '" + arena.configName() + "' are not covered by any spawnpoints:" + locs);
+            plugin.getLogger().warning("The following locations in arena '" + arena.configName() + "' are not covered by any spawnpoints:" + locs);
             return spawnpoints;
         }
         return result;
@@ -66,7 +65,7 @@ public class WaveUtils
         {
             if (!arena.getWorld().equals(p.getWorld()))
             {
-                Messenger.info("Player '" + p.getName() + "' is not in the right world. Kicking...");
+                arena.getPlugin().getLogger().info("Player '" + p.getName() + "' is not in the right world. Kicking...");
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 continue;
             }

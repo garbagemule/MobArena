@@ -31,7 +31,7 @@ public class ForceCommand implements Command
                 for (Arena arena : am.getArenas()) {
                     arena.forceEnd();
                 }
-                Messenger.tell(sender, Msg.FORCE_END_ENDED);
+                am.getGlobalMessenger().tell(sender, Msg.FORCE_END_ENDED);
                 am.resetArenaMap();
                 return true;
             }
@@ -39,18 +39,18 @@ public class ForceCommand implements Command
             // Otherwise, grab the arena in question.
             Arena arena = am.getArenaWithName(arg2);
             if (arena == null) {
-                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+                am.getGlobalMessenger().tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return true;
             }
             
             if (arena.getAllPlayers().isEmpty()) {
-                Messenger.tell(sender, Msg.FORCE_END_EMPTY);
+                am.getGlobalMessenger().tell(sender, Msg.FORCE_END_EMPTY);
                 return true;
             }
             
             // And end it!
             arena.forceEnd();
-            Messenger.tell(sender, Msg.FORCE_END_ENDED);
+            am.getGlobalMessenger().tell(sender, Msg.FORCE_END_ENDED);
             return true;
         }
         
@@ -61,23 +61,23 @@ public class ForceCommand implements Command
             // Grab the arena.
             Arena arena = am.getArenaWithName(arg2);
             if (arena == null) {
-                Messenger.tell(sender, Msg.ARENA_DOES_NOT_EXIST);
+                am.getGlobalMessenger().tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return true;
             }
             
             if (arena.isRunning()) {
-                Messenger.tell(sender, Msg.FORCE_START_RUNNING);
+                am.getGlobalMessenger().tell(sender, Msg.FORCE_START_RUNNING);
                 return true;
             }
             
             if (arena.getReadyPlayersInLobby().isEmpty()) {
-                Messenger.tell(sender, Msg.FORCE_START_NOT_READY);
+                am.getGlobalMessenger().tell(sender, Msg.FORCE_START_NOT_READY);
                 return true;
             }
             
             // And start it!
             arena.forceStart();
-            Messenger.tell(sender, Msg.FORCE_START_STARTED);
+            am.getGlobalMessenger().tell(sender, Msg.FORCE_START_STARTED);
             return true;
         }
         return false;
