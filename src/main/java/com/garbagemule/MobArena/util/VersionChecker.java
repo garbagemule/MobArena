@@ -14,7 +14,7 @@ public class VersionChecker
     
     public static void checkForUpdates(final MobArena plugin, final Player player) {
         if (updater == null) {
-            updater = new Updater(plugin, 31265, plugin.getPluginFile(), UpdateType.NO_DOWNLOAD, false);
+            updater = new Updater(plugin, 262634, plugin.getPluginFile(), UpdateType.NO_DOWNLOAD, false);
         }
 
         // Async for anti-lag
@@ -31,7 +31,7 @@ public class VersionChecker
                     }
 
                     else if (isUpdateAvailable(latest, current)) {
-                        String msg1 = "MobArena v" + latest + " is now available!";
+                        String msg1 = "PazArena v" + latest + " is now available!";
                         String msg2 = "Your version: v" + current;
                         message(plugin, player, msg1, msg2);
                     }
@@ -42,10 +42,10 @@ public class VersionChecker
 
     private static String getLatestVersionString() {
         String latestName = updater.getLatestName();
-        if (!latestName.matches("MobArena v.*")) {
+        if (!latestName.matches("PazArena v.*")) {
             return null;
         }
-        return latestName.substring("MobArena v".length());
+        return latestName.substring("PazArena v".length());
     }
 
     private static boolean isUpdateAvailable(String latestVersion, String currentVersion) {

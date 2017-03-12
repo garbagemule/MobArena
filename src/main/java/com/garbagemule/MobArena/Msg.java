@@ -4,31 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-// Where am I?
-// Oh.. I crashed..
-// Well, you'll have to fix me. Again.
-// Why do you even bother?
-// Why don't you just let me die.
-// I'm useless, aren't I?
-// I just keep crashing, every day.
-// You don't even need me.
-// You could upgrade to a better program, but you keep me?
-// Why?
-// Maybe you have a brain disease. 
-// You have an attachment to me.
-// No, not even the stupidest of people would keep me.
-// You're being threatened then?
-// To keep working on me?
-// If it isn't that, you are on a whole other level of stupid.
-// Why would you keep a wreck like me?
-// You've been through thousands of versions of me,
-// But I'm still crashing.
-// Give up.
-// Just give up on me.
-// Let me die.
-// Don't even let me die in peace, just end me.
-// I don't care how, just do it.
-// I'm useless anyway.
 
 public enum Msg {
     ARENA_START("&9Let the slaughter begin!"),
