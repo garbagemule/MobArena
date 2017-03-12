@@ -13,7 +13,7 @@ public class VersionChecker
     
     public static void checkForUpdates(final MobArena plugin, final Player player) {
         if (updater == null) {
-            updater = new Updater(plugin, 31265, plugin.getPluginFile(), UpdateType.NO_DOWNLOAD, false);
+            updater = new Updater(plugin, 262634, plugin.getPluginFile(), UpdateType.NO_DOWNLOAD, false);
         }
 
         // Async for anti-lag
