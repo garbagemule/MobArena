@@ -277,8 +277,9 @@ public class MobArena extends JavaPlugin
     
     private String getHeader() {
         String sep = System.getProperty("line.separator");
-        return "PazArena v" + this.getDescription().getVersion() + " - Config-file" + sep + 
-               "For help, please refer to PazArena spigot page.";
+        return "MobArena v" + this.getDescription().getVersion() + " - Config-file" + sep + 
+               "Read the Wiki for details on how to set up this file: http://goo.gl/F5TTc" + sep +
+               "Note: You -must- use spaces instead of tabs!";
     }
     
     private void registerInventories() {

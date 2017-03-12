@@ -1,19 +1,23 @@
-name: PazArena
+name: ${project.name}
 author: garbagemule
 main: com.garbagemule.MobArena.MobArena
-version: 1.2.0
+version: ${project.version}
 softdepend: [Multiverse-Core,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:
-        description: Base command for PazArena
+        description: Base command for MobArena
         usage: |
-            ERROR: Do not post on MobArena pages!
-            Post console output to PazArena spigot page.
+            YOU HAVE AN ERROR!
+            Find the error in your server log, copy it into
+            http://pastebin.com, and then paste the link
+            in the IRC or on the forums.
     mobarena:
-        description: Base command for PazArena
+        description: Base command for MobArena
         usage: |
-            ERROR: Do not post on MobArena pages!
-            Post console output to PazArena spigot page.
+            YOU HAVE AN ERROR!
+            Find the error in your server log, copy it into
+            http://pastebin.com, and then paste the link
+            in the IRC or on the forums.
 permissions:
     mobarena.use.join:
         description: Join command
@@ -47,7 +51,7 @@ permissions:
             mobarena.admin.force: true
             mobarena.admin.teleport: true
     mobarena.admin.enable:
-        description: Enable and disable PazArena and/or arenas.
+        description: Enable and disable MobArena and/or arenas.
         default: false
     mobarena.admin.kick:
         description: Kick a player from an arena.

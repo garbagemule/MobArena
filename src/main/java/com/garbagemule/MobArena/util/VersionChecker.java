@@ -30,7 +30,7 @@ public class VersionChecker
                     }
 
                     else if (isUpdateAvailable(latest, current)) {
-                        String msg1 = "PazArena v" + latest + " is now available!";
+                        String msg1 = "MobArena v" + latest + " is now available!";
                         String msg2 = "Your version: v" + current;
                         message(plugin, player, msg1, msg2);
                     }
@@ -41,10 +41,10 @@ public class VersionChecker
 
     private static String getLatestVersionString() {
         String latestName = updater.getLatestName();
-        if (!latestName.matches("PazArena v.*")) {
+        if (!latestName.matches("MobArena v.*")) {
             return null;
         }
-        return latestName.substring("PazArena v".length());
+        return latestName.substring("MobArena v".length());
     }
 
     private static boolean isUpdateAvailable(String latestVersion, String currentVersion) {
