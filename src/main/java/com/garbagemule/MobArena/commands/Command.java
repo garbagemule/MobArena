@@ -24,5 +24,5 @@ public interface Command
      * @return true, if the command succeeded in any way, false if the
      * command handler should print the usage message to the sender
      */
-    public boolean execute(ArenaMaster am, CommandSender sender, String... args);
+    boolean execute(ArenaMaster am, CommandSender sender, String... args);
 }

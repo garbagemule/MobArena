@@ -31,19 +31,19 @@ public interface Timer {
     /**
      * Start the timer.
      */
-    public void start();
+    void start();
 
     /**
      * Stop the timer.
      */
-    public void stop();
+    void stop();
 
     /**
      * Check if the timer is running.
      *
      * @return true, if the timer is currently running, false otherwise
      */
-    public boolean isRunning();
+    boolean isRunning();
 
     /**
      * Set the callback object of the timer.
@@ -62,14 +62,14 @@ public interface Timer {
      * @throws IllegalArgumentException if the callback is null
      * @throws IllegalStateException if the callback has already been set
      */
-    public void setCallback(TimerCallback callback);
+    void setCallback(TimerCallback callback);
 
     /**
      * Get the tick interval of the timer.
      *
      * @return the tick interval of the timer
      */
-    public long getInterval();
+    long getInterval();
 
     /**
      * Set the tick interval of the timer.
@@ -82,5 +82,5 @@ public interface Timer {
      * @param interval tick interval of the timer; must be positive
      * @throws IllegalArgumentException if the value is non-positive
      */
-    public void setInterval(long interval);
+    void setInterval(long interval);
 }

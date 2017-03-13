@@ -67,8 +67,8 @@ public class UpgradeWave extends AbstractWave
     /**
      * Represents an upgrade for an upgrade wave
      */
-    public static interface Upgrade {
-        public void upgrade(Arena arena, Player p);
+    public interface Upgrade {
+        void upgrade(Arena arena, Player p);
     }
 
     /**

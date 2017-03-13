@@ -38,95 +38,95 @@ public interface Arena
     //
     /////////////////////////////////////////////////////////////////////////*/
 
-    public ConfigurationSection getSettings();
+    ConfigurationSection getSettings();
     
-    public World getWorld();
+    World getWorld();
     
-    public void setWorld(World world);
+    void setWorld(World world);
     
-    public boolean isEnabled();
+    boolean isEnabled();
     
-    public void setEnabled(boolean value);
+    void setEnabled(boolean value);
     
-    public boolean isProtected();
+    boolean isProtected();
     
-    public void setProtected(boolean value);
+    void setProtected(boolean value);
     
-    public boolean isRunning();
+    boolean isRunning();
     
-    public boolean inEditMode();
+    boolean inEditMode();
     
-    public void setEditMode(boolean value);
+    void setEditMode(boolean value);
 
-    public int getMinPlayers();
+    int getMinPlayers();
 
-    public int getMaxPlayers();
+    int getMaxPlayers();
     
-    public List<ItemStack> getEntryFee();
+    List<ItemStack> getEntryFee();
     
-    public Set<Map.Entry<Integer,List<ItemStack>>> getEveryWaveEntrySet();
+    Set<Map.Entry<Integer,List<ItemStack>>> getEveryWaveEntrySet();
 
-    public List<ItemStack> getAfterWaveReward(int wave);
+    List<ItemStack> getAfterWaveReward(int wave);
     
-    public Set<Player> getPlayersInArena();
+    Set<Player> getPlayersInArena();
     
-    public Set<Player> getPlayersInLobby();
+    Set<Player> getPlayersInLobby();
     
-    public Set<Player> getReadyPlayersInLobby();
+    Set<Player> getReadyPlayersInLobby();
     
-    public Set<Player> getSpectators();
+    Set<Player> getSpectators();
 
-    public MASpawnThread getSpawnThread();
+    MASpawnThread getSpawnThread();
     
-    public WaveManager getWaveManager();
+    WaveManager getWaveManager();
     
-    public Location getPlayerEntry(Player p);
+    Location getPlayerEntry(Player p);
     
-    public ArenaListener getEventListener();
+    ArenaListener getEventListener();
     
-    public void setLeaderboard(Leaderboard leaderboard);
+    void setLeaderboard(Leaderboard leaderboard);
     
-    public ArenaPlayer getArenaPlayer(Player p);
+    ArenaPlayer getArenaPlayer(Player p);
     
-    public Set<Block> getBlocks();
+    Set<Block> getBlocks();
 
-    public void addBlock(Block b);
+    void addBlock(Block b);
     
-    public boolean removeBlock(Block b);
+    boolean removeBlock(Block b);
     
-    public boolean hasPet(Entity e);
+    boolean hasPet(Entity e);
     
-    public void addRepairable(Repairable r);
+    void addRepairable(Repairable r);
     
-    public ArenaRegion getRegion();
+    ArenaRegion getRegion();
     
-    public InventoryManager getInventoryManager();
+    InventoryManager getInventoryManager();
     
-    public RewardManager getRewardManager();
+    RewardManager getRewardManager();
     
-    public MonsterManager getMonsterManager();
+    MonsterManager getMonsterManager();
 
-    public ClassLimitManager getClassLimitManager();
+    ClassLimitManager getClassLimitManager();
 
-    public void revivePlayer(Player p);
+    void revivePlayer(Player p);
     
-    public ScoreboardManager getScoreboard();
+    ScoreboardManager getScoreboard();
     
     
-    public Messenger getMessenger();
+    Messenger getMessenger();
 
-    public Messenger getGlobalMessenger();
+    Messenger getGlobalMessenger();
 
-    public void announce(String msg);
+    void announce(String msg);
 
-    public void announce(Msg msg, String s);
+    void announce(Msg msg, String s);
 
-    public void announce(Msg msg);
+    void announce(Msg msg);
     
     
 
     
-    public void scheduleTask(Runnable r, int delay);
+    void scheduleTask(Runnable r, int delay);
     
     
     
@@ -139,45 +139,45 @@ public interface Arena
     
     
     
-    public boolean startArena();
+    boolean startArena();
     
-    public boolean endArena();
+    boolean endArena();
     
-    public void forceStart();
+    void forceStart();
     
-    public void forceEnd();
+    void forceEnd();
     
-    public boolean playerJoin(Player p, Location loc);
+    boolean playerJoin(Player p, Location loc);
     
-    public void playerReady(Player p);
+    void playerReady(Player p);
     
-    public boolean playerLeave(Player p);
+    boolean playerLeave(Player p);
     
-    public void playerDeath(Player p);
+    void playerDeath(Player p);
 
-    public void playerRespawn(Player p);
+    void playerRespawn(Player p);
     
-    public Location getRespawnLocation(Player p);
+    Location getRespawnLocation(Player p);
     
-    public void playerSpec(Player p, Location loc);
+    void playerSpec(Player p, Location loc);
     
-    public void storePlayerData(Player p, Location loc);
+    void storePlayerData(Player p, Location loc);
     
-    public void storeContainerContents();
+    void storeContainerContents();
     
-    public void restoreContainerContents();
+    void restoreContainerContents();
     
-    public void movePlayerToLobby(Player p);
+    void movePlayerToLobby(Player p);
     
-    public void movePlayerToSpec(Player p);
+    void movePlayerToSpec(Player p);
     
-    public void movePlayerToEntry(Player p);
+    void movePlayerToEntry(Player p);
     
-    public void discardPlayer(Player p);
+    void discardPlayer(Player p);
     
-    public void repairBlocks();
+    void repairBlocks();
     
-    public void queueRepairable(Repairable r);
+    void queueRepairable(Repairable r);
     
     
     
@@ -187,19 +187,19 @@ public interface Arena
     //
     ////////////////////////////////////////////////////////////////////*/
     
-    public void assignClass(Player p, String className);
+    void assignClass(Player p, String className);
 
-    public void assignClassGiveInv(Player p, String className, ItemStack[] contents);
+    void assignClassGiveInv(Player p, String className, ItemStack[] contents);
 
-    public void addRandomPlayer(Player p);
+    void addRandomPlayer(Player p);
     
-    public void assignRandomClass(Player p);
+    void assignRandomClass(Player p);
     
-    public void assignClassPermissions(Player p);
+    void assignClassPermissions(Player p);
     
-    public void removeClassPermissions(Player p);
+    void removeClassPermissions(Player p);
 
-    public void addPermission(Player p, String perm, boolean value);
+    void addPermission(Player p, String perm, boolean value);
     
     
     
@@ -209,7 +209,7 @@ public interface Arena
     //
     ////////////////////////////////////////////////////////////////////*/
     
-    public void restoreRegion();
+    void restoreRegion();
     
     
     
@@ -219,43 +219,43 @@ public interface Arena
     //
     ////////////////////////////////////////////////////////////////////*/
     
-    public boolean inArena(Player p);
+    boolean inArena(Player p);
     
-    public boolean inLobby(Player p);
+    boolean inLobby(Player p);
     
-    public boolean inSpec(Player p);
+    boolean inSpec(Player p);
     
-    public boolean isDead(Player p);
+    boolean isDead(Player p);
     
-    public String configName();
+    String configName();
     
-    public String arenaName();
+    String arenaName();
     
-    public MobArena getPlugin();
+    MobArena getPlugin();
     
-    public Map<String,ArenaClass> getClasses();
+    Map<String,ArenaClass> getClasses();
     
-    public int getPlayerCount();
+    int getPlayerCount();
     
-    public List<Player> getAllPlayers();
+    List<Player> getAllPlayers();
     
-    public Collection<ArenaPlayer> getArenaPlayerSet();
+    Collection<ArenaPlayer> getArenaPlayerSet();
     
-    public List<Player> getNonreadyPlayers();
+    List<Player> getNonreadyPlayers();
     
-    public boolean canAfford(Player p);
+    boolean canAfford(Player p);
     
-    public boolean takeFee(Player p);
+    boolean takeFee(Player p);
 
-    public boolean refund(Player p);
+    boolean refund(Player p);
     
-    public boolean canJoin(Player p);
+    boolean canJoin(Player p);
     
-    public boolean canSpec(Player p);
+    boolean canSpec(Player p);
 
-    public boolean hasIsolatedChat();
+    boolean hasIsolatedChat();
 
-    public Player getLastPlayerStanding();
+    Player getLastPlayerStanding();
 
-    public AutoStartTimer getAutoStartTimer();
+    AutoStartTimer getAutoStartTimer();
 }
