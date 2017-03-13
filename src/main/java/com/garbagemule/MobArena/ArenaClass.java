@@ -315,7 +315,7 @@ public class ArenaClass
         
         private int[] types;
         
-        private ArmorType(int... types) {
+        ArmorType(int... types) {
             this.types = types;
         }
         

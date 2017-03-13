@@ -13,7 +13,7 @@ public enum Stats
     
     private String name, shortName;
     
-    private Stats(String name, String shortName) {
+    Stats(String name, String shortName) {
         this.name      = name;
         this.shortName = shortName;
     }

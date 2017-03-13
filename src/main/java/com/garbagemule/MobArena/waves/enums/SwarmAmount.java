@@ -7,7 +7,7 @@ public enum SwarmAmount
     LOW(10), MEDIUM(20), HIGH(30), PSYCHO(60);
     private int multiplier;
     
-    private SwarmAmount(int multiplier) {
+    SwarmAmount(int multiplier) {
         this.multiplier = multiplier;
     }
     
