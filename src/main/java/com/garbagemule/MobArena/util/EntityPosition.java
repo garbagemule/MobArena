@@ -1,8 +1,9 @@
 package com.garbagemule.MobArena.util;
 
-import java.io.Serializable;
 import org.bukkit.Location;
 import org.bukkit.World;
+
+import java.io.Serializable;
 
 /**
  * NOTE: I (garbagemule) DID NOT WRITE THIS CLASS (notice the author below)

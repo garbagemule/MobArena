@@ -1,16 +1,12 @@
 package com.garbagemule.MobArena;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.util.MutableInt;
+import org.bukkit.entity.Player;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.bukkit.entity.Player;
-
-import com.garbagemule.MobArena.ArenaPlayer;
-import com.garbagemule.MobArena.ArenaPlayerStatistics;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.MutableInt;
 
 public class ArenaPlayerStatistics
 {

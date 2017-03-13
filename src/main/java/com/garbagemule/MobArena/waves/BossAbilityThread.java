@@ -1,11 +1,11 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.List;
-import java.util.Set;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.types.BossWave;
+
+import java.util.List;
+import java.util.Set;
 
 public class BossAbilityThread implements Runnable
 {

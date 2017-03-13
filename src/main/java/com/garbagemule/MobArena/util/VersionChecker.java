@@ -1,11 +1,10 @@
 package com.garbagemule.MobArena.util;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.util.Updater.UpdateResult;
 import com.garbagemule.MobArena.util.Updater.UpdateType;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public class VersionChecker
 {

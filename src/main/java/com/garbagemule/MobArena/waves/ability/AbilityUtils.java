@@ -1,16 +1,15 @@
 package com.garbagemule.MobArena.waves.ability;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class AbilityUtils
 {

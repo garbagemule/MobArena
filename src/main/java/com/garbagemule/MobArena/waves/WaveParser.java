@@ -1,28 +1,42 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.ArenaClass;
-
-import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
-import com.garbagemule.MobArena.waves.enums.*;
+import com.garbagemule.MobArena.waves.enums.BossHealth;
+import com.garbagemule.MobArena.waves.enums.SwarmAmount;
+import com.garbagemule.MobArena.waves.enums.WaveBranch;
+import com.garbagemule.MobArena.waves.enums.WaveError;
+import com.garbagemule.MobArena.waves.enums.WaveGrowth;
+import com.garbagemule.MobArena.waves.enums.WaveType;
 import com.garbagemule.MobArena.waves.types.BossWave;
 import com.garbagemule.MobArena.waves.types.DefaultWave;
 import com.garbagemule.MobArena.waves.types.SpecialWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.SwarmWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.*;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.ArmorUpgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.GenericUpgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.PermissionUpgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.Upgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.WeaponUpgrade;
+import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class WaveParser
 {

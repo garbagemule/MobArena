@@ -1,5 +1,9 @@
 package com.garbagemule.MobArena.region;
 
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
+
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
@@ -14,9 +18,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.*;
-
-import static com.garbagemule.MobArena.util.config.ConfigUtils.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ArenaRegion
 {

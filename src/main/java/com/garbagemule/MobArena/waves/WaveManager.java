@@ -1,11 +1,12 @@
 package com.garbagemule.MobArena.waves;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.enums.WaveBranch;
+import com.garbagemule.MobArena.waves.enums.WaveError;
+import org.bukkit.configuration.ConfigurationSection;
+
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.enums.*;
-import org.bukkit.configuration.ConfigurationSection;
 
 public class WaveManager
 {

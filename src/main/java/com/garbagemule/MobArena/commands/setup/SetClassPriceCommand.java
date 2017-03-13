@@ -1,14 +1,10 @@
 package com.garbagemule.MobArena.commands.setup;
 
 import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
-import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 @CommandInfo(
     name    = "setclassprice",

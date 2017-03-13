@@ -1,19 +1,52 @@
 package com.garbagemule.MobArena.commands;
 
-import java.util.*;
-import java.util.Map.Entry;
-
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.admin.DisableCommand;
+import com.garbagemule.MobArena.commands.admin.EnableCommand;
+import com.garbagemule.MobArena.commands.admin.ForceCommand;
+import com.garbagemule.MobArena.commands.admin.KickCommand;
+import com.garbagemule.MobArena.commands.admin.RestoreCommand;
+import com.garbagemule.MobArena.commands.setup.AddArenaCommand;
+import com.garbagemule.MobArena.commands.setup.AddClassPermCommand;
+import com.garbagemule.MobArena.commands.setup.AutoDegenerateCommand;
+import com.garbagemule.MobArena.commands.setup.AutoGenerateCommand;
+import com.garbagemule.MobArena.commands.setup.CheckDataCommand;
+import com.garbagemule.MobArena.commands.setup.CheckSpawnsCommand;
+import com.garbagemule.MobArena.commands.setup.ClassChestCommand;
+import com.garbagemule.MobArena.commands.setup.ConfigCommand;
+import com.garbagemule.MobArena.commands.setup.EditArenaCommand;
+import com.garbagemule.MobArena.commands.setup.ListClassPermsCommand;
+import com.garbagemule.MobArena.commands.setup.ListClassesCommand;
+import com.garbagemule.MobArena.commands.setup.RemoveArenaCommand;
+import com.garbagemule.MobArena.commands.setup.RemoveClassCommand;
+import com.garbagemule.MobArena.commands.setup.RemoveClassPermCommand;
+import com.garbagemule.MobArena.commands.setup.RemoveContainerCommand;
+import com.garbagemule.MobArena.commands.setup.RemoveLeaderboardCommand;
+import com.garbagemule.MobArena.commands.setup.RemoveSpawnpointCommand;
+import com.garbagemule.MobArena.commands.setup.SetClassCommand;
+import com.garbagemule.MobArena.commands.setup.SetClassPriceCommand;
+import com.garbagemule.MobArena.commands.setup.SettingCommand;
+import com.garbagemule.MobArena.commands.setup.SetupCommand;
+import com.garbagemule.MobArena.commands.user.ArenaListCommand;
+import com.garbagemule.MobArena.commands.user.JoinCommand;
+import com.garbagemule.MobArena.commands.user.LeaveCommand;
+import com.garbagemule.MobArena.commands.user.NotReadyCommand;
+import com.garbagemule.MobArena.commands.user.PickClassCommand;
+import com.garbagemule.MobArena.commands.user.PlayerListCommand;
+import com.garbagemule.MobArena.commands.user.SpecCommand;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-
-import com.garbagemule.MobArena.*;
-import com.garbagemule.MobArena.commands.user.*;
-import com.garbagemule.MobArena.commands.admin.*;
-import com.garbagemule.MobArena.commands.setup.*;
-import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.conversations.Conversable;
-import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class CommandHandler implements CommandExecutor
 {

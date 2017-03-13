@@ -1,8 +1,7 @@
 package com.garbagemule.MobArena.commands;
 
-import org.bukkit.command.CommandSender;
-
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import org.bukkit.command.CommandSender;
 
 public interface Command
 {

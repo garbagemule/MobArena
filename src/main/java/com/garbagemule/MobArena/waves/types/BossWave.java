@@ -1,20 +1,25 @@
 package com.garbagemule.MobArena.waves.types;
 
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.AbstractWave;
+import com.garbagemule.MobArena.waves.BossAbilityThread;
+import com.garbagemule.MobArena.waves.MABoss;
+import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
+import com.garbagemule.MobArena.waves.ability.Ability;
+import com.garbagemule.MobArena.waves.ability.AbilityInfo;
+import com.garbagemule.MobArena.waves.enums.BossHealth;
+import com.garbagemule.MobArena.waves.enums.WaveType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-
-import com.garbagemule.MobArena.Msg;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.*;
-import com.garbagemule.MobArena.waves.ability.*;
-import com.garbagemule.MobArena.waves.enums.*;
 
 public class BossWave extends AbstractWave
 {

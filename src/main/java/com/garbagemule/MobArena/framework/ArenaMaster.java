@@ -1,19 +1,17 @@
 package com.garbagemule.MobArena.framework;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
+import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.MobArena;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
-import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public interface ArenaMaster
 {

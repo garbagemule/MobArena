@@ -1,25 +1,27 @@
 package com.garbagemule.MobArena;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.garbagemule.MobArena.events.ArenaCompleteEvent;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemStack;
-
 import com.garbagemule.MobArena.events.NewWaveEvent;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
-import com.garbagemule.MobArena.waves.*;
+import com.garbagemule.MobArena.waves.MABoss;
+import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
+import com.garbagemule.MobArena.waves.WaveManager;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import com.garbagemule.MobArena.waves.types.BossWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MASpawnThread implements Runnable
 {

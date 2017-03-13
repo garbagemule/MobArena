@@ -1,12 +1,12 @@
 package com.garbagemule.MobArena.commands.admin;
 
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-
-import com.garbagemule.MobArena.*;
-import com.garbagemule.MobArena.commands.*;
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.Command;
+import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 
 @CommandInfo(
     name    = "disable",

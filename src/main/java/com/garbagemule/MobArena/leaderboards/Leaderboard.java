@@ -1,19 +1,18 @@
 package com.garbagemule.MobArena.leaderboards;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.garbagemule.MobArena.ArenaPlayer;
+import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 
-import com.garbagemule.MobArena.ArenaPlayer;
-import com.garbagemule.MobArena.ArenaPlayerStatistics;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Leaderboard
 {

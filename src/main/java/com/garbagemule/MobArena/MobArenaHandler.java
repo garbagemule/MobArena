@@ -1,13 +1,11 @@
 package com.garbagemule.MobArena;
 
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
 
 public class MobArenaHandler
 {

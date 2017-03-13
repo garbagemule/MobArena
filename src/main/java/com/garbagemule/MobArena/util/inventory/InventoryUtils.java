@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.util.inventory;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.bukkit.inventory.ItemStack;
 
 public class InventoryUtils
 {

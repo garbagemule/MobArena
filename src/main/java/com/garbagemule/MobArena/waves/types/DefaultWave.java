@@ -1,12 +1,16 @@
 package com.garbagemule.MobArena.waves.types;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
-import com.garbagemule.MobArena.waves.enums.*;
+import com.garbagemule.MobArena.waves.enums.WaveGrowth;
+import com.garbagemule.MobArena.waves.enums.WaveType;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.SortedMap;
 
 public class DefaultWave extends AbstractWave
 {

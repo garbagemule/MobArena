@@ -1,18 +1,17 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-
+import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.enums.WaveBranch;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.enums.*;
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.MobArena;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 public class WaveUtils
 {

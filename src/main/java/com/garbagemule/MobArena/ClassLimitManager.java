@@ -1,15 +1,14 @@
 package com.garbagemule.MobArena;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.util.MutableInt;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.MutableInt;
-import org.bukkit.plugin.Plugin;
 
 public class ClassLimitManager
 {

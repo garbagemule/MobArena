@@ -1,10 +1,9 @@
 package com.garbagemule.MobArena.leaderboards;
 
-import java.util.List;
-
+import com.garbagemule.MobArena.ArenaPlayerStatistics;
 import org.bukkit.block.Sign;
 
-import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import java.util.List;
 
 public class PlayerLeaderboardColumn extends AbstractLeaderboardColumn
 {

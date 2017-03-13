@@ -1,13 +1,14 @@
 package com.garbagemule.MobArena;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 
+import com.garbagemule.MobArena.ArenaClass.ArmorType;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.TextUtils;
+import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -21,15 +22,13 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 
-import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
-import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
-
-import com.garbagemule.MobArena.ArenaClass.ArmorType;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.util.ItemParser;
-import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.util.config.ConfigUtils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ArenaMasterImpl implements ArenaMaster
 {

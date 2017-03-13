@@ -1,13 +1,12 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SheepBouncer implements Runnable
 {

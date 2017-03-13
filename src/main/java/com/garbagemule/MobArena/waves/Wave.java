@@ -1,12 +1,12 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.List;
-import java.util.Map;
-
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.enums.WaveBranch;
+import com.garbagemule.MobArena.waves.enums.WaveType;
 import org.bukkit.Location;
 
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.enums.*;
+import java.util.List;
+import java.util.Map;
 
 public interface Wave
 {

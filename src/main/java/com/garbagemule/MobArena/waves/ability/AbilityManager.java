@@ -1,5 +1,34 @@
 package com.garbagemule.MobArena.waves.ability;
 
+import com.garbagemule.MobArena.waves.ability.core.ChainLightning;
+import com.garbagemule.MobArena.waves.ability.core.DisorientDistant;
+import com.garbagemule.MobArena.waves.ability.core.DisorientNearby;
+import com.garbagemule.MobArena.waves.ability.core.DisorientTarget;
+import com.garbagemule.MobArena.waves.ability.core.FetchDistant;
+import com.garbagemule.MobArena.waves.ability.core.FetchNearby;
+import com.garbagemule.MobArena.waves.ability.core.FetchTarget;
+import com.garbagemule.MobArena.waves.ability.core.FireAura;
+import com.garbagemule.MobArena.waves.ability.core.Flood;
+import com.garbagemule.MobArena.waves.ability.core.LightningAura;
+import com.garbagemule.MobArena.waves.ability.core.LivingBomb;
+import com.garbagemule.MobArena.waves.ability.core.ObsidianBomb;
+import com.garbagemule.MobArena.waves.ability.core.PullDistant;
+import com.garbagemule.MobArena.waves.ability.core.PullNearby;
+import com.garbagemule.MobArena.waves.ability.core.PullTarget;
+import com.garbagemule.MobArena.waves.ability.core.RootTarget;
+import com.garbagemule.MobArena.waves.ability.core.ShootArrow;
+import com.garbagemule.MobArena.waves.ability.core.ShootFireball;
+import com.garbagemule.MobArena.waves.ability.core.ShufflePositions;
+import com.garbagemule.MobArena.waves.ability.core.ThrowDistant;
+import com.garbagemule.MobArena.waves.ability.core.ThrowNearby;
+import com.garbagemule.MobArena.waves.ability.core.ThrowTarget;
+import com.garbagemule.MobArena.waves.ability.core.WarpToPlayer;
+import org.bukkit.Bukkit;
+
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -8,11 +37,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.tools.*;
-
-import com.garbagemule.MobArena.waves.ability.core.*;
-import org.bukkit.Bukkit;
 
 public class AbilityManager
 {
