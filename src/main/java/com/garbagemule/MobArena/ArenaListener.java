@@ -856,6 +856,11 @@ public class ArenaListener
             else if (event.getTarget() instanceof Player && !arena.inArena((Player) event.getTarget())) {
                 event.setCancelled(true);
             }
+
+            // And other mobs unless infighting is enabled
+            else if (monsters.getMonsters().contains(event.getTarget()) && !monsterInfight) {
+                event.setCancelled(true);
+            }
         }
     }
     
