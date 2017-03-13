@@ -23,13 +23,13 @@ public class MonsterManager
     private Set<LivingEntity> mounts;
     
     public MonsterManager() {
-        this.monsters  = new HashSet<LivingEntity>();
-        this.sheep     = new HashSet<LivingEntity>();
-        this.golems    = new HashSet<LivingEntity>();
-        this.pets      = new HashSet<Wolf>();
-        this.bosses    = new HashMap<LivingEntity,MABoss>();
-        this.suppliers = new HashMap<LivingEntity,List<ItemStack>>();
-        this.mounts    = new HashSet<LivingEntity>();
+        this.monsters  = new HashSet<>();
+        this.sheep     = new HashSet<>();
+        this.golems    = new HashSet<>();
+        this.pets      = new HashSet<>();
+        this.bosses    = new HashMap<>();
+        this.suppliers = new HashMap<>();
+        this.mounts    = new HashSet<>();
     }
     
     public void reset() {

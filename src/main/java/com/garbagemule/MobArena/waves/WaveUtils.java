@@ -20,7 +20,7 @@ public class WaveUtils
      */
     public static List<Location> getValidSpawnpoints(Arena arena, List<Location> spawnpoints, Collection<Player> players) {
         MobArena plugin = arena.getPlugin();
-        List<Location> result = new ArrayList<Location>();
+        List<Location> result = new ArrayList<>();
         
         // Ensure that we do have some spawnpoints.
         if (spawnpoints == null || spawnpoints.isEmpty()) {

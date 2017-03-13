@@ -64,7 +64,7 @@ public class AbilityManager
      * Load all the core abilities included in MobArena
      */
     public static void loadCoreAbilities() {
-        if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
+        if (abilities == null) abilities = new HashMap<>();
 
         register(ChainLightning.class);
         register(DisorientDistant.class);
@@ -96,7 +96,7 @@ public class AbilityManager
      * @param classDir a directory of .class (and/or .java) files
      */
     public static void loadCustomAbilities(File classDir) {
-        if (abilities == null) abilities = new HashMap<String,Class<? extends Ability>>();
+        if (abilities == null) abilities = new HashMap<>();
         
         // Grab the source directory.
         File javaDir = new File(classDir, "src");
@@ -179,7 +179,7 @@ public class AbilityManager
     }
     
     private static List<File> getSourceFilesToCompile(File javaDir, File classDir) {
-        List<File> result = new ArrayList<File>();
+        List<File> result = new ArrayList<>();
         
         if (javaDir == null || !javaDir.exists()) {
             return result;

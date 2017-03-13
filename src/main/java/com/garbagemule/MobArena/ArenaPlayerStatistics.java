@@ -23,7 +23,7 @@ public class ArenaPlayerStatistics
 
     public void reset() {
         if (ints == null) {
-            ints = new HashMap<String, MutableInt>();
+            ints = new HashMap<>();
         }
 
         ints.clear();

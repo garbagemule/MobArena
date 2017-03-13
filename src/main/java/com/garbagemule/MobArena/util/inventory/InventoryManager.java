@@ -26,8 +26,8 @@ public class InventoryManager
         this.dir    = new File(arena.getPlugin().getDataFolder(), "inventories");
         this.dir.mkdir();
         
-        this.items  = new HashMap<Player,ItemStack[]>();
-        this.armor  = new HashMap<Player,ItemStack[]>();
+        this.items  = new HashMap<>();
+        this.armor  = new HashMap<>();
     }
     
     public void storeInv(Player p) throws IOException {

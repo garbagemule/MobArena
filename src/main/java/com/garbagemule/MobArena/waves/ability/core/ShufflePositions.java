@@ -25,7 +25,7 @@ public class ShufflePositions implements Ability
         entities.add(boss.getEntity());
         
         // Grab the locations
-        List<Location> locations = new LinkedList<Location>();
+        List<Location> locations = new LinkedList<>();
         for (LivingEntity e : entities) {
             locations.add(e.getLocation());
         }

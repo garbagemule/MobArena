@@ -8,7 +8,7 @@ import java.util.List;
 public class InventoryUtils
 {
     public static List<ItemStack> extractAll(int id, List<ItemStack> items) {
-        List<ItemStack> result = new ArrayList<ItemStack>();
+        List<ItemStack> result = new ArrayList<>();
 
         for (ItemStack stack : items) {
             if (stack.getTypeId() == id) {

@@ -38,7 +38,7 @@ public class DefaultWave extends AbstractWave
         Random random = new Random();
         
         // Prepare the monster map.
-        Map<MACreature,Integer> monsters = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> monsters = new HashMap<>();
         
         // Generate some random amounts.
         for (int i = 0; i < toSpawn; i++) {
@@ -60,7 +60,7 @@ public class DefaultWave extends AbstractWave
     }
 
     private Map<MACreature,Integer> getFixed() {
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
 
         // For fixed waves, we just convert the accumulated map
         int last = 0;

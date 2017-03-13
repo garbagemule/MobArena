@@ -127,7 +127,7 @@ public class SetupCommand implements Command, Listener {
             player.getInventory().setContents(getToolbox());
             player.getInventory().setHeldItemSlot(0);
 
-            this.missing = new ArrayList<String>();
+            this.missing = new ArrayList<>();
             this.next = color(String.format(
                     "Setup Mode for arena &a%s&r. Type &e?&r for help.",
                     "&a" + arena.configName() + "&r"

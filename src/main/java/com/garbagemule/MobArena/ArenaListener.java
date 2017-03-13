@@ -153,7 +153,7 @@ public class ArenaListener
 
         this.allowMonsters = arena.getWorld().getAllowMonsters();
 
-        this.banned = new HashSet<Player>();
+        this.banned = new HashSet<>();
     }
     
     void pvpActivate() {
@@ -465,7 +465,7 @@ public class ArenaListener
 
         // If the arena isn't destructible, just clear the blocklist.
         if (!softRestore && protect) {
-            List<Block> blocks = new LinkedList<Block>(arena.getBlocks());
+            List<Block> blocks = new LinkedList<>(arena.getBlocks());
             event.blockList().retainAll(blocks);
             return;
         }

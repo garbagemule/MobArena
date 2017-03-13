@@ -17,7 +17,7 @@ public class PotionEffectParser
         if (s == null || s.isEmpty())
             return null;
         
-        List<PotionEffect> potions = new ArrayList<PotionEffect>();
+        List<PotionEffect> potions = new ArrayList<>();
         for (String potion : s.split(",")) {
             PotionEffect eff = parsePotionEffect(potion.trim());
             if (eff != null) {

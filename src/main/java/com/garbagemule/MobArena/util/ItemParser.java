@@ -126,11 +126,11 @@ public class ItemParser
     
     public static List<ItemStack> parseItems(String s) {
         if (s == null) {
-            return new ArrayList<ItemStack>(1);
+            return new ArrayList<>(1);
         }
         
         String[] items = s.split(",");
-        List<ItemStack> result = new ArrayList<ItemStack>(items.length);
+        List<ItemStack> result = new ArrayList<>(items.length);
         
         for (String item : items) {
             ItemStack stack = parseItem(item.trim());

@@ -39,8 +39,8 @@ public class Leaderboard
     {
         this.plugin = plugin;
         this.arena  = arena;
-        this.boards = new ArrayList<LeaderboardColumn>();
-        this.stats  = new ArrayList<ArenaPlayerStatistics>();
+        this.boards = new ArrayList<>();
+        this.stats  = new ArrayList<>();
     }
     
     /**
@@ -183,7 +183,7 @@ public class Leaderboard
             if (stat == null) continue;
             
             // Create the list of signs
-            List<Sign> signs = new ArrayList<Sign>();
+            List<Sign> signs = new ArrayList<>();
             current = header;
             for (int i = 1; i < rows; i++)
             {

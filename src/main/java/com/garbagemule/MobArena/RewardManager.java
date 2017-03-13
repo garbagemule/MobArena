@@ -24,8 +24,8 @@ public class RewardManager
     public RewardManager(Arena arena) {
         this.plugin   = arena.getPlugin();
         this.arena    = arena;
-        this.players  = new HashMap<Player,List<ItemStack>>();
-        this.rewarded = new HashSet<Player>();
+        this.players  = new HashMap<>();
+        this.rewarded = new HashSet<>();
     }
     
     public void reset() {

@@ -133,7 +133,7 @@ public class CommandHandler implements CommandExecutor
      * @return a list of commands whose patterns match the given string
      */
     private List<Command> getMatchingCommands(String arg) {
-        List<Command> result = new ArrayList<Command>();
+        List<Command> result = new ArrayList<>();
         
         // Grab the commands that match the argument.
         for (Entry<String,Command> entry : commands.entrySet()) {
@@ -209,7 +209,7 @@ public class CommandHandler implements CommandExecutor
      * method, but this is neater, albeit more manual work.
      */
     private void registerCommands() {
-        commands = new LinkedHashMap<String,Command>();
+        commands = new LinkedHashMap<>();
         
         // mobarena.use
         register(JoinCommand.class);

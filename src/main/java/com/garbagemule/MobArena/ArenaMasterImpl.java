@@ -52,12 +52,12 @@ public class ArenaMasterImpl implements ArenaMaster
         this.plugin = plugin;
         this.config = plugin.getConfig();
 
-        this.arenas = new ArrayList<Arena>();
-        this.arenaMap = new HashMap<Player, Arena>();
+        this.arenas = new ArrayList<>();
+        this.arenaMap = new HashMap<>();
 
-        this.classes = new HashMap<String, ArenaClass>();
+        this.classes = new HashMap<>();
 
-        this.allowedCommands = new HashSet<String>();
+        this.allowedCommands = new HashSet<>();
         
         this.enabled = config.getBoolean("global-settings.enabled", true);
     }
@@ -125,7 +125,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
     
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
-        List<Arena> result = new ArrayList<Arena>(arenas.size());
+        List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
             if (arena.isEnabled()) 
                 result.add(arena);
@@ -133,7 +133,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Arena> getPermittedArenas(Player p) {
-        List<Arena> result = new ArrayList<Arena>(arenas.size());
+        List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
             if (plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
@@ -141,7 +141,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Arena> getEnabledAndPermittedArenas(Player p) {
-        List<Arena> result = new ArrayList<Arena>(arenas.size());
+        List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
             if (arena.isEnabled() && plugin.has(p, "mobarena.arenas." + arena.configName()))
                 result.add(arena);
@@ -156,7 +156,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Arena> getArenasInWorld(World world) {
-        List<Arena> result = new ArrayList<Arena>(arenas.size());
+        List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
             if (arena.getWorld().equals(world))
                 result.add(arena);
@@ -164,7 +164,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public List<Player> getAllPlayers() {
-        List<Player> result = new ArrayList<Player>(arenas.size());
+        List<Player> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
             result.addAll(arena.getAllPlayers());
         return result;
@@ -172,11 +172,11 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getAllPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new ArrayList<Player>(arena.getPlayersInArena()) : new ArrayList<Player>();
+        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<Player>();
     }
 
     public List<Player> getAllLivingPlayers() {
-        List<Player> result = new ArrayList<Player>();
+        List<Player> result = new ArrayList<>();
         for (Arena arena : arenas)
             result.addAll(arena.getPlayersInArena());
         return result;
@@ -184,7 +184,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getLivingPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new ArrayList<Player>(arena.getPlayersInArena()) : new ArrayList<Player>();
+        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<Player>();
     }
 
     public Arena getArenaWithPlayer(Player p) {
@@ -271,7 +271,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
 
         // Establish the map.
-        classes = new HashMap<String, ArenaClass>();
+        classes = new HashMap<>();
         Set<String> classNames = section.getKeys(false);
 
         // Load each individual class.
@@ -331,7 +331,7 @@ public class ArenaMasterImpl implements ArenaMaster
             List<ItemStack> stacks = ItemParser.parseItems(str);
             arenaClass.setItems(stacks);
         } else {
-            List<ItemStack> stacks = new ArrayList<ItemStack>();
+            List<ItemStack> stacks = new ArrayList<>();
             for (String item : items) {
                 ItemStack stack = ItemParser.parseItem(item);
                 if (stack != null) {
@@ -536,7 +536,7 @@ public class ArenaMasterImpl implements ArenaMaster
             createArenaNode(section, "default", plugin.getServer().getWorlds().get(0), false);
         }
         
-        arenas = new ArrayList<Arena>();
+        arenas = new ArrayList<>();
         for (World w : Bukkit.getServer().getWorlds()) {
             loadArenasInWorld(w.getName());
         }

@@ -38,7 +38,7 @@ public class PlayerListCommand implements Command
             list = MAUtils.listToString(arena.getPlayersInArena(), am.getPlugin());
         } else {
             StringBuilder buffy = new StringBuilder();
-            List<Player> players = new LinkedList<Player>();
+            List<Player> players = new LinkedList<>();
             
             for (Arena arena : am.getArenas()) {
                 players.addAll(arena.getPlayersInArena());

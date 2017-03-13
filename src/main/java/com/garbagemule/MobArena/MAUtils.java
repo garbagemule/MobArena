@@ -53,7 +53,7 @@ public class MAUtils
     public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
     {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
-        Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
+        Map<Integer,List<ItemStack>> result = new HashMap<>();
 
         String typePath = "rewards.waves." + type;
         if (!config.contains(typePath)) return result;
@@ -141,7 +141,7 @@ public class MAUtils
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+        List<Player> players = new ArrayList<>(arena.getPlayersInArena());
         for (Player p : players) {
             if (!arena.getWorld().equals(p.getWorld())) {
                 plugin.getLogger().info("Player '" + p.getName() + "' is not in the right world. Kicking...");
@@ -261,7 +261,7 @@ public class MAUtils
      */
     public static List<String> stringToList(String list)
     {
-        List<String> result = new LinkedList<String>();
+        List<String> result = new LinkedList<>();
         if (list == null) return result;
         
         String[] parts = list.trim().split(",");
@@ -303,7 +303,7 @@ public class MAUtils
         int lz2 = z1 + 6;
         
         // Save the precious patch
-        HashMap<EntityPosition,Integer> preciousPatch = new HashMap<EntityPosition,Integer>();
+        HashMap<EntityPosition,Integer> preciousPatch = new HashMap<>();
         Location lo;
         int id;
         for (int i = x1; i <= x2; i++)

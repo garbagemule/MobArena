@@ -27,7 +27,7 @@ public class UpgradeWave extends AbstractWave
     
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
-        return new HashMap<MACreature,Integer>();
+        return new HashMap<>();
     }
 
     public void grantItems(Arena arena, Player p, String className) {
@@ -49,9 +49,9 @@ public class UpgradeWave extends AbstractWave
     }
 
     public Wave copy() {
-        Map<String,List<Upgrade>> upgrades = new HashMap<String,List<Upgrade>>();
+        Map<String,List<Upgrade>> upgrades = new HashMap<>();
         for (Map.Entry<String,List<Upgrade>> entry : this.upgrades.entrySet()) {
-            upgrades.put(entry.getKey(), new ArrayList<Upgrade>(entry.getValue()));
+            upgrades.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         UpgradeWave result = new UpgradeWave(upgrades);
         result.giveAll = this.giveAll;

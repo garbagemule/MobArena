@@ -34,7 +34,7 @@ public class WaveManager
     public void reset() {
         reloadWaves();
         wave = 0;
-        singleWavesInstance = new TreeSet<Wave>(singleWaves);
+        singleWavesInstance = new TreeSet<>(singleWaves);
     }
     
     public void reloadWaves() {
@@ -119,7 +119,7 @@ public class WaveManager
     }
     
     private SortedSet<Wave> getMatchingRecurrentWaves(int wave) {
-        TreeSet<Wave> result = new TreeSet<Wave>(WaveUtils.getRecurrentComparator());
+        TreeSet<Wave> result = new TreeSet<>(WaveUtils.getRecurrentComparator());
         for (Wave w : recurrentWaves) {
             if (w.matches(wave)) {
                 result.add(w);

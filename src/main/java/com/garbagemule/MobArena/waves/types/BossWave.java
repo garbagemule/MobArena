@@ -43,9 +43,9 @@ public class BossWave extends AbstractWave
     
     public BossWave(MACreature monster) {
         this.monster   = monster;
-        this.bosses    = new HashSet<MABoss>();
-        this.abilities = new ArrayList<Ability>();
-        this.potions = new ArrayList<PotionEffect>();
+        this.bosses    = new HashSet<>();
+        this.abilities = new ArrayList<>();
+        this.potions = new ArrayList<>();
         this.activated = false;
         this.abilityAnnounce = false;
         this.setType(WaveType.BOSS);
@@ -57,7 +57,7 @@ public class BossWave extends AbstractWave
     
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
         result.put(monster, 1);
         return result;
     }
@@ -92,7 +92,7 @@ public class BossWave extends AbstractWave
     }
     
     public Set<MABoss> getMABosses() {
-        Set<MABoss> result = new HashSet<MABoss>();
+        Set<MABoss> result = new HashSet<>();
         for (MABoss b : bosses) {
             if (!b.isDead()) {
                 result.add(b);

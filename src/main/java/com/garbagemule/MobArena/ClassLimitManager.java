@@ -20,8 +20,8 @@ public class ClassLimitManager
     public ClassLimitManager(Arena arena, Map<String,ArenaClass> classes, ConfigurationSection limits) {
         this.limits       = limits;
         this.classes      = classes;
-        this.classLimits  = new HashMap<ArenaClass,MutableInt>();
-        this.classesInUse = new HashMap<ArenaClass, HashSet<String>>();
+        this.classLimits  = new HashMap<>();
+        this.classesInUse = new HashMap<>();
 
         loadLimitMap(arena.getPlugin());
         initInUseMap();

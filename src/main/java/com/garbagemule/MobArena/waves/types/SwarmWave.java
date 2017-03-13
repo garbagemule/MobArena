@@ -24,7 +24,7 @@ public class SwarmWave extends AbstractWave
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
         // Prepare the monster map.
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
         
         // Add the monster and the swarm amount.
         int toSpawn = (int) Math.max(1D, amount.getAmount(playerCount) * super.getAmountMultiplier());

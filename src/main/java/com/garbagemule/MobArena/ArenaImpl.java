@@ -92,7 +92,7 @@ public class ArenaImpl implements Arena
     private RewardManager     rewardManager;
     private ClassLimitManager limitManager;
     private Map<Player,ArenaPlayer> arenaPlayerMap;
-    private Map<Player,PlayerData> playerData = new HashMap<Player,PlayerData>();
+    private Map<Player,PlayerData> playerData = new HashMap<>();
     
     private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
     private Set<Player> randoms;
@@ -155,17 +155,17 @@ public class ArenaImpl implements Arena
         this.leaderboard = new Leaderboard(plugin, this, region.getLeaderboard());
 
         // Player stuff
-        this.arenaPlayerMap = new HashMap<Player,ArenaPlayer>();
-        this.arenaPlayers   = new HashSet<Player>();
-        this.lobbyPlayers   = new HashSet<Player>();
-        this.readyPlayers   = new HashSet<Player>();
-        this.specPlayers    = new HashSet<Player>();
-        this.deadPlayers    = new HashSet<Player>();
-        this.randoms        = new HashSet<Player>();
+        this.arenaPlayerMap = new HashMap<>();
+        this.arenaPlayers   = new HashSet<>();
+        this.lobbyPlayers   = new HashSet<>();
+        this.readyPlayers   = new HashSet<>();
+        this.specPlayers    = new HashSet<>();
+        this.deadPlayers    = new HashSet<>();
+        this.randoms        = new HashSet<>();
 
         // Classes, items and permissions
         this.classes      = plugin.getArenaMaster().getClasses();
-        this.attachments  = new HashMap<Player,PermissionAttachment>();
+        this.attachments  = new HashMap<>();
         this.limitManager = new ClassLimitManager(this, classes, makeSection(section, "class-limits"));
 
         String defaultClassName = settings.getString("default-class", null);
@@ -174,10 +174,10 @@ public class ArenaImpl implements Arena
         }
         
         // Blocks and pets
-        this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
-        this.blocks       = new HashSet<Block>();
-        this.repairables  = new LinkedList<Repairable>();
-        this.containables = new LinkedList<Repairable>();
+        this.repairQueue  = new PriorityBlockingQueue<>(100, new RepairableComparator());
+        this.blocks       = new HashSet<>();
+        this.repairables  = new LinkedList<>();
+        this.containables = new LinkedList<>();
         
         // Monster stuff
         this.monsterManager = new MonsterManager();
@@ -607,7 +607,7 @@ public class ArenaImpl implements Arena
             return;
         
         // Set operations.
-        Set<Player> tmp = new HashSet<Player>();
+        Set<Player> tmp = new HashSet<>();
         tmp.addAll(lobbyPlayers);
         tmp.removeAll(readyPlayers);
         
@@ -1298,7 +1298,7 @@ public class ArenaImpl implements Arena
     public void assignRandomClass(Player p)
     {
         Random r = new Random();
-        List<String> classes = new LinkedList<String>(this.classes.keySet());
+        List<String> classes = new LinkedList<>(this.classes.keySet());
 
         String className = classes.remove(r.nextInt(classes.size()));
         while (!plugin.has(p, "mobarena.classes." + className))
@@ -1480,7 +1480,7 @@ public class ArenaImpl implements Arena
     @Override
     public List<Player> getAllPlayers()
     {
-        List<Player> result = new LinkedList<Player>();
+        List<Player> result = new LinkedList<>();
         result.addAll(arenaPlayers);
         result.addAll(lobbyPlayers);
         result.addAll(specPlayers);
@@ -1514,7 +1514,7 @@ public class ArenaImpl implements Arena
     @Override
     public List<Player> getNonreadyPlayers()
     {
-        List<Player> result = new LinkedList<Player>();
+        List<Player> result = new LinkedList<>();
         result.addAll(lobbyPlayers);
         result.removeAll(readyPlayers);
         return result;

@@ -42,7 +42,7 @@ public class WaveParser
 {
     public static TreeSet<Wave> parseWaves(Arena arena, ConfigurationSection config, WaveBranch branch) {
         // Create a TreeSet with the Comparator for the specific branch.
-        TreeSet<Wave> result = new TreeSet<Wave>(WaveUtils.getComparator(branch));
+        TreeSet<Wave> result = new TreeSet<>(WaveUtils.getComparator(branch));
         
         // If the config is null, return the empty set.
         if (config == null) {
@@ -358,7 +358,7 @@ public class WaveParser
         }
         
         // Prepare the map.
-        SortedMap<Integer,MACreature> monsterMap = new TreeMap<Integer,MACreature>();
+        SortedMap<Integer,MACreature> monsterMap = new TreeMap<>();
         int sum = 0;
         String path = "monsters.";
         
@@ -378,7 +378,7 @@ public class WaveParser
     }
     
     private static List<Location> getSpawnpoints(Arena arena, String name, ConfigurationSection config) {
-        List<Location> result = new ArrayList<Location>();
+        List<Location> result = new ArrayList<>();
         
         String spawnString = config.getString("spawnpoints");
         if (spawnString == null) {
@@ -414,7 +414,7 @@ public class WaveParser
             return null;
         }
         
-        Map<String,List<Upgrade>> upgrades = new HashMap<String,List<Upgrade>>();
+        Map<String,List<Upgrade>> upgrades = new HashMap<>();
         String path = "upgrades.";
         
         for (String className : classes) {
@@ -424,7 +424,7 @@ public class WaveParser
             if (val instanceof String) {
                 itemList = (String) val;
                 List<ItemStack> stacks = ItemParser.parseItems(itemList);
-                List<Upgrade> list = new ArrayList<Upgrade>();
+                List<Upgrade> list = new ArrayList<>();
                 for (ItemStack stack : stacks) {
                     list.add(new GenericUpgrade(stack));
                 }
@@ -433,7 +433,7 @@ public class WaveParser
             // New complex setup
             else if (val instanceof ConfigurationSection) {
                 ConfigurationSection classSection = (ConfigurationSection) val;
-                List<Upgrade> list = new ArrayList<Upgrade>();
+                List<Upgrade> list = new ArrayList<>();
 
                 // Items (Generic + Weapons)
                 itemList = classSection.getString("items", null);
@@ -468,7 +468,7 @@ public class WaveParser
     }
     
     public static Wave createDefaultWave() {
-        SortedMap<Integer,MACreature> monsters = new TreeMap<Integer,MACreature>();
+        SortedMap<Integer,MACreature> monsters = new TreeMap<>();
         monsters.put(10, MACreature.ZOMBIE);
         monsters.put(20, MACreature.SKELETON);
         monsters.put(30, MACreature.SPIDER);

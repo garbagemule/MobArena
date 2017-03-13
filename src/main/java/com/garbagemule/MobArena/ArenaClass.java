@@ -36,10 +36,10 @@ public class ArenaClass
         this.configName    = name;
         this.lowercaseName = name.toLowerCase().replace(" ", "");
         
-        this.items = new ArrayList<ItemStack>();
-        this.armor = new ArrayList<ItemStack>(4);
-        this.perms = new HashMap<String,Boolean>();
-        this.lobbyperms = new HashMap<String,Boolean>();
+        this.items = new ArrayList<>();
+        this.armor = new ArrayList<>(4);
+        this.perms = new HashMap<>();
+        this.lobbyperms = new HashMap<>();
 
         this.unbreakableWeapons = unbreakableWeapons;
         this.unbreakableArmor = unbreakableArmor;
@@ -137,7 +137,7 @@ public class ArenaClass
      * @param stacks a list of items
      */
     public void setItems(List<ItemStack> stacks) {
-        this.items = new ArrayList<ItemStack>(stacks.size());
+        this.items = new ArrayList<>(stacks.size());
         for (ItemStack stack : stacks) {
             addItem(stack);
         }

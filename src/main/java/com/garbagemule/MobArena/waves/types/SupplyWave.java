@@ -33,7 +33,7 @@ public class SupplyWave extends AbstractWave
         Random random = new Random();
         
         // Prepare the monster map.
-        Map<MACreature,Integer> monsters = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> monsters = new HashMap<>();
         
         int toSpawn = (int) Math.max(1D, playerCount * super.getAmountMultiplier());
         
@@ -66,7 +66,7 @@ public class SupplyWave extends AbstractWave
 
     public Wave copy() {
         SupplyWave result = new SupplyWave(monsterMap);
-        result.drops = new ArrayList<ItemStack>(this.drops);
+        result.drops = new ArrayList<>(this.drops);
 
         // From AbstractWave
         result.setAmountMultiplier(getAmountMultiplier());

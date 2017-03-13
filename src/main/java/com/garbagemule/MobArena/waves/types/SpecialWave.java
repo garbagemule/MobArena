@@ -27,7 +27,7 @@ public class SpecialWave extends AbstractWave
         int value = random.nextInt(monsterMap.lastKey()); 
 
         // Prepare the monster map.
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
         
         for (Map.Entry<Integer,MACreature> entry : monsterMap.entrySet()) {
             if (value > entry.getKey()) {

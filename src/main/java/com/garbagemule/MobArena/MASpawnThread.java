@@ -108,7 +108,7 @@ public class MASpawnThread implements Runnable
             plugin.getServer().getPluginManager().callEvent(complete);
 
             // Then force leave everyone
-            List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+            List<Player> players = new ArrayList<>(arena.getPlayersInArena());
             for (Player p : players) {
                 arena.playerLeave(p);
             }
@@ -278,7 +278,7 @@ public class MASpawnThread implements Runnable
     }
 
     private void removeCheatingPlayers() {
-        List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+        List<Player> players = new ArrayList<>(arena.getPlayersInArena());
         for (Player p : players) {
             if (region.contains(p.getLocation())) {
                 continue;

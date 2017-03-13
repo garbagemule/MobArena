@@ -26,7 +26,7 @@ public class SheepBouncer implements Runnable
         }
         
         // Put all the sheep in a new collection for iteration purposes.
-        sheep = new HashSet<LivingEntity>(arena.getMonsterManager().getExplodingSheep());
+        sheep = new HashSet<>(arena.getMonsterManager().getExplodingSheep());
         
         // If there are no sheep, reschedule and return.
         if (sheep.isEmpty()) {

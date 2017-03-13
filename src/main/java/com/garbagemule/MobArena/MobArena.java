@@ -283,7 +283,7 @@ public class MobArena extends JavaPlugin
     }
     
     private void registerInventories() {
-        this.inventoriesToRestore = new HashSet<String>();
+        this.inventoriesToRestore = new HashSet<>();
         
         File dir = new File(getDataFolder(), "inventories");
         if (!dir.exists()) {
