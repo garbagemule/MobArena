@@ -439,7 +439,7 @@ public class ArenaListener
             }
         }
 
-        LivingEntity entity = (LivingEntity) event.getEntity();
+        LivingEntity entity = event.getEntity();
         if (arena.isRunning() && entity instanceof Slime)
             monsters.addMonster(entity);
 

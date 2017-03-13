@@ -52,7 +52,7 @@ public class InventoryManager
         p.updateInventory();
     }
     
-    public void restoreInv(Player p) throws FileNotFoundException, IOException, InvalidConfigurationException {
+    public void restoreInv(Player p) throws IOException, InvalidConfigurationException {
         // Try to grab the items from memory first
         ItemStack[] items = this.items.get(p);
         ItemStack[] armor = this.armor.get(p);

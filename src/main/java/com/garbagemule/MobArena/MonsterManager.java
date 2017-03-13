@@ -125,7 +125,7 @@ public class MonsterManager
     
     public void removePets(Player p) {
         for (Wolf w : pets) {
-            if (w == null || !(w.getOwner() instanceof Player) || !((Player) w.getOwner()).getName().equals(p.getName()))
+            if (w == null || !(w.getOwner() instanceof Player) || !w.getOwner().getName().equals(p.getName()))
                 continue;
             
             w.setOwner(null);

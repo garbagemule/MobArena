@@ -427,7 +427,7 @@ public class MAUtils
         {
             world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
             Sign sign = (Sign) world.getBlockAt(i,ly1+1,lz2-1).getState();
-            sign.setLine(0, TextUtils.camelCase((String)iterator.next()));
+            sign.setLine(0, TextUtils.camelCase(iterator.next()));
             sign.update();
         }
         world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);
