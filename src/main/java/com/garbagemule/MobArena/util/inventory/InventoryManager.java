@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.util.inventory;
 
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -116,12 +117,12 @@ public class InventoryManager
         
         // Check for null or id 0, or AIR
         for (ItemStack stack : inventory) {
-            if (stack != null && stack.getTypeId() != 0)
+            if (stack != null && stack.getType() != Material.AIR)
                 return false;
         }
 
         for (ItemStack stack : armor) {
-            if (stack != null && stack.getTypeId() != 0)
+            if (stack != null && stack.getType() != Material.AIR)
                 return false;
         }
         

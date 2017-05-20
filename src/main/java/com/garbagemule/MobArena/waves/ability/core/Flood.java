@@ -5,6 +5,7 @@ import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityInfo;
 import com.garbagemule.MobArena.waves.ability.AbilityUtils;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -19,8 +20,8 @@ public class Flood implements Ability
         Player p = AbilityUtils.getRandomPlayer(arena);
         Block block = p.getLocation().getBlock();
         
-        if (block.getTypeId() == 0) {
-            block.setTypeId(8);
+        if (block.getType() == Material.AIR) {
+            block.setType(Material.WATER);
             arena.addBlock(block);
         }
     }

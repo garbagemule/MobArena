@@ -248,7 +248,7 @@ public class ArenaListener
             arena.addRepairable(r);
             
             if (!softRestoreDrops)
-                b.setTypeId(0);
+                b.setType(Material.AIR);
             return true;
         }
 
@@ -398,7 +398,7 @@ public class ArenaListener
                     if (b.getType() == Material.TNT) {
                         Player planter = getPlanter(b);
                         if (planter != null) {
-                            b.setTypeId(0);
+                            b.setType(Material.AIR);
                             TNTPrimed tnt = b.getWorld().spawn(b.getLocation(), TNTPrimed.class);
                             setPlanter(tnt, planter);
                         }
@@ -504,7 +504,7 @@ public class ArenaListener
             if (mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
                 arena.removeBlock(b);
             else if (arena.removeBlock(b))
-                arena.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(state.getTypeId(), 1));
+                arena.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(state.getType(), 1));
             else if (softRestore)
                 arena.addRepairable(r);
             else
@@ -791,7 +791,7 @@ public class ArenaListener
             Material.IRON_HELMET,      Material.IRON_CHESTPLATE,      Material.IRON_LEGGINGS,      Material.IRON_BOOTS,
             Material.DIAMOND_HELMET,   Material.DIAMOND_CHESTPLATE,   Material.DIAMOND_LEGGINGS,   Material.DIAMOND_BOOTS,
             // Misc
-            Material.BOW, Material.FLINT_AND_STEEL, Material.FISHING_ROD, Material.SHEARS, Material.CARROT_STICK
+            Material.BOW, Material.FLINT_AND_STEEL, Material.FISHING_ROD, Material.SHEARS, Material.CARROT_STICK, Material.SHIELD
     );
 
     private void repairWeapon(Player p) {
@@ -799,7 +799,8 @@ public class ArenaListener
         if (ap != null) {
             ArenaClass ac = ap.getArenaClass();
             if (ac != null && ac.hasUnbreakableWeapons()) {
-                repair(p.getItemInHand());
+                repair(p.getInventory().getItemInMainHand());
+                repair(p.getInventory().getItemInOffHand());
             }
         }
     }
@@ -999,7 +1000,7 @@ public class ArenaListener
             return;
 
         if (!arena.isRunning()) {
-            event.getBlockClicked().getRelative(event.getBlockFace()).setTypeId(0);
+            event.getBlockClicked().getRelative(event.getBlockFace()).setType(Material.AIR);
             event.setCancelled(true);
             return;
         }
@@ -1024,7 +1025,7 @@ public class ArenaListener
             return;
 
         // Iron block
-        if (event.getClickedBlock().getTypeId() == 42) {
+        if (event.getClickedBlock().getType() == Material.IRON_BLOCK) {
             handleReadyBlock(p);
         }
         // Sign

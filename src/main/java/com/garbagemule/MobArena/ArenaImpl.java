@@ -1368,7 +1368,7 @@ public class ArenaImpl implements Arena
     
     private void removeBlocks() {
         for (Block b : blocks) {
-            b.setTypeId(0);
+            b.setType(Material.AIR);
         }
         blocks.clear();
     }

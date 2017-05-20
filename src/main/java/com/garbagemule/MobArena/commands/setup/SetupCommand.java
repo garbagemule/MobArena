@@ -208,7 +208,7 @@ public class SetupCommand implements Command, Listener {
         }
 
         private boolean isTool(ItemStack item) {
-            if (item == null || item.getTypeId() == 0) return false;
+            if (item == null || item.getType() == Material.AIR) return false;
 
             String name = item.getItemMeta().getDisplayName();
             if (name == null) return false;

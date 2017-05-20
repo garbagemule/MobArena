@@ -338,29 +338,29 @@ public class MAUtils
         {
             for (int j = y1; j <= y2; j++)
             {
-                world.getBlockAt(i,j,z1).setTypeId(24);
-                world.getBlockAt(i,j,z2).setTypeId(24);
+                world.getBlockAt(i,j,z1).setType(Material.SANDSTONE);
+                world.getBlockAt(i,j,z2).setType(Material.SANDSTONE);
             }
         }
         for (int k = z1; k <= z2; k++)
         {
             for (int j = y1; j <= y2; j++)
             {
-                world.getBlockAt(x1,j,k).setTypeId(24);
-                world.getBlockAt(x2,j,k).setTypeId(24);
+                world.getBlockAt(x1,j,k).setType(Material.SANDSTONE);
+                world.getBlockAt(x2,j,k).setType(Material.SANDSTONE);
             }
         }
         
         // Add some hippie light.
         for (int i = x1; i <= x2; i++)
         {
-            world.getBlockAt(i,y1+2,z1).setTypeId(89);
-            world.getBlockAt(i,y1+2,z2).setTypeId(89);
+            world.getBlockAt(i,y1+2,z1).setType(Material.GLOWSTONE);
+            world.getBlockAt(i,y1+2,z2).setType(Material.GLOWSTONE);
         }
         for (int k = z1; k <= z2; k++)
         {
-            world.getBlockAt(x1,y1+2,k).setTypeId(89);
-            world.getBlockAt(x2,y1+2,k).setTypeId(89);
+            world.getBlockAt(x1,y1+2,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(x2,y1+2,k).setType(Material.GLOWSTONE);
         }
         
         // Build a monster floor, and some Obsidian foundation.
@@ -368,8 +368,8 @@ public class MAUtils
         {
             for (int k = z1; k <= z2; k++)
             {
-                world.getBlockAt(i,y1,k).setTypeId(24);
-                world.getBlockAt(i,y1-1,k).setTypeId(49);
+                world.getBlockAt(i,y1,k).setType(Material.SANDSTONE);
+                world.getBlockAt(i,y1-1,k).setType(Material.OBSIDIAN);
             }
         }
         
@@ -377,48 +377,48 @@ public class MAUtils
         for (int i = x1; i <= x2; i++)
         {
             for (int k = z1; k <= z2; k++)
-                world.getBlockAt(i,y2,k).setTypeId(20);
+                world.getBlockAt(i,y2,k).setType(Material.GLASS);
         }
         
         // Monster bulldoze
         for (int i = x1+1; i < x2; i++)
             for (int j = y1+1; j < y2; j++)
                 for (int k = z1+1; k < z2; k++)
-                    world.getBlockAt(i,j,k).setTypeId(0);
+                    world.getBlockAt(i,j,k).setType(Material.AIR);
         
         // Build a hippie lobby
         for (int i = lx1; i <= lx2; i++) // Walls
         {
             for (int j = ly1; j <= ly2; j++)
             {
-                world.getBlockAt(i,j,lz1).setTypeId(24);
-                world.getBlockAt(i,j,lz2).setTypeId(24);
+                world.getBlockAt(i,j,lz1).setType(Material.SANDSTONE);
+                world.getBlockAt(i,j,lz2).setType(Material.SANDSTONE);
             }
         }
         for (int k = lz1; k <= lz2; k++) // Walls
         {
             for (int j = ly1; j <= ly2; j++)
             {
-                world.getBlockAt(lx1,j,k).setTypeId(24);
-                world.getBlockAt(lx2,j,k).setTypeId(24);
+                world.getBlockAt(lx1,j,k).setType(Material.SANDSTONE);
+                world.getBlockAt(lx2,j,k).setType(Material.SANDSTONE);
             }
         }
         for (int k = lz1; k <= lz2; k++) // Lights
         {
-            world.getBlockAt(lx1,ly1+2,k).setTypeId(89);
-            world.getBlockAt(lx2,ly1+2,k).setTypeId(89);
-            world.getBlockAt(lx1,ly1+3,k).setTypeId(89);
-            world.getBlockAt(lx2,ly1+3,k).setTypeId(89);
+            world.getBlockAt(lx1,ly1+2,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(lx2,ly1+2,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(lx1,ly1+3,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(lx2,ly1+3,k).setType(Material.GLOWSTONE);
         }
         for (int i = lx1; i <= lx2; i++) // Floor
         {
             for (int k = lz1; k <= lz2; k++)
-                world.getBlockAt(i,ly1,k).setTypeId(24);
+                world.getBlockAt(i,ly1,k).setType(Material.SANDSTONE);
         }
         for (int i = x1+1; i < lx2; i++) // Bulldoze
             for (int j = ly1+1; j <= ly2; j++)
                 for (int k = lz1+1; k < lz2; k++)
-                    world.getBlockAt(i,j,k).setTypeId(0);
+                    world.getBlockAt(i,j,k).setType(Material.AIR);
         
         // Place the hippie signs
         //Iterator<String> iterator = am.getClasses().iterator();

@@ -310,7 +310,7 @@ public class MobArena extends JavaPlugin
 
     public boolean giveMoney(Player p, ItemStack item) {
         if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p.getName(), getAmount(item));
+            EconomyResponse result = economy.depositPlayer(p, getAmount(item));
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
@@ -322,7 +322,7 @@ public class MobArena extends JavaPlugin
 
     public boolean takeMoney(Player p, double amount) {
         if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p.getName(), amount);
+            EconomyResponse result = economy.withdrawPlayer(p, amount);
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
@@ -333,7 +333,7 @@ public class MobArena extends JavaPlugin
     }
 
     public boolean hasEnough(Player p, double amount) {
-        return economy == null || (economy.getBalance(p.getName()) >= amount);
+        return economy == null || (economy.getBalance(p) >= amount);
     }
     
     public String economyFormat(ItemStack item) {
