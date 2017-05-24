@@ -22,6 +22,7 @@ public class ItemParser
 {
     private static final int WOOL_ID = Material.WOOL.getId();
     private static final int DYE_ID  = Material.INK_SACK.getId();
+    private static final List<ItemProvider> providers = new ArrayList<ItemProvider>();
 
     private static final Map<Short, PotionType> POTION_TYPE_MAP = new HashMap<>();
     static {
@@ -38,6 +39,10 @@ public class ItemParser
         POTION_TYPE_MAP.put((short) 8204, PotionType.INSTANT_DAMAGE);
         POTION_TYPE_MAP.put((short) 8205, PotionType.WATER_BREATHING);
         POTION_TYPE_MAP.put((short) 8206, PotionType.INVISIBILITY);
+    }
+
+    public static void registerItemProvider(ItemProvider provider) {
+        providers.add(provider);
     }
     
     public static String parseString(ItemStack... stacks) {
@@ -145,12 +150,16 @@ public class ItemParser
     public static ItemStack parseItem(String item) {
         if (item == null || item.equals(""))
             return null;
-        
+
+        ItemStack result = null;
+        for (ItemProvider provider : providers) {
+            result = provider.getItem(item);
+            if (result != null) return result;
+        }
+
         // Check if the item has enchantments.
         String[] space = item.split(" ");
         String[] parts = (space.length == 2 ? space[0].split(":") : item.split(":"));
-        
-        ItemStack result = null;
         
         switch (parts.length) {
             case 1:
