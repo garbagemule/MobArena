@@ -53,9 +53,22 @@ public class ObsidianBomb implements Ability
             public void run() {
                 if (!arena.isRunning())
                     return;
-                
-                world.getBlockAt(loc).breakNaturally();
-                world.createExplosion(loc, 3F);
+                {
+
+                    boolean bombDrop = arena.getSettings ().getBoolean ("allow_bomb_drop");
+
+                    if (bombDrop)
+                    {
+                        world.getBlockAt(loc).breakNaturally();
+                        world.createExplosion(loc, 3F);
+                    }
+                    else
+                    {
+                        world.getBlockAt(loc).setType (Material.AIR);
+                        world.createExplosion(loc, 3F);
+                    }
+                }
+
             }
         }, FUSE);
     }
