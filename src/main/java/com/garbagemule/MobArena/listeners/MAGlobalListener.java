@@ -280,7 +280,7 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onPlayerCommandPreprocess(event);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void playerDropItem(PlayerDropItemEvent event) {
         if (!am.isEnabled()) return;
         for (Arena arena : am.getArenas())
