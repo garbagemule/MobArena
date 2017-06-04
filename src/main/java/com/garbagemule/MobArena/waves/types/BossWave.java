@@ -1,20 +1,25 @@
 package com.garbagemule.MobArena.waves.types;
 
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.AbstractWave;
+import com.garbagemule.MobArena.waves.BossAbilityThread;
+import com.garbagemule.MobArena.waves.MABoss;
+import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
+import com.garbagemule.MobArena.waves.ability.Ability;
+import com.garbagemule.MobArena.waves.ability.AbilityInfo;
+import com.garbagemule.MobArena.waves.enums.BossHealth;
+import com.garbagemule.MobArena.waves.enums.WaveType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-
-import com.garbagemule.MobArena.Msg;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.*;
-import com.garbagemule.MobArena.waves.ability.*;
-import com.garbagemule.MobArena.waves.enums.*;
 
 public class BossWave extends AbstractWave
 {
@@ -38,9 +43,9 @@ public class BossWave extends AbstractWave
     
     public BossWave(MACreature monster) {
         this.monster   = monster;
-        this.bosses    = new HashSet<MABoss>();
-        this.abilities = new ArrayList<Ability>();
-        this.potions = new ArrayList<PotionEffect>();
+        this.bosses    = new HashSet<>();
+        this.abilities = new ArrayList<>();
+        this.potions = new ArrayList<>();
         this.activated = false;
         this.abilityAnnounce = false;
         this.setType(WaveType.BOSS);
@@ -52,7 +57,7 @@ public class BossWave extends AbstractWave
     
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
         result.put(monster, 1);
         return result;
     }
@@ -87,7 +92,7 @@ public class BossWave extends AbstractWave
     }
     
     public Set<MABoss> getMABosses() {
-        Set<MABoss> result = new HashSet<MABoss>();
+        Set<MABoss> result = new HashSet<>();
         for (MABoss b : bosses) {
             if (!b.isDead()) {
                 result.add(b);

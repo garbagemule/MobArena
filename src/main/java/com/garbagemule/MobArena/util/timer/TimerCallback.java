@@ -14,7 +14,7 @@ public interface TimerCallback {
      * which means the interval can be changed within this method prior to
      * the timer actually starting.
      */
-    public void onStart();
+    void onStart();
 
     /**
      * Called when the timer ticks.
@@ -22,7 +22,7 @@ public interface TimerCallback {
      * Ticks are implementation-specific. Refer to the documentation of the
      * specific timer for details.
      */
-    public void onTick();
+    void onTick();
 
     /**
      * Called when the timer finishes.
@@ -31,7 +31,7 @@ public interface TimerCallback {
      * For example, the {@link CountdownTimer} finishes when it has counted
      * down to 0.
      */
-    public void onFinish();
+    void onFinish();
 
     /**
      * Called when the timer is stopped prematurely.
@@ -41,5 +41,5 @@ public interface TimerCallback {
      * stopped manually, in which case this method is called instead of
      * the {@code onFinish()} method.
      */
-    public void onStop();
+    void onStop();
 }

@@ -6,16 +6,16 @@ import org.bukkit.block.BlockState;
 
 public interface Repairable
 {
-    public void repair();
+    void repair();
 
-    public BlockState getState();
+    BlockState getState();
     
-    public Material getType();
-    public int getId();
-    public byte getData();
+    Material getType();
+    int getId();
+    byte getData();
     
-    public World getWorld();
-    public int getX();
-    public int getY();
-    public int getZ();
+    World getWorld();
+    int getX();
+    int getY();
+    int getZ();
 }

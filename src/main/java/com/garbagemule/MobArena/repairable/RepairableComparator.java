@@ -1,13 +1,13 @@
 package com.garbagemule.MobArena.repairable;
 
-import java.util.Comparator;
-
 import org.bukkit.Material;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Redstone;
+
+import java.util.Comparator;
 
 public class RepairableComparator implements Comparator<Repairable>
 {    

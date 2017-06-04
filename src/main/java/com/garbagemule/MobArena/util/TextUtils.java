@@ -1,10 +1,9 @@
 package com.garbagemule.MobArena.util;
 
-import java.util.Collection;
-
+import com.garbagemule.MobArena.Msg;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.Msg;
+import java.util.Collection;
 
 public class TextUtils
 {

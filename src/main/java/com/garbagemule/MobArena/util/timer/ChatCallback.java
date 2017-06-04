@@ -1,10 +1,10 @@
 package com.garbagemule.MobArena.util.timer;
 
-import com.garbagemule.MobArena.Msg;
-import com.garbagemule.MobArena.framework.Arena;
-
 import static com.garbagemule.MobArena.util.timer.Common.toSeconds;
 import static com.garbagemule.MobArena.util.timer.Common.toTicks;
+
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.framework.Arena;
 
 /**
  * The ChatCallback will periodically announce a message to all players in an

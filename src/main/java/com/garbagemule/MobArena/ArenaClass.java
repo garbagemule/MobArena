@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena;
 
-import java.util.*;
-import java.util.Map.Entry;
+import static org.bukkit.Material.*;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -11,6 +10,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ArenaClass
 {
@@ -31,10 +39,10 @@ public class ArenaClass
         this.configName    = name;
         this.lowercaseName = name.toLowerCase().replace(" ", "");
         
-        this.items = new ArrayList<ItemStack>();
-        this.armor = new ArrayList<ItemStack>(4);
-        this.perms = new HashMap<String,Boolean>();
-        this.lobbyperms = new HashMap<String,Boolean>();
+        this.items = new ArrayList<>();
+        this.armor = new ArrayList<>(4);
+        this.perms = new HashMap<>();
+        this.lobbyperms = new HashMap<>();
 
         this.unbreakableWeapons = unbreakableWeapons;
         this.unbreakableArmor = unbreakableArmor;
@@ -124,7 +132,7 @@ public class ArenaClass
      * @param stacks a list of items
      */
     public void setItems(List<ItemStack> stacks) {
-        this.items = new ArrayList<ItemStack>(stacks.size());
+        this.items = new ArrayList<>(stacks.size());
         for (ItemStack stack : stacks) {
             addItem(stack);
         }
@@ -273,8 +281,15 @@ public class ArenaClass
     /**
      * Used by isWeapon() to determine if an ItemStack is a weapon type.
      */
-    private static int[] weaponTypes = {256,257,258,259,261,267,268,269,270,271,272,273,274,275,276,277,278,279,283,284,285,286,290,291,292,293,294,346,398};
-    
+    private static EnumSet<Material> weaponTypes = EnumSet.of(
+        WOOD_SWORD,   GOLD_SWORD,   STONE_SWORD,   IRON_SWORD,   DIAMOND_SWORD,
+        WOOD_AXE,     GOLD_AXE,     STONE_AXE,     IRON_AXE,     DIAMOND_AXE,
+        WOOD_PICKAXE, GOLD_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE,
+        WOOD_SPADE,   GOLD_SPADE,   STONE_SPADE,   IRON_SPADE,   DIAMOND_SPADE,
+        WOOD_HOE,     GOLD_HOE,     STONE_HOE,     IRON_HOE,     DIAMOND_HOE,
+        BOW, FISHING_ROD, FLINT_AND_STEEL, SHEARS, CARROT_STICK
+    );
+
     /**
      * Returns true, if the ItemStack appears to be a weapon, in which case
      * the addItem() method will set the weapon durability to the absolute
@@ -284,7 +299,7 @@ public class ArenaClass
      */
     public static boolean isWeapon(ItemStack stack) {
         if (stack == null) return false;
-        return Arrays.binarySearch(weaponTypes, stack.getTypeId()) > -1;
+        return weaponTypes.contains(stack.getType());
     }
 
     /**
@@ -294,28 +309,44 @@ public class ArenaClass
      * 'armor'-node.
      */
     public enum ArmorType {
-        HELMET     (298,302,306,310,314),
-        CHESTPLATE (299,303,307,311,315),
-        LEGGINGS   (300,304,308,312,316),
-        BOOTS      (301,305,309,313,317);
-        
-        private int[] types;
-        
-        private ArmorType(int... types) {
-            this.types = types;
-        }
-        
+        HELMET,
+        CHESTPLATE,
+        LEGGINGS,
+        BOOTS;
+
         public static ArmorType getType(ItemStack stack) {
-            int id = stack.getTypeId();
-            
-            for (ArmorType armorType : ArmorType.values()) {
-                for (int type : armorType.types) {
-                    if (id == type) {
-                        return armorType;
-                    }
-                }
+            switch (stack.getType()) {
+                case LEATHER_HELMET:
+                case CHAINMAIL_HELMET:
+                case IRON_HELMET:
+                case DIAMOND_HELMET:
+                case GOLD_HELMET:
+                    return HELMET;
+
+                case LEATHER_CHESTPLATE:
+                case CHAINMAIL_CHESTPLATE:
+                case IRON_CHESTPLATE:
+                case DIAMOND_CHESTPLATE:
+                case GOLD_CHESTPLATE:
+                    return CHESTPLATE;
+
+                case LEATHER_LEGGINGS:
+                case CHAINMAIL_LEGGINGS:
+                case IRON_LEGGINGS:
+                case DIAMOND_LEGGINGS:
+                case GOLD_LEGGINGS:
+                    return LEGGINGS;
+
+                case LEATHER_BOOTS:
+                case CHAINMAIL_BOOTS:
+                case IRON_BOOTS:
+                case DIAMOND_BOOTS:
+                case GOLD_BOOTS:
+                    return BOOTS;
+
+                default:
+                    return null;
             }
-            return null;
         }
     }
     

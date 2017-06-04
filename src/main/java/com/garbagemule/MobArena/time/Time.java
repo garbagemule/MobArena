@@ -17,7 +17,7 @@ public enum Time
     
     private int time;
     
-    private Time(int time) {
+    Time(int time) {
         this.time = time;
     }
     

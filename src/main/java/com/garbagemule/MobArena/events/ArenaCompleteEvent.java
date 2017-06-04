@@ -16,7 +16,7 @@ public class ArenaCompleteEvent extends Event {
 
     public ArenaCompleteEvent(Arena arena) {
         this.arena = arena;
-        this.survivors = new HashSet<Player>();
+        this.survivors = new HashSet<>();
         this.survivors.addAll(arena.getPlayersInArena());
     }
 

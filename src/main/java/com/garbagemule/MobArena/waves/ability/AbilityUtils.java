@@ -1,16 +1,15 @@
 package com.garbagemule.MobArena.waves.ability;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.MAUtils;
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class AbilityUtils
 {
@@ -44,7 +43,7 @@ public class AbilityUtils
      * @return a random arena player, or null if none were found
      */
     public static Player getRandomPlayer(Arena arena) {
-        List<Player> list = new ArrayList<Player>(arena.getPlayersInArena());
+        List<Player> list = new ArrayList<>(arena.getPlayersInArena());
         if (list.isEmpty()) return null;
         
         return list.get(random.nextInt(list.size()));
@@ -58,7 +57,7 @@ public class AbilityUtils
      * @return a list of nearby players
      */
     public static List<Player> getNearbyPlayers(Arena arena, Entity boss, int x) {
-        List<Player> result = new ArrayList<Player>();
+        List<Player> result = new ArrayList<>();
         for (Entity e : boss.getNearbyEntities(x, x, x)) {
             if (arena.getPlayersInArena().contains(e)) {
                 result.add((Player) e);
@@ -75,7 +74,7 @@ public class AbilityUtils
      * @return a list of distant players
      */
     public static List<Player> getDistantPlayers(Arena arena, Entity boss, int x) {
-        List<Player> result = new ArrayList<Player>();
+        List<Player> result = new ArrayList<>();
         for (Player p : arena.getPlayersInArena()) {
             if (MAUtils.distanceSquared(arena.getPlugin(), p, boss.getLocation()) > (double) (x*x)) {
                 result.add(p);

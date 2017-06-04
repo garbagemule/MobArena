@@ -1,12 +1,15 @@
 package com.garbagemule.MobArena.waves.types;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.WaveType;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.SortedMap;
 
 public class SpecialWave extends AbstractWave
 {
@@ -24,7 +27,7 @@ public class SpecialWave extends AbstractWave
         int value = random.nextInt(monsterMap.lastKey()); 
 
         // Prepare the monster map.
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
         
         for (Map.Entry<Integer,MACreature> entry : monsterMap.entrySet()) {
             if (value > entry.getKey()) {

@@ -1,5 +1,9 @@
 package com.garbagemule.MobArena.region;
 
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
+
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
@@ -14,9 +18,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.*;
-
-import static com.garbagemule.MobArena.util.config.ConfigUtils.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ArenaRegion
 {
@@ -88,7 +95,7 @@ public class ArenaRegion
     }
     
     public void reloadSpawnpoints() {
-        spawnpoints = new HashMap<String,Location>();
+        spawnpoints = new HashMap<>();
         Set<String> keys = spawns.getKeys(false);
         if (keys != null) {
             for (String spwn : keys) {
@@ -98,7 +105,7 @@ public class ArenaRegion
     }
     
     public void reloadChests() {
-        containers = new HashMap<String,Location>();
+        containers = new HashMap<>();
         Set<String> keys = chests.getKeys(false);
         if (keys != null) {
             for (String chst : keys) {
@@ -124,7 +131,7 @@ public class ArenaRegion
         verifyData();
         
         // Prepare the list
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         // Region points
         if (region) {
@@ -356,7 +363,7 @@ public class ArenaRegion
     }
     
     public List<Chunk> getChunks() {
-        List<Chunk> result = new ArrayList<Chunk>();
+        List<Chunk> result = new ArrayList<>();
         
         if (p1 == null || p2 == null) {
             return result;
@@ -399,7 +406,7 @@ public class ArenaRegion
     }
     
     public List<Location> getSpawnpointList() {
-        return new ArrayList<Location>(spawnpoints.values());
+        return new ArrayList<>(spawnpoints.values());
     }
     
     public Collection<Location> getContainers() {
@@ -619,7 +626,7 @@ public class ArenaRegion
         }
 
         // Find all the spawnpoints that cover the location
-        Map<String,Location> map = new HashMap<String,Location>();
+        Map<String,Location> map = new HashMap<>();
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet()) {
             if (p.getLocation().distanceSquared(entry.getValue()) < MobArena.MIN_PLAYER_DISTANCE_SQUARED) {
                 map.put(entry.getKey(), entry.getValue());
@@ -666,7 +673,7 @@ public class ArenaRegion
             @Override
             public void run() {
                 // Grab all the blocks, and send block change events.
-                final Map<Location,BlockState> blocks = new HashMap<Location,BlockState>();
+                final Map<Location,BlockState> blocks = new HashMap<>();
                 for (Location l : points) {
                     Block b = l.getBlock();
                     blocks.put(l, b.getState());
@@ -695,7 +702,7 @@ public class ArenaRegion
     }
 
     private List<Location> getFramePoints(Location loc1, Location loc2) {
-        List<Location> result = new ArrayList<Location>();
+        List<Location> result = new ArrayList<>();
         int x1 = loc1.getBlockX(); int y1 = loc1.getBlockY(); int z1 = loc1.getBlockZ();
         int x2 = loc2.getBlockX(); int y2 = loc2.getBlockY(); int z2 = loc2.getBlockZ();
 

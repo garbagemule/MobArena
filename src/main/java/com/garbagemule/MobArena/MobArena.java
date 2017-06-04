@@ -1,16 +1,17 @@
 package com.garbagemule.MobArena;
 
-import java.io.*;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.logging.Logger;
-
+import com.garbagemule.MobArena.commands.CommandHandler;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.listeners.MAGlobalListener;
+import com.garbagemule.MobArena.listeners.MagicSpellsListener;
+import com.garbagemule.MobArena.util.VersionChecker;
+import com.garbagemule.MobArena.util.config.ConfigUtils;
+import com.garbagemule.MobArena.util.inventory.InventoryManager;
+import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -25,15 +26,14 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.garbagemule.MobArena.commands.CommandHandler;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.listeners.MAGlobalListener;
-import com.garbagemule.MobArena.listeners.MagicSpellsListener;
-import com.garbagemule.MobArena.util.VersionChecker;
-import com.garbagemule.MobArena.util.config.ConfigUtils;
-import com.garbagemule.MobArena.util.inventory.InventoryManager;
-import com.garbagemule.MobArena.waves.ability.AbilityManager;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * MobArena
@@ -283,7 +283,7 @@ public class MobArena extends JavaPlugin
     }
     
     private void registerInventories() {
-        this.inventoriesToRestore = new HashSet<String>();
+        this.inventoriesToRestore = new HashSet<>();
         
         File dir = new File(getDataFolder(), "inventories");
         if (!dir.exists()) {
@@ -310,7 +310,7 @@ public class MobArena extends JavaPlugin
 
     public boolean giveMoney(Player p, ItemStack item) {
         if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p.getName(), getAmount(item));
+            EconomyResponse result = economy.depositPlayer(p, getAmount(item));
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
@@ -322,7 +322,7 @@ public class MobArena extends JavaPlugin
 
     public boolean takeMoney(Player p, double amount) {
         if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p.getName(), amount);
+            EconomyResponse result = economy.withdrawPlayer(p, amount);
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
@@ -333,7 +333,7 @@ public class MobArena extends JavaPlugin
     }
 
     public boolean hasEnough(Player p, double amount) {
-        return economy == null || (economy.getBalance(p.getName()) >= amount);
+        return economy == null || (economy.getBalance(p) >= amount);
     }
     
     public String economyFormat(ItemStack item) {

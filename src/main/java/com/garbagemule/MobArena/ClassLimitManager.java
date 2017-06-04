@@ -1,15 +1,14 @@
 package com.garbagemule.MobArena;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.util.MutableInt;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.util.MutableInt;
-import org.bukkit.plugin.Plugin;
 
 public class ClassLimitManager
 {
@@ -21,8 +20,8 @@ public class ClassLimitManager
     public ClassLimitManager(Arena arena, Map<String,ArenaClass> classes, ConfigurationSection limits) {
         this.limits       = limits;
         this.classes      = classes;
-        this.classLimits  = new HashMap<ArenaClass,MutableInt>();
-        this.classesInUse = new HashMap<ArenaClass, HashSet<String>>();
+        this.classLimits  = new HashMap<>();
+        this.classesInUse = new HashMap<>();
 
         loadLimitMap(arena.getPlugin());
         initInUseMap();

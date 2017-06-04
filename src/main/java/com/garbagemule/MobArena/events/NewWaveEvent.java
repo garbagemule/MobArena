@@ -1,11 +1,10 @@
 package com.garbagemule.MobArena.events;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.Wave;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.Wave;
 
 public class NewWaveEvent extends Event implements Cancellable
 {

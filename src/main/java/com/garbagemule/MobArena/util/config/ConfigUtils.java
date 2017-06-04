@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
+import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
@@ -36,7 +37,7 @@ public class ConfigUtils
     private static void process(Plugin plugin, String resource, ConfigurationSection section, boolean addOnlyIfEmpty, boolean removeObsolete) {
         try {
             YamlConfiguration defaults = new YamlConfiguration();
-            defaults.load(plugin.getResource("res/" + resource));
+            defaults.load(new InputStreamReader(plugin.getResource("res/" + resource)));
 
             process(defaults, section, addOnlyIfEmpty, removeObsolete);
             plugin.saveConfig();

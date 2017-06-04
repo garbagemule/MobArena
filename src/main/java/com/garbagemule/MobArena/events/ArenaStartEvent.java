@@ -1,10 +1,9 @@
 package com.garbagemule.MobArena.events;
 
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import com.garbagemule.MobArena.framework.Arena;
 
 public class ArenaStartEvent extends Event implements Cancellable
 {

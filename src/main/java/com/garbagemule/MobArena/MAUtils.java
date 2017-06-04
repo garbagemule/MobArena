@@ -1,24 +1,15 @@
 package com.garbagemule.MobArena;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Set;
-
-import org.bukkit.block.Sign;
-import org.bukkit.World;
-import org.bukkit.Material;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.util.EntityPosition;
+import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ocelot;
@@ -27,12 +18,20 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.framework.ArenaMaster;
-import com.garbagemule.MobArena.region.ArenaRegion;
-import com.garbagemule.MobArena.util.EntityPosition;
-import com.garbagemule.MobArena.util.ItemParser;
-import com.garbagemule.MobArena.util.TextUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class MAUtils
 {         
@@ -54,7 +53,7 @@ public class MAUtils
     public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
     {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
-        Map<Integer,List<ItemStack>> result = new HashMap<Integer,List<ItemStack>>();
+        Map<Integer,List<ItemStack>> result = new HashMap<>();
 
         String typePath = "rewards.waves." + type;
         if (!config.contains(typePath)) return result;
@@ -142,7 +141,7 @@ public class MAUtils
         
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
-        List<Player> players = new ArrayList<Player>(arena.getPlayersInArena());
+        List<Player> players = new ArrayList<>(arena.getPlayersInArena());
         for (Player p : players) {
             if (!arena.getWorld().equals(p.getWorld())) {
                 plugin.getLogger().info("Player '" + p.getName() + "' is not in the right world. Kicking...");
@@ -262,7 +261,7 @@ public class MAUtils
      */
     public static List<String> stringToList(String list)
     {
-        List<String> result = new LinkedList<String>();
+        List<String> result = new LinkedList<>();
         if (list == null) return result;
         
         String[] parts = list.trim().split(",");
@@ -304,7 +303,7 @@ public class MAUtils
         int lz2 = z1 + 6;
         
         // Save the precious patch
-        HashMap<EntityPosition,Integer> preciousPatch = new HashMap<EntityPosition,Integer>();
+        HashMap<EntityPosition,Integer> preciousPatch = new HashMap<>();
         Location lo;
         int id;
         for (int i = x1; i <= x2; i++)
@@ -339,29 +338,29 @@ public class MAUtils
         {
             for (int j = y1; j <= y2; j++)
             {
-                world.getBlockAt(i,j,z1).setTypeId(24);
-                world.getBlockAt(i,j,z2).setTypeId(24);
+                world.getBlockAt(i,j,z1).setType(Material.SANDSTONE);
+                world.getBlockAt(i,j,z2).setType(Material.SANDSTONE);
             }
         }
         for (int k = z1; k <= z2; k++)
         {
             for (int j = y1; j <= y2; j++)
             {
-                world.getBlockAt(x1,j,k).setTypeId(24);
-                world.getBlockAt(x2,j,k).setTypeId(24);
+                world.getBlockAt(x1,j,k).setType(Material.SANDSTONE);
+                world.getBlockAt(x2,j,k).setType(Material.SANDSTONE);
             }
         }
         
         // Add some hippie light.
         for (int i = x1; i <= x2; i++)
         {
-            world.getBlockAt(i,y1+2,z1).setTypeId(89);
-            world.getBlockAt(i,y1+2,z2).setTypeId(89);
+            world.getBlockAt(i,y1+2,z1).setType(Material.GLOWSTONE);
+            world.getBlockAt(i,y1+2,z2).setType(Material.GLOWSTONE);
         }
         for (int k = z1; k <= z2; k++)
         {
-            world.getBlockAt(x1,y1+2,k).setTypeId(89);
-            world.getBlockAt(x2,y1+2,k).setTypeId(89);
+            world.getBlockAt(x1,y1+2,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(x2,y1+2,k).setType(Material.GLOWSTONE);
         }
         
         // Build a monster floor, and some Obsidian foundation.
@@ -369,8 +368,8 @@ public class MAUtils
         {
             for (int k = z1; k <= z2; k++)
             {
-                world.getBlockAt(i,y1,k).setTypeId(24);
-                world.getBlockAt(i,y1-1,k).setTypeId(49);
+                world.getBlockAt(i,y1,k).setType(Material.SANDSTONE);
+                world.getBlockAt(i,y1-1,k).setType(Material.OBSIDIAN);
             }
         }
         
@@ -378,48 +377,48 @@ public class MAUtils
         for (int i = x1; i <= x2; i++)
         {
             for (int k = z1; k <= z2; k++)
-                world.getBlockAt(i,y2,k).setTypeId(20);
+                world.getBlockAt(i,y2,k).setType(Material.GLASS);
         }
         
         // Monster bulldoze
         for (int i = x1+1; i < x2; i++)
             for (int j = y1+1; j < y2; j++)
                 for (int k = z1+1; k < z2; k++)
-                    world.getBlockAt(i,j,k).setTypeId(0);
+                    world.getBlockAt(i,j,k).setType(Material.AIR);
         
         // Build a hippie lobby
         for (int i = lx1; i <= lx2; i++) // Walls
         {
             for (int j = ly1; j <= ly2; j++)
             {
-                world.getBlockAt(i,j,lz1).setTypeId(24);
-                world.getBlockAt(i,j,lz2).setTypeId(24);
+                world.getBlockAt(i,j,lz1).setType(Material.SANDSTONE);
+                world.getBlockAt(i,j,lz2).setType(Material.SANDSTONE);
             }
         }
         for (int k = lz1; k <= lz2; k++) // Walls
         {
             for (int j = ly1; j <= ly2; j++)
             {
-                world.getBlockAt(lx1,j,k).setTypeId(24);
-                world.getBlockAt(lx2,j,k).setTypeId(24);
+                world.getBlockAt(lx1,j,k).setType(Material.SANDSTONE);
+                world.getBlockAt(lx2,j,k).setType(Material.SANDSTONE);
             }
         }
         for (int k = lz1; k <= lz2; k++) // Lights
         {
-            world.getBlockAt(lx1,ly1+2,k).setTypeId(89);
-            world.getBlockAt(lx2,ly1+2,k).setTypeId(89);
-            world.getBlockAt(lx1,ly1+3,k).setTypeId(89);
-            world.getBlockAt(lx2,ly1+3,k).setTypeId(89);
+            world.getBlockAt(lx1,ly1+2,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(lx2,ly1+2,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(lx1,ly1+3,k).setType(Material.GLOWSTONE);
+            world.getBlockAt(lx2,ly1+3,k).setType(Material.GLOWSTONE);
         }
         for (int i = lx1; i <= lx2; i++) // Floor
         {
             for (int k = lz1; k <= lz2; k++)
-                world.getBlockAt(i,ly1,k).setTypeId(24);
+                world.getBlockAt(i,ly1,k).setType(Material.SANDSTONE);
         }
         for (int i = x1+1; i < lx2; i++) // Bulldoze
             for (int j = ly1+1; j <= ly2; j++)
                 for (int k = lz1+1; k < lz2; k++)
-                    world.getBlockAt(i,j,k).setTypeId(0);
+                    world.getBlockAt(i,j,k).setType(Material.AIR);
         
         // Place the hippie signs
         //Iterator<String> iterator = am.getClasses().iterator();
@@ -428,7 +427,7 @@ public class MAUtils
         {
             world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
             Sign sign = (Sign) world.getBlockAt(i,ly1+1,lz2-1).getState();
-            sign.setLine(0, TextUtils.camelCase((String)iterator.next()));
+            sign.setLine(0, TextUtils.camelCase(iterator.next()));
             sign.update();
         }
         world.getBlockAt(lx2-2,ly1+1,lz1+2).setType(Material.IRON_BLOCK);

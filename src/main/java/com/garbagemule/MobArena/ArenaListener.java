@@ -1,9 +1,20 @@
 package com.garbagemule.MobArena;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.events.ArenaKillEvent;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.leaderboards.Leaderboard;
+import com.garbagemule.MobArena.listeners.MAGlobalListener.TeleportResponse;
+import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.region.RegionPoint;
+import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.repairable.RepairableAttachable;
+import com.garbagemule.MobArena.repairable.RepairableBed;
+import com.garbagemule.MobArena.repairable.RepairableBlock;
+import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.repairable.RepairableDoor;
+import com.garbagemule.MobArena.repairable.RepairableSign;
 import com.garbagemule.MobArena.util.ClassChests;
+import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,9 +23,27 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.Snowman;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -23,18 +52,27 @@ import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
@@ -49,16 +87,14 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.leaderboards.Leaderboard;
-import com.garbagemule.MobArena.listeners.MAGlobalListener.TeleportResponse;
-import com.garbagemule.MobArena.region.ArenaRegion;
-import com.garbagemule.MobArena.region.RegionPoint;
-import com.garbagemule.MobArena.repairable.*;
-import com.garbagemule.MobArena.util.TextUtils;
-import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.projectiles.ProjectileSource;
+
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class ArenaListener
 {
@@ -116,7 +152,7 @@ public class ArenaListener
 
         this.allowMonsters = arena.getWorld().getAllowMonsters();
 
-        this.banned = new HashSet<Player>();
+        this.banned = new HashSet<>();
     }
     
     void pvpActivate() {
@@ -211,7 +247,7 @@ public class ArenaListener
             arena.addRepairable(r);
             
             if (!softRestoreDrops)
-                b.setTypeId(0);
+                b.setType(Material.AIR);
             return true;
         }
 
@@ -361,7 +397,7 @@ public class ArenaListener
                     if (b.getType() == Material.TNT) {
                         Player planter = getPlanter(b);
                         if (planter != null) {
-                            b.setTypeId(0);
+                            b.setType(Material.AIR);
                             TNTPrimed tnt = b.getWorld().spawn(b.getLocation(), TNTPrimed.class);
                             setPlanter(tnt, planter);
                         }
@@ -402,7 +438,7 @@ public class ArenaListener
             }
         }
 
-        LivingEntity entity = (LivingEntity) event.getEntity();
+        LivingEntity entity = event.getEntity();
         if (arena.isRunning() && entity instanceof Slime)
             monsters.addMonster(entity);
 
@@ -428,7 +464,7 @@ public class ArenaListener
 
         // If the arena isn't destructible, just clear the blocklist.
         if (!softRestore && protect) {
-            List<Block> blocks = new LinkedList<Block>(arena.getBlocks());
+            List<Block> blocks = new LinkedList<>(arena.getBlocks());
             event.blockList().retainAll(blocks);
             return;
         }
@@ -467,7 +503,7 @@ public class ArenaListener
             if (mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
                 arena.removeBlock(b);
             else if (arena.removeBlock(b))
-                arena.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(state.getTypeId(), 1));
+                arena.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(state.getType(), 1));
             else if (softRestore)
                 arena.addRepairable(r);
             else
@@ -819,6 +855,11 @@ public class ArenaListener
             else if (event.getTarget() instanceof Player && !arena.inArena((Player) event.getTarget())) {
                 event.setCancelled(true);
             }
+
+            // And other mobs unless infighting is enabled
+            else if (monsters.getMonsters().contains(event.getTarget()) && !monsterInfight) {
+                event.setCancelled(true);
+            }
         }
     }
     
@@ -957,7 +998,7 @@ public class ArenaListener
             return;
 
         if (!arena.isRunning()) {
-            event.getBlockClicked().getRelative(event.getBlockFace()).setTypeId(0);
+            event.getBlockClicked().getRelative(event.getBlockFace()).setType(Material.AIR);
             event.setCancelled(true);
             return;
         }
@@ -982,7 +1023,7 @@ public class ArenaListener
             return;
 
         // Iron block
-        if (event.getClickedBlock().getTypeId() == 42) {
+        if (event.getClickedBlock().getType() == Material.IRON_BLOCK) {
             handleReadyBlock(p);
         }
         // Sign

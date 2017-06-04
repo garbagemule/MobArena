@@ -1,8 +1,7 @@
 package com.garbagemule.MobArena.commands;
 
-import org.bukkit.command.CommandSender;
-
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import org.bukkit.command.CommandSender;
 
 public interface Command
 {
@@ -25,5 +24,5 @@ public interface Command
      * @return true, if the command succeeded in any way, false if the
      * command handler should print the usage message to the sender
      */
-    public boolean execute(ArenaMaster am, CommandSender sender, String... args);
+    boolean execute(ArenaMaster am, CommandSender sender, String... args);
 }

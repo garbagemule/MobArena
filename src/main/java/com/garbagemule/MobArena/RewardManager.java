@@ -1,5 +1,9 @@
 package com.garbagemule.MobArena;
 
+import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,11 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import com.garbagemule.MobArena.framework.Arena;
 
 public class RewardManager
 {
@@ -25,8 +24,8 @@ public class RewardManager
     public RewardManager(Arena arena) {
         this.plugin   = arena.getPlugin();
         this.arena    = arena;
-        this.players  = new HashMap<Player,List<ItemStack>>();
-        this.rewarded = new HashSet<Player>();
+        this.players  = new HashMap<>();
+        this.rewarded = new HashSet<>();
     }
     
     public void reset() {

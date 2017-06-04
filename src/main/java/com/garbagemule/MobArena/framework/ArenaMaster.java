@@ -1,19 +1,17 @@
 package com.garbagemule.MobArena.framework;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
+import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Messenger;
+import com.garbagemule.MobArena.MobArena;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
-import com.garbagemule.MobArena.ArenaClass;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public interface ArenaMaster
 {
@@ -24,25 +22,25 @@ public interface ArenaMaster
     /////////////////////////////////////////////////////////////////////////*/
     
     
-    public MobArena getPlugin();
+    MobArena getPlugin();
 
-    public Messenger getGlobalMessenger();
+    Messenger getGlobalMessenger();
     
-    public boolean isEnabled();
+    boolean isEnabled();
     
-    public void setEnabled(boolean value);
+    void setEnabled(boolean value);
     
-    public boolean notifyOnUpdates();
+    boolean notifyOnUpdates();
     
-    public List<Arena> getArenas();
+    List<Arena> getArenas();
     
-    public Map<String,ArenaClass> getClasses();
+    Map<String,ArenaClass> getClasses();
     
-    public void addPlayer(Player p, Arena arena);
+    void addPlayer(Player p, Arena arena);
     
-    public Arena removePlayer(Player p);
+    Arena removePlayer(Player p);
     
-    public void resetArenaMap();
+    void resetArenaMap();
     
     
     
@@ -53,41 +51,41 @@ public interface ArenaMaster
     /////////////////////////////////////////////////////////////////////////*/
     
 
-    public List<Arena> getEnabledArenas();
+    List<Arena> getEnabledArenas();
     
-    public List<Arena> getEnabledArenas(List<Arena> arenas);
+    List<Arena> getEnabledArenas(List<Arena> arenas);
     
-    public List<Arena> getPermittedArenas(Player p);
+    List<Arena> getPermittedArenas(Player p);
     
-    public List<Arena> getEnabledAndPermittedArenas(Player p);
+    List<Arena> getEnabledAndPermittedArenas(Player p);
     
-    public Arena getArenaAtLocation(Location loc);
+    Arena getArenaAtLocation(Location loc);
     
-    public List<Arena> getArenasInWorld(World world);
+    List<Arena> getArenasInWorld(World world);
     
-    public List<Player> getAllPlayers();
+    List<Player> getAllPlayers();
     
-    public List<Player> getAllPlayersInArena(String arenaName);
+    List<Player> getAllPlayersInArena(String arenaName);
     
-    public List<Player> getAllLivingPlayers();
+    List<Player> getAllLivingPlayers();
     
-    public List<Player> getLivingPlayersInArena(String arenaName);
+    List<Player> getLivingPlayersInArena(String arenaName);
     
-    public Arena getArenaWithPlayer(Player p);
+    Arena getArenaWithPlayer(Player p);
     
-    public Arena getArenaWithPlayer(String playerName);
+    Arena getArenaWithPlayer(String playerName);
     
-    public Arena getArenaWithSpectator(Player p);
+    Arena getArenaWithSpectator(Player p);
     
-    public Arena getArenaWithMonster(Entity e);
+    Arena getArenaWithMonster(Entity e);
     
-    public Arena getArenaWithPet(Entity e);
+    Arena getArenaWithPet(Entity e);
     
-    public Arena getArenaWithName(String configName);
+    Arena getArenaWithName(String configName);
     
-    public Arena getArenaWithName(Collection<Arena> arenas, String configName);
+    Arena getArenaWithName(Collection<Arena> arenas, String configName);
     
-    public boolean isAllowed(String command);
+    boolean isAllowed(String command);
     
     
     
@@ -97,40 +95,40 @@ public interface ArenaMaster
     //
     /////////////////////////////////////////////////////////////////////////*/
     
-    public void initialize();
+    void initialize();
 
     /**
      * Load the global settings.
      */
-    public void loadSettings();
+    void loadSettings();
     
     /**
      * Load all class-related stuff.
      */
-    public void loadClasses();
+    void loadClasses();
     
-    public ArenaClass createClassNode(String className, PlayerInventory inv, boolean safe);
+    ArenaClass createClassNode(String className, PlayerInventory inv, boolean safe);
     
-    public void removeClassNode(String className);
+    void removeClassNode(String className);
     
-    public boolean addClassPermission(String className, String perm);
+    boolean addClassPermission(String className, String perm);
     
-    public boolean removeClassPermission(String className, String perm);
+    boolean removeClassPermission(String className, String perm);
     
     /**
      * Load all arena-related stuff.
      */
-    public void loadArenas();
+    void loadArenas();
     
-    public void loadArenasInWorld(String worldName);
+    void loadArenasInWorld(String worldName);
     
-    public void unloadArenasInWorld(String worldName);
+    void unloadArenasInWorld(String worldName);
 
-    public boolean reloadArena(String name);
+    boolean reloadArena(String name);
     
-    public Arena createArenaNode(String configName, World world);
+    Arena createArenaNode(String configName, World world);
     
-    public void removeArenaNode(Arena arena);
+    void removeArenaNode(Arena arena);
     
     
     
@@ -140,7 +138,7 @@ public interface ArenaMaster
     //
     /////////////////////////////////////////////////////////////////////////*/
     
-    public void reloadConfig();
+    void reloadConfig();
     
-    public void saveConfig();
+    void saveConfig();
 }

@@ -1,6 +1,6 @@
 package com.garbagemule.MobArena.util.timer;
 
-import static com.garbagemule.MobArena.util.timer.Common.*;
+import static com.garbagemule.MobArena.util.timer.Common.toSeconds;
 
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.entity.Player;

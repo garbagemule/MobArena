@@ -3,7 +3,6 @@ package com.garbagemule.MobArena.repairable;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-
 import org.bukkit.inventory.ItemStack;
 
 public class RepairableContainer extends RepairableBlock

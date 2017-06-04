@@ -1,12 +1,11 @@
 package com.garbagemule.MobArena.commands.setup;
 
-import java.util.Set;
-
+import com.garbagemule.MobArena.commands.Command;
+import com.garbagemule.MobArena.commands.CommandInfo;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.command.CommandSender;
 
-import com.garbagemule.MobArena.*;
-import com.garbagemule.MobArena.commands.*;
-import com.garbagemule.MobArena.framework.ArenaMaster;
+import java.util.Set;
 
 @CommandInfo(
     name    = "listclasses",

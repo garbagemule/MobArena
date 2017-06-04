@@ -14,5 +14,5 @@ public interface Ability
      * @param arena the Arena of the boss
      * @param boss the MABoss object
      */
-    public void execute(Arena arena, MABoss boss);
+    void execute(Arena arena, MABoss boss);
 }

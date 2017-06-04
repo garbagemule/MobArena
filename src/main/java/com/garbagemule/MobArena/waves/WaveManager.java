@@ -1,11 +1,12 @@
 package com.garbagemule.MobArena.waves;
 
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.waves.enums.WaveBranch;
+import com.garbagemule.MobArena.waves.enums.WaveError;
+import org.bukkit.configuration.ConfigurationSection;
+
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.enums.*;
-import org.bukkit.configuration.ConfigurationSection;
 
 public class WaveManager
 {
@@ -33,7 +34,7 @@ public class WaveManager
     public void reset() {
         reloadWaves();
         wave = 0;
-        singleWavesInstance = new TreeSet<Wave>(singleWaves);
+        singleWavesInstance = new TreeSet<>(singleWaves);
     }
     
     public void reloadWaves() {
@@ -118,7 +119,7 @@ public class WaveManager
     }
     
     private SortedSet<Wave> getMatchingRecurrentWaves(int wave) {
-        TreeSet<Wave> result = new TreeSet<Wave>(WaveUtils.getRecurrentComparator());
+        TreeSet<Wave> result = new TreeSet<>(WaveUtils.getRecurrentComparator());
         for (Wave w : recurrentWaves) {
             if (w.matches(wave)) {
                 result.add(w);

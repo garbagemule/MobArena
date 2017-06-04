@@ -1,11 +1,11 @@
 package com.garbagemule.MobArena.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PotionEffectParser
 {
@@ -17,7 +17,7 @@ public class PotionEffectParser
         if (s == null || s.isEmpty())
             return null;
         
-        List<PotionEffect> potions = new ArrayList<PotionEffect>();
+        List<PotionEffect> potions = new ArrayList<>();
         for (String potion : s.split(",")) {
             PotionEffect eff = parsePotionEffect(potion.trim());
             if (eff != null) {

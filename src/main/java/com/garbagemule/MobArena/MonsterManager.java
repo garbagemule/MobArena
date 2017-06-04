@@ -1,19 +1,18 @@
 package com.garbagemule.MobArena;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 
-import com.garbagemule.MobArena.waves.MABoss;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MonsterManager
 {
@@ -24,13 +23,13 @@ public class MonsterManager
     private Set<LivingEntity> mounts;
     
     public MonsterManager() {
-        this.monsters  = new HashSet<LivingEntity>();
-        this.sheep     = new HashSet<LivingEntity>();
-        this.golems    = new HashSet<LivingEntity>();
-        this.pets      = new HashSet<Wolf>();
-        this.bosses    = new HashMap<LivingEntity,MABoss>();
-        this.suppliers = new HashMap<LivingEntity,List<ItemStack>>();
-        this.mounts    = new HashSet<LivingEntity>();
+        this.monsters  = new HashSet<>();
+        this.sheep     = new HashSet<>();
+        this.golems    = new HashSet<>();
+        this.pets      = new HashSet<>();
+        this.bosses    = new HashMap<>();
+        this.suppliers = new HashMap<>();
+        this.mounts    = new HashSet<>();
     }
     
     public void reset() {
@@ -126,7 +125,7 @@ public class MonsterManager
     
     public void removePets(Player p) {
         for (Wolf w : pets) {
-            if (w == null || !(w.getOwner() instanceof Player) || !((Player) w.getOwner()).getName().equals(p.getName()))
+            if (w == null || !(w.getOwner() instanceof Player) || !w.getOwner().getName().equals(p.getName()))
                 continue;
             
             w.setOwner(null);

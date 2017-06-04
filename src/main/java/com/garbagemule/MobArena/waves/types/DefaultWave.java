@@ -1,12 +1,16 @@
 package com.garbagemule.MobArena.waves.types;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
-import com.garbagemule.MobArena.waves.enums.*;
+import com.garbagemule.MobArena.waves.enums.WaveGrowth;
+import com.garbagemule.MobArena.waves.enums.WaveType;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.SortedMap;
 
 public class DefaultWave extends AbstractWave
 {
@@ -34,7 +38,7 @@ public class DefaultWave extends AbstractWave
         Random random = new Random();
         
         // Prepare the monster map.
-        Map<MACreature,Integer> monsters = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> monsters = new HashMap<>();
         
         // Generate some random amounts.
         for (int i = 0; i < toSpawn; i++) {
@@ -56,7 +60,7 @@ public class DefaultWave extends AbstractWave
     }
 
     private Map<MACreature,Integer> getFixed() {
-        Map<MACreature,Integer> result = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> result = new HashMap<>();
 
         // For fixed waves, we just convert the accumulated map
         int last = 0;

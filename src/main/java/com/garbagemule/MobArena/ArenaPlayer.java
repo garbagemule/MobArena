@@ -1,10 +1,7 @@
 package com.garbagemule.MobArena;
 
-import org.bukkit.entity.Player;
-
-import com.garbagemule.MobArena.ArenaPlayerStatistics;
-import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.entity.Player;
 
 public class ArenaPlayer
 {

@@ -1,10 +1,8 @@
 package com.garbagemule.MobArena.util.inventory;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -13,8 +11,12 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InventoryManager
 {
@@ -25,8 +27,8 @@ public class InventoryManager
         this.dir    = new File(arena.getPlugin().getDataFolder(), "inventories");
         this.dir.mkdir();
         
-        this.items  = new HashMap<Player,ItemStack[]>();
-        this.armor  = new HashMap<Player,ItemStack[]>();
+        this.items  = new HashMap<>();
+        this.armor  = new HashMap<>();
     }
     
     public void storeInv(Player p) throws IOException {
@@ -51,7 +53,7 @@ public class InventoryManager
         p.updateInventory();
     }
     
-    public void restoreInv(Player p) throws FileNotFoundException, IOException, InvalidConfigurationException {
+    public void restoreInv(Player p) throws IOException, InvalidConfigurationException {
         // Try to grab the items from memory first
         ItemStack[] items = this.items.get(p);
         ItemStack[] armor = this.armor.get(p);
@@ -114,12 +116,12 @@ public class InventoryManager
         
         // Check for null or id 0, or AIR
         for (ItemStack stack : inventory) {
-            if (stack != null && stack.getTypeId() != 0)
+            if (stack != null && stack.getType() != Material.AIR)
                 return false;
         }
 
         for (ItemStack stack : armor) {
-            if (stack != null && stack.getTypeId() != 0)
+            if (stack != null && stack.getType() != Material.AIR)
                 return false;
         }
         

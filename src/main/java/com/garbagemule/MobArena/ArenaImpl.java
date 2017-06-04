@@ -1,9 +1,35 @@
 package com.garbagemule.MobArena;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.PriorityBlockingQueue;
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
+import com.garbagemule.MobArena.ArenaClass.ArmorType;
+import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
+import com.garbagemule.MobArena.events.ArenaEndEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerDeathEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerJoinEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerLeaveEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerReadyEvent;
+import com.garbagemule.MobArena.events.ArenaStartEvent;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.leaderboards.Leaderboard;
+import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.repairable.RepairableComparator;
+import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.time.Time;
+import com.garbagemule.MobArena.time.TimeStrategy;
+import com.garbagemule.MobArena.time.TimeStrategyLocked;
+import com.garbagemule.MobArena.time.TimeStrategyNull;
+import com.garbagemule.MobArena.util.ClassChests;
+import com.garbagemule.MobArena.util.Delays;
+import com.garbagemule.MobArena.util.Enums;
+import com.garbagemule.MobArena.util.ItemParser;
+import com.garbagemule.MobArena.util.inventory.InventoryManager;
+import com.garbagemule.MobArena.util.inventory.InventoryUtils;
+import com.garbagemule.MobArena.util.timer.AutoStartTimer;
+import com.garbagemule.MobArena.util.timer.StartDelayTimer;
+import com.garbagemule.MobArena.waves.SheepBouncer;
+import com.garbagemule.MobArena.waves.WaveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -14,30 +40,29 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
-import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
-
-import com.garbagemule.MobArena.ArenaClass.ArmorType;
-import com.garbagemule.MobArena.events.*;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.leaderboards.Leaderboard;
-import com.garbagemule.MobArena.region.ArenaRegion;
-import com.garbagemule.MobArena.repairable.*;
-import com.garbagemule.MobArena.time.Time;
-import com.garbagemule.MobArena.time.TimeStrategy;
-import com.garbagemule.MobArena.time.TimeStrategyLocked;
-import com.garbagemule.MobArena.time.TimeStrategyNull;
-import com.garbagemule.MobArena.util.*;
-import com.garbagemule.MobArena.util.inventory.InventoryManager;
-import com.garbagemule.MobArena.util.inventory.InventoryUtils;
-import com.garbagemule.MobArena.util.timer.AutoStartTimer;
-import com.garbagemule.MobArena.util.timer.StartDelayTimer;
-import com.garbagemule.MobArena.waves.*;
-import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class ArenaImpl implements Arena
 {
@@ -66,7 +91,7 @@ public class ArenaImpl implements Arena
     private RewardManager     rewardManager;
     private ClassLimitManager limitManager;
     private Map<Player,ArenaPlayer> arenaPlayerMap;
-    private Map<Player,PlayerData> playerData = new HashMap<Player,PlayerData>();
+    private Map<Player,PlayerData> playerData = new HashMap<>();
     
     private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
     private Set<Player> randoms;
@@ -129,17 +154,17 @@ public class ArenaImpl implements Arena
         this.leaderboard = new Leaderboard(plugin, this, region.getLeaderboard());
 
         // Player stuff
-        this.arenaPlayerMap = new HashMap<Player,ArenaPlayer>();
-        this.arenaPlayers   = new HashSet<Player>();
-        this.lobbyPlayers   = new HashSet<Player>();
-        this.readyPlayers   = new HashSet<Player>();
-        this.specPlayers    = new HashSet<Player>();
-        this.deadPlayers    = new HashSet<Player>();
-        this.randoms        = new HashSet<Player>();
+        this.arenaPlayerMap = new HashMap<>();
+        this.arenaPlayers   = new HashSet<>();
+        this.lobbyPlayers   = new HashSet<>();
+        this.readyPlayers   = new HashSet<>();
+        this.specPlayers    = new HashSet<>();
+        this.deadPlayers    = new HashSet<>();
+        this.randoms        = new HashSet<>();
 
         // Classes, items and permissions
         this.classes      = plugin.getArenaMaster().getClasses();
-        this.attachments  = new HashMap<Player,PermissionAttachment>();
+        this.attachments  = new HashMap<>();
         this.limitManager = new ClassLimitManager(this, classes, makeSection(section, "class-limits"));
 
         String defaultClassName = settings.getString("default-class", null);
@@ -148,10 +173,10 @@ public class ArenaImpl implements Arena
         }
         
         // Blocks and pets
-        this.repairQueue  = new PriorityBlockingQueue<Repairable>(100, new RepairableComparator());
-        this.blocks       = new HashSet<Block>();
-        this.repairables  = new LinkedList<Repairable>();
-        this.containables = new LinkedList<Repairable>();
+        this.repairQueue  = new PriorityBlockingQueue<>(100, new RepairableComparator());
+        this.blocks       = new HashSet<>();
+        this.repairables  = new LinkedList<>();
+        this.containables = new LinkedList<>();
         
         // Monster stuff
         this.monsterManager = new MonsterManager();
@@ -581,7 +606,7 @@ public class ArenaImpl implements Arena
             return;
         
         // Set operations.
-        Set<Player> tmp = new HashSet<Player>();
+        Set<Player> tmp = new HashSet<>();
         tmp.addAll(lobbyPlayers);
         tmp.removeAll(readyPlayers);
         
@@ -829,6 +854,10 @@ public class ArenaImpl implements Arena
             // Skip players who are either null or offline
             if (p == null || !p.isOnline()) continue;
 
+            // Skip the My Items class
+            ArenaClass ac = arenaPlayerMap.get(p).getArenaClass();
+            if (ac == null || ac.getConfigName().equals("My Items")) continue;
+
             // Grab the inventory
             PlayerInventory inv = p.getInventory();
             if (inv == null) continue;
@@ -860,6 +889,10 @@ public class ArenaImpl implements Arena
         for (Player p : arenaPlayers) {
             // Skip players who are either null or offline
             if (p == null || !p.isOnline()) continue;
+
+            // Skip the My Items class
+            ArenaClass ac = arenaPlayerMap.get(p).getArenaClass();
+            if (ac == null || ac.getConfigName().equals("My Items")) continue;
 
             // Grab the inventory
             PlayerInventory inv = p.getInventory();
@@ -1256,7 +1289,7 @@ public class ArenaImpl implements Arena
     public void assignRandomClass(Player p)
     {
         Random r = new Random();
-        List<String> classes = new LinkedList<String>(this.classes.keySet());
+        List<String> classes = new LinkedList<>(this.classes.keySet());
 
         String className = classes.remove(r.nextInt(classes.size()));
         while (!plugin.has(p, "mobarena.classes." + className))
@@ -1326,7 +1359,7 @@ public class ArenaImpl implements Arena
     
     private void removeBlocks() {
         for (Block b : blocks) {
-            b.setTypeId(0);
+            b.setType(Material.AIR);
         }
         blocks.clear();
     }
@@ -1437,7 +1470,7 @@ public class ArenaImpl implements Arena
     @Override
     public List<Player> getAllPlayers()
     {
-        List<Player> result = new LinkedList<Player>();
+        List<Player> result = new LinkedList<>();
         result.addAll(arenaPlayers);
         result.addAll(lobbyPlayers);
         result.addAll(specPlayers);
@@ -1471,7 +1504,7 @@ public class ArenaImpl implements Arena
     @Override
     public List<Player> getNonreadyPlayers()
     {
-        List<Player> result = new LinkedList<Player>();
+        List<Player> result = new LinkedList<>();
         result.addAll(lobbyPlayers);
         result.removeAll(readyPlayers);
         return result;

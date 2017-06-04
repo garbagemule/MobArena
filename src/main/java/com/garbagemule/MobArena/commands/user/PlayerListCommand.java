@@ -1,15 +1,16 @@
 package com.garbagemule.MobArena.commands.user;
 
-import java.util.LinkedList;
-import java.util.List;
-
+import com.garbagemule.MobArena.MAUtils;
+import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.Command;
+import com.garbagemule.MobArena.commands.CommandInfo;
+import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.garbagemule.MobArena.*;
-import com.garbagemule.MobArena.commands.*;
-import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.framework.ArenaMaster;
+import java.util.LinkedList;
+import java.util.List;
 
 @CommandInfo(
     name    = "playerlist",
@@ -37,7 +38,7 @@ public class PlayerListCommand implements Command
             list = MAUtils.listToString(arena.getPlayersInArena(), am.getPlugin());
         } else {
             StringBuilder buffy = new StringBuilder();
-            List<Player> players = new LinkedList<Player>();
+            List<Player> players = new LinkedList<>();
             
             for (Arena arena : am.getArenas()) {
                 players.addAll(arena.getPlayersInArena());

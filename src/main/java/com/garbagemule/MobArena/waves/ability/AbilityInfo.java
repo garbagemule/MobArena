@@ -10,11 +10,11 @@ public @interface AbilityInfo
      * The "pretty print" name of the ability.
      * This value is printed when a boss executes the ability in the arena.
      */
-    public String name();
+    String name();
     
     /**
      * The config aliases for the ability.
      * This is used by MobArena to parse ability names from the config-file.
      */
-    public String[] aliases();
+    String[] aliases();
 }

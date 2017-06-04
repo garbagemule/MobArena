@@ -1,5 +1,7 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
+
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
@@ -12,8 +14,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
-
-import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
 
 @CommandInfo(
     name    = "classchest",

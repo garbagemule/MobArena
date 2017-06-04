@@ -1,10 +1,6 @@
 package com.garbagemule.MobArena.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.garbagemule.MobArena.MobArena;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -13,7 +9,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.material.MaterialData;
 
-import com.garbagemule.MobArena.MobArena;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ItemParser
 {
@@ -106,11 +105,11 @@ public class ItemParser
     
     public static List<ItemStack> parseItems(String s) {
         if (s == null) {
-            return new ArrayList<ItemStack>(1);
+            return new ArrayList<>(1);
         }
         
         String[] items = s.split(",");
-        List<ItemStack> result = new ArrayList<ItemStack>(items.length);
+        List<ItemStack> result = new ArrayList<>(items.length);
         
         for (String item : items) {
             ItemStack stack = parseItem(item.trim());

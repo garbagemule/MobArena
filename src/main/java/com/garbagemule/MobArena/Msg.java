@@ -85,7 +85,7 @@ public enum Msg {
 
     private String value;
 
-    private Msg(String value) {
+    Msg(String value) {
         set(value);
     }
 

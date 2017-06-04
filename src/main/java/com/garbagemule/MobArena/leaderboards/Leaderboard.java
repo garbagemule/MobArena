@@ -1,19 +1,18 @@
 package com.garbagemule.MobArena.leaderboards;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.garbagemule.MobArena.ArenaPlayer;
+import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 
-import com.garbagemule.MobArena.ArenaPlayer;
-import com.garbagemule.MobArena.ArenaPlayerStatistics;
-import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Leaderboard
 {
@@ -40,8 +39,8 @@ public class Leaderboard
     {
         this.plugin = plugin;
         this.arena  = arena;
-        this.boards = new ArrayList<LeaderboardColumn>();
-        this.stats  = new ArrayList<ArenaPlayerStatistics>();
+        this.boards = new ArrayList<>();
+        this.stats  = new ArrayList<>();
     }
     
     /**
@@ -184,7 +183,7 @@ public class Leaderboard
             if (stat == null) continue;
             
             // Create the list of signs
-            List<Sign> signs = new ArrayList<Sign>();
+            List<Sign> signs = new ArrayList<>();
             current = header;
             for (int i = 1; i < rows; i++)
             {

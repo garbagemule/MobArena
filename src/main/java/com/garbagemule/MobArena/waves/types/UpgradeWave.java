@@ -1,16 +1,19 @@
 package com.garbagemule.MobArena.waves.types;
 
-import java.util.*;
-
-import com.garbagemule.MobArena.waves.Wave;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.WaveType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class UpgradeWave extends AbstractWave
 {
@@ -24,7 +27,7 @@ public class UpgradeWave extends AbstractWave
     
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
-        return new HashMap<MACreature,Integer>();
+        return new HashMap<>();
     }
 
     public void grantItems(Arena arena, Player p, String className) {
@@ -46,9 +49,9 @@ public class UpgradeWave extends AbstractWave
     }
 
     public Wave copy() {
-        Map<String,List<Upgrade>> upgrades = new HashMap<String,List<Upgrade>>();
+        Map<String,List<Upgrade>> upgrades = new HashMap<>();
         for (Map.Entry<String,List<Upgrade>> entry : this.upgrades.entrySet()) {
-            upgrades.put(entry.getKey(), new ArrayList<Upgrade>(entry.getValue()));
+            upgrades.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         UpgradeWave result = new UpgradeWave(upgrades);
         result.giveAll = this.giveAll;
@@ -64,8 +67,8 @@ public class UpgradeWave extends AbstractWave
     /**
      * Represents an upgrade for an upgrade wave
      */
-    public static interface Upgrade {
-        public void upgrade(Arena arena, Player p);
+    public interface Upgrade {
+        void upgrade(Arena arena, Player p);
     }
 
     /**

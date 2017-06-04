@@ -1,14 +1,18 @@
 package com.garbagemule.MobArena.waves.types;
 
-import java.util.*;
-
-import com.garbagemule.MobArena.waves.Wave;
-import org.bukkit.inventory.ItemStack;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
+import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.WaveType;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.SortedMap;
 
 public class SupplyWave extends AbstractWave
 {
@@ -29,7 +33,7 @@ public class SupplyWave extends AbstractWave
         Random random = new Random();
         
         // Prepare the monster map.
-        Map<MACreature,Integer> monsters = new HashMap<MACreature,Integer>();
+        Map<MACreature,Integer> monsters = new HashMap<>();
         
         int toSpawn = (int) Math.max(1D, playerCount * super.getAmountMultiplier());
         
@@ -62,7 +66,7 @@ public class SupplyWave extends AbstractWave
 
     public Wave copy() {
         SupplyWave result = new SupplyWave(monsterMap);
-        result.drops = new ArrayList<ItemStack>(this.drops);
+        result.drops = new ArrayList<>(this.drops);
 
         // From AbstractWave
         result.setAmountMultiplier(getAmountMultiplier());

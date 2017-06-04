@@ -1,10 +1,9 @@
 package com.garbagemule.MobArena.region;
 
+import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-
-import com.garbagemule.MobArena.framework.Arena;
 
 public class RegionSerializer
 {

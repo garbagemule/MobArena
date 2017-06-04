@@ -1,34 +1,48 @@
 package com.garbagemule.MobArena.waves;
 
-import java.util.*;
-
 import com.garbagemule.MobArena.ArenaClass;
-
-import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
-import com.garbagemule.MobArena.waves.enums.*;
+import com.garbagemule.MobArena.waves.enums.BossHealth;
+import com.garbagemule.MobArena.waves.enums.SwarmAmount;
+import com.garbagemule.MobArena.waves.enums.WaveBranch;
+import com.garbagemule.MobArena.waves.enums.WaveError;
+import com.garbagemule.MobArena.waves.enums.WaveGrowth;
+import com.garbagemule.MobArena.waves.enums.WaveType;
 import com.garbagemule.MobArena.waves.types.BossWave;
 import com.garbagemule.MobArena.waves.types.DefaultWave;
 import com.garbagemule.MobArena.waves.types.SpecialWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.SwarmWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.*;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.ArmorUpgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.GenericUpgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.PermissionUpgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.Upgrade;
+import com.garbagemule.MobArena.waves.types.UpgradeWave.WeaponUpgrade;
+import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class WaveParser
 {
     public static TreeSet<Wave> parseWaves(Arena arena, ConfigurationSection config, WaveBranch branch) {
         // Create a TreeSet with the Comparator for the specific branch.
-        TreeSet<Wave> result = new TreeSet<Wave>(WaveUtils.getComparator(branch));
+        TreeSet<Wave> result = new TreeSet<>(WaveUtils.getComparator(branch));
         
         // If the config is null, return the empty set.
         if (config == null) {
@@ -344,7 +358,7 @@ public class WaveParser
         }
         
         // Prepare the map.
-        SortedMap<Integer,MACreature> monsterMap = new TreeMap<Integer,MACreature>();
+        SortedMap<Integer,MACreature> monsterMap = new TreeMap<>();
         int sum = 0;
         String path = "monsters.";
         
@@ -364,7 +378,7 @@ public class WaveParser
     }
     
     private static List<Location> getSpawnpoints(Arena arena, String name, ConfigurationSection config) {
-        List<Location> result = new ArrayList<Location>();
+        List<Location> result = new ArrayList<>();
         
         String spawnString = config.getString("spawnpoints");
         if (spawnString == null) {
@@ -400,7 +414,7 @@ public class WaveParser
             return null;
         }
         
-        Map<String,List<Upgrade>> upgrades = new HashMap<String,List<Upgrade>>();
+        Map<String,List<Upgrade>> upgrades = new HashMap<>();
         String path = "upgrades.";
         
         for (String className : classes) {
@@ -410,7 +424,7 @@ public class WaveParser
             if (val instanceof String) {
                 itemList = (String) val;
                 List<ItemStack> stacks = ItemParser.parseItems(itemList);
-                List<Upgrade> list = new ArrayList<Upgrade>();
+                List<Upgrade> list = new ArrayList<>();
                 for (ItemStack stack : stacks) {
                     list.add(new GenericUpgrade(stack));
                 }
@@ -419,7 +433,7 @@ public class WaveParser
             // New complex setup
             else if (val instanceof ConfigurationSection) {
                 ConfigurationSection classSection = (ConfigurationSection) val;
-                List<Upgrade> list = new ArrayList<Upgrade>();
+                List<Upgrade> list = new ArrayList<>();
 
                 // Items (Generic + Weapons)
                 itemList = classSection.getString("items", null);
@@ -454,7 +468,7 @@ public class WaveParser
     }
     
     public static Wave createDefaultWave() {
-        SortedMap<Integer,MACreature> monsters = new TreeMap<Integer,MACreature>();
+        SortedMap<Integer,MACreature> monsters = new TreeMap<>();
         monsters.put(10, MACreature.ZOMBIE);
         monsters.put(20, MACreature.SKELETON);
         monsters.put(30, MACreature.SPIDER);

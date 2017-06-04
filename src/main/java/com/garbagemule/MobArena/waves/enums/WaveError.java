@@ -22,7 +22,7 @@ public enum WaveError
     
     private String msg;
     
-    private WaveError(String msg) {
+    WaveError(String msg) {
         this.msg = msg;
     }
     
