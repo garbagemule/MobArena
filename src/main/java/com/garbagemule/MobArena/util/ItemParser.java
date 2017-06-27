@@ -143,6 +143,10 @@ public class ItemParser
     }
     
     public static ItemStack parseItem(String item) {
+        return parseItem(item, true);
+    }
+
+    public static ItemStack parseItem(String item, boolean logFailure) {
         if (item == null || item.equals(""))
             return null;
         
@@ -164,7 +168,9 @@ public class ItemParser
                 break;
         }
         if (result == null || result.getTypeId() == 0) {
-            Bukkit.getLogger().warning("[MobArena] Failed to parse item: " + item);
+            if (logFailure) {
+                Bukkit.getLogger().warning("[MobArena] Failed to parse item: " + item);
+            }
             return null;
         }
 
