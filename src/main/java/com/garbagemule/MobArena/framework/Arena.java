@@ -14,6 +14,7 @@ import com.garbagemule.MobArena.ScoreboardManager;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
 import com.garbagemule.MobArena.waves.WaveManager;
@@ -64,9 +65,9 @@ public interface Arena
     
     List<ItemStack> getEntryFee();
     
-    Set<Map.Entry<Integer,List<ItemStack>>> getEveryWaveEntrySet();
+    Set<Map.Entry<Integer,List<Thing>>> getEveryWaveEntrySet();
 
-    List<ItemStack> getAfterWaveReward(int wave);
+    List<Thing> getAfterWaveReward(int wave);
     
     Set<Player> getPlayersInArena();
     

@@ -1,8 +1,8 @@
 package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +18,7 @@ public class RewardManager
     private MobArena plugin;
     @SuppressWarnings("unused")
     private Arena arena;
-    private Map<Player,List<ItemStack>> players;
+    private Map<Player,List<Thing>> players;
     private Set<Player> rewarded;
     
     public RewardManager(Arena arena) {
@@ -33,35 +33,29 @@ public class RewardManager
         rewarded.clear();
     }
     
-    public void addReward(Player p, ItemStack stack) {
+    public void addReward(Player p, Thing thing) {
         if (!players.containsKey(p)) {
-            players.put(p, new ArrayList<ItemStack>());
+            players.put(p, new ArrayList<Thing>());
         }
-        players.get(p).add(stack);
+        players.get(p).add(thing);
     }
     
-    public List<ItemStack> getRewards(Player p) {
-        List<ItemStack> rewards = players.get(p);
-        return (rewards == null ? new ArrayList<ItemStack>(1) : Collections.unmodifiableList(rewards));
+    public List<Thing> getRewards(Player p) {
+        List<Thing> rewards = players.get(p);
+        return (rewards == null ? new ArrayList<Thing>(1) : Collections.unmodifiableList(rewards));
     }
     
     public void grantRewards(Player p) {
         if (rewarded.contains(p)) return;
         
-        List<ItemStack> rewards = players.get(p);
+        List<Thing> rewards = players.get(p);
         if (rewards == null) return;
         
-        for (ItemStack stack : rewards) {
-            if (stack == null) {
+        for (Thing reward : rewards) {
+            if (reward == null) {
                 continue;
             }
-            
-            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                // plugin.giveMoney(p, stack.getAmount()); - removed to fix double money rewards
-                continue;
-            }
-            
-            p.getInventory().addItem(stack);
+            reward.giveTo(p);
         }
         rewarded.add(p);
     }

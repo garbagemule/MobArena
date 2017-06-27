@@ -13,6 +13,7 @@ import com.garbagemule.MobArena.repairable.RepairableBlock;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.repairable.RepairableDoor;
 import com.garbagemule.MobArena.repairable.RepairableSign;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.ChatColor;
@@ -601,16 +602,9 @@ public class ArenaListener
                 }
                 MABoss boss = monsters.getBoss(damagee);
                 if (boss != null) {
-                    ItemStack reward = boss.getReward();
+                    Thing reward = boss.getReward();
                     if (reward != null) {
-                        String msg = p.getName() + " killed the boss and won: ";
-                        if (reward.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                            plugin.giveMoney(p, reward);
-                            msg += plugin.economyFormat(reward);
-                        } else {
-                            arena.getRewardManager().addReward((Player) damager, reward);
-                            msg += MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount();
-                        }
+                        String msg = p.getName() + " killed the boss and won: " + reward;
                         for (Player q : arena.getPlayersInArena()) {
                             arena.getMessenger().tell(q, msg);
                         }
