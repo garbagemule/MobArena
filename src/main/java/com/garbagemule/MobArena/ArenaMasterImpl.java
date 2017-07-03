@@ -228,6 +228,17 @@ public class ArenaMasterImpl implements ArenaMaster
         return null;
     }
 
+    public Arena getArenaWithDisplayName(String arenaName) {
+        return getArenaWithDisplayName(this.arenas, arenaName);
+    }
+
+    public Arena getArenaWithDisplayName(Collection<Arena> arenas, String arenaName) {
+        for (Arena arena : arenas)
+            if (arena.arenaName().equals(arenaName))
+                return arena;
+        return null;
+    }
+
     /*
      * /////////////////////////////////////////////////////////////////////////
      * // // Initialization //

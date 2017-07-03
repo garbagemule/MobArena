@@ -1046,6 +1046,12 @@ public class ArenaListener
     }
 
     private void handleSign(Sign sign, Player p) {
+        // Check if this is a "leave" sign
+        if (ChatColor.stripColor(sign.getLine(1)).equals("Leave")) {
+            arena.playerLeave(p);
+            return;
+        }
+
         // Check if the first line is a class name.
         String className = ChatColor.stripColor(sign.getLine(0)).toLowerCase().replace(" ", "");
 
