@@ -307,11 +307,15 @@ public class WaveParser
         // Rewards!
         String rew = config.getString("reward");
         if (rew != null) {
-            Thing reward = arena.getPlugin().getThingManager().parse(rew);
-            if (reward == null) {
-                Bukkit.getLogger().warning("[MobArena] Failed to parse boss reward: " + rew);
-            } else {
-                result.setReward(reward);
+            try {
+                Thing thing = arena.getPlugin().getThingManager().parse(rew.trim());
+                if (thing == null) {
+                    arena.getPlugin().getLogger().warning("Failed to parse boss reward: " + rew.trim());
+                } else {
+                    result.setReward(thing);
+                }
+            } catch (Exception e) {
+                arena.getPlugin().getLogger().severe("Exception parsing boss reward '" + rew.trim() + "': " + e.getLocalizedMessage());
             }
         }
 

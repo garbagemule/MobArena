@@ -18,13 +18,7 @@ class MoneyThingParser implements ThingParser {
         if (money == null) {
             return null;
         }
-
-        Double value = valueOf(money);
-        if (value == null) {
-            return null;
-        }
-
-        return new MoneyThing(plugin, value);
+        return new MoneyThing(plugin, Double.parseDouble(money));
     }
 
     private String trimPrefix(String s) {
@@ -35,14 +29,5 @@ class MoneyThingParser implements ThingParser {
             return s.substring(PREFIX_LONG.length());
         }
         return null;
-    }
-
-    private Double valueOf(String money) {
-        try {
-            return Double.parseDouble(money);
-        } catch (NumberFormatException e) {
-            plugin.getLogger().warning("Invalid economy value: " + money);
-            return null;
-        }
     }
 }

@@ -74,11 +74,15 @@ public class MAUtils
 
             List<Thing> things = new ArrayList<>();
             for (String reward : rewards.split(",")) {
-                Thing thing = plugin.getThingManager().parse(reward.trim());
-                if (thing == null) {
-                    plugin.getLogger().warning("Failed to parse reward: " + reward.trim());
-                } else {
-                    things.add(thing);
+                try {
+                    Thing thing = plugin.getThingManager().parse(reward.trim());
+                    if (thing == null) {
+                        plugin.getLogger().warning("Failed to parse reward: " + reward.trim());
+                    } else {
+                        things.add(thing);
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().severe("Exception parsing reward '" + reward.trim() + "': " + e.getLocalizedMessage());
                 }
             }
             result.put(wave, things);
