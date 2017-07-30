@@ -223,19 +223,6 @@ public class MAUtils
             ItemStack stack;
             for (E e : list) {
                 stack = (ItemStack) e;
-                if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                    String formatted = plugin.economyFormat(stack);
-                    if (formatted != null) {
-                        buffy.append(formatted);
-                        buffy.append(", ");
-                    }
-                    else {
-                        plugin.getLogger().warning("Tried to do some money stuff, but no economy plugin was detected!");
-                        return buffy.toString();
-                    }
-                    continue;
-                }
-                
                 buffy.append(stack.getType().toString().toLowerCase());
                 buffy.append(":");
                 buffy.append(stack.getAmount());

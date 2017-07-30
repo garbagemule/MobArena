@@ -4,6 +4,7 @@ import static org.bukkit.Material.*;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,14 +29,14 @@ public class ArenaClass
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
-    private double price;
+    private Thing price;
     private Location classchest;
 
     /**
      * Create a new, empty arena class with the given name.
      * @param name the class name as it appears in the config-file
      */
-    public ArenaClass(String name, double price, boolean unbreakableWeapons, boolean unbreakableArmor) {
+    public ArenaClass(String name, Thing price, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
         this.lowercaseName = name.toLowerCase().replace(" ", "");
         
@@ -283,7 +284,7 @@ public class ArenaClass
         return unbreakableArmor;
     }
 
-    public double getPrice() {
+    public Thing getPrice() {
         return price;
     }
     
@@ -377,7 +378,7 @@ public class ArenaClass
     public static class MyItems extends ArenaClass {
         private ArenaMaster am;
 
-        public MyItems(double price, boolean unbreakableWeapons, boolean unbreakableArmor, ArenaMaster am) {
+        public MyItems(Thing price, boolean unbreakableWeapons, boolean unbreakableArmor, ArenaMaster am) {
             super("My Items", price, unbreakableWeapons, unbreakableArmor);
             this.am = am;
         }

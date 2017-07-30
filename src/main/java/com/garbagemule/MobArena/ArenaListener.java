@@ -1067,10 +1067,10 @@ public class ArenaListener
         }
 
         // Check price, balance, and inform
-        double price = newAC.getPrice();
-        if (price > 0D) {
-            if (!plugin.hasEnough(p, price)) {
-                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, plugin.economyFormat(price));
+        Thing price = newAC.getPrice();
+        if (price != null) {
+            if (!price.heldBy(p)) {
+                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, price.toString());
                 return;
             }
         }
@@ -1095,7 +1095,7 @@ public class ArenaListener
         return true;
     }*/
 
-    private void delayAssignClass(final Player p, final String className, final double price, final Sign sign) {
+    private void delayAssignClass(final Player p, final String className, final Thing price, final Sign sign) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {
             public void run() {
                 if (!className.equalsIgnoreCase("random")) {
@@ -1111,8 +1111,8 @@ public class ArenaListener
                     }
                     arena.assignClass(p, className);
                     arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(className).getConfigName());
-                    if (price > 0D) {
-                        arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE,  plugin.economyFormat(price));
+                    if (price != null) {
+                        arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE,  price.toString());
                     }
                 }
                 else {
