@@ -98,8 +98,8 @@ public class MASpawnThread implements Runnable
             return;
         }
 
-        // Grant rewards (if any) for the wave about to spawn
-        grantRewards(nextWave);
+        // Grant rewards (if any) for the wave that just ended
+        grantRewards(nextWave - 1);
 
         // Check if this is the final wave, in which case, end instead of spawn
         if (nextWave > 1 && (nextWave - 1) == waveManager.getFinalWave()) {
@@ -292,7 +292,7 @@ public class MASpawnThread implements Runnable
 
     private void grantRewards(int wave) {
         for (Map.Entry<Integer, List<ItemStack>> entry : arena.getEveryWaveEntrySet()) {
-            if (wave % entry.getKey() == 0) {
+            if (wave > 0 && wave % entry.getKey() == 0) {
                 addReward(entry.getValue());
             }
         }
