@@ -18,6 +18,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -344,7 +345,17 @@ public class MASpawnThread implements Runnable
                 }
             }
             else {
-                arena.getMessenger().tell(p, Msg.WAVE_REWARD, MAUtils.toCamelCase(reward.getType().toString()) + ":" + reward.getAmount());
+                String itemName = "";
+                ItemMeta meta = reward.getItemMeta();
+                if (meta != null && meta.hasDisplayName()) {
+                    itemName = meta.getDisplayName();
+                } else {
+                    itemName = MAUtils.toCamelCase(reward.getType().toString());
+                }
+                if (reward.getAmount() > 1) {
+                    itemName += ":" + reward.getAmount();
+                }
+                arena.getMessenger().tell(p, Msg.WAVE_REWARD, itemName);
             }
         }
     }
