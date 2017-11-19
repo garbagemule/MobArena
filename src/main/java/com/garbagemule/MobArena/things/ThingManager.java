@@ -10,6 +10,7 @@ public class ThingManager implements ThingParser {
 
     public ThingManager(MobArena plugin) {
         parsers = new ArrayList<>();
+        parsers.add(new CommandThingParser());
         parsers.add(new MoneyThingParser(plugin));
         parsers.add(new ItemStackThingParser());
     }
