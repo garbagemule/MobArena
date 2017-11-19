@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.waves;
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.ability.Ability;
@@ -24,6 +25,7 @@ import com.garbagemule.MobArena.waves.types.UpgradeWave.GenericUpgrade;
 import com.garbagemule.MobArena.waves.types.UpgradeWave.PermissionUpgrade;
 import com.garbagemule.MobArena.waves.types.UpgradeWave.Upgrade;
 import com.garbagemule.MobArena.waves.types.UpgradeWave.WeaponUpgrade;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
@@ -305,8 +307,16 @@ public class WaveParser
         // Rewards!
         String rew = config.getString("reward");
         if (rew != null) {
-            ItemStack item = ItemParser.parseItem(rew);
-            if (item != null) result.setReward(item);
+            try {
+                Thing thing = arena.getPlugin().getThingManager().parse(rew.trim());
+                if (thing == null) {
+                    arena.getPlugin().getLogger().warning("Failed to parse boss reward: " + rew.trim());
+                } else {
+                    result.setReward(thing);
+                }
+            } catch (Exception e) {
+                arena.getPlugin().getLogger().severe("Exception parsing boss reward '" + rew.trim() + "': " + e.getLocalizedMessage());
+            }
         }
 
         // Drops!

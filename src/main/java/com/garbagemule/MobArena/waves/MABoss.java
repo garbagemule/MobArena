@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.waves;
 
+import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +11,7 @@ public class MABoss
 {
     private LivingEntity entity;
     private boolean dead;
-    private ItemStack reward;
+    private Thing reward;
     private List<ItemStack> drops;
     
     /**
@@ -74,11 +75,11 @@ public class MABoss
         this.dead = dead;
     }
     
-    public void setReward(ItemStack reward) {
+    public void setReward(Thing reward) {
         this.reward = reward;
     }
 
-    public ItemStack getReward() {
+    public Thing getReward() {
         return reward;
     }
 

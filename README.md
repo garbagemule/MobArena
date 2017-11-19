@@ -1,4 +1,6 @@
 # MobArena
+[![Build Status](https://travis-ci.org/garbagemule/MobArena.svg?branch=master)](https://travis-ci.org/garbagemule/MobArena)
+
 MobArena is an arena-style minigame for Bukkit-based Minecraft servers.
 
 ## Getting Started

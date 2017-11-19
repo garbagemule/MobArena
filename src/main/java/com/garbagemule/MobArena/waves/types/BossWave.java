@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves.types;
 
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.BossAbilityThread;
 import com.garbagemule.MobArena.waves.MABoss;
@@ -37,7 +38,7 @@ public class BossWave extends AbstractWave
     
     private int abilityInterval;
 
-    private ItemStack reward;
+    private Thing reward;
     private List<ItemStack> drops;
     private List<PotionEffect> potions;
     
@@ -121,11 +122,11 @@ public class BossWave extends AbstractWave
         this.abilityAnnounce = abilityAnnounce;
     }
     
-    public ItemStack getReward() {
+    public Thing getReward() {
         return reward;
     }
 
-    public void setReward(ItemStack reward) {
+    public void setReward(Thing reward) {
         this.reward = reward;
     }
 

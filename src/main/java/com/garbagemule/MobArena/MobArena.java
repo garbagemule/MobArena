@@ -5,6 +5,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
+import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
@@ -54,10 +55,15 @@ public class MobArena extends JavaPlugin
     private FileConfiguration config;
     
     public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
-    public static final int ECONOMY_MONEY_ID = -29;
     public static Random random = new Random();
 
     private Messenger messenger;
+    private ThingManager thingman;
+
+    @Override
+    public void onLoad() {
+        thingman = new ThingManager(this);
+    }
 
     public void onEnable() {
         // Initialize config-file
@@ -316,6 +322,14 @@ public class MobArena extends JavaPlugin
         return false;
     }
 
+    public boolean giveMoney(Player p, double amount) {
+        if (economy != null) {
+            EconomyResponse result = economy.depositPlayer(p, amount);
+            return (result.type == ResponseType.SUCCESS);
+        }
+        return false;
+    }
+
     public boolean takeMoney(Player p, ItemStack item) {
         return takeMoney(p, getAmount(item));
     }
@@ -352,5 +366,9 @@ public class MobArena extends JavaPlugin
 
     public Messenger getGlobalMessenger() {
         return messenger;
+    }
+
+    public ThingManager getThingManager() {
+        return thingman;
     }
 }

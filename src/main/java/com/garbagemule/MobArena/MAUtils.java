@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
@@ -50,10 +51,10 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */    
-    public static Map<Integer,List<ItemStack>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
+    public static Map<Integer,List<Thing>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
     {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
-        Map<Integer,List<ItemStack>> result = new HashMap<>();
+        Map<Integer,List<Thing>> result = new HashMap<>();
 
         String typePath = "rewards.waves." + type;
         if (!config.contains(typePath)) return result;
@@ -70,30 +71,25 @@ public class MAUtils
             int wave = Integer.parseInt(n);
             String path = typePath + "." + wave;
             String rewards = config.getString(path);
-            
-            result.put(wave, ItemParser.parseItems(rewards));
+
+            List<Thing> things = new ArrayList<>();
+            for (String reward : rewards.split(",")) {
+                try {
+                    Thing thing = plugin.getThingManager().parse(reward.trim());
+                    if (thing == null) {
+                        plugin.getLogger().warning("Failed to parse reward: " + reward.trim());
+                    } else {
+                        things.add(thing);
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().severe("Exception parsing reward '" + reward.trim() + "': " + e.getLocalizedMessage());
+                }
+            }
+            result.put(wave, things);
         }
         return result;
     }
 
-    
-    
-    /* ///////////////////////////////////////////////////////////////////// //
-    
-            INVENTORY AND REWARD METHODS
-    
-    // ///////////////////////////////////////////////////////////////////// */
-    
-    /* Helper method for grabbing a random reward */
-    public static ItemStack getRandomReward(List<ItemStack> rewards)
-    {
-        if (rewards.isEmpty())
-            return null;
-        
-        Random ran = new Random();
-        return rewards.get(ran.nextInt(rewards.size()));
-    }
-    
     
     
     /* ///////////////////////////////////////////////////////////////////// //
@@ -227,19 +223,6 @@ public class MAUtils
             ItemStack stack;
             for (E e : list) {
                 stack = (ItemStack) e;
-                if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                    String formatted = plugin.economyFormat(stack);
-                    if (formatted != null) {
-                        buffy.append(formatted);
-                        buffy.append(", ");
-                    }
-                    else {
-                        plugin.getLogger().warning("Tried to do some money stuff, but no economy plugin was detected!");
-                        return buffy.toString();
-                    }
-                    continue;
-                }
-                
                 buffy.append(stack.getType().toString().toLowerCase());
                 buffy.append(":");
                 buffy.append(stack.getAmount());

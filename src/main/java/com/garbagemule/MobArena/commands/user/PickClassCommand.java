@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -70,10 +71,10 @@ public class PickClassCommand implements Command
         }
 
         // Check price, balance, and inform
-        double price = ac.getPrice();
-        if (price > 0D) {
-            if (!am.getPlugin().hasEnough(p, price)) {
-                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, am.getPlugin().economyFormat(price));
+        Thing price = ac.getPrice();
+        if (price != null) {
+            if (!price.heldBy(p)) {
+                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_TOO_EXPENSIVE, price.toString());
                 return true;
             }
         }
@@ -91,8 +92,8 @@ public class PickClassCommand implements Command
             }
             arena.assignClass(p, lowercase);
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(lowercase).getConfigName());
-            if (price > 0D) {
-                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE, am.getPlugin().economyFormat(price));
+            if (price != null) {
+                arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE, price.toString());
             }
         } else {
             arena.addRandomPlayer(p);

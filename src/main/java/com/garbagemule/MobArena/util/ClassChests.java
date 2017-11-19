@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.util;
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -98,9 +99,9 @@ public class ClassChests {
         arena.assignClassGiveInv(player, classname, contents);
         arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(classname).getConfigName());
 
-        double price = ac.getPrice();
-        if (price > 0D) {
-            arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PRICE, arena.getPlugin().economyFormat(price));
+        Thing price = ac.getPrice();
+        if (price != null) {
+            arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PRICE, price.toString());
         }
     }
 

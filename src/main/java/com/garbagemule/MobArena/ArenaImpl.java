@@ -16,6 +16,7 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.time.Time;
 import com.garbagemule.MobArena.time.TimeStrategy;
 import com.garbagemule.MobArena.time.TimeStrategyLocked;
@@ -52,6 +53,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -113,11 +115,11 @@ public class ArenaImpl implements Arena
     private WaveManager   waveManager;
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
-    private Map<Integer,List<ItemStack>> everyWaveMap, afterWaveMap;
+    private Map<Integer,List<Thing>> everyWaveMap, afterWaveMap;
     
     // Misc
     private ArenaListener eventListener;
-    private List<ItemStack> entryFee;
+    private List<Thing> entryFee;
     private TimeStrategy timeStrategy;
     private AutoStartTimer autoStartTimer;
     private StartDelayTimer startDelayTimer;
@@ -188,9 +190,25 @@ public class ArenaImpl implements Arena
         
         // Misc
         this.eventListener = new ArenaListener(this, plugin);
-        this.entryFee      = ItemParser.parseItems(settings.getString("entry-fee", ""));
         this.allowMonsters = world.getAllowMonsters();
         this.allowAnimals  = world.getAllowAnimals();
+
+        this.entryFee = new ArrayList<>();
+        String feeString = settings.getString("entry-fee", "");
+        if (feeString != null && !feeString.isEmpty()) {
+            for (String fee : feeString.split(",")) {
+                try {
+                    Thing thing = plugin.getThingManager().parse(fee.trim());
+                    if (thing == null) {
+                        plugin.getLogger().warning("Failed to parse entry fee: " + fee.trim());
+                    } else {
+                        this.entryFee.add(thing);
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().severe("Exception parsing entry fee '" + fee.trim() + "': " + e.getLocalizedMessage());
+                }
+            }
+        }
 
         this.autoStartTimer  = new AutoStartTimer(this);
         this.startDelayTimer = new StartDelayTimer(this, autoStartTimer);
@@ -287,17 +305,17 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    public List<ItemStack> getEntryFee() {
+    public List<Thing> getEntryFee() {
         return entryFee;
     }
 
     @Override
-    public Set<Map.Entry<Integer,List<ItemStack>>> getEveryWaveEntrySet() {
+    public Set<Map.Entry<Integer,List<Thing>>> getEveryWaveEntrySet() {
         return everyWaveMap.entrySet();
     }
 
     @Override
-    public List<ItemStack> getAfterWaveReward(int wave) {
+    public List<Thing> getAfterWaveReward(int wave) {
         return afterWaveMap.get(wave);
     }
 
@@ -510,9 +528,9 @@ public class ArenaImpl implements Arena
             assignClassPermissions(p);
             arenaPlayerMap.get(p).resetStats();
 
-            double price = arenaPlayerMap.get(p).getArenaClass().getPrice();
-            if (price > 0D) {
-                plugin.takeMoney(p, price);
+            Thing price = arenaPlayerMap.get(p).getArenaClass().getPrice();
+            if (price != null) {
+                price.takeFrom(p);
             }
             
             scoreboard.addPlayer(p);
@@ -1512,21 +1530,9 @@ public class ArenaImpl implements Arena
 
     @Override
     public boolean canAfford(Player p) {
-        if (entryFee.isEmpty()) return true;
-        
-        PlayerInventory inv = p.getInventory();
-        for (ItemStack stack : entryFee) {
-            // Economy money
-            if (stack.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                if (!plugin.hasEnough(p, stack)) {
-                    return false;
-                }
-            }
-            // Normal stack
-            else {
-                if (!inv.contains(stack.getType(), stack.getAmount())) {
-                    return false;
-                }
+        for (Thing fee : entryFee) {
+            if (!fee.heldBy(p)) {
+                return false;
             }
         }
         return true;
@@ -1535,34 +1541,11 @@ public class ArenaImpl implements Arena
     @Override
     public boolean takeFee(Player p) {
         if (entryFee.isEmpty()) return true;
-        
-        PlayerInventory inv = p.getInventory();
 
-        // Take some economy money        
-        for (ItemStack stack : InventoryUtils.extractAll(MobArena.ECONOMY_MONEY_ID, entryFee)) {
-            plugin.takeMoney(p, stack);
+        for (Thing fee : entryFee) {
+            fee.takeFrom(p);
         }
-        
-        // Take any other items
-        for (ItemStack fee : entryFee) {
-            if (fee.getTypeId() < 0) continue;
 
-            int remaining = fee.getAmount();
-            while (remaining > 0) {
-                int slot = inv.first(fee.getType());
-                if (slot < 0) break;
-
-                ItemStack item = inv.getItem(slot);
-                remaining -= item.getAmount();
-                if (remaining >= 0) {
-                    inv.setItem(slot, null);
-                } else {
-                    item.setAmount(-remaining);
-                    inv.setItem(slot, item);
-                }
-            }
-        }
-        
         messenger.tell(p, Msg.JOIN_FEE_PAID.format(MAUtils.listToString(entryFee, plugin)));
         return true;
     }
@@ -1571,17 +1554,9 @@ public class ArenaImpl implements Arena
     public boolean refund(Player p) {
         if (entryFee.isEmpty()) return true;
         if (!inLobby(p)) return false;
-        
-        // Refund economy money
-        for (ItemStack stack : InventoryUtils.extractAll(MobArena.ECONOMY_MONEY_ID, entryFee)) {
-            plugin.giveMoney(p, stack);
-        }
-        
-        // Refund other items.
-        for (ItemStack stack : entryFee) {
-            if (stack.getTypeId() > 0) {
-                p.getInventory().addItem(stack);
-            }
+
+        for (Thing fee : entryFee) {
+            fee.giveTo(p);
         }
         return true;
     }

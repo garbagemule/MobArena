@@ -6,6 +6,7 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -294,7 +295,7 @@ public class ArenaMasterImpl implements ArenaMaster
         if (section == null) {
             // We may not have a class entry for My Items, but that's fine
             if (classname.equals("My Items")) {
-                ArenaClass myItems = new ArenaClass.MyItems(0, false, false, this);
+                ArenaClass myItems = new ArenaClass.MyItems(null, false, false, this);
                 classes.put(lowercase, myItems);
                 return myItems;
             }
@@ -307,15 +308,14 @@ public class ArenaMasterImpl implements ArenaMaster
         boolean arms = section.getBoolean("unbreakable-armor", true);
 
         // Grab the class price, if any
-        double price = -1D;
+        Thing price = null;
         String priceString = section.getString("price", null);
         if (priceString != null) {
-            ItemStack priceItem = ItemParser.parseItem(priceString);
-            if (priceItem != null && priceItem.getTypeId() == MobArena.ECONOMY_MONEY_ID) {
-                price = (priceItem.getAmount() + (priceItem.getDurability() / 100D));
-            } else {
-                plugin.getLogger().warning("The price for class '" + classname + "' could not be parsed!");
-                plugin.getLogger().warning("- expected e.g. '$10',  found '" + priceString + "'");
+            try {
+                price = plugin.getThingManager().parse(priceString);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Exception parsing class price: " + e.getLocalizedMessage());
+                price = null;
             }
         }
 
