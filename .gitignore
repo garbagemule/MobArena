@@ -16,7 +16,6 @@ Thumbs.db
 bin/
 build/
 misc/
-test/
 target/
 
 # Misc files
