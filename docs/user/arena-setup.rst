@@ -2,269 +2,272 @@
 Arena setup
 ###########
 
-**On this page:** \* `Building an arena <#building-an-arena>`__ \*
-`About regions, warps, etc. <#about-regions-warps-etc>`__ \* `Setup
-Mode <#setup-mode>`__ \* `Commands <#setup-mode-commands>`__ \* `The
-Toolbox <#the-toolbox>`__ \* `Regions <#regions->`__ \*
-`Warps <#warps->`__ \* `Spawnpoints <#spawnpoints->`__ \*
-`Chests <#chests->`__
+This page explains how to set up an arena, from defining it to configuring it.
 
+
+*****************
 Building an arena
-=================
+*****************
 
-A well-built arena consists of a **lobby** for class selection, an
-**arena floor**, and either a **spectator area** or an **exit point**.
-Let's go over each one...
+There are four key parts to an arena:
 
-**Lobby:** The lobby is where your players will be selecting their
-classes when they join an arena. A well-formed lobby consists of *a sign
-for each class*, which the players will click to choose a given class,
-as well as an *iron block*, which the players will click when they are
-ready to start. The signs must have the name of the class on the first
-line (case-sensitive), but you can put whatever you want on the
-remaining three lines. Note that MobArena *does not* "register" class
-sign creation, so you *will not* get a confirmation message (if you do,
-it is another plugin interfering).
+#. Lobby
+#. Arena floor
+#. Spectator area
+#. Exit point
 
-**Arena floor:** This is where your players will be fighting monsters.
-The arena floor should be enclosed in walls, and possibly with a roof,
-such that the players and monsters have no way of getting out. This
-ensures that players won't be able to just wander out of the arena.
+Lobby
+=====
 
-**Spectator area:** When players want to spectate a session, they can
-use the ``/ma spec`` command to get warped to the spectator area of an
-arena. This is also where arena players are warped to when they die, if
-``spectate-after-death: true`` in the config-file. The area should be
-designed so that it *is not* possible for the spectators to wander out
-(into the arena or away from the area), because spectators are
-invincible.
+A lobby is where players choose a class before joining an arena. It's also the
+"waiting area" before a new match begins.
 
-**Exit point:** Upon typing ``/ma leave``, arena players and spectators
-will be warped to the location they joined from, unless the arena has an
-exit warp (optional). Using exit points, it is possible to control
-exactly where players go after a session.
+Lobbies have two requirements:
 
-About regions, warps, etc.
---------------------------
+- **Class selection signs**: Clicked to select a class
+- **Iron block**: Clicked to mark self as "ready"
 
-Once our arena is built, it's time to set up the MobArena regions,
-warps, and points. Before we do so, let's take a look at what these
-things are and what MobArena uses them for...
+Class selection signs must have the name of the class on the first line
+(case-sensitive). The last three lines are not checked and they can have any
+text. You will not receive a confirmation message after making a new sign since
+MobArena does not register the creation of class selection signs.
 
-**Regions:** An arena needs an *arena region*, and optionally a *lobby
-region*. MobArena uses the arena region to make sure that players aren't
-cheating (by kicking them from the arena if they move outside the
-region), and to make sure that only MobArena's own mobs are spawned
-inside of it. MobArena is extremely xenophobic (afraid of strangers), so
-it tries its best to keep unwanted mobs out of the sessions. Regions are
-set using the Region tools.
+Arena floor
+===========
 
-**Warps:** When players join a MobArena session, they are teleported to
-the *lobby warp* inside the lobby, where they will *pick their class*
-and ready up using the *ready block* (block of iron). When everyone is
-ready, the players are teleported to the *arena warp* inside of the
-arena. Spectators will be teleported to the *spectator warp* in the
-spectator area, and when players leave an arena, they will either be
-teleported to where they joined from, or to the *exit warp*, if it has
-been set up. Warps are set using the Warps tool.
+An arena floor is where the action happens. Players fight through mob waves on
+the arena floor. How the arena floor looks is up to you, but we recommend these
+minimum requirements:
 
-**Spawnpoints:** The *spawnpoints* of an arena are the locations where
-monsters can spawn from. MobArena will only spawn monsters from
-spawnpoints that have players nearby (in a 15-block radius). Note that
-the number of mobs spawned doesn't depend on how many spawnpoints an
-arena has - the number of mobs is determined by a formula (see
-[[Formulas]]) that only involves the wave number and player count
-(unless you use fixed amounts). Spawnpoints are added using the
-Spawnpoints tool.
+- Closed in by walls on all sides
+- Have a ceiling / roof
 
-**Containers:** The *containers* of an arena are locations of chests,
-dispensers, etc. which contain items that will be renewed when the arena
-ends. Only registered containers will have their contents renewed, so it
-is not enough to simply put a chest in the arena - it also needs to be
-registered using the Chests tool.
+This prevents players and mobs from escaping and also blocks players from
+wandering out of the arena with class items.
+ander out of the arena.
 
-Setup Mode
+Spectator area
+==============
+
+A spectator area lets non-players watch an on-going match. The ``/ma spec``
+command teleports a player into the spectator area. If configured, [#]_ players
+warp into the spectator arena when they die.
+
+Design the area so spectators cannot escape the spectator area, since they
+invincible. Spectators should *not* enter the arena floor or exit the spectator
+area on foot.
+
+.. [#] Set ``spectate-after-death`` to ``true`` in the config file to force
+   players to the spectator area after dying
+
+Exit point
 ==========
 
-We will set up the arena using *Setup Mode*. When we enter Setup Mode,
-MobArena will temporarily store our inventory and give us a set of
-golden tools (the *Toolbox*), each with a different function. We will
-also be able to *fly*, making moving around the arena a lot easier.
-Last, but not least, we will *not* be able to chat or type normal
-commands while in Setup Mode, because Setup Mode starts an *isolated
-conversation* with us.
+When players leave the arena or when the last player standing dies, arena
+players and spectators teleport to the location they joined from. Optionally, an
+arena can have an exit warp. This controls where players go after leaving a
+match.
 
-**To enter Setup Mode:** Type ``/ma setup <arena>``, where ``<arena>``
-is the name of an arena. Note that if you only have one arena, you don't
-have to type the arena name. If the arena you want to set up has not yet
-been created, first type ``/ma addarena <arena>`` to create it.
 
-**To leave Setup Mode:** Type ``done``.
+****************
+Defining regions
+****************
 
-Note that if you have just installed MobArena, there will be a premade
-arena-node called ``default`` in the config-file already. If you want a
-different name, create a new arena first, and then remove the default
-arena by typing ``/ma delarena default``.
+When an arena is ready, it must be **defined** into…
 
-In the next section, we will take a look at the different commands
-available in Setup Mode...
+#. Regions
+#. Warps
+#. Spawnpoints
+#. Containers
 
-Setup Mode Commands
--------------------
+Regions
+=======
 
-Setup Mode is an *isolated conversation*, which means Setup Mode will
-intercept everything we type. The reason for this is that it makes the
-commands in Setup Mode shorter (e.g. ``exp`` instead of
-``/ma expandregion``), and it also prevents us from accidentally typing
-commands from other plugins.
+Arenas **must** have an arena region and optionally a lobby region. Regions are
+set using the Regions tools. MobArena uses the arena region to…
 
-Below is a list of all the commands we can use in Setup Mode. Many of
-the commands have short-hand aliases which might make them even faster
-to type out. As an example, the ``expand`` command has the alias
-``exp``. Sometimes it's easier to remember the longer names, but the
-short-hand aliases are provided for faster setup.
+- Stop cheating by kicking players if they leave the arena region
+- Only spawn MobArena mobs inside arena region
 
--  | ``done``
-   | Leave Setup Mode.
-   | **Aliases:** ``end`` ``stop`` ``done`` ``quit``
+Warps
+=====
 
--  | ``help``
-   | Display help screen.
-   | **Aliases:** ``?`` ``h``
+Players teleport to different warps for different events. There are four warps
+used in MobArena:
 
--  | ``missing``
-   | Display a list of missing (mandatory) regions, warps, and points.
-   | This command is useful if you have forgotten how far you are in the
-     setup process, and what you still need to set up.
-   | **Aliases:** ``miss``
+- **Lobby warp**: Warp location for players joining a new match; leave when all
+  players "ready up" or match countdown timer ends
+- **Arena warp**: Warp location for players to spawn in the arena floor
+- **Spectator warp**: Warp location for spectators to watch an on-going match
+- **Exit warp**: Optional warp location for players to teleport to after a match
+  finishs or they leave the arena
 
--  | ``expand <region> <amount> <direction>``
-   | Expand a region by some amount in some direction.
-   | Valid regions: ``ar`` for the arena region, or ``lr`` for the lobby
-     region
-   | Valid amounts: positive integers (whole numbers)
-   | Valid directions: ``up``, ``down``, or ``out``
-   | **Example:** ``expand ar 5 up``
-   | **Aliases:** ``exp``
+Spawnpoints
+===========
 
--  | ``show [<region>|<warp>|<point>]``
-   | Show a region, warp, or point(s) as red wool blocks.
-   | Valid regions: ``ar`` for the arena region, or ``lr`` for the lobby
-     region
-   | Valid warps: ``arena``, ``lobby``, ``spec``, ``exit``
-   | Valid points: ``spawns`` (or just ``sp``) for spawnpoints,
-     ``chests`` (or just ``c``) for chests
-   | **Example:** ``show sp``
+Mobs spawn at the spawnpoint(s) of an area. MobArena only uses spawnpoints in a
+*15-block radius* from any player. An arena can have multiple spawnpoints.
+Spawnpoints are added using the Spawnpoints tool.
 
-The Toolbox
------------
+The number of mobs spawned is not determined by the number of spawnpoints, but
+actual formulas. See :doc:`wave-formulas` for more information.
 
-The Toolbox is a set of golden tools, where each tool has a specific
-function. We will use these tools to set up the regions, warps, and
-points of our arena. The tools are used by left- or right-clicking a
-block while holding them, and the actions vary depending on the specific
-tool.
+Containers
+==========
 
-Note that the functions of a tool are described in the *item tooltip*,
-which we can see by opening up our inventory and hovering our mouse over
-the tools.
+Containers are locations of chests, dispensers, or other containers with
+renewable contents. Any containers added to an arena must be registered using
+the Chests tool.
 
-Regions |Region Tools|
-~~~~~~~~~~~~~~~~~~~~~~
 
-The arena and lobby regions can be set up using the Region tools (axe).
-There are two golden axes in the Toolbox, and they both behave the same,
-except that one is for the arena region, and the other is for the lobby
-region. The tools are named accordingly, and they will display either
-"Arena Region" or "Lobby Region" above the quickbar when we select them.
+**********
+Setup Mode
+**********
 
-Note that the behavior of the Region tools is similar to that of the
-WorldEdit wand (wooden axe), so if you are familiar with defining
-regions in WorldEdit, the Region tools should feel familiar.
+Configure a new arena with *Setup Mode*. Setup Mode is a special mode that
+temporarily stores inventory and gives an administrator a set of golden tools.
+The golden tools are called the **Toolbox**.
 
-| **Left-click:** Set the first point to be the location of the target
-  block
-| **Right-click:** Set the second point to be the location of the target
-  block
+Flying is enabled to simplify arena setup. Talking in server chat is also
+disabled because Setup Mode starts an isolated conversation with the
+administrator (explained below).
 
-Upon setting both points, the region will be defined. Type ``show ar``
-(or ``show lr``) to check that the region spans the desired area. If the
-region is a little bit too small, use the ``expand`` command (see above)
-to make it a little bigger.
+- **Create a new arena**: ``/ma addarena <arena name>``
+- **Enter Setup Mode**: ``/ma setup <arena name>`` [#]_
+- **Leave Setup Mode**: ``done`` (no slash)
+- **Delete an arena**: ``/ma delarena <arena name>`` [#]_
 
-**Note:** The region MUST look like a box (3D) and not a rectangle (2D).
-If the region is just a rectangle, your arena will not work correctly.
-The same applies if the arena floor is not fully contained in the box,
-so make sure to expand the region down a block or two to be sure.
+.. [#] If you only have one arena, you don't have to specify the arena name
+.. [#] An arena named ``default`` is created on first use. You can remove this
+   arena if you want to use an arena with a different name.
 
-Warps |Warps Tool|
-~~~~~~~~~~~~~~~~~~
+Setup Mode commands
+===================
 
-The arena, lobby, spectator, and exit warps can be set up using the
-Warps tool (hoe). The tool knows about all the warps, and we have to
-*cycle through them* to select the warp we want to place. The default
-selected warp is the *arena warp*.
+Setup Mode is an *isolated conversation*, which means Setup Mode intercepts
+everything an administrator types. This makes commands in Setup Mode shorter and
+prevents accidental use of other plugins.
 
-| **Left-click:** Set the currently selected warp on top of the target
-  block
-| **Right-click:** Cycle between available warps
+Below is a list of all commands in Setup Mode:
 
-When left-clicking, the selected warp will be set to the top of the
-clicked block. The pitch (up and down) will be set to 0, which means
-when players are teleported, they will be looking "straight ahead". The
-yaw (rotation, left/right) will be set to whatever direction we are
-facing, when we set the warp. This means that we need to rotate
-ourselves to be looking in the direction we want the players to look in
-when they are teleported to the point.
++-------------------+-------------------------------------+------------+
+| Command           | Description                         | Aliases    |
++===================+=====================================+============+
+| done              | Leave Setup Mode                    | end, stop, |
+|                   |                                     | done, quit |
++-------------------+-------------------------------------+------------+
+| help              | Display help screen                 | ?, h       |
++-------------------+-------------------------------------+------------+
+| missing           | Display list of missing (mandatory) | miss       |
+|                   | regions, warps, spawnpoints. Useful |            |
+|                   | to check what is left to set up.    |            |
++-------------------+-------------------------------------+------------+
+| expand            | Expand region by some amount in a   | exp        |
+| ``<region>``      | given direction. *Example*:         |            |
+| ``<amount>``      | ``expand ar 5 up``                  |            |
+| ``<direction>``   |                                     |            | 
++-------------------+-------------------------------------+------------+
+| show              | Show a region, warp, spawnpoint(s), | N/A        |
+| ``[<region>|``    | or container as red wool blocks.    |            |
+| ``<warp>|``       | *Example*: ``show sp``              |            |
+| ``<spawnpoint>|`` |                                     |            |
+| ``<container>]``  |                                     |            |
++-------------------+-------------------------------------+------------+
 
-**Note:** The arena, lobby, and spectator warps are all required. The
-exit warp is optional.
+- **Valid regions**: ``ar`` (arena region), ``lr`` (lobby region)
+- **Valid amounts**: Any positive integer (i.e. whole number)
+- **Valid directions**: ``up``, ``down``, ``out``
+- **Valid warps**: ``arena``, ``lobby``, ``spec``, ``exit``
+- **Valid spawnpoints**: ``spawns`` (or ``sp``)
+- **Valid containers**: ``chests`` (or ``c``)
 
-Spawnpoints |Spawnpoints Tool|
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Toolbox
+=======
 
-The spawnpoints can be set up using the Spawnpoints tool (sword). The
-tool knows about all the spawnpoints of the arena, and allows us to
-remove existing ones or add new ones as we please.
+The Toolbox is a set of golden tools. Each tool has a specific functions. We use
+them to set up regions, warps, spawnpoints, and containers. Toolbox tools are
+used with either a left- or right-click.
 
-| **Left-click:** Add a spawnpoint on top of the target block
-| **Right-click:** Remove the spawnpoint on top of the target block (if
-  the spawnpoint exists)
+Tool functions are also described in the *item tooltip* in your inventory.
 
-When left-clicking, a spawnpoint will be added on top of the clicked
-block, if one doesn't already exist. Right-clicking a block will remove
-a spawnpoint on that block, if one exists.
+Region tools
+------------
 
-**Note:** Due to limitations and "bugs" in Minecraft, it is not possible
-(read: viable) to spawn mobs further than 15 blocks away from a player,
-and still make it target and attack the player naturally. Therefore, it
-is recommended to place many spawnpoints, so that every single location
-in the arena is within a 15-block radius of a spawnpoint. If a player is
-not within 15 blocks of any spawnpoint, MobArena will print a warning to
-the console with the coordinates. If no players are within 15 blocks of
-any spawnpoint, MobArena will default to using all spawnpoints, which
-may result in mobs spawning far away from players, so they will have to
-run around searching for them.
+|r-icon|
 
-Chests |Chests Tool|
-~~~~~~~~~~~~~~~~~~~~
+Arena and lobby regions are defined with Region tools (golden axes). There are
+two golden axes in the Toolbox. One is for *arena setup* and the other is for
+*lobby setup*. The tools are named accordingly.
 
-The chests and containers can be set up using the Chests tool (spade).
-It works very much like the Spawnpoints tool, but requires that the
-clicked block is a valid container.
+Region tools behave similarly to the WorldEdit wand (wooden axe). If you are
+familiar with regions in WorldEdit, Region tools should feel familiar.
 
-| **Left-click:** Register the clicked container (if it wasn't
-  registered)
-| **Right-click:** Unregister the clicked container (if it was
-  registered)
+- **Left-click**: Sets first point on clicked block
+- **Right-click**: Sets second point on clicked block
 
-When left-clicking a container, MobArena will register the container (if
-it wasn't registered already), such that when an arena session ends, the
-container will be restored to contain whatever was in it when the arena
-began. Right-clicking a container will unregister it.
+When both points are set, the region is defined. ``show ar`` (or ``show lr``)
+lets you check the region spans the desired area. If the region is too small,
+use the ``expand`` command (see above) to make it bigger.
 
-.. |Region Tools| image:: http://puu.sh/4wwCH.png
-.. |Warps Tool| image:: http://puu.sh/4wwIB.png
-.. |Spawnpoints Tool| image:: http://puu.sh/4wwCJ.png
-.. |Chests Tool| image:: http://puu.sh/4wwIF.png
+The region must be three-dimensional (like a box) and not two-dimensional (flat
+rectangle). Make sure your arena floor is contained in the region selection
+(expanding a block or two below the floor is recommended).
+
+Warp tool
+---------
+
+|w-icon|
+
+All warps are defined using the Warp tool (golden hoe). The tool defines any of
+the four types of warps depending which one is selected.
+
+- **Left-click:** Set selected warp type on top of clicked block
+- **Right-click:** Cycle between warp types
+
+A selected warp is placed on top of the clicked block. The direction you are
+looking is also taken into account.
+
+Arena, lobby, and spectator warps are required. An exit warp is optional.
+
+Spawnpoint tool 
+---------------
+
+|s-icon|
+
+Spawnpoints are set up with the Spawnpoint tool (golden sword). The tool allows
+an administrator to set or remove spawnpoints for mobs.
+
+- **Left-click:** Add spawnpoint on top of clicked block
+- **Right-click:** Remove spawnpoint on top of clicked block (if one exists)
+
+Many spawnpoints recommended
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A **high number of spawnpoints** is recommended. Mobs only spawn at spawnpoints
+within 15 blocks of a player. Every area in the arena should have one or more
+spawnpoints in a 15 block radius from each other.
+
+If a player is not within 15 blocks of a spawnpoint, MobArena prints a warning
+to the console with coordinates. If no players are within 15 blocks of a
+spawnpoint, MobArena uses a random spawnpoint. This means mobs may spawn far
+away from players.
+
+Container tool
+--------------
+
+|c-icon|
+
+Containers are set up with the Container tool (golden shovel). It works like the
+Spawnpoint tool, but checks that the clicked block is a valid container.
+
+- **Left-click:** Register clicked container (if not registered)
+- **Right-click:** Unregister clicked container (if registered)
+
+At the end of a match, a container is restored to its contents from the
+beginning of the match.
+
+.. |r-icon| image:: http://puu.sh/4wwCH.png
+.. |w-icon| image:: http://puu.sh/4wwIB.png
+.. |s-icon| image:: http://puu.sh/4wwCJ.png
+.. |c-icon| image:: http://puu.sh/4wwIF.png
 
