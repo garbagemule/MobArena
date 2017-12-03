@@ -20,6 +20,7 @@
 * This is a…
     * [ ] Bug fix
     * [ ] Feature addition
+    * [ ] Documentation
     * [ ] Refactoring
     * [ ] Minor / simple change (like a typo)
     * [ ] Other
