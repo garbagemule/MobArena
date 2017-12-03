@@ -2,105 +2,128 @@
 Class chests
 ############
 
-**On this page:** \* `About Class Chests <#about-class-chests>`__ \*
-`Linked Class Chests <#linked-class-chests>`__
+If MobArena's item parser doesn't support your favorite custom items or you want
+to configure your class items in-game, class chests are a way to do this.
 
-About Class Chests
-------------------
 
-If some of your favorite items aren't supported by MobArena's internal
-[[item parser\|Item and Reward Syntax]], or if you just want to be able
-to configure your class items from in-game, the **class chests** may be
-what you're looking for!
+*********************
+Enabling class chests
+*********************
 
---------------
+Class chests must be enabled in an arena configuration to work. To enable this,
+make sure your arena configuration has this line.
 
-**Note: The Class Chests will only work for arenas with
-``use-class-chests: true``, and the classes *MUST* exist in the
-config-file for MobArena to recognize them, however the items and armor
-lists can be empty.** \* \* \*
+.. code-block:: yaml
 
-The idea behind the class chests is to simply place some **chests below
-the corresponding class signs** in the lobby, and fill them with
-whatever items you want the given class to have. When the players
-activate the class signs, the **contents of the chests are copied to the
-player inventory**. This suggests a type of "control room" setup, where
-an admin-only access room below the lobby contains the chests, allowing
-admins to warp down there and change the contents of the chests.
+   use-class-chests: true
 
-.. figure:: img/1.png
-   :alt: Lobby and Control Room
+Additionally, classes **must** exist in the config file for MobArena to
+recognize them. However, the items and armor lists can be empty.
 
-   Lobby and Control Room
 
-For easier access and modification of the class chests, omitting the
-control room from the arena or lobby region may prove useful. Otherwise,
-arenas may have to be temporarily disabled or put into edit mode to
-allow warping to and changing the contents of the chests.
+*************
+How they work
+*************
 
-The class chests can be located **up to 6 blocks below the sign** itself
-or below the block right behind the sign (for wall signs, this would be
-the block the sign is attached to). The chest may also be in the block
-directly behind the sign itself - this is safe, because MobArena
-prevents players in the lobby from opening inventories, so if your lobby
-is in a tight spot, this might be the better option.
+Class chests support items that are not supported by MobArena's item parser.
+Class chests **copy the chest contents** to player inventories. Therefore, any
+items supported by Spigot are supported by MobArena.
 
-**Multiple sign rows:** It is possible to have two rows of class signs
-in the lobby and still use this feature. Simply place the class chest
-for the sign of the bottom row exactly at the 6-block limit, and the
-class chest for the sign of the top row one block up and behind the
-other chest (in a stair-like fashion). The blocks are searched in a
-vertical/pillar-like fashion, which is the reason this works.
+.. figure:: ../img/class-chests-4.png
+   :alt: Support for custom items, like dyed or enchanted armor, is possible
 
-.. figure:: img/2.png
-   :alt: Chests Below
+   Support for custom items, like dyed or enchanted armor, is possible
 
-   Chests Below
+Class chests are placed *below* the class sign in the lobby. An administrator
+fills the chest with whatever items they want the class to have. When the player
+chooses the class, the chest contents are copied to the player's inventory.
 
-To get **auto-equipped armor** from the class chests, place the armor
-pieces in the **last four slots of the third row** in the chest.
-MobArena will check these four slots, and if any of them are armor
-pieces, they will be equipped. Note that the item placed in the very
-last slot (bottom right), will always be equipped as a helmet (this
-allows wool blocks, pumpkins, etc. to be used as helmets). The order of
-the other three slots doesn't matter.
+Using a control room
+====================
 
-The **fifth last slot**, right next to the armor slots, will be equipped
-as an **off-hand** item.
+A "control room" setup works best for this. A control room is an
+administrator-only room that holds the class chests. Administrators warp there
+to change the contents of the chests.
 
-.. figure:: img/3.png
-   :alt: Armor Slots
+There's different ways to implement a control room. A common way is to build the
+control room underneath the lobby. To later modify the control room, you must
+enter Edit Mode (explained in :doc:`arena-setup`). If you want to use a control
+room outside of the arena, look into `Linked class chests`_.
 
-   Armor Slots
+.. figure:: ../img/class-chests-1.png
+   :alt: Lobby is above an example control room
 
-The class chests are the best way to add items that are not currently
-supported by the MobArena [[item parser\|Item Syntax]]. This is because
-the class chests **simply copy the contents of the chests** to the
-player inventories, thus making any items supported by Bukkit supported
-by MobArena.
+   Lobby is above an example control room
 
-.. figure:: img/4.png
-   :alt: Dyed Armor
+Class chests can be…
 
-   Dyed Armor
+- No more than *six blocks* from class selection sign
+- Placed behind class selection sign
 
-Linked Class Chests
--------------------
+Multiple sign rows
+==================
 
-If per-arena class chest setups is too troublesome (e.g. if you have
-many arenas), if you don't need per-arena setups, or if you simply want
-a single, global class chest for each class, *linked class chests* are
-what you're looking for.
+MobArena supports multiple rows of class signs in a lobby with class chests.
 
-When you link a chest to a class, MobArena will always copy the contents
-of that chest to the player's inventory, when they pick the given class,
-regardless of any local class chests (note that the arena must still
-have ``use-class-chests: true``).
+#. Place class chests for bottom row of class selection signs six blocks away
+#. Place class chests for next row of class selection signs five blocks away
+#. Continue until you're out of rows or space
 
-To link a chest to a class, simply look at the chest and type
-``/ma classchest <class>``, and you're done! The linked class chests may
-exist in any world, but remember that there can only be one class chest
-per class, and that local class chests will be ignored!
+If done correctly, it will look a stair pattern.
 
-To unlink a class chest, you will have to open the config-file and
-remove the ``classchest`` node from the given class.
+.. figure:: ../img/class-chests-2.png
+   :alt: Placing class chests below class selection signs in control room
+
+   Placing class chests below class selection signs in control room
+
+
+********************
+Auto-equipping items
+********************
+
+Special items can be auto-equipped to the player.
+
+Armor
+=====
+
+Armor can be auto-equipped from class chests. Place all armor pieces in the
+**last four slots of the third row** in the chest.
+
+MobArena checks these four slots for armor. If it finds armor, it equips them
+onto the player when they choose the class. Additionally, any item in the last
+slot of a chest (bottom right corner) is always equipped as a helmet. This lets
+you use non-armor items as helmets.
+
+The order of the other three slots does not matter.
+
+.. figure:: ../img/class-chests-3.png
+   :alt: Armor items are placed in last four slots of third row in chest
+
+   Armor items are placed in last four slots of third row in chest
+
+Off-hand item
+=============
+
+The fifth slot before the end of the third row (next to the armor) is for the
+**off-hand item**. This could be a shield or another item of your choice.
+
+
+*******************
+Linked class chests
+*******************
+
+Linked class chests allow you to match a single chest for the same class across
+multiple arenas. If you have multiple arenas with the same classes, linked class
+chests let you manage a single chest for all arenas that use the class.
+
+There can only be one class chest used per class. Using a linked class chest
+overrides any local class chests.
+
+To link a chest to a class, look at the chest and use this command.
+
+.. code-block:: text
+
+   /ma classchest <class>
+
+Linked class chests must be removed manually. Open the config file and remove
+the ``classchest`` node from the class.
