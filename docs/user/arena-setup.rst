@@ -11,10 +11,10 @@ Building an arena
 
 There are four key parts to an arena:
 
-#. Lobby
-#. Arena floor
-#. Spectator area
-#. Exit point
+#. `Lobby`_
+#. `Arena floor`_
+#. `Spectator area`_
+#. `Exit point`_
 
 Lobby
 =====
@@ -29,8 +29,11 @@ Lobbies have two requirements:
 
 Class selection signs must have the name of the class on the first line
 (case-sensitive). The last three lines are not checked and they can have any
-text. You will not receive a confirmation message after making a new sign since
-MobArena does not register the creation of class selection signs.
+text.
+
+You will not receive a confirmation message after making a new sign since
+MobArena does not register the creation of class selection signs. If you get a
+confirmation message, another plugin is interferring.
 
 Arena floor
 ===========
@@ -44,7 +47,6 @@ minimum requirements:
 
 This prevents players and mobs from escaping and also blocks players from
 wandering out of the arena with class items.
-ander out of the arena.
 
 Spectator area
 ==============
@@ -53,7 +55,7 @@ A spectator area lets non-players watch an on-going match. The ``/ma spec``
 command teleports a player into the spectator area. If configured, [#]_ players
 warp into the spectator arena when they die.
 
-Design the area so spectators cannot escape the spectator area, since they
+Design the area so spectators cannot escape the spectator area, since they are
 invincible. Spectators should *not* enter the arena floor or exit the spectator
 area on foot.
 
@@ -69,16 +71,21 @@ arena can have an exit warp. This controls where players go after leaving a
 match.
 
 
-****************
-Defining regions
-****************
+**************
+Defining areas
+**************
 
-When an arena is ready, it must be **defined** into…
+By now, you have a full arena map and you are ready to configure it in MobArena.
+When an area is built, it must be **defined** by MobArena. This tells MobArena
+where the arena boundaries are, such as whether an area is a lobby or the arena
+floor.
 
-#. Regions
-#. Warps
-#. Spawnpoints
-#. Containers
+MobArena has four types of areas:
+
+#. `Regions`_
+#. `Warps`_
+#. `Spawnpoints`_
+#. `Containers`_
 
 Regions
 =======
@@ -126,7 +133,7 @@ Setup Mode
 
 Configure a new arena with *Setup Mode*. Setup Mode is a special mode that
 temporarily stores inventory and gives an administrator a set of golden tools.
-The golden tools are called the **Toolbox**.
+The golden tools are called the `Toolbox`_.
 
 Flying is enabled to simplify arena setup. Talking in server chat is also
 disabled because Setup Mode starts an isolated conversation with the
@@ -184,7 +191,7 @@ Below is a list of all commands in Setup Mode:
 Toolbox
 =======
 
-The Toolbox is a set of golden tools. Each tool has a specific functions. We use
+The Toolbox is a set of golden tools. Each tool has a specific function. We use
 them to set up regions, warps, spawnpoints, and containers. Toolbox tools are
 used with either a left- or right-click.
 
@@ -239,9 +246,6 @@ an administrator to set or remove spawnpoints for mobs.
 
 - **Left-click:** Add spawnpoint on top of clicked block
 - **Right-click:** Remove spawnpoint on top of clicked block (if one exists)
-
-Many spawnpoints recommended
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A **high number of spawnpoints** is recommended. Mobs only spawn at spawnpoints
 within 15 blocks of a player. Every area in the arena should have one or more
