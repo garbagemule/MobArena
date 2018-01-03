@@ -120,11 +120,12 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void signChange(SignChangeEvent event) {
-        if (!event.getPlayer().hasPermission("mobarena.setup.leaderboards") && !event.getPlayer().hasPermission("mobarena.setup.signs")) {
+        if (!event.getLine(0).startsWith("[MA]")) {
             return;
         }
 
-        if (!event.getLine(0).startsWith("[MA]")) {
+        if (!event.getPlayer().hasPermission("mobarena.setup.leaderboards") && !event.getPlayer().hasPermission("mobarena.setup.signs")) {
+            event.setCancelled(true);
             return;
         }
         
