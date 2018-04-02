@@ -4,6 +4,7 @@ import static org.bukkit.Material.*;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.ItemStackThing;
 import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,7 +14,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -24,8 +24,9 @@ import java.util.Map.Entry;
 public class ArenaClass
 {
     private String configName, lowercaseName;
-    private ItemStack helmet, chestplate, leggings, boots, offhand;
-    private List<ItemStack> items, armor;
+    private ItemStackThing helmet, chestplate, leggings, boots, offhand;
+    private List<Thing> items;
+    private List<ItemStackThing> armor;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
@@ -76,14 +77,18 @@ public class ArenaClass
         if (items.isEmpty()) {
             return Material.STONE;
         }
-        return items.get(0).getType();
+        Thing firstItem = items.get(0);
+        if (firstItem instanceof ItemStackThing) {
+            return ((ItemStackThing)firstItem).getItem().getType();
+        }
+        return Material.STONE;
     }
     
     /**
      * Set the helmet slot for the class.
      * @param helmet an item
      */
-    public void setHelmet(ItemStack helmet) {
+    public void setHelmet(ItemStackThing helmet) {
         this.helmet = helmet;
     }
     
@@ -91,7 +96,7 @@ public class ArenaClass
      * Set the chestplate slot for the class.
      * @param chestplate an item
      */
-    public void setChestplate(ItemStack chestplate) {
+    public void setChestplate(ItemStackThing chestplate) {
         this.chestplate = chestplate;
     }
     
@@ -99,7 +104,7 @@ public class ArenaClass
      * Set the leggings slot for the class.
      * @param leggings an item
      */
-    public void setLeggings(ItemStack leggings) {
+    public void setLeggings(ItemStackThing leggings) {
         this.leggings = leggings;
     }
     
@@ -107,7 +112,7 @@ public class ArenaClass
      * Set the boots slot for the class.
      * @param boots an item
      */
-    public void setBoots(ItemStack boots) {
+    public void setBoots(ItemStackThing boots) {
         this.boots = boots;
     }
     
@@ -115,35 +120,39 @@ public class ArenaClass
      * Set the off-hand slot for the class.
      * @param offHand
      */
-    public void setOffHand(ItemStack offHand) {
+    public void setOffHand(ItemStackThing offHand) {
         this.offhand = offHand;
     }
 
     /**
      * Add an item to the items list.
-     * @param stack an item
+     * @param thing a thing
      */
-    public void addItem(ItemStack stack) {
-        if (stack == null) return;
-        
-        if (stack.getAmount() > 64) {
-            while (stack.getAmount() > 64) {
-                items.add(new ItemStack(stack.getType(), 64));
-                stack.setAmount(stack.getAmount() - 64);
+    public void addItem(Thing thing) {
+        if (thing == null) return;
+
+        if (thing instanceof ItemStackThing) {
+            ItemStack stack = ((ItemStackThing)thing).getItem();
+            if (stack.getAmount() > 64) {
+                while (stack.getAmount() > 64) {
+                    items.add(new ItemStackThing(new ItemStack(stack.getType(), 64)));
+                    stack.setAmount(stack.getAmount() - 64);
+                }
             }
         }
-        items.add(stack);
+
+        items.add(thing);
     }
     
     /**
      * Replace the current items list with a new list of all the items in the given list.
      * This method uses the addItem() method for each item to ensure consistency.
-     * @param stacks a list of items
+     * @param things a list of things
      */
-    public void setItems(List<ItemStack> stacks) {
-        this.items = new ArrayList<>(stacks.size());
-        for (ItemStack stack : stacks) {
-            addItem(stack);
+    public void setItems(List<Thing> things) {
+        this.items = new ArrayList<>(things.size());
+        for (Thing thing : things) {
+            addItem(thing);
         }
     }
     
@@ -151,7 +160,7 @@ public class ArenaClass
      * Replace the current armor list with the given list.
      * @param armor a list of items
      */
-    public void setArmor(List<ItemStack> armor) {
+    public void setArmor(List<ItemStackThing> armor) {
         this.armor = armor;
     }
     
@@ -167,13 +176,14 @@ public class ArenaClass
         PlayerInventory inv = p.getInventory();
 
         // Fork over the items.
-        for (ItemStack stack : items) {
-            inv.addItem(stack);
+        for (Thing thing : items) {
+            thing.giveTo(p);
         }
         
         // Check for legacy armor-node items
         if (!armor.isEmpty()) {
-            for (ItemStack piece : armor) {
+            for (ItemStackThing armorThing : armor) {
+                ItemStack piece = armorThing.getItem();
                 ArmorType type = ArmorType.getType(piece);
                 if (type == null) continue;
                 
@@ -197,11 +207,11 @@ public class ArenaClass
         }
         
         // Check type specifics.
-        if (helmet     != null) inv.setHelmet(helmet);
-        if (chestplate != null) inv.setChestplate(chestplate);
-        if (leggings   != null) inv.setLeggings(leggings);
-        if (boots      != null) inv.setBoots(boots);
-        if (offhand    != null) inv.setItemInOffHand(offhand);
+        if (helmet     != null) inv.setHelmet(helmet.getItem());
+        if (chestplate != null) inv.setChestplate(chestplate.getItem());
+        if (leggings   != null) inv.setLeggings(leggings.getItem());
+        if (boots      != null) inv.setBoots(boots.getItem());
+        if (offhand    != null) inv.setItemInOffHand(offhand.getItem());
     }
     
     /**
@@ -286,6 +296,13 @@ public class ArenaClass
 
     public Thing getPrice() {
         return price;
+    }
+
+    public void removeThings(Player p) {
+        // We're going to let inventory restore take care of armor
+        for (Thing thing : items) {
+            thing.takeFrom(p);
+        }
     }
     
     /**

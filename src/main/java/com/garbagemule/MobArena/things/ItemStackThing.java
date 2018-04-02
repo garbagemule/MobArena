@@ -37,4 +37,8 @@ public class ItemStackThing implements Thing {
         }
         return item;
     }
+
+    public ItemStack getItem() {
+        return stack;
+    }
 }

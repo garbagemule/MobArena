@@ -45,6 +45,7 @@ public class ThingManager implements ThingParser {
 
     @Override
     public Thing parse(String s) {
+        if (s == null || s.isEmpty()) return null;
         for (ThingParser parser : parsers) {
             Thing thing = parser.parse(s);
             if (thing != null) {
@@ -52,5 +53,23 @@ public class ThingManager implements ThingParser {
             }
         }
         return null;
+    }
+
+    public List<Thing> parseThings(String s) {
+        if (s == null) {
+            return new ArrayList<>(1);
+        }
+
+        String[] items = s.split(",");
+        List<Thing> result = new ArrayList<>(items.length);
+
+        for (String item : items) {
+            Thing thing = parse(item.trim());
+            if (thing != null) {
+                result.add(thing);
+            }
+        }
+
+        return result;
     }
 }

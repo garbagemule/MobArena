@@ -6,7 +6,9 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.ItemStackThing;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -326,26 +328,32 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Parse the items-node
         List<String> items = section.getStringList("items");
+        ThingManager thingManager = plugin.getThingManager();
         if (items == null || items.isEmpty()) {
             String str = section.getString("items", "");
-            List<ItemStack> stacks = ItemParser.parseItems(str);
+            List<Thing> stacks = thingManager.parseThings(str);
             arenaClass.setItems(stacks);
         } else {
-            List<ItemStack> stacks = new ArrayList<>();
+            List<Thing> things = new ArrayList<>();
             for (String item : items) {
-                ItemStack stack = ItemParser.parseItem(item);
-                if (stack != null) {
-                    stacks.add(stack);
+                Thing thing = thingManager.parse(item);
+                if (thing != null) {
+                    things.add(thing);
                 }
             }
-            arenaClass.setItems(stacks);
+            arenaClass.setItems(things);
         }
 
         // And the legacy armor-node
         String armor = section.getString("armor", "");
         if (!armor.equals("")) {
-            List<ItemStack> stacks = ItemParser.parseItems(armor);
-            arenaClass.setArmor(stacks);
+            List<Thing> armorThings = thingManager.parseThings(armor);
+            List<ItemStackThing> armorItems = new ArrayList<>();
+            for (Thing thing :armorThings) {
+                ItemStackThing itemThing = checkItemThing(classname, "armor", thing);
+                armorItems.add(itemThing);
+            }
+            arenaClass.setArmor(armorItems);
         }
 
         // Get armor strings
@@ -356,18 +364,18 @@ public class ArenaMasterImpl implements ArenaMaster
         String off   = section.getString("offhand", null);
 
         // Parse to ItemStacks
-        ItemStack helmet     = ItemParser.parseItem(head);
-        ItemStack chestplate = ItemParser.parseItem(chest);
-        ItemStack leggings   = ItemParser.parseItem(legs);
-        ItemStack boots      = ItemParser.parseItem(feet);
-        ItemStack offhand    = ItemParser.parseItem(off);
+        Thing helmet     = thingManager.parse(head);
+        Thing chestplate = thingManager.parse(chest);
+        Thing leggings   = thingManager.parse(legs);
+        Thing boots      = thingManager.parse(feet);
+        Thing offhand    = thingManager.parse(off);
 
         // Set in ArenaClass
-        arenaClass.setHelmet(helmet);
-        arenaClass.setChestplate(chestplate);
-        arenaClass.setLeggings(leggings);
-        arenaClass.setBoots(boots);
-        arenaClass.setOffHand(offhand);
+        arenaClass.setHelmet(checkItemThing(classname, "helmet", helmet));
+        arenaClass.setChestplate(checkItemThing(classname, "chestplate", chestplate));
+        arenaClass.setLeggings(checkItemThing(classname, "leggings", leggings));
+        arenaClass.setBoots(checkItemThing(classname, "boots", boots));
+        arenaClass.setOffHand(checkItemThing(classname, "offhand", offhand));
 
         // Per-class permissions
         loadClassPermissions(arenaClass, section);
@@ -383,6 +391,18 @@ public class ArenaMasterImpl implements ArenaMaster
         // Finally add the class to the classes map.
         classes.put(lowercase, arenaClass);
         return arenaClass;
+    }
+
+    private ItemStackThing checkItemThing(String classname, String property, Thing thing) {
+        if (thing == null) {
+            return null;
+        }
+        if (thing instanceof ItemStackThing) {
+            return (ItemStackThing)thing;
+        }
+
+        plugin.getLogger().warning(property + " in class " + classname + " contains non-item things");
+        return null;
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
