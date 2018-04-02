@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.things;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemStackThing implements Thing {
     private ItemStack stack;
@@ -27,10 +28,14 @@ public class ItemStackThing implements Thing {
 
     @Override
     public String toString() {
-        String item = stack.getType()
-            .name()
-            .replace("_", " ")
-            .toLowerCase();
+        ItemMeta itemMeta = stack.getItemMeta();
+        String item = itemMeta == null ? null : itemMeta.getDisplayName();
+        if (item == null || item.isEmpty()) {
+            item = stack.getType()
+                .name()
+                .replace("_", " ")
+                .toLowerCase();
+        }
 
         if (stack.getAmount() > 1) {
             return stack.getAmount() + "x " + item;
