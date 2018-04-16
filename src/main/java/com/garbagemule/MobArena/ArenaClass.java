@@ -130,17 +130,6 @@ public class ArenaClass
      */
     public void addItem(Thing thing) {
         if (thing == null) return;
-
-        if (thing instanceof ItemStackThing) {
-            ItemStack stack = ((ItemStackThing)thing).getItem();
-            if (stack.getAmount() > 64) {
-                while (stack.getAmount() > 64) {
-                    items.add(new ItemStackThing(new ItemStack(stack.getType(), 64)));
-                    stack.setAmount(stack.getAmount() - 64);
-                }
-            }
-        }
-
         items.add(thing);
     }
     
