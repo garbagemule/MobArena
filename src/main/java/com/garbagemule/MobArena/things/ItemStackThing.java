@@ -28,18 +28,22 @@ public class ItemStackThing implements Thing {
 
     @Override
     public String toString() {
-        ItemMeta itemMeta = stack.getItemMeta();
-        String item = itemMeta == null ? null : itemMeta.getDisplayName();
-        if (item == null || item.isEmpty()) {
-            item = stack.getType()
-                .name()
-                .replace("_", " ")
-                .toLowerCase();
+        String name = getName();
+        int amount = stack.getAmount();
+        if (amount > 1) {
+            return amount + "x " + name;
         }
+        return name;
+    }
 
-        if (stack.getAmount() > 1) {
-            return stack.getAmount() + "x " + item;
+    private String getName() {
+        ItemMeta meta = stack.getItemMeta();
+        if (meta.hasDisplayName()) {
+            return meta.getDisplayName();
         }
-        return item;
+        return stack.getType()
+            .name()
+            .replace("_", " ")
+            .toLowerCase();
     }
 }
