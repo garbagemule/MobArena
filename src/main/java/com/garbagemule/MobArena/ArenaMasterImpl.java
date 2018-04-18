@@ -24,12 +24,15 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ArenaMasterImpl implements ArenaMaster
 {
@@ -324,22 +327,8 @@ public class ArenaMasterImpl implements ArenaMaster
             ? new ArenaClass.MyItems(price, weps, arms, this)
             : new ArenaClass(classname, price, weps, arms);
 
-        // Parse the items-node
-        List<String> items = section.getStringList("items");
-        if (items == null || items.isEmpty()) {
-            String str = section.getString("items", "");
-            List<ItemStack> stacks = ItemParser.parseItems(str);
-            arenaClass.setItems(stacks);
-        } else {
-            List<ItemStack> stacks = new ArrayList<>();
-            for (String item : items) {
-                ItemStack stack = ItemParser.parseItem(item);
-                if (stack != null) {
-                    stacks.add(stack);
-                }
-            }
-            arenaClass.setItems(stacks);
-        }
+        // Load items
+        loadClassItems(section, arenaClass);
 
         // And the legacy armor-node
         String armor = section.getString("armor", "");
@@ -383,6 +372,22 @@ public class ArenaMasterImpl implements ArenaMaster
         // Finally add the class to the classes map.
         classes.put(lowercase, arenaClass);
         return arenaClass;
+    }
+
+    private void loadClassItems(ConfigurationSection section, ArenaClass arenaClass) {
+        List<String> items = section.getStringList("items");
+        if (items == null || items.isEmpty()) {
+            String value = section.getString("items", "");
+            items = Arrays.asList(value.split(","));
+        }
+
+        List<Thing> things = items.stream()
+            .map(String::trim)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        arenaClass.setItems(things);
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {

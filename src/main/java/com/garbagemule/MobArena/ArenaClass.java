@@ -26,7 +26,8 @@ public class ArenaClass
 {
     private String configName, lowercaseName;
     private ItemStack helmet, chestplate, leggings, boots, offhand;
-    private List<ItemStack> items, armor;
+    private List<ItemStack> armor;
+    private List<Thing> items;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
@@ -66,18 +67,6 @@ public class ArenaClass
      */
     public String getLowercaseName() {
         return lowercaseName;
-    }
-    
-    /**
-     * Get the Material type of the first item in the items list.
-     * If the items list is empty, the method returns Material.STONE
-     * @return the type of the first item, or STONE if the list is empty
-     */
-    public Material getLogo() {
-        if (items.isEmpty()) {
-            return Material.STONE;
-        }
-        return items.get(0).getType();
     }
     
     /**
@@ -122,30 +111,22 @@ public class ArenaClass
 
     /**
      * Add an item to the items list.
-     * @param stack an item
+     * @param item a Thing
      */
-    public void addItem(ItemStack stack) {
-        if (stack == null) return;
-        
-        if (stack.getAmount() > 64) {
-            while (stack.getAmount() > 64) {
-                items.add(new ItemStack(stack.getType(), 64));
-                stack.setAmount(stack.getAmount() - 64);
-            }
+    public void addItem(Thing item) {
+        if (item != null) {
+            items.add(item);
         }
-        items.add(stack);
     }
     
     /**
      * Replace the current items list with a new list of all the items in the given list.
      * This method uses the addItem() method for each item to ensure consistency.
-     * @param stacks a list of items
+     * @param items a list of Things
      */
-    public void setItems(List<ItemStack> stacks) {
-        this.items = new ArrayList<>(stacks.size());
-        for (ItemStack stack : stacks) {
-            addItem(stack);
-        }
+    public void setItems(List<Thing> items) {
+        this.items = new ArrayList<>(items.size());
+        items.forEach(this::addItem);
     }
     
     /**
@@ -168,9 +149,7 @@ public class ArenaClass
         PlayerInventory inv = p.getInventory();
 
         // Fork over the items.
-        for (ItemStack stack : items) {
-            inv.addItem(stack);
-        }
+        items.forEach(item -> item.giveTo(p));
         
         // Check for legacy armor-node items
         if (!armor.isEmpty()) {
