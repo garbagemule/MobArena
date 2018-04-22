@@ -942,6 +942,21 @@ public class ArenaListener
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Player p = event.getPlayer();
 
+        /*
+         * If the player "drops an item" while in the process of leaving the
+         * arena, it has to be due to something that happens in the leaving
+         * process because most of the event system is single-threaded. This
+         * doesn't make much sense, but it can happen if the player earns a
+         * command reward of /give, which drops the item with a drop delay of
+         * 0 from the player, causing the player to immediately pick it up.
+         * Cancelling this event causes the player to somehow pick up the item
+         * twice, so we don't want to do that. This early return should guard
+         * against this specific case, and hopefully not break anything else.
+         */
+        if (arena.isLeaving(p)) {
+            return;
+        }
+
         // If the player is active in the arena, only cancel if sharing is not allowed
         if (arena.inArena(p)) {
             if (!canShare) {

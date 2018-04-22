@@ -153,6 +153,8 @@ public interface Arena
     void playerReady(Player p);
     
     boolean playerLeave(Player p);
+
+    boolean isLeaving(Player p);
     
     void playerDeath(Player p);
 

@@ -97,6 +97,7 @@ public class ArenaImpl implements Arena
     private Map<Player,PlayerData> playerData = new HashMap<>();
     
     private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
+    private Set<Player> leavingPlayers;
     private Set<Player> randoms;
     
     // Classes stuff
@@ -164,6 +165,7 @@ public class ArenaImpl implements Arena
         this.specPlayers    = new HashSet<>();
         this.deadPlayers    = new HashSet<>();
         this.randoms        = new HashSet<>();
+        this.leavingPlayers = new HashSet<>();
 
         // Classes, items and permissions
         this.classes      = plugin.getArenaMaster().getClasses();
@@ -742,6 +744,12 @@ public class ArenaImpl implements Arena
             return false;
         }
 
+        // Protect against infinite leave loops
+        if (leavingPlayers.contains(p)) {
+            return false;
+        }
+        leavingPlayers.add(p);
+
         // Clear inventory if player is an arena player, and unmount
         if (arenaPlayers.contains(p)) {
             unmount(p);
@@ -772,7 +780,14 @@ public class ArenaImpl implements Arena
         discardPlayer(p);
         
         endArena();
+
+        leavingPlayers.remove(p);
         return true;
+    }
+
+    @Override
+    public boolean isLeaving(Player p) {
+        return leavingPlayers.contains(p);
     }
 
     @Override
