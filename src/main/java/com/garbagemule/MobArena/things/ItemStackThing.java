@@ -26,6 +26,10 @@ public class ItemStackThing implements Thing {
         return player.getInventory().containsAtLeast(stack, stack.getAmount());
     }
 
+    ItemStack getItemStack() {
+        return stack;
+    }
+
     @Override
     public String toString() {
         String name = getName();

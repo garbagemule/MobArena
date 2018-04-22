@@ -7,12 +7,17 @@ import java.util.List;
 
 public class ThingManager implements ThingParser {
     private List<ThingParser> parsers;
+    private ItemStackThingParser items;
 
-    public ThingManager(MobArena plugin) {
+    public ThingManager(MobArena plugin, ItemStackThingParser parser) {
         parsers = new ArrayList<>();
         parsers.add(new CommandThingParser());
         parsers.add(new MoneyThingParser(plugin));
-        parsers.add(new ItemStackThingParser());
+        items = parser;
+    }
+
+    public ThingManager(MobArena plugin) {
+        this(plugin, new ItemStackThingParser());
     }
 
     /**
@@ -43,6 +48,18 @@ public class ThingManager implements ThingParser {
         register(parser, false);
     }
 
+    /**
+     * Register a new ItemStack parser in the manager.
+     * <p>
+     * The provided parser will be invoked if no other thing parsers return a
+     * non-null result, and if all other ItemStack parsers also return null.
+     *
+     * @param parser an ItemStack parser, non-null
+     */
+    public void register(ItemStackParser parser) {
+        items.register(parser);
+    }
+
     @Override
     public Thing parse(String s) {
         for (ThingParser parser : parsers) {
@@ -51,6 +68,6 @@ public class ThingManager implements ThingParser {
                 return thing;
             }
         }
-        return null;
+        return items.parse(s);
     }
 }

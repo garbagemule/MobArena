@@ -25,8 +25,8 @@ import java.util.stream.IntStream;
 public class ArenaClass
 {
     private String configName, lowercaseName;
-    private ItemStack helmet, chestplate, leggings, boots, offhand;
-    private List<ItemStack> armor;
+    private Thing helmet, chestplate, leggings, boots, offhand;
+    private List<Thing> armor;
     private List<Thing> items;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
@@ -71,42 +71,42 @@ public class ArenaClass
     
     /**
      * Set the helmet slot for the class.
-     * @param helmet an item
+     * @param helmet a Thing
      */
-    public void setHelmet(ItemStack helmet) {
+    public void setHelmet(Thing helmet) {
         this.helmet = helmet;
     }
     
     /**
      * Set the chestplate slot for the class.
-     * @param chestplate an item
+     * @param chestplate a Thing
      */
-    public void setChestplate(ItemStack chestplate) {
+    public void setChestplate(Thing chestplate) {
         this.chestplate = chestplate;
     }
     
     /**
      * Set the leggings slot for the class.
-     * @param leggings an item
+     * @param leggings a Thing
      */
-    public void setLeggings(ItemStack leggings) {
+    public void setLeggings(Thing leggings) {
         this.leggings = leggings;
     }
     
     /**
      * Set the boots slot for the class.
-     * @param boots an item
+     * @param boots a Thing
      */
-    public void setBoots(ItemStack boots) {
+    public void setBoots(Thing boots) {
         this.boots = boots;
     }
     
     /**
      * Set the off-hand slot for the class.
-     * @param offHand
+     * @param offhand a Thing
      */
-    public void setOffHand(ItemStack offHand) {
-        this.offhand = offHand;
+    public void setOffHand(Thing offhand) {
+        this.offhand = offhand;
     }
 
     /**
@@ -131,9 +131,9 @@ public class ArenaClass
     
     /**
      * Replace the current armor list with the given list.
-     * @param armor a list of items
+     * @param armor a list of Things
      */
-    public void setArmor(List<ItemStack> armor) {
+    public void setArmor(List<Thing> armor) {
         this.armor = armor;
     }
     
@@ -152,36 +152,14 @@ public class ArenaClass
         items.forEach(item -> item.giveTo(p));
         
         // Check for legacy armor-node items
-        if (!armor.isEmpty()) {
-            for (ItemStack piece : armor) {
-                ArmorType type = ArmorType.getType(piece);
-                if (type == null) continue;
-                
-                switch (type) {
-                    case HELMET:
-                        inv.setHelmet(piece);
-                        break;
-                    case CHESTPLATE:
-                        inv.setChestplate(piece);
-                        break;
-                    case LEGGINGS:
-                        inv.setLeggings(piece);
-                        break;
-                    case BOOTS:
-                        inv.setBoots(piece);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        
+        armor.forEach(thing -> thing.giveTo(p));
+
         // Check type specifics.
-        if (helmet     != null) inv.setHelmet(helmet);
-        if (chestplate != null) inv.setChestplate(chestplate);
-        if (leggings   != null) inv.setLeggings(leggings);
-        if (boots      != null) inv.setBoots(boots);
-        if (offhand    != null) inv.setItemInOffHand(offhand);
+        if (helmet     != null) helmet.giveTo(p);
+        if (chestplate != null) chestplate.giveTo(p);
+        if (leggings   != null) leggings.giveTo(p);
+        if (boots      != null) boots.giveTo(p);
+        if (offhand    != null) offhand.giveTo(p);
     }
     
     /**

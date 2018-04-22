@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ArenaMasterImpl implements ArenaMaster
@@ -330,33 +331,8 @@ public class ArenaMasterImpl implements ArenaMaster
         // Load items
         loadClassItems(section, arenaClass);
 
-        // And the legacy armor-node
-        String armor = section.getString("armor", "");
-        if (!armor.equals("")) {
-            List<ItemStack> stacks = ItemParser.parseItems(armor);
-            arenaClass.setArmor(stacks);
-        }
-
-        // Get armor strings
-        String head  = section.getString("helmet", null);
-        String chest = section.getString("chestplate", null);
-        String legs  = section.getString("leggings", null);
-        String feet  = section.getString("boots", null);
-        String off   = section.getString("offhand", null);
-
-        // Parse to ItemStacks
-        ItemStack helmet     = ItemParser.parseItem(head);
-        ItemStack chestplate = ItemParser.parseItem(chest);
-        ItemStack leggings   = ItemParser.parseItem(legs);
-        ItemStack boots      = ItemParser.parseItem(feet);
-        ItemStack offhand    = ItemParser.parseItem(off);
-
-        // Set in ArenaClass
-        arenaClass.setHelmet(helmet);
-        arenaClass.setChestplate(chestplate);
-        arenaClass.setLeggings(leggings);
-        arenaClass.setBoots(boots);
-        arenaClass.setOffHand(offhand);
+        // Load armor
+        loadClassArmor(section, arenaClass);
 
         // Per-class permissions
         loadClassPermissions(arenaClass, section);
@@ -388,6 +364,49 @@ public class ArenaMasterImpl implements ArenaMaster
             .collect(Collectors.toList());
 
         arenaClass.setItems(things);
+    }
+
+    private void loadClassArmor(ConfigurationSection section, ArenaClass arenaClass) {
+        // Legacy armor node
+        loadClassArmorLegacyNode(section, arenaClass);
+
+        // Specific armor pieces
+        loadClassArmorPiece(section, "helmet",     arenaClass::setHelmet);
+        loadClassArmorPiece(section, "chestplate", arenaClass::setChestplate);
+        loadClassArmorPiece(section, "leggings",   arenaClass::setLeggings);
+        loadClassArmorPiece(section, "boots",      arenaClass::setBoots);
+        loadClassArmorPiece(section, "offhand",    arenaClass::setOffHand);
+    }
+
+    private void loadClassArmorLegacyNode(ConfigurationSection section, ArenaClass arenaClass) {
+        List<String> armor = section.getStringList("armor");
+        if (armor == null || armor.isEmpty()) {
+            String value = section.getString("armor", "");
+            armor = Arrays.asList(value.split(","));
+        }
+
+        // Prepend "armor:" for the armor thing parser
+        List<Thing> things = armor.stream()
+            .map(String::trim)
+            .map(s -> "armor:" + s)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        arenaClass.setArmor(things);
+    }
+
+    private void loadClassArmorPiece(ConfigurationSection section, String slot, Consumer<Thing> setter) {
+        String value = section.getString(slot, null);
+        if (value == null) {
+            return;
+        }
+        // Prepend the slot name for the item parser
+        Thing thing =  plugin.getThingManager().parse(slot + ":" + value);
+        if (thing == null) {
+            return;
+        }
+        setter.accept(thing);
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
