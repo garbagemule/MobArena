@@ -642,10 +642,12 @@ public class ArenaImpl implements Arena
 
     @Override
     public void forceEnd() {
-        for (Player p : getAllPlayers()) {
-            playerLeave(p);
+        List<Player> players = getAllPlayers();
+        if (players.isEmpty()) {
+            return;
         }
         
+        players.forEach(this::playerLeave);
         cleanup();
     }
 
