@@ -1202,7 +1202,7 @@ public class ArenaListener
                 return TeleportResponse.ALLOW;
             }
             
-            if (region.isWarp(from) || region.isWarp(to) || to.equals(arena.getPlayerEntry(p))) {
+            if ((arena.getAllPlayers().contains(p) && (region.isWarp(from) || region.isWarp(to))) || to.equals(arena.getPlayerEntry(p))) {
                 return TeleportResponse.ALLOW;
             }
 
