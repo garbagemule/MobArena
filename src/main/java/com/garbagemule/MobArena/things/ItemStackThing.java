@@ -46,4 +46,8 @@ public class ItemStackThing implements Thing {
             .replace("_", " ")
             .toLowerCase();
     }
+
+    public ItemStack getItem() {
+        return stack;
+    }
 }

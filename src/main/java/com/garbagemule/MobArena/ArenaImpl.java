@@ -758,7 +758,8 @@ public class ArenaImpl implements Arena
         
         removeClassPermissions(p);
         removePotionEffects(p);
-        
+
+        removeClassThings(p);
         restoreInvAndExp(p);
         if (inLobby(p) || inArena(p)) {
             refund(p);
@@ -1377,6 +1378,12 @@ public class ArenaImpl implements Arena
             }
         }
         p.recalculatePermissions();
+    }
+
+    public void removeClassThings(Player p)
+    {
+        ArenaClass arenaClass = arenaPlayerMap.get(p).getArenaClass();
+        arenaClass.removeThings(p);
     }
 
     @Override
