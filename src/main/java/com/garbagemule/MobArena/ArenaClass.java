@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.IntStream;
 
 public class ArenaClass
 {
@@ -389,6 +390,7 @@ public class ArenaClass
             if (arena != null) {
                 try {
                     arena.getInventoryManager().restoreInv(p);
+                    removeBannedItems(p.getInventory());
                 } catch (Exception e) {
                     am.getPlugin().getLogger().severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
                 }
@@ -398,6 +400,24 @@ public class ArenaClass
         @Override
         public Location getClassChest() {
             return null;
+        }
+
+        private void removeBannedItems(PlayerInventory inv) {
+            ItemStack[] contents = inv.getContents();
+            IntStream.range(0, contents.length)
+                .filter(i -> contents[i] != null)
+                .filter(i -> isBanned(contents[i].getType()))
+                .forEach(inv::clear);
+        }
+
+        private boolean isBanned(Material type) {
+            switch (type) {
+                case ENDER_PEARL:
+                case ENDER_CHEST:
+                case SHULKER_SHELL:
+                    return true;
+            }
+            return type.name().endsWith("_SHULKER_BOX");
         }
     }
 }
