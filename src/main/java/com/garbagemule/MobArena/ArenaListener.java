@@ -1173,44 +1173,54 @@ public class ArenaListener
             return TeleportResponse.IDGAF;
         }
 
-        Location to = event.getTo();
-        Location from = event.getFrom();
         Player p = event.getPlayer();
 
+        /*
+         * Players that are being moved around by the arena are always allowed
+         * to teleport. They stay in this "moving" state only during the actual
+         * transition and are removed from that state as soon as the transition
+         * is complete.
+         */
+        if (arena.isMoving(p) || p.hasPermission("mobarena.admin.teleport")) {
+            return TeleportResponse.ALLOW;
+        }
+
+        Location to = event.getTo();
+        Location from = event.getFrom();
+
+        /*
+         * At this point we're looking at warping of players that are either in
+         * the arena - but not in the "moving" state - or not in the arena. The
+         * tricky bit here is to figure out the edge cases. This is essentially
+         * a matter of players "teleporting on their own" (or with assistance
+         * from other plugins).
+         */
         if (region.contains(from)) {
-            // Players with proper admin permission can warp out
-            if (p.hasPermission("mobarena.admin.teleport")) {
+            if (region.contains(to)) {
+                // Inside -> inside
+                if (!arena.inArena(p)) {
+                    arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
+                    return TeleportResponse.REJECT;
+                }
                 return TeleportResponse.ALLOW;
+            } else {
+                // Inside -> outside
+                if (arena.getAllPlayers().contains(p)) {
+                    arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
+                    return TeleportResponse.REJECT;
+                }
+                return TeleportResponse.IDGAF;
             }
-            
-            // Players not in the arena are free to warp out.
-            if (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p)) {
-                return TeleportResponse.ALLOW;
+        } else {
+            if (region.contains(to)) {
+                // Outside -> inside
+                arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
+                return TeleportResponse.REJECT;
+            } else {
+                // Outside -> outside
+                return TeleportResponse.IDGAF;
             }
-
-            // Covers the case in which both locations are in the arena.
-            if (region.contains(to) || region.isWarp(to) || to.equals(arena.getPlayerEntry(p))) {
-                return TeleportResponse.ALLOW;
-            }
-
-            arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
-            return TeleportResponse.REJECT;
         }
-        else if (region.contains(to)) {
-            // Players with proper admin permission can warp in
-            if (p.hasPermission("mobarena.admin.teleport")) {
-                return TeleportResponse.ALLOW;
-            }
-            
-            if (region.isWarp(from) || region.isWarp(to) || to.equals(arena.getPlayerEntry(p))) {
-                return TeleportResponse.ALLOW;
-            }
-
-            arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
-            return TeleportResponse.REJECT;
-        }
-
-        return TeleportResponse.IDGAF;
     }
 
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {

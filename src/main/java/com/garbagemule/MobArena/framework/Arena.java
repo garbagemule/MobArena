@@ -154,6 +154,8 @@ public interface Arena
     
     boolean playerLeave(Player p);
 
+    boolean isMoving(Player p);
+
     boolean isLeaving(Player p);
     
     void playerDeath(Player p);

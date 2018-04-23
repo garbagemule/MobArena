@@ -97,6 +97,7 @@ public class ArenaImpl implements Arena
     private Map<Player,PlayerData> playerData = new HashMap<>();
     
     private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
+    private Set<Player> movingPlayers;
     private Set<Player> leavingPlayers;
     private Set<Player> randoms;
     
@@ -165,6 +166,7 @@ public class ArenaImpl implements Arena
         this.specPlayers    = new HashSet<>();
         this.deadPlayers    = new HashSet<>();
         this.randoms        = new HashSet<>();
+        this.movingPlayers  = new HashSet<>();
         this.leavingPlayers = new HashSet<>();
 
         // Classes, items and permissions
@@ -518,7 +520,9 @@ public class ArenaImpl implements Arena
                 System.out.println("[MobArena] Invincibility glitch attempt stopped!");
             }
             
+            movingPlayers.add(p);
             p.teleport(region.getArenaWarp());
+            movingPlayers.remove(p);
             p.setAllowFlight(false);
             p.setFlying(false);
             //movePlayerToLocation(p, region.getArenaWarp());
@@ -663,6 +667,11 @@ public class ArenaImpl implements Arena
             return false;
         }
 
+        if (movingPlayers.contains(p)) {
+            return false;
+        }
+        movingPlayers.add(p);
+
         // Announce globally (must happen before moving player)
         if (settings.getBoolean("global-join-announce", false)) {
             if (lobbyPlayers.isEmpty()) {
@@ -710,6 +719,7 @@ public class ArenaImpl implements Arena
             }
         }
         
+        movingPlayers.remove(p);
         return true;
     }
 
@@ -783,6 +793,11 @@ public class ArenaImpl implements Arena
 
         leavingPlayers.remove(p);
         return true;
+    }
+
+    @Override
+    public boolean isMoving(Player p) {
+        return movingPlayers.contains(p) || leavingPlayers.contains(p);
     }
 
     @Override
@@ -878,11 +893,17 @@ public class ArenaImpl implements Arena
 
     @Override
     public void playerSpec(Player p, Location loc) {
+        if (movingPlayers.contains(p)) {
+            return;
+        }
+        movingPlayers.add(p);
+
         storePlayerData(p, loc);
         MAUtils.sitPets(p);
         movePlayerToSpec(p);
         
         messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
+        movingPlayers.remove(p);
     }
 
     private void spawnPets() {
