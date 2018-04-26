@@ -18,7 +18,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -300,24 +299,12 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    public boolean giveMoney(Player p, ItemStack item) {
-        if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p, getAmount(item));
-            return (result.type == ResponseType.SUCCESS);
-        }
-        return false;
-    }
-
     public boolean giveMoney(Player p, double amount) {
         if (economy != null) {
             EconomyResponse result = economy.depositPlayer(p, amount);
             return (result.type == ResponseType.SUCCESS);
         }
         return false;
-    }
-
-    public boolean takeMoney(Player p, ItemStack item) {
-        return takeMoney(p, getAmount(item));
     }
 
     public boolean takeMoney(Player p, double amount) {
@@ -328,26 +315,12 @@ public class MobArena extends JavaPlugin
         return false;
     }
 
-    public boolean hasEnough(Player p, ItemStack item) {
-        return hasEnough(p, getAmount(item));
-    }
-
     public boolean hasEnough(Player p, double amount) {
         return economy == null || (economy.getBalance(p) >= amount);
-    }
-    
-    public String economyFormat(ItemStack item) {
-        return economyFormat(getAmount(item));
     }
 
     public String economyFormat(double amount) {
         return economy == null ? null : economy.format(amount);
-    }
-
-    private double getAmount(ItemStack item) {
-        double major = item.getAmount();
-        double minor = item.getDurability() / 100D;
-        return major + minor;
     }
 
     public Messenger getGlobalMessenger() {
