@@ -22,12 +22,12 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -136,45 +136,32 @@ public class MobArena extends JavaPlugin
         }
 
         // Check for tab characters in config-file
-        BufferedReader in = null;
         try {
-            in = new BufferedReader(new FileReader(new File(getDataFolder(), "config.yml")));
-            int row = 0;
-            String line;
-            while ((line = in.readLine()) != null) {
-                row++;
-                if (line.indexOf('\t') != -1) {
-                    StringBuilder buffy = new StringBuilder();
-                    buffy.append("Found tab in config-file on line ").append(row).append(".");
-                    buffy.append('\n').append("NEVER use tabs! ALWAYS use spaces!");
-                    buffy.append('\n').append(line);
-                    buffy.append('\n');
-                    for (int i = 0; i < line.indexOf('\t'); i++) {
-                        buffy.append(' ');
-                    }
-                    buffy.append('^');
-                    throw new IllegalArgumentException(buffy.toString());
+            Path path = getDataFolder().toPath().resolve("config.yml");
+            List<String> lines = Files.readAllLines(path);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                int index = line.indexOf('\t');
+                if (index != -1) {
+                    String indent = new String(new char[index]).replace('\0', ' ');
+                    throw new IllegalArgumentException(
+                        "Found tab in config-file on line " + (i + 1) + "! NEVER use tabs! ALWAYS use spaces!\n\n" +
+                        line + "\n" +
+                        indent + "^"
+                    );
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reading the config-file:\n" + e.getMessage());
+        }
 
-            // Actually reload the config-file
+        // Reload the config-file
+        try {
             config.load(configFile);
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reading the config-file:\n" + e.getMessage());
         } catch (InvalidConfigurationException e) {
             throw new RuntimeException("\n\n>>>\n>>> There is an error in your config-file! Handle it!\n>>> Here is what snakeyaml says:\n>>>\n\n" + e.getMessage());
-        } catch (FileNotFoundException e) {
-            throw new IllegalStateException("Config-file could not be created for some reason! <o>");
-        } catch (IOException e) {
-            // Error reading the file, just re-throw
-            getLogger().severe("There was an error reading the config-file:\n" + e.getMessage());
-        } finally {
-            // Java 6 <3
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    // Swallow
-                }
-            }
         }
     }
 
