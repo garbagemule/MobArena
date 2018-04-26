@@ -278,7 +278,12 @@ public class ArenaListener
             // If auto-igniting, set the planter of the primed TNT instead
             if (autoIgniteTNT) {
                 event.setCancelled(true);
-                event.getPlayer().getInventory().removeItem(new ItemStack(Material.TNT, 1));
+                ItemStack stack = event.getItemInHand();
+                if (stack == null || stack.getType() != Material.TNT) {
+                    plugin.getLogger().warning("Player " + event.getPlayer().getDisplayName() + " just placed TNT without holding a TNT block");
+                    return;
+                }
+                stack.setAmount(stack.getAmount() - 1);
                 TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
                 setPlanter(tnt, event.getPlayer());
                 return;
