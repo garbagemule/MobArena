@@ -11,8 +11,6 @@ import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -299,28 +297,8 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    public boolean giveMoney(Player p, double amount) {
-        if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p, amount);
-            return (result.type == ResponseType.SUCCESS);
-        }
-        return false;
-    }
-
-    public boolean takeMoney(Player p, double amount) {
-        if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p, amount);
-            return (result.type == ResponseType.SUCCESS);
-        }
-        return false;
-    }
-
-    public boolean hasEnough(Player p, double amount) {
-        return economy == null || (economy.getBalance(p) >= amount);
-    }
-
-    public String economyFormat(double amount) {
-        return economy == null ? null : economy.format(amount);
+    public Economy getEconomy() {
+        return economy;
     }
 
     public Messenger getGlobalMessenger() {
