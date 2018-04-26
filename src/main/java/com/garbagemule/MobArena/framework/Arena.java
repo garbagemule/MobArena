@@ -147,6 +147,8 @@ public interface Arena
     void forceStart();
     
     void forceEnd();
+
+    boolean hasPermission(Player p);
     
     boolean playerJoin(Player p, Location loc);
     

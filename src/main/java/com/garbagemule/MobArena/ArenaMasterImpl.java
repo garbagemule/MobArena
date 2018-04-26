@@ -19,9 +19,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.PluginManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -140,7 +137,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getPermittedArenas(Player p) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
-            if (plugin.has(p, "mobarena.arenas." + arena.configName()))
+            if (arena.hasPermission(p))
                 result.add(arena);
         return result;
     }
@@ -148,7 +145,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getEnabledAndPermittedArenas(Player p) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
-            if (arena.isEnabled() && plugin.has(p, "mobarena.arenas." + arena.configName()))
+            if (arena.isEnabled() && arena.hasPermission(p))
                 result.add(arena);
         return result;
     }
@@ -338,9 +335,6 @@ public class ArenaMasterImpl implements ArenaMaster
         loadClassPermissions(arenaClass, section);
         loadClassLobbyPermissions(arenaClass, section);
 
-        // Register the permission.
-        registerPermission("mobarena.classes." + lowercase, PermissionDefault.TRUE).addParent("mobarena.classes", true);
-
         // Check for class chests
         Location cc = parseLocation(section, "classchest", null);
         arenaClass.setClassChest(cc);
@@ -486,8 +480,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Remove the class from the map.
         classes.remove(lowercase);
-
-        unregisterPermission("mobarena.arenas." + lowercase);
     }
 
     public boolean addClassPermission(String classname, String perm) {
@@ -621,7 +613,6 @@ public class ArenaMasterImpl implements ArenaMaster
         ConfigUtils.addIfEmpty(plugin, "waves.yml", makeSection(section, "waves"));
 
         Arena arena = new ArenaImpl(plugin, section, arenaname, world);
-        registerPermission("mobarena.arenas." + arenaname.toLowerCase(), PermissionDefault.TRUE);
         arenas.add(arena);
         plugin.getLogger().info("Loaded arena '" + arenaname + "'");
         return arena;
@@ -669,7 +660,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public void removeArenaNode(Arena arena) {
         arenas.remove(arena);
-        unregisterPermission("mobarena.arenas." + arena.configName());
 
         config.set("arenas." + arena.configName(), null);
         plugin.saveConfig();
@@ -689,21 +679,5 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public void saveConfig() {
         plugin.saveConfig();
-    }
-
-    private Permission registerPermission(String permString, PermissionDefault value) {
-        PluginManager pm = plugin.getServer().getPluginManager();
-
-        Permission perm = pm.getPermission(permString);
-        if (perm == null) {
-            perm = new Permission(permString);
-            perm.setDefault(value);
-            pm.addPermission(perm);
-        }
-        return perm;
-    }
-
-    private void unregisterPermission(String s) {
-        plugin.getServer().getPluginManager().removePermission(s);
     }
 }

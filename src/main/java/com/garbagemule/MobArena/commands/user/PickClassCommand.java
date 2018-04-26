@@ -54,7 +54,7 @@ public class PickClassCommand implements Command
         }
 
         // Check for permission.
-        if (!am.getPlugin().has(p, "mobarena.classes." + lowercase) && !lowercase.equals("random")) {
+        if (!ac.hasPermission(p) && !lowercase.equals("random")) {
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return true;
         }

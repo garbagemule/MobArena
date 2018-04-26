@@ -63,9 +63,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.stream.Collectors;
 
 public class ArenaImpl implements Arena
 {
@@ -655,6 +655,12 @@ public class ArenaImpl implements Arena
         
         players.forEach(this::playerLeave);
         cleanup();
+    }
+
+    @Override
+    public boolean hasPermission(Player p) {
+        String perm = "mobarena.arenas." + name;
+        return !p.isPermissionSet(perm) || p.hasPermission(perm);
     }
 
     @Override
@@ -1353,21 +1359,19 @@ public class ArenaImpl implements Arena
     @Override
     public void assignRandomClass(Player p)
     {
-        Random r = new Random();
-        List<String> classes = new LinkedList<>(this.classes.keySet());
+        List<ArenaClass> classes = this.classes.values().stream()
+            .filter(c -> c.hasPermission(p))
+            .collect(Collectors.toList());
 
-        String className = classes.remove(r.nextInt(classes.size()));
-        while (!plugin.has(p, "mobarena.classes." + className))
-        {
-            if (classes.isEmpty())
-            {
-                plugin.getLogger().info("Player '" + p.getName() + "' has no class permissions!");
-                playerLeave(p);
-                return;
-            }
-            className = classes.remove(r.nextInt(classes.size()));
+        if (classes.isEmpty()) {
+            plugin.getLogger().info("Player '" + p.getName() + "' has no class permissions!");
+            playerLeave(p);
+            return;
         }
         
+        int index = MobArena.random.nextInt(classes.size());
+        String className = classes.get(index).getConfigName();
+
         assignClass(p, className);
         messenger.tell(p, Msg.LOBBY_CLASS_PICKED, this.classes.get(className).getConfigName());
     }
@@ -1621,7 +1625,7 @@ public class ArenaImpl implements Arena
             messenger.tell(p, Msg.JOIN_ALREADY_PLAYING);
         else if (running)
             messenger.tell(p, Msg.JOIN_ARENA_IS_RUNNING);
-        else if (!plugin.has(p, "mobarena.arenas." + configName()))
+        else if (!hasPermission(p))
             messenger.tell(p, Msg.JOIN_ARENA_PERMISSION);
         else if (getMaxPlayers() > 0 && lobbyPlayers.size() >= getMaxPlayers())
             messenger.tell(p, Msg.JOIN_PLAYER_LIMIT_REACHED);

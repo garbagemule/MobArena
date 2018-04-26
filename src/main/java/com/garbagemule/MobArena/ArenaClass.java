@@ -137,6 +137,11 @@ public class ArenaClass
         this.armor = armor;
     }
     
+    public boolean hasPermission(Player p) {
+        String perm = "mobarena.classes." + configName;
+        return !p.isPermissionSet(perm) || p.hasPermission(perm);
+    }
+
     /**
      * Grants all of the class items and armor to the given player.
      * The normal items will be added to the inventory normally, while the

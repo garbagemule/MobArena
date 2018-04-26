@@ -1061,14 +1061,15 @@ public class ArenaListener
         if (!arena.getClasses().containsKey(className) && !className.equals("random"))
             return;
 
+        ArenaClass newAC = arena.getClasses().get(className);
+
         // Check for permission.
-        if (!plugin.has(p, "mobarena.classes." + className) && !className.equals("random")) {
+        if (!newAC.hasPermission(p) && !className.equals("random")) {
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
         
         ArenaClass oldAC = arena.getArenaPlayer(p).getArenaClass();
-        ArenaClass newAC = arena.getClasses().get(className);
         
         // Same class, do nothing.
         if (newAC.equals(oldAC)) {
