@@ -14,8 +14,6 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -225,18 +223,6 @@ public class MobArena extends JavaPlugin
         
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
-    }
-    
-    // Permissions stuff
-    public boolean has(Player p, String s) {
-        return p.hasPermission(s);
-    }
-    
-    public boolean has(CommandSender sender, String s) {
-        if (sender instanceof ConsoleCommandSender) {
-            return true;
-        }
-        return has((Player) sender, s);
     }
     
     private void setupVault() {

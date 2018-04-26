@@ -108,7 +108,7 @@ public class CommandHandler implements CommandExecutor
         CommandInfo info = command.getClass().getAnnotation(CommandInfo.class);
         
         // First check if the sender has permission.
-        if (!plugin.has(sender, info.permission())) {
+        if (!sender.hasPermission(info.permission())) {
             am.getGlobalMessenger().tell(sender, Msg.MISC_NO_ACCESS);
             return true;
         }
@@ -153,7 +153,7 @@ public class CommandHandler implements CommandExecutor
      */
     private void showUsage(Command cmd, CommandSender sender, boolean prefix) {
         CommandInfo info = cmd.getClass().getAnnotation(CommandInfo.class);
-        if (!plugin.has(sender, info.permission())) return;
+        if (!sender.hasPermission(info.permission())) return;
 
         sender.sendMessage((prefix ? "Usage: " : "") + info.usage() + " " + ChatColor.YELLOW + info.desc());
     }
@@ -179,7 +179,7 @@ public class CommandHandler implements CommandExecutor
 
         for (Command cmd : commands.values()) {
             CommandInfo info = cmd.getClass().getAnnotation(CommandInfo.class);
-            if (!plugin.has(sender, info.permission())) continue;
+            if (!sender.hasPermission(info.permission())) continue;
 
             StringBuilder buffy;
             if (info.permission().startsWith("mobarena.admin")) {
