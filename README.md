@@ -29,8 +29,9 @@ response immediately. It could take anything from a couple of seconds to a
 day, but your message _will_ be seen.
 
 
-## Bugs and Suggestions
+## Contributing
 
-Found a bug or have a great idea for the plugin? Use the issue tracker here on 
-Github to submit a bug report or feature request. Please have a look through 
-the existing issues before you post a new one to avoid duplicates.
+Found a bug, got a suggestion, or want to dig into the code base? There are
+many ways to contribute to the project!
+
+Get started here: [Contributing](https://github.com/garbagemule/MobArena/blob/master/.github/CONTRIBUTING.md)
