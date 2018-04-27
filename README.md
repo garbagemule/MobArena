@@ -18,15 +18,15 @@ started using the plugin.
 
 ## Getting Help
 
-If you run into problems or need help with something, feel free to hop on IRC 
-(#mobarena @ irc.esper.net) to have a chat. If you don't know what IRC is or 
-don't have an IRC client, you can use a web-based one:
+If you run into problems or need help with something, feel free to hop on the
+MobArena Discord server or IRC channel to have a chat:
 
-- [Webchat](https://webchat.esper.net/?nick=&channels=#mobarena)
+- Discord: [Instant Invite](https://discordapp.com/invite/sddqVJd)
+- IRC (#mobarena @ EsperNet): [KiwiIRC Web Client](https://kiwiirc.com/nextclient/#irc://irc.esper.net/#mobarena)
 
-Remember, though, that IRC is _idle chat_, which means you likely won't get a 
-response immediately. It could take anything from a couple of seconds to a 
-day, but your message _will_ be seen.
+Remember, though, that these communication channels are _idle chat_, which
+means you likely won't get a response immediately. It could take anything from
+a couple of seconds to a day, but your message _will_ be seen.
 
 
 ## Contributing
