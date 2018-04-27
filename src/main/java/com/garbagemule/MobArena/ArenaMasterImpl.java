@@ -225,7 +225,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public Arena getArenaWithName(Collection<Arena> arenas, String configName) {
         for (Arena arena : arenas)
-            if (arena.configName().equals(configName))
+            if (arena.configName().equalsIgnoreCase(configName))
                 return arena;
         return null;
     }
