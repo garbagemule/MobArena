@@ -683,3 +683,4 @@ public class ArenaMasterImpl implements ArenaMaster
         plugin.getServer().getPluginManager().removePermission(s);
     }
 }
+
