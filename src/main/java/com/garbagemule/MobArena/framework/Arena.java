@@ -81,8 +81,6 @@ public interface Arena
     
     WaveManager getWaveManager();
     
-    Location getPlayerEntry(Player p);
-    
     ArenaListener getEventListener();
     
     void setLeaderboard(Leaderboard leaderboard);
@@ -168,17 +166,9 @@ public interface Arena
     
     void playerSpec(Player p, Location loc);
     
-    void storePlayerData(Player p, Location loc);
-    
     void storeContainerContents();
     
     void restoreContainerContents();
-    
-    void movePlayerToLobby(Player p);
-    
-    void movePlayerToSpec(Player p);
-    
-    void movePlayerToEntry(Player p);
     
     void discardPlayer(Player p);
     
