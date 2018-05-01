@@ -609,6 +609,7 @@ public class ArenaListener
                 if (boss != null) {
                     Thing reward = boss.getReward();
                     if (reward != null) {
+                        arena.getRewardManager().addReward(p, reward);
                         String msg = p.getName() + " killed the boss and won: " + reward;
                         for (Player q : arena.getPlayersInArena()) {
                             arena.getMessenger().tell(q, msg);
