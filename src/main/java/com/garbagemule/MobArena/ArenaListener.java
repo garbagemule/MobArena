@@ -607,12 +607,12 @@ public class ArenaListener
                 }
                 MABoss boss = monsters.getBoss(damagee);
                 if (boss != null) {
+                    for (Player q : arena.getPlayersInArena()) {
+                        arena.getMessenger().tell(q, Msg.WAVE_BOSS_KILLED, p.getName());
+                    }
                     Thing reward = boss.getReward();
                     if (reward != null) {
-                        String msg = p.getName() + " " + Msg.WAVE_BOSS_KILLED + " " + reward;
-                        for (Player q : arena.getPlayersInArena()) {
-                            arena.getMessenger().tell(q, msg);
-                        }
+                        arena.getMessenger().tell(damager, Msg.WAVE_BOSS_REWARD_EARNED, reward.toString());
                     }
                 }
             }
