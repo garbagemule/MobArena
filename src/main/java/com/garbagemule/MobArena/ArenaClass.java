@@ -20,12 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.IntStream;
 
 public class ArenaClass
 {
     private String configName, lowercaseName;
-    private ItemStack helmet, chestplate, leggings, boots;
-    private List<ItemStack> items, armor;
+    private Thing helmet, chestplate, leggings, boots;
+    private List<Thing> armor;
+    private List<Thing> items;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
@@ -68,85 +70,70 @@ public class ArenaClass
     }
     
     /**
-     * Get the Material type of the first item in the items list.
-     * If the items list is empty, the method returns Material.STONE
-     * @return the type of the first item, or STONE if the list is empty
-     */
-    public Material getLogo() {
-        if (items.isEmpty()) {
-            return Material.STONE;
-        }
-        return items.get(0).getType();
-    }
-    
-    /**
      * Set the helmet slot for the class.
-     * @param helmet an item
+     * @param helmet a Thing
      */
-    public void setHelmet(ItemStack helmet) {
+    public void setHelmet(Thing helmet) {
         this.helmet = helmet;
     }
     
     /**
      * Set the chestplate slot for the class.
-     * @param chestplate an item
+     * @param chestplate a Thing
      */
-    public void setChestplate(ItemStack chestplate) {
+    public void setChestplate(Thing chestplate) {
         this.chestplate = chestplate;
     }
     
     /**
      * Set the leggings slot for the class.
-     * @param leggings an item
+     * @param leggings a Thing
      */
-    public void setLeggings(ItemStack leggings) {
+    public void setLeggings(Thing leggings) {
         this.leggings = leggings;
     }
     
     /**
      * Set the boots slot for the class.
-     * @param boots an item
+     * @param boots a Thing
      */
-    public void setBoots(ItemStack boots) {
+    public void setBoots(Thing boots) {
         this.boots = boots;
     }
 
     /**
      * Add an item to the items list.
-     * @param stack an item
+     * @param item a Thing
      */
-    public void addItem(ItemStack stack) {
-        if (stack == null) return;
-        
-        if (stack.getAmount() > 64) {
-            while (stack.getAmount() > 64) {
-                items.add(new ItemStack(stack.getType(), 64));
-                stack.setAmount(stack.getAmount() - 64);
-            }
+    public void addItem(Thing item) {
+        if (item != null) {
+            items.add(item);
         }
-        items.add(stack);
     }
     
     /**
      * Replace the current items list with a new list of all the items in the given list.
      * This method uses the addItem() method for each item to ensure consistency.
-     * @param stacks a list of items
+     * @param items a list of Things
      */
-    public void setItems(List<ItemStack> stacks) {
-        this.items = new ArrayList<>(stacks.size());
-        for (ItemStack stack : stacks) {
-            addItem(stack);
-        }
+    public void setItems(List<Thing> items) {
+        this.items = new ArrayList<>(items.size());
+        items.forEach(this::addItem);
     }
     
     /**
      * Replace the current armor list with the given list.
-     * @param armor a list of items
+     * @param armor a list of Things
      */
-    public void setArmor(List<ItemStack> armor) {
+    public void setArmor(List<Thing> armor) {
         this.armor = armor;
     }
     
+    public boolean hasPermission(Player p) {
+        String perm = "mobarena.classes." + configName;
+        return !p.isPermissionSet(perm) || p.hasPermission(perm);
+    }
+
     /**
      * Grants all of the class items and armor to the given player.
      * The normal items will be added to the inventory normally, while the
@@ -159,40 +146,16 @@ public class ArenaClass
         PlayerInventory inv = p.getInventory();
 
         // Fork over the items.
-        for (ItemStack stack : items) {
-            inv.addItem(stack);
-        }
+        items.forEach(item -> item.giveTo(p));
         
         // Check for legacy armor-node items
-        if (!armor.isEmpty()) {
-            for (ItemStack piece : armor) {
-                ArmorType type = ArmorType.getType(piece);
-                if (type == null) continue;
-                
-                switch (type) {
-                    case HELMET:
-                        inv.setHelmet(piece);
-                        break;
-                    case CHESTPLATE:
-                        inv.setChestplate(piece);
-                        break;
-                    case LEGGINGS:
-                        inv.setLeggings(piece);
-                        break;
-                    case BOOTS:
-                        inv.setBoots(piece);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        
+        armor.forEach(thing -> thing.giveTo(p));
+
         // Check type specifics.
-        if (helmet     != null) inv.setHelmet(helmet);
-        if (chestplate != null) inv.setChestplate(chestplate);
-        if (leggings   != null) inv.setLeggings(leggings);
-        if (boots      != null) inv.setBoots(boots);
+        if (helmet     != null) helmet.giveTo(p);
+        if (chestplate != null) chestplate.giveTo(p);
+        if (leggings   != null) leggings.giveTo(p);
+        if (boots      != null) boots.giveTo(p);
     }
     
     /**
@@ -379,7 +342,8 @@ public class ArenaClass
             Arena arena = am.getArenaWithPlayer(p);
             if (arena != null) {
                 try {
-                    arena.getInventoryManager().restoreInv(p);
+                    arena.getInventoryManager().equip(p);
+                    removeBannedItems(p.getInventory());
                 } catch (Exception e) {
                     am.getPlugin().getLogger().severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
                 }
@@ -389,6 +353,23 @@ public class ArenaClass
         @Override
         public Location getClassChest() {
             return null;
+        }
+
+        private void removeBannedItems(PlayerInventory inv) {
+            ItemStack[] contents = inv.getContents();
+            IntStream.range(0, contents.length)
+                .filter(i -> contents[i] != null)
+                .filter(i -> isBanned(contents[i].getType()))
+                .forEach(inv::clear);
+        }
+
+        private boolean isBanned(Material type) {
+            switch (type) {
+                case ENDER_PEARL:
+                case ENDER_CHEST:
+                    return true;
+            }
+            return false;
         }
     }
 }

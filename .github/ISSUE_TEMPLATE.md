@@ -10,8 +10,8 @@
 # Summary
 
 <!--
-    Choose the type of issue you are filing. You can choose one by typing [X] in
-    one of the fields. For example, if a bug report, change the line below to…
+    Choose the type of issue you are filing. Pick one by typing [X] in any
+    field. For example, bug reports look like…
 
     [X] Bug report
  -->
@@ -19,42 +19,46 @@
 * This issue is a…
     * [ ] Bug report
     * [ ] Feature request
+    * [ ] Documentation request
     * [ ] Other issue
-    * [ ] Question <!-- Please read the wiki first! -->
+    * [ ] Question
 * **Describe the issue / feature in 1-2 sentences**: 
 
 
 # Background
 
 <!--
-    This section is very important! First, if you are filing a bug report,
-    DELETE the "Feature request" section. If it's a feature request, DELETE the
-    "Bug report".
+    IF THIS IS A BUG REPORT:
 
-    If a bug report, make sure to include all info. This helps us see what
-    you're running and makes it easier to duplicate your problem.
-
-    If a feature request, help us understand your idea. Be descriptive, but also
-    consider any other issues that could happen if it is added. Would it affect
-    other features of MobArena?
+    * Delete the "Feature request" section
+    * Include all requested info
 
     You can get some of this info by typing these commands in-game:
         /version MobArena: Get your MobArena plugin version
         /version: Get your Bukkit/Spigot server version
         /plugins: Get the plugins running on your server
+ 
+
+    IF THIS IS A FEATURE REQUEST:
+
+    * Delete the "Bug report" section
+    * Be descriptive – help us understand your idea
+    * Consider any issues that might happen if your idea is added
+    * Does it affect other features of MobArena?
  -->
 
 ### Bug report
 
 * **MobArena version**: 
 * **Server version**: 
-* **Plugins**:
+* **Plugins**: 
 
 ### Feature request 
 
 * **Feature type**:
     * [ ] Arena configuration
     * [ ] Classes
+    * [ ] Documentation
     * [ ] Economy integration
     * [ ] Leaderboards
     * [ ] New config settings
@@ -62,11 +66,11 @@
     * [ ] Rewards
     * [ ] Third-party plugin support
 
-**What does it do?**:
+**What does it do?**: 
 
-**Does it need new or changed commands? What are they?**:
+**Does it need new or changed commands? What are they?**: 
 
-**Does this feature affect other parts of MobArena?**:
+**Does this feature affect other parts of MobArena?**: 
 
 
 # Details
@@ -83,7 +87,6 @@
 * **Stacktrace** (if applicable): 
 
 <!--
-    Phew, all done! Thank you so much for filing a new issue! We'll try to get
-    back to you soon.
+    Phew, all done! Thanks for filing a new issue! We'll get back to you soon.
  -->
 

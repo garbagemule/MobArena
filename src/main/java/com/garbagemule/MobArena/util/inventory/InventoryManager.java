@@ -1,9 +1,7 @@
 package com.garbagemule.MobArena.util.inventory;
 
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.Material;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -12,88 +10,39 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class InventoryManager
 {
-    private File dir;
-    private Map<Player,ItemStack[]> items, armor;
+    private Map<Player, ItemStack[]> inventories;
     
-    public InventoryManager(Arena arena) {
-        this.dir    = new File(arena.getPlugin().getDataFolder(), "inventories");
-        this.dir.mkdir();
-        
-        this.items  = new HashMap<>();
-        this.armor  = new HashMap<>();
+    public InventoryManager() {
+        this.inventories = new HashMap<>();
     }
     
-    public void storeInv(Player p) throws IOException {
-        // Avoid overwrites
-        if (items.containsKey(p)) return;
-        
-        // Fetch the player's items and armor
-        ItemStack[] items = p.getInventory().getContents();
-        ItemStack[] armor = p.getInventory().getArmorContents();
-        
-        // Store them in memory
-        this.items.put(p, items);
-        this.armor.put(p, armor);
-        
-        // And on disk
-        File file = new File(dir, p.getName());
-        YamlConfiguration config = new YamlConfiguration();
-        config.set("items", items);
-        config.set("armor", armor);
-        config.save(file);
-        
-        p.updateInventory();
+    public void put(Player p, ItemStack[] contents) {
+        inventories.put(p, contents);
     }
     
-    public void restoreInv(Player p) throws IOException, InvalidConfigurationException {
-        // Try to grab the items from memory first
-        ItemStack[] items = this.items.get(p);
-        ItemStack[] armor = this.armor.get(p);
-        
-        // If we can't restore from memory, restore from file
-        if (items == null || armor == null) {
-            File file = new File(dir, p.getName());
-
-            YamlConfiguration config = new YamlConfiguration();
-            config.load(file);
-            
-            // Get the items and armor lists
-            List<?> itemsList = config.getList("items");
-            List<?> armorList = config.getList("armor");
-            
-            // Turn the lists into arrays
-            items = itemsList.toArray(new ItemStack[itemsList.size()]);
-            armor = armorList.toArray(new ItemStack[armorList.size()]);
+    public void equip(Player p) {
+        ItemStack[] contents = inventories.get(p);
+        if (contents == null) {
+            return;
         }
-        
-        // Set the player inventory contents
-        p.getInventory().setContents(items);
-        p.getInventory().setArmorContents(armor);
+        p.getInventory().setContents(contents);
     }
 
-    public void clearCache(Player p) {
-        items.remove(p);
-        armor.remove(p);
-
-        File file = new File(dir, p.getName());
-        if (file.exists()) {
-            file.delete();
-        }
+    public void remove(Player p) {
+        inventories.remove(p);
     }
     
     /**
      * Clear a player's inventory completely.
      * @param p a player
      */
-    public void clearInventory(Player p) {
+    public static void clearInventory(Player p) {
         PlayerInventory inv = p.getInventory();
         inv.clear();
         inv.setHelmet(null);
@@ -130,29 +79,23 @@ public class InventoryManager
     
     public static boolean restoreFromFile(MobArena plugin, Player p) {
         try {
-            // Grab the file and load the config
-            File dir = new File(plugin.getDataFolder(), "inventories");
-            File file = new File(dir, p.getName());
+            File inventories = new File(plugin.getDataFolder(), "inventories");
+            File file = new File(inventories, p.getUniqueId().toString());
+
+            if (!file.exists()) {
+                return false;
+            }
+
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
             
-            // Get the items and armor lists
-            List<?> itemsList = config.getList("items");
-            List<?> armorList = config.getList("armor");
+            ItemStack[] contents = config.getList("contents").toArray(new ItemStack[0]);
+            p.getInventory().setContents(contents);
             
-            // Turn the lists into arrays
-            ItemStack[] items = itemsList.toArray(new ItemStack[itemsList.size()]);
-            ItemStack[] armor = armorList.toArray(new ItemStack[armorList.size()]);
-            
-            // Set the player inventory contents
-            p.getInventory().setContents(items);
-            p.getInventory().setArmorContents(armor);
-            
-            // Delete files
             file.delete();
-            
             return true;
         } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to restore inventory for " + p.getName(), e);
             return false;
         }
     }

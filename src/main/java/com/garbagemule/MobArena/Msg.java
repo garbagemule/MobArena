@@ -71,6 +71,8 @@ public enum Msg {
     WAVE_BOSS("Wave &b#%&r! [BOSS]"),
     WAVE_BOSS_ABILITY("Boss used ability: &c%&r!"),
     WAVE_BOSS_LOW_HEALTH("Boss is almost dead!"),
+    WAVE_BOSS_KILLED("&a%&r killed the boss!"),
+    WAVE_BOSS_REWARD_EARNED("You earned: &e%"),
     WAVE_REWARD("You just earned a reward: &e%&r"),
     MISC_LIST_PLAYERS("Live players: &a%&r"),
     MISC_LIST_ARENAS("Available arenas: %"),

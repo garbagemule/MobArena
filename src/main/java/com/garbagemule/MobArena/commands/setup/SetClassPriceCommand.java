@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
 
 @CommandInfo(
@@ -49,7 +50,9 @@ public class SetClassPriceCommand implements Command
             double price = Double.parseDouble(arg2);
 
             value = "$" + arg2;
-            msg = "Price for class '" + ac.getConfigName() + "' was set to " + am.getPlugin().economyFormat(price);
+            Economy economy = am.getPlugin().getEconomy();
+            String formatted = (economy != null) ? economy.format(price) : ("$" + price);
+            msg = "Price for class '" + ac.getConfigName() + "' was set to " + formatted;
         } else {
             value = null;
             msg = "Price for class '" + ac.getConfigName() + "' was removed. The class is now free!";

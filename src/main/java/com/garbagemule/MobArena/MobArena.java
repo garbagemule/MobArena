@@ -8,33 +8,24 @@ import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
-import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * MobArena
@@ -44,9 +35,6 @@ public class MobArena extends JavaPlugin
 {
     private ArenaMaster arenaMaster;
     private CommandHandler commandHandler;
-    
-    // Inventories from disconnects
-    private Set<String> inventoriesToRestore;
     
     // Vault
     private Economy economy;
@@ -96,9 +84,6 @@ public class MobArena extends JavaPlugin
         arenaMaster = new ArenaMasterImpl(this);
         arenaMaster.initialize();
 
-        // Register any inventories to restore.
-        registerInventories();
-
         // Register event listeners
         registerListeners();
 
@@ -141,45 +126,32 @@ public class MobArena extends JavaPlugin
         }
 
         // Check for tab characters in config-file
-        BufferedReader in = null;
         try {
-            in = new BufferedReader(new FileReader(new File(getDataFolder(), "config.yml")));
-            int row = 0;
-            String line;
-            while ((line = in.readLine()) != null) {
-                row++;
-                if (line.indexOf('\t') != -1) {
-                    StringBuilder buffy = new StringBuilder();
-                    buffy.append("Found tab in config-file on line ").append(row).append(".");
-                    buffy.append('\n').append("NEVER use tabs! ALWAYS use spaces!");
-                    buffy.append('\n').append(line);
-                    buffy.append('\n');
-                    for (int i = 0; i < line.indexOf('\t'); i++) {
-                        buffy.append(' ');
-                    }
-                    buffy.append('^');
-                    throw new IllegalArgumentException(buffy.toString());
+            Path path = getDataFolder().toPath().resolve("config.yml");
+            List<String> lines = Files.readAllLines(path);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                int index = line.indexOf('\t');
+                if (index != -1) {
+                    String indent = new String(new char[index]).replace('\0', ' ');
+                    throw new IllegalArgumentException(
+                        "Found tab in config-file on line " + (i + 1) + "! NEVER use tabs! ALWAYS use spaces!\n\n" +
+                        line + "\n" +
+                        indent + "^"
+                    );
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reading the config-file:\n" + e.getMessage());
+        }
 
-            // Actually reload the config-file
+        // Reload the config-file
+        try {
             config.load(configFile);
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reading the config-file:\n" + e.getMessage());
         } catch (InvalidConfigurationException e) {
             throw new RuntimeException("\n\n>>>\n>>> There is an error in your config-file! Handle it!\n>>> Here is what snakeyaml says:\n>>>\n\n" + e.getMessage());
-        } catch (FileNotFoundException e) {
-            throw new IllegalStateException("Config-file could not be created for some reason! <o>");
-        } catch (IOException e) {
-            // Error reading the file, just re-throw
-            getLogger().severe("There was an error reading the config-file:\n" + e.getMessage());
-        } finally {
-            // Java 6 <3
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    // Swallow
-                }
-            }
         }
     }
 
@@ -225,18 +197,6 @@ public class MobArena extends JavaPlugin
         
         PluginManager pm = this.getServer().getPluginManager();
         pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
-    }
-    
-    // Permissions stuff
-    public boolean has(Player p, String s) {
-        return p.hasPermission(s);
-    }
-    
-    public boolean has(CommandSender sender, String s) {
-        if (sender instanceof ConsoleCommandSender) {
-            return true;
-        }
-        return has((Player) sender, s);
     }
     
     private void setupVault() {
@@ -288,80 +248,8 @@ public class MobArena extends JavaPlugin
                "Note: You -must- use spaces instead of tabs!";
     }
     
-    private void registerInventories() {
-        this.inventoriesToRestore = new HashSet<>();
-        
-        File dir = new File(getDataFolder(), "inventories");
-        if (!dir.exists()) {
-            dir.mkdir();
-            return;
-        }
-        
-        for (File f : dir.listFiles()) {
-            if (f.getName().endsWith(".inv")) {
-                inventoriesToRestore.add(f.getName().substring(0, f.getName().indexOf(".")));
-            }
-        }
-    }
-
-    public void restoreInventory(Player p) {
-        if (!inventoriesToRestore.contains(p.getName())) {
-            return;
-        }
-        
-        if (InventoryManager.restoreFromFile(this, p)) {
-            inventoriesToRestore.remove(p.getName());
-        }
-    }
-
-    public boolean giveMoney(Player p, ItemStack item) {
-        if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p, getAmount(item));
-            return (result.type == ResponseType.SUCCESS);
-        }
-        return false;
-    }
-
-    public boolean giveMoney(Player p, double amount) {
-        if (economy != null) {
-            EconomyResponse result = economy.depositPlayer(p, amount);
-            return (result.type == ResponseType.SUCCESS);
-        }
-        return false;
-    }
-
-    public boolean takeMoney(Player p, ItemStack item) {
-        return takeMoney(p, getAmount(item));
-    }
-
-    public boolean takeMoney(Player p, double amount) {
-        if (economy != null) {
-            EconomyResponse result = economy.withdrawPlayer(p, amount);
-            return (result.type == ResponseType.SUCCESS);
-        }
-        return false;
-    }
-
-    public boolean hasEnough(Player p, ItemStack item) {
-        return hasEnough(p, getAmount(item));
-    }
-
-    public boolean hasEnough(Player p, double amount) {
-        return economy == null || (economy.getBalance(p) >= amount);
-    }
-    
-    public String economyFormat(ItemStack item) {
-        return economyFormat(getAmount(item));
-    }
-
-    public String economyFormat(double amount) {
-        return economy == null ? null : economy.format(amount);
-    }
-
-    private double getAmount(ItemStack item) {
-        double major = item.getAmount();
-        double minor = item.getDurability() / 100D;
-        return major + minor;
+    public Economy getEconomy() {
+        return economy;
     }
 
     public Messenger getGlobalMessenger() {

@@ -44,7 +44,11 @@ public class ScoreboardManager {
      * @param player a player
      */
     void removePlayer(Player player) {
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        try {
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        } catch (IllegalStateException e) {
+            // Happens if the player is logging out, just swallow it
+        }
     }
 
     /**

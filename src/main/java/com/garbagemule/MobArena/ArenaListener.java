@@ -277,7 +277,12 @@ public class ArenaListener
             // If auto-igniting, set the planter of the primed TNT instead
             if (autoIgniteTNT) {
                 event.setCancelled(true);
-                event.getPlayer().getInventory().removeItem(new ItemStack(Material.TNT, 1));
+                ItemStack stack = event.getItemInHand();
+                if (stack == null || stack.getType() != Material.TNT) {
+                    plugin.getLogger().warning("Player " + event.getPlayer().getDisplayName() + " just placed TNT without holding a TNT block");
+                    return;
+                }
+                stack.setAmount(stack.getAmount() - 1);
                 TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
                 setPlanter(tnt, event.getPlayer());
                 return;
@@ -601,12 +606,13 @@ public class ArenaListener
                 }
                 MABoss boss = monsters.getBoss(damagee);
                 if (boss != null) {
+                    for (Player q : arena.getPlayersInArena()) {
+                        arena.getMessenger().tell(q, Msg.WAVE_BOSS_KILLED, p.getName());
+                    }
                     Thing reward = boss.getReward();
                     if (reward != null) {
-                        String msg = p.getName() + " killed the boss and won: " + reward;
-                        for (Player q : arena.getPlayersInArena()) {
-                            arena.getMessenger().tell(q, msg);
-                        }
+                        arena.getRewardManager().addReward(p, reward);
+                        arena.getMessenger().tell(damager, Msg.WAVE_BOSS_REWARD_EARNED, reward.toString());
                     }
                 }
             }
@@ -940,6 +946,21 @@ public class ArenaListener
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Player p = event.getPlayer();
 
+        /*
+         * If the player "drops an item" while in the process of leaving the
+         * arena, it has to be due to something that happens in the leaving
+         * process because most of the event system is single-threaded. This
+         * doesn't make much sense, but it can happen if the player earns a
+         * command reward of /give, which drops the item with a drop delay of
+         * 0 from the player, causing the player to immediately pick it up.
+         * Cancelling this event causes the player to somehow pick up the item
+         * twice, so we don't want to do that. This early return should guard
+         * against this specific case, and hopefully not break anything else.
+         */
+        if (arena.isLeaving(p)) {
+            return;
+        }
+
         // If the player is active in the arena, only cancel if sharing is not allowed
         if (arena.inArena(p)) {
             if (!canShare) {
@@ -1044,14 +1065,15 @@ public class ArenaListener
         if (!arena.getClasses().containsKey(className) && !className.equals("random"))
             return;
 
+        ArenaClass newAC = arena.getClasses().get(className);
+
         // Check for permission.
-        if (!plugin.has(p, "mobarena.classes." + className) && !className.equals("random")) {
+        if (!newAC.hasPermission(p) && !className.equals("random")) {
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
         
         ArenaClass oldAC = arena.getArenaPlayer(p).getArenaClass();
-        ArenaClass newAC = arena.getClasses().get(className);
         
         // Same class, do nothing.
         if (newAC.equals(oldAC)) {
@@ -1156,44 +1178,54 @@ public class ArenaListener
             return TeleportResponse.IDGAF;
         }
 
-        Location to = event.getTo();
-        Location from = event.getFrom();
         Player p = event.getPlayer();
 
+        /*
+         * Players that are being moved around by the arena are always allowed
+         * to teleport. They stay in this "moving" state only during the actual
+         * transition and are removed from that state as soon as the transition
+         * is complete.
+         */
+        if (arena.isMoving(p) || p.hasPermission("mobarena.admin.teleport")) {
+            return TeleportResponse.ALLOW;
+        }
+
+        Location to = event.getTo();
+        Location from = event.getFrom();
+
+        /*
+         * At this point we're looking at warping of players that are either in
+         * the arena - but not in the "moving" state - or not in the arena. The
+         * tricky bit here is to figure out the edge cases. This is essentially
+         * a matter of players "teleporting on their own" (or with assistance
+         * from other plugins).
+         */
         if (region.contains(from)) {
-            // Players with proper admin permission can warp out
-            if (p.hasPermission("mobarena.admin.teleport")) {
+            if (region.contains(to)) {
+                // Inside -> inside
+                if (!(arena.inArena(p) || arena.inLobby(p))) {
+                    arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
+                    return TeleportResponse.REJECT;
+                }
                 return TeleportResponse.ALLOW;
+            } else {
+                // Inside -> outside
+                if (arena.getAllPlayers().contains(p)) {
+                    arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
+                    return TeleportResponse.REJECT;
+                }
+                return TeleportResponse.IDGAF;
             }
-            
-            // Players not in the arena are free to warp out.
-            if (!arena.inArena(p) && !arena.inLobby(p) && !arena.inSpec(p)) {
-                return TeleportResponse.ALLOW;
+        } else {
+            if (region.contains(to)) {
+                // Outside -> inside
+                arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
+                return TeleportResponse.REJECT;
+            } else {
+                // Outside -> outside
+                return TeleportResponse.IDGAF;
             }
-
-            // Covers the case in which both locations are in the arena.
-            if (region.contains(to) || region.isWarp(to) || to.equals(arena.getPlayerEntry(p))) {
-                return TeleportResponse.ALLOW;
-            }
-
-            arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
-            return TeleportResponse.REJECT;
         }
-        else if (region.contains(to)) {
-            // Players with proper admin permission can warp in
-            if (p.hasPermission("mobarena.admin.teleport")) {
-                return TeleportResponse.ALLOW;
-            }
-            
-            if (region.isWarp(from) || region.isWarp(to) || to.equals(arena.getPlayerEntry(p))) {
-                return TeleportResponse.ALLOW;
-            }
-
-            arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
-            return TeleportResponse.REJECT;
-        }
-
-        return TeleportResponse.IDGAF;
     }
 
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {

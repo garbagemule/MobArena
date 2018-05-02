@@ -1,34 +1,50 @@
 package com.garbagemule.MobArena.things;
 
-import com.garbagemule.MobArena.MobArena;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.entity.Player;
 
 public class MoneyThing implements Thing {
-    private MobArena plugin;
+    private Economy economy;
     private double amount;
 
-    public MoneyThing(MobArena plugin, double amount) {
-        this.plugin = plugin;
+    public MoneyThing(Economy economy, double amount) {
+        this.economy = economy;
         this.amount = amount;
     }
 
     @Override
     public boolean giveTo(Player player) {
-        return plugin.giveMoney(player, amount);
+        if (economy == null) {
+            return false;
+        }
+        EconomyResponse result = economy.depositPlayer(player, amount);
+        return result.type == ResponseType.SUCCESS;
     }
 
     @Override
     public boolean takeFrom(Player player) {
-        return plugin.takeMoney(player, amount);
+        if (economy == null) {
+            return false;
+        }
+        EconomyResponse result = economy.withdrawPlayer(player, amount);
+        return result.type == ResponseType.SUCCESS;
     }
 
     @Override
     public boolean heldBy(Player player) {
-        return plugin.hasEnough(player, amount);
+        if (economy == null) {
+            return false;
+        }
+        return economy.getBalance(player) >= amount;
     }
 
     @Override
     public String toString() {
-        return plugin.economyFormat(amount);
+        if (economy == null) {
+            return "$" + amount;
+        }
+        return economy.format(amount);
     }
 }

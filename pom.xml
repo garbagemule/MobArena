@@ -7,18 +7,18 @@
   <groupId>com.garbagemule</groupId>
   <artifactId>mobarena</artifactId>
   <name>MobArena</name>
-  <version>0.98.2-SNAPSHOT</version>
+  <version>0.99.1-SNAPSHOT</version>
 
   <build>
     <plugins>
-      <!-- Use Java 7 for compilation -->
+      <!-- Use Java 8 for compilation -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.3</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
 

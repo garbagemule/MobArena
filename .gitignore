@@ -21,3 +21,20 @@ target/
 # Misc files
 MobArena.jar
 build.properties
+
+# Virtualenv (for docs)
+# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib/python*/
+[Ll]ib64
+[Ll]ocal
+[Mm]an
+[Ss]cripts
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+
+# ReadTheDocs generated documentation
+docs/_build

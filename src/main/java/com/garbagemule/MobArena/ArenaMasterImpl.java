@@ -19,17 +19,18 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.PluginManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ArenaMasterImpl implements ArenaMaster
 {
@@ -136,7 +137,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getPermittedArenas(Player p) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
-            if (plugin.has(p, "mobarena.arenas." + arena.configName()))
+            if (arena.hasPermission(p))
                 result.add(arena);
         return result;
     }
@@ -144,7 +145,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getEnabledAndPermittedArenas(Player p) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
-            if (arena.isEnabled() && plugin.has(p, "mobarena.arenas." + arena.configName()))
+            if (arena.isEnabled() && arena.hasPermission(p))
                 result.add(arena);
         return result;
     }
@@ -224,7 +225,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public Arena getArenaWithName(Collection<Arena> arenas, String configName) {
         for (Arena arena : arenas)
-            if (arena.configName().equals(configName))
+            if (arena.configName().equalsIgnoreCase(configName))
                 return arena;
         return null;
     }
@@ -324,54 +325,15 @@ public class ArenaMasterImpl implements ArenaMaster
             ? new ArenaClass.MyItems(price, weps, arms, this)
             : new ArenaClass(classname, price, weps, arms);
 
-        // Parse the items-node
-        List<String> items = section.getStringList("items");
-        if (items == null || items.isEmpty()) {
-            String str = section.getString("items", "");
-            List<ItemStack> stacks = ItemParser.parseItems(str);
-            arenaClass.setItems(stacks);
-        } else {
-            List<ItemStack> stacks = new ArrayList<>();
-            for (String item : items) {
-                ItemStack stack = ItemParser.parseItem(item);
-                if (stack != null) {
-                    stacks.add(stack);
-                }
-            }
-            arenaClass.setItems(stacks);
-        }
+        // Load items
+        loadClassItems(section, arenaClass);
 
-        // And the legacy armor-node
-        String armor = section.getString("armor", "");
-        if (!armor.equals("")) {
-            List<ItemStack> stacks = ItemParser.parseItems(armor);
-            arenaClass.setArmor(stacks);
-        }
-
-        // Get armor strings
-        String head  = section.getString("helmet", null);
-        String chest = section.getString("chestplate", null);
-        String legs  = section.getString("leggings", null);
-        String feet  = section.getString("boots", null);
-
-        // Parse to ItemStacks
-        ItemStack helmet     = ItemParser.parseItem(head);
-        ItemStack chestplate = ItemParser.parseItem(chest);
-        ItemStack leggings   = ItemParser.parseItem(legs);
-        ItemStack boots      = ItemParser.parseItem(feet);
-
-        // Set in ArenaClass
-        arenaClass.setHelmet(helmet);
-        arenaClass.setChestplate(chestplate);
-        arenaClass.setLeggings(leggings);
-        arenaClass.setBoots(boots);
+        // Load armor
+        loadClassArmor(section, arenaClass);
 
         // Per-class permissions
         loadClassPermissions(arenaClass, section);
         loadClassLobbyPermissions(arenaClass, section);
-
-        // Register the permission.
-        registerPermission("mobarena.classes." + lowercase, PermissionDefault.TRUE).addParent("mobarena.classes", true);
 
         // Check for class chests
         Location cc = parseLocation(section, "classchest", null);
@@ -380,6 +342,64 @@ public class ArenaMasterImpl implements ArenaMaster
         // Finally add the class to the classes map.
         classes.put(lowercase, arenaClass);
         return arenaClass;
+    }
+
+    private void loadClassItems(ConfigurationSection section, ArenaClass arenaClass) {
+        List<String> items = section.getStringList("items");
+        if (items == null || items.isEmpty()) {
+            String value = section.getString("items", "");
+            items = Arrays.asList(value.split(","));
+        }
+
+        List<Thing> things = items.stream()
+            .map(String::trim)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        arenaClass.setItems(things);
+    }
+
+    private void loadClassArmor(ConfigurationSection section, ArenaClass arenaClass) {
+        // Legacy armor node
+        loadClassArmorLegacyNode(section, arenaClass);
+
+        // Specific armor pieces
+        loadClassArmorPiece(section, "helmet",     arenaClass::setHelmet);
+        loadClassArmorPiece(section, "chestplate", arenaClass::setChestplate);
+        loadClassArmorPiece(section, "leggings",   arenaClass::setLeggings);
+        loadClassArmorPiece(section, "boots",      arenaClass::setBoots);
+    }
+
+    private void loadClassArmorLegacyNode(ConfigurationSection section, ArenaClass arenaClass) {
+        List<String> armor = section.getStringList("armor");
+        if (armor == null || armor.isEmpty()) {
+            String value = section.getString("armor", "");
+            armor = Arrays.asList(value.split(","));
+        }
+
+        // Prepend "armor:" for the armor thing parser
+        List<Thing> things = armor.stream()
+            .map(String::trim)
+            .map(s -> "armor:" + s)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        arenaClass.setArmor(things);
+    }
+
+    private void loadClassArmorPiece(ConfigurationSection section, String slot, Consumer<Thing> setter) {
+        String value = section.getString(slot, null);
+        if (value == null) {
+            return;
+        }
+        // Prepend the slot name for the item parser
+        Thing thing =  plugin.getThingManager().parse(slot + ":" + value);
+        if (thing == null) {
+            return;
+        }
+        setter.accept(thing);
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
@@ -453,8 +473,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Remove the class from the map.
         classes.remove(lowercase);
-
-        unregisterPermission("mobarena.arenas." + lowercase);
     }
 
     public boolean addClassPermission(String classname, String perm) {
@@ -588,7 +606,6 @@ public class ArenaMasterImpl implements ArenaMaster
         ConfigUtils.addIfEmpty(plugin, "waves.yml", makeSection(section, "waves"));
 
         Arena arena = new ArenaImpl(plugin, section, arenaname, world);
-        registerPermission("mobarena.arenas." + arenaname.toLowerCase(), PermissionDefault.TRUE);
         arenas.add(arena);
         plugin.getLogger().info("Loaded arena '" + arenaname + "'");
         return arena;
@@ -636,7 +653,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public void removeArenaNode(Arena arena) {
         arenas.remove(arena);
-        unregisterPermission("mobarena.arenas." + arena.configName());
 
         config.set("arenas." + arena.configName(), null);
         plugin.saveConfig();
@@ -656,21 +672,5 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public void saveConfig() {
         plugin.saveConfig();
-    }
-
-    private Permission registerPermission(String permString, PermissionDefault value) {
-        PluginManager pm = plugin.getServer().getPluginManager();
-
-        Permission perm = pm.getPermission(permString);
-        if (perm == null) {
-            perm = new Permission(permString);
-            perm.setDefault(value);
-            pm.addPermission(perm);
-        }
-        return perm;
-    }
-
-    private void unregisterPermission(String s) {
-        plugin.getServer().getPluginManager().removePermission(s);
     }
 }
