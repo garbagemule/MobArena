@@ -322,8 +322,6 @@ public class MAGlobalListener implements Listener
                 return;
             }
         }
-        
-        plugin.restoreInventory(event.getPlayer());
     }
     
     public enum TeleportResponse {

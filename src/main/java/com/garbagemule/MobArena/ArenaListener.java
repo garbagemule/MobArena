@@ -612,6 +612,7 @@ public class ArenaListener
                     }
                     Thing reward = boss.getReward();
                     if (reward != null) {
+                        arena.getRewardManager().addReward(p, reward);
                         arena.getMessenger().tell(damager, Msg.WAVE_BOSS_REWARD_EARNED, reward.toString());
                     }
                 }
@@ -1204,7 +1205,7 @@ public class ArenaListener
         if (region.contains(from)) {
             if (region.contains(to)) {
                 // Inside -> inside
-                if (!arena.inArena(p)) {
+                if (!(arena.inArena(p) || arena.inLobby(p))) {
                     arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
                     return TeleportResponse.REJECT;
                 }

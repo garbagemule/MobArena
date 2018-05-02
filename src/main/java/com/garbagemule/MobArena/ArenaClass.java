@@ -351,7 +351,7 @@ public class ArenaClass
             Arena arena = am.getArenaWithPlayer(p);
             if (arena != null) {
                 try {
-                    arena.getInventoryManager().restoreInv(p);
+                    arena.getInventoryManager().equip(p);
                     removeBannedItems(p.getInventory());
                 } catch (Exception e) {
                     am.getPlugin().getLogger().severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());
