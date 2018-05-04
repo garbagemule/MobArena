@@ -42,7 +42,6 @@ class PlayerMultiStep extends PlayerStep {
             try {
                 step.run();
                 history.push(step);
-                logger.info("Step " + step + " OK");
             } catch (RuntimeException up) {
                 logger.log(Level.SEVERE, up, () -> "Failed to run step " + step);
                 undo();
@@ -57,7 +56,6 @@ class PlayerMultiStep extends PlayerStep {
             Step step = history.pop();
             try {
                 step.undo();
-                logger.info("Rollback " + step + " OK");
             } catch (RuntimeException e) {
                 logger.log(Level.SEVERE, e, () -> "Failed to undo step " + step);
             }
