@@ -2,13 +2,15 @@ package com.garbagemule.MobArena.things;
 
 import net.milkbowl.vault.economy.Economy;
 
+import java.util.function.Supplier;
+
 class MoneyThingParser implements ThingParser {
     private static final String PREFIX_LONG = "money:";
     private static final String PREFIX_SHORT = "$";
 
-    private Economy economy;
+    private Supplier<Economy> economy;
 
-    MoneyThingParser(Economy economy) {
+    MoneyThingParser(Supplier<Economy> economy) {
         this.economy = economy;
     }
 
@@ -18,7 +20,7 @@ class MoneyThingParser implements ThingParser {
         if (money == null) {
             return null;
         }
-        return new MoneyThing(economy, Double.parseDouble(money));
+        return new MoneyThing(economy.get(), Double.parseDouble(money));
     }
 
     private String trimPrefix(String s) {

@@ -12,7 +12,7 @@ public class ThingManager implements ThingParser {
     public ThingManager(MobArena plugin, ItemStackThingParser parser) {
         parsers = new ArrayList<>();
         parsers.add(new CommandThingParser());
-        parsers.add(new MoneyThingParser(plugin.getEconomy()));
+        parsers.add(new MoneyThingParser(plugin::getEconomy));
         items = parser;
     }
 

@@ -22,7 +22,7 @@ public class MoneyThingParserTest {
     @Before
     public void setup() {
         Economy economy = mock(Economy.class);
-        subject = new MoneyThingParser(economy);
+        subject = new MoneyThingParser(() -> economy);
     }
 
     @Test
