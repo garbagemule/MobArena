@@ -49,9 +49,11 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -668,7 +670,13 @@ public class ArenaImpl implements Arena
 
         specPlayers.remove(p);
 
-        takeFee(p);
+        if (!entryFee.isEmpty()) {
+            if (!takeFee(p)) {
+                messenger.tell(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
+                return false;
+            }
+            messenger.tell(p, Msg.JOIN_FEE_PAID.format(MAUtils.listToString(entryFee, plugin)));
+        }
 
         // Announce globally (must happen before moving player)
         if (settings.getBoolean("global-join-announce", false)) {
@@ -1498,13 +1506,17 @@ public class ArenaImpl implements Arena
 
     @Override
     public boolean takeFee(Player p) {
-        if (entryFee.isEmpty()) return true;
-
+        Deque<Thing> paid = new ArrayDeque<>();
         for (Thing fee : entryFee) {
-            fee.takeFrom(p);
+            if (fee.takeFrom(p)) {
+                paid.push(fee);
+            } else {
+                while (!paid.isEmpty()) {
+                    paid.pop().giveTo(p);
+                }
+                return false;
+            }
         }
-
-        messenger.tell(p, Msg.JOIN_FEE_PAID.format(MAUtils.listToString(entryFee, plugin)));
         return true;
     }
     
