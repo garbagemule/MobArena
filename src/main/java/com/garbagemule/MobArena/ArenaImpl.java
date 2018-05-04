@@ -774,7 +774,7 @@ public class ArenaImpl implements Arena
         removeClassPermissions(p);
         removePotionEffects(p);
         
-        boolean refund = inLobby(p) || inArena(p);
+        boolean refund = inLobby(p);
 
         if (inLobby(p)) {
             ArenaPlayer ap = arenaPlayerMap.get(p);
