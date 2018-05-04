@@ -668,6 +668,8 @@ public class ArenaImpl implements Arena
 
         specPlayers.remove(p);
 
+        takeFee(p);
+
         // Announce globally (must happen before moving player)
         if (settings.getBoolean("global-join-announce", false)) {
             if (lobbyPlayers.isEmpty()) {
