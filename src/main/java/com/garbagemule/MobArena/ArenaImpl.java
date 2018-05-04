@@ -774,9 +774,7 @@ public class ArenaImpl implements Arena
         removeClassPermissions(p);
         removePotionEffects(p);
         
-        if (inLobby(p) || inArena(p)) {
-            refund(p);
-        }
+        boolean refund = inLobby(p) || inArena(p);
 
         if (inLobby(p)) {
             ArenaPlayer ap = arenaPlayerMap.get(p);
@@ -791,6 +789,10 @@ public class ArenaImpl implements Arena
         }
         
         discardPlayer(p);
+
+        if (refund) {
+            refund(p);
+        }
         
         endArena();
 
@@ -1522,12 +1524,7 @@ public class ArenaImpl implements Arena
     
     @Override
     public boolean refund(Player p) {
-        if (entryFee.isEmpty()) return true;
-        if (!inLobby(p)) return false;
-
-        for (Thing fee : entryFee) {
-            fee.giveTo(p);
-        }
+        entryFee.forEach(fee -> fee.giveTo(p));
         return true;
     }
 
