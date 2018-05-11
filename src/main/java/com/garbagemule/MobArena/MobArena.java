@@ -164,7 +164,7 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    private void loadAnnouncementsFile() {
+    public static void loadAnnouncementsFile() {
         // Create if missing
         File file = new File(getDataFolder(), "announcements.yml");
         try {
