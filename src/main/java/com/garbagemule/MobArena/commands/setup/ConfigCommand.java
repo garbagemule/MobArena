@@ -23,6 +23,7 @@ public class ConfigCommand implements Command
         if (args[0].equals("reload")) {
             try {
                 am.reloadConfig();
+                am.getPlugin().loadAnnouncementsFile();
                 am.getGlobalMessenger().tell(sender, "Config reloaded.");
             } catch (Exception e) {
                 am.getGlobalMessenger().tell(sender, ChatColor.RED + "ERROR:" + ChatColor.RESET + "\n" + e.getMessage());
