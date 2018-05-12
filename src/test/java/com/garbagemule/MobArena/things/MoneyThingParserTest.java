@@ -5,7 +5,9 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.garbagemule.MobArena.MobArena;
 import net.milkbowl.vault.economy.Economy;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,8 +23,11 @@ public class MoneyThingParserTest {
 
     @Before
     public void setup() {
+        MobArena plugin = mock(MobArena.class);
         Economy economy = mock(Economy.class);
-        subject = new MoneyThingParser(() -> economy);
+        when(plugin.getEconomy()).thenReturn(economy);
+
+        subject = new MoneyThingParser(plugin);
     }
 
     @Test
