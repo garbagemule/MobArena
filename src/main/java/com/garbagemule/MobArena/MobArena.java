@@ -202,7 +202,7 @@ public class MobArena extends JavaPlugin
     private void setupVault() {
         Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
         if (vaultPlugin == null) {
-            getLogger().warning("Vault was not found. Economy rewards will not work!");
+            getLogger().info("Vault was not found. Economy rewards will not work.");
             return;
         }
         

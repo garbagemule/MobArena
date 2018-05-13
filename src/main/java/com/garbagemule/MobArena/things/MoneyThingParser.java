@@ -1,17 +1,16 @@
 package com.garbagemule.MobArena.things;
 
+import com.garbagemule.MobArena.MobArena;
 import net.milkbowl.vault.economy.Economy;
-
-import java.util.function.Supplier;
 
 class MoneyThingParser implements ThingParser {
     private static final String PREFIX_LONG = "money:";
     private static final String PREFIX_SHORT = "$";
 
-    private Supplier<Economy> economy;
+    private MobArena plugin;
 
-    MoneyThingParser(Supplier<Economy> economy) {
-        this.economy = economy;
+    MoneyThingParser(MobArena plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -20,7 +19,11 @@ class MoneyThingParser implements ThingParser {
         if (money == null) {
             return null;
         }
-        return new MoneyThing(economy.get(), Double.parseDouble(money));
+        Economy economy = plugin.getEconomy();
+        if (economy == null) {
+            plugin.getLogger().severe("Vault or economy plugin missing while parsing: " + s);
+        }
+        return new MoneyThing(economy, Double.parseDouble(money));
     }
 
     private String trimPrefix(String s) {
