@@ -5,11 +5,15 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
+import com.garbagemule.MobArena.metrics.ArenaCountChart;
+import com.garbagemule.MobArena.metrics.ClassCountChart;
+import com.garbagemule.MobArena.metrics.VaultChart;
 import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -86,6 +90,9 @@ public class MobArena extends JavaPlugin
 
         // Register event listeners
         registerListeners();
+
+        // Setup bStats metrics
+        setupMetrics();
 
         // Announce enable!
         getLogger().info("v" + this.getDescription().getVersion() + " enabled.");
@@ -223,6 +230,13 @@ public class MobArena extends JavaPlugin
 
         getLogger().info("MagicSpells found, loading config-file.");
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
+    }
+
+    private void setupMetrics() {
+        Metrics metrics = new Metrics(this);
+        metrics.addCustomChart(new VaultChart(this));
+        metrics.addCustomChart(new ArenaCountChart(this));
+        metrics.addCustomChart(new ClassCountChart(this));
     }
     
     private void loadAbilities() {
