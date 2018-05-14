@@ -16,26 +16,32 @@ import java.util.logging.Level;
 
 public class InventoryManager
 {
-    private Map<Player, ItemStack[]> inventories;
+    private Map<Player, ItemStack[]> items;
+    private Map<Player, ItemStack[]> armor;
     
     public InventoryManager() {
-        this.inventories = new HashMap<>();
+        this.items = new HashMap<>();
+        this.armor = new HashMap<>();
     }
     
-    public void put(Player p, ItemStack[] contents) {
-        inventories.put(p, contents);
+    public void put(Player p, ItemStack[] items, ItemStack[] armor) {
+        this.items.put(p, items);
+        this.armor.put(p, armor);
     }
     
     public void equip(Player p) {
-        ItemStack[] contents = inventories.get(p);
-        if (contents == null) {
+        ItemStack[] items = this.items.get(p);
+        ItemStack[] armor = this.armor.get(p);
+        if (items == null || armor == null) {
             return;
         }
-        p.getInventory().setContents(contents);
+        p.getInventory().setContents(items);
+        p.getInventory().setArmorContents(armor);
     }
 
     public void remove(Player p) {
-        inventories.remove(p);
+        items.remove(p);
+        armor.remove(p);
     }
     
     /**
@@ -89,8 +95,10 @@ public class InventoryManager
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
             
-            ItemStack[] contents = config.getList("contents").toArray(new ItemStack[0]);
-            p.getInventory().setContents(contents);
+            ItemStack[] items = config.getList("items").toArray(new ItemStack[0]);
+            ItemStack[] armor = config.getList("armor").toArray(new ItemStack[0]);
+            p.getInventory().setContents(items);
+            p.getInventory().setArmorContents(armor);
             
             file.delete();
             return true;

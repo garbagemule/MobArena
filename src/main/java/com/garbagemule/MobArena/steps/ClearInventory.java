@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.steps;
 
 import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +15,8 @@ class ClearInventory extends PlayerStep {
     private final File inventories;
     private final Arena arena;
 
-    private ItemStack[] contents;
+    private ItemStack[] items;
+    private ItemStack[] armor;
     private File backup;
 
     private ClearInventory(Player player, Arena arena) {
@@ -25,15 +27,17 @@ class ClearInventory extends PlayerStep {
 
     @Override
     public void run() {
-        contents = player.getInventory().getContents();
+        items = player.getInventory().getContents();
+        armor = player.getInventory().getArmorContents();
         createBackup();
 
-        player.getInventory().clear();
+        InventoryManager.clearInventory(player);
     }
 
     @Override
     public void undo() {
-        player.getInventory().setContents(contents);
+        player.getInventory().setContents(items);
+        player.getInventory().setArmorContents(armor);
 
         arena.getInventoryManager().remove(player);
         deleteBackup();
@@ -41,7 +45,8 @@ class ClearInventory extends PlayerStep {
 
     private void createBackup() {
         YamlConfiguration yaml = new YamlConfiguration();
-        yaml.set("contents", contents);
+        yaml.set("items", items);
+        yaml.set("armor", armor);
 
         backup = new File(inventories, player.getUniqueId().toString());
         try {
@@ -49,7 +54,7 @@ class ClearInventory extends PlayerStep {
         } catch (IOException e) {
             throw new RuntimeException("Failed to store inventory for " + player.getName(), e);
         }
-        arena.getInventoryManager().put(player, contents);
+        arena.getInventoryManager().put(player, items, armor);
     }
 
     private void deleteBackup() {
