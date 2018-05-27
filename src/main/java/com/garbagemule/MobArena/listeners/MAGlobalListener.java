@@ -42,6 +42,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -358,6 +359,13 @@ public class MAGlobalListener implements Listener
     public void playerPreLogin(PlayerLoginEvent event) {
         for (Arena arena : am.getArenas()) {
             arena.getEventListener().onPlayerPreLogin(event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void vehicleEnter(VehicleEnterEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onVehicleEnter(event);
         }
     }
 

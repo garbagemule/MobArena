@@ -25,6 +25,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.AbstractHorse;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -75,6 +76,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
@@ -1269,6 +1271,27 @@ public class ArenaListener
         arena.playerLeave(p);
     }
 
+    public void onVehicleEnter(VehicleEnterEvent event) {
+        Entity entity = event.getEntered();
+        if (!(entity instanceof Player)) return;
+
+        Player p = (Player) entity;
+        if (!arena.inArena(p)) return;
+
+        Vehicle vehicle = event.getVehicle();
+        if (!(vehicle instanceof Horse)) return;
+
+        Horse horse = (Horse) vehicle;
+        if (!monsters.hasMount(horse)) return;
+
+        AnimalTamer tamer = horse.getOwner();
+        if (tamer.equals(p)) {
+            horse.setAI(true);
+        } else {
+            event.setCancelled(true);
+        }
+    }
+
     public void onVehicleExit(VehicleExitEvent event) {
         LivingEntity entity = event.getExited();
         if (!(entity instanceof Player)) return;
@@ -1279,8 +1302,9 @@ public class ArenaListener
         Vehicle vehicle = event.getVehicle();
         if (!(vehicle instanceof Horse)) return;
 
-        if (monsters.hasMount(vehicle)) {
-            event.setCancelled(true);
-        }
+        Horse horse = (Horse) vehicle;
+        if (!monsters.hasMount(horse)) return;
+
+        horse.setAI(false);
     }
 }
