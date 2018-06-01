@@ -8,6 +8,9 @@ import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.metrics.ArenaCountChart;
 import com.garbagemule.MobArena.metrics.ClassCountChart;
 import com.garbagemule.MobArena.metrics.VaultChart;
+import com.garbagemule.MobArena.signs.ArenaSign;
+import com.garbagemule.MobArena.signs.SignBootstrap;
+import com.garbagemule.MobArena.signs.SignListeners;
 import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -18,6 +21,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -52,6 +56,8 @@ public class MobArena extends JavaPlugin
     private Messenger messenger;
     private ThingManager thingman;
 
+    private SignListeners signListeners;
+
     @Override
     public void onLoad() {
         thingman = new ThingManager(this);
@@ -61,6 +67,7 @@ public class MobArena extends JavaPlugin
         // Initialize config-file
         configFile = new File(getDataFolder(), "config.yml");
         config = new YamlConfiguration();
+        ConfigurationSerialization.registerClass(ArenaSign.class);
         reloadConfig();
 
         // Initialize global messenger
@@ -88,6 +95,9 @@ public class MobArena extends JavaPlugin
         arenaMaster = new ArenaMasterImpl(this);
         arenaMaster.initialize();
 
+        // Load signs after Messenger and ArenaMaster
+        reloadSigns();
+
         // Register event listeners
         registerListeners();
 
@@ -111,6 +121,7 @@ public class MobArena extends JavaPlugin
         }
         arenaMaster.resetArenaMap();
         VersionChecker.shutdown();
+        ConfigurationSerialization.unregisterClass(ArenaSign.class);
 
         getLogger().info("disabled.");
     }
@@ -126,6 +137,16 @@ public class MobArena extends JavaPlugin
 
     @Override
     public void reloadConfig() {
+        // Make sure the data folder exists
+        File data = new File(getDataFolder(), "data");
+        if (!data.exists()) {
+            boolean created = data.mkdir();
+            if (!created) {
+                throw new IllegalStateException("Failed to create data folder!");
+            }
+            getLogger().info("Created data folder.");
+        }
+
         // Check if the config-file exists
         if (!configFile.exists()) {
             getLogger().info("No config-file found, creating default...");
@@ -160,6 +181,15 @@ public class MobArena extends JavaPlugin
         } catch (InvalidConfigurationException e) {
             throw new RuntimeException("\n\n>>>\n>>> There is an error in your config-file! Handle it!\n>>> Here is what snakeyaml says:\n>>>\n\n" + e.getMessage());
         }
+    }
+
+    void reloadSigns() {
+        if (signListeners != null) {
+            signListeners.unregister();
+        }
+        SignBootstrap bootstrap = SignBootstrap.create(this);
+        signListeners = new SignListeners();
+        signListeners.register(bootstrap);
     }
 
     @Override
