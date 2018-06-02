@@ -83,6 +83,7 @@ permissions:
             mobarena.setup.classchest: true
             mobarena.setup.classes: true
             mobarena.setup.leaderboards: true
+            mobarena.setup.signs: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
     mobarena.setup.config:
@@ -123,6 +124,9 @@ permissions:
         default: false
     mobarena.setup.leaderboards:
         description: Set up leaderboards.
+        default: false
+    mobarena.setup.signs:
+        description: Set up leave/join signs.
         default: false
     mobarena.setup.autogenerate:
         description: Auto-generate an arena.

@@ -84,6 +84,10 @@ public interface ArenaMaster
     Arena getArenaWithName(String configName);
     
     Arena getArenaWithName(Collection<Arena> arenas, String configName);
+
+    Arena getArenaWithDisplayName(String configName);
+
+    Arena getArenaWithDisplayName(Collection<Arena> arenas, String configName);
     
     boolean isAllowed(String command);
     

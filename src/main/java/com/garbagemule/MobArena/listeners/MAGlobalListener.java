@@ -8,6 +8,8 @@ import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -119,25 +121,41 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void signChange(SignChangeEvent event) {
-        if (!event.getPlayer().hasPermission("mobarena.setup.leaderboards")) {
+        if (!event.getLine(0).startsWith("[MA]")) {
             return;
         }
-        
-        if (!event.getLine(0).startsWith("[MA]")) {
+
+        if (!event.getPlayer().hasPermission("mobarena.setup.leaderboards") && !event.getPlayer().hasPermission("mobarena.setup.signs")) {
+            event.setCancelled(true);
             return;
         }
         
         String text = event.getLine(0).substring((4));
         Arena arena;
         Stats stat;
-        
-        if ((arena = am.getArenaWithName(text)) != null) {
-            arena.getEventListener().onSignChange(event);
-            setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.arenaName(), ChatColor.AQUA + "Players", "---------------");
+
+        if (event.getPlayer().hasPermission("mobarena.setup.signs")) {
+            String signCommand = event.getLine(1);
+            if (signCommand.equalsIgnoreCase("join")) {
+                if ((arena = am.getArenaWithName(text)) != null) {
+                    setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.arenaName(), ChatColor.BLUE + "Join", "");
+                    return;
+                }
+            } else if (signCommand.equalsIgnoreCase("leave")) {
+                setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.BLUE + "Leave", "", "");
+                return;
+            }
         }
-        else if ((stat = Stats.getByShortName(text)) != null) {
-            setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
-            am.getGlobalMessenger().tell(event.getPlayer(), "Stat sign created.");
+
+        if (event.getPlayer().hasPermission("mobarena.setup.leaderboards")) {
+            if ((arena = am.getArenaWithName(text)) != null) {
+                arena.getEventListener().onSignChange(event);
+                setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.arenaName(), ChatColor.AQUA + "Players", "---------------");
+            }
+            else if ((stat = Stats.getByShortName(text)) != null) {
+                setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
+                am.getGlobalMessenger().tell(event.getPlayer(), "Stat sign created.");
+            }
         }
     }
     
@@ -292,8 +310,37 @@ public class MAGlobalListener implements Listener
     @EventHandler(priority = EventPriority.HIGHEST)
     public void playerInteract(PlayerInteractEvent event) {
         if (!am.isEnabled()) return;
+
+        // Handle sign clicks while not in lobby
+        if (event.hasBlock() && event.getClickedBlock().getState() instanceof Sign) {
+            Sign sign = (Sign) event.getClickedBlock().getState();
+            if (handleSign(sign, event.getPlayer())) {
+                return;
+            }
+        }
+
         for (Arena arena : am.getArenas())
             arena.getEventListener().onPlayerInteract(event);
+    }
+
+    /**
+     * Handle a sign click from a player.
+     *
+     * @param sign the sign being clicked
+     * @param p the player clicking
+     * @return true if handled, false if not (which should defer to arena processing)
+     */
+    private boolean handleSign(Sign sign, Player p) {
+        // This currently only handles join signs
+        if (sign.getLine(0).equals(ChatColor.GREEN + "MobArena") && sign.getLine(2).equals(ChatColor.BLUE + "Join")) {
+            String arenaName = ChatColor.stripColor(sign.getLine(1));
+            Arena arena = am.getArenaWithDisplayName(arenaName);
+            if (arena != null) {
+                arena.playerJoin(p, p.getLocation());
+                return true;
+            }
+        }
+        return false;
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
