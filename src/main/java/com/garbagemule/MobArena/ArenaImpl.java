@@ -1162,6 +1162,9 @@ public class ArenaImpl implements Arena
         }
         
         InventoryManager.clearInventory(p);
+        p.getActivePotionEffects().stream()
+            .map(PotionEffect::getType)
+            .forEach(p::removePotionEffect);
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
