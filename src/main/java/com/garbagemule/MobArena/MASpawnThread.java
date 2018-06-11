@@ -166,6 +166,9 @@ public class MASpawnThread implements Runnable
                 // Spawn the monster
                 LivingEntity e = entry.getKey().spawn(arena, world, spawnpoint);
 
+                // Add potion effects
+                e.addPotionEffects(w.getEffects());
+
                 // Add it to the arena.
                 monsterManager.addMonster(e);
 
@@ -196,7 +199,6 @@ public class MASpawnThread implements Runnable
                         boss.setDrops(bw.getDrops());
                         bw.addMABoss(boss);
                         bw.activateAbilities(arena);
-                        e.addPotionEffects(bw.getPotions());
                         if (bw.getBossName() != null) {
                             e.setCustomName(bw.getBossName());
                             e.setCustomNameVisible(true);

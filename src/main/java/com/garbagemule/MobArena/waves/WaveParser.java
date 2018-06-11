@@ -32,13 +32,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class WaveParser
 {
@@ -135,6 +138,9 @@ public class WaveParser
         // Grab the specific spawnpoints if any
         List<Location> spawnpoints = getSpawnpoints(arena, name, config);
         
+        // Potion effects
+        List<PotionEffect> effects = getPotionEffects(config);
+
         // Recurrent must have priority + frequency, single must have firstWave
         if (branch == WaveBranch.RECURRENT && (priority == -1 || frequency <= 0)) {
             arena.getPlugin().getLogger().warning(WaveError.RECURRENT_NODES.format(name, arena.configName()));
@@ -157,6 +163,9 @@ public class WaveParser
         
         // Aaand the spawnpoints
         result.setSpawnpoints(spawnpoints);
+
+        // Potions
+        result.setEffects(effects);
         
         return result;
     }
@@ -324,13 +333,6 @@ public class WaveParser
         List<ItemStack> drops = ItemParser.parseItems(drp);
         result.setDrops(drops);
         
-        // Potions!
-        String pots = config.getString("potions");
-        if (pots != null) {
-            List<PotionEffect> potions = PotionEffectParser.parsePotionEffects(pots);
-            if (potions != null) result.setPotions(potions);
-        }
-        
         return result;
     }
     
@@ -411,6 +413,26 @@ public class WaveParser
         }
         
         return result;
+    }
+
+    private static List<PotionEffect> getPotionEffects(ConfigurationSection config) {
+        String value = config.getString("effects");
+        if (value == null) {
+            value = config.getString("potions");
+        }
+        if (value != null) {
+            List<PotionEffect> parsed = PotionEffectParser.parsePotionEffects(value);
+            return (parsed != null) ? parsed : Collections.emptyList();
+        }
+
+        List<String> list = config.getStringList("effects");
+        if (list.isEmpty()) {
+            list = config.getStringList("potions");
+        }
+        return list.stream()
+            .map(PotionEffectParser::parsePotionEffect)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
     
     private static Map<String,List<Upgrade>> getUpgradeMap(ConfigurationSection config) {

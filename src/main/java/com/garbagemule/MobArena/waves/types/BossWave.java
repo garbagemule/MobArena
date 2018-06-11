@@ -13,7 +13,6 @@ import com.garbagemule.MobArena.waves.ability.AbilityInfo;
 import com.garbagemule.MobArena.waves.enums.BossHealth;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,13 +39,11 @@ public class BossWave extends AbstractWave
 
     private Thing reward;
     private List<ItemStack> drops;
-    private List<PotionEffect> potions;
     
     public BossWave(MACreature monster) {
         this.monster   = monster;
         this.bosses    = new HashSet<>();
         this.abilities = new ArrayList<>();
-        this.potions = new ArrayList<>();
         this.activated = false;
         this.abilityAnnounce = false;
         this.setType(WaveType.BOSS);
@@ -138,14 +135,6 @@ public class BossWave extends AbstractWave
         this.drops = drops;
     }
     
-    public List<PotionEffect> getPotions() {
-        return potions;
-    }
-    
-    public void setPotions(List<PotionEffect> potions) {
-        this.potions = potions;
-    }
-    
     public void activateAbilities(Arena arena) {
         if (activated) {
             return;
@@ -175,7 +164,6 @@ public class BossWave extends AbstractWave
         result.flatHealth = this.flatHealth;
         result.reward = this.reward;
         result.drops = this.drops;
-        result.potions = this.potions;
         result.bossName = this.bossName;
 
         // From AbstractWave
@@ -183,6 +171,7 @@ public class BossWave extends AbstractWave
         result.setHealthMultiplier(getHealthMultiplier());
         result.setName(getName());
         result.setSpawnpoints(getSpawnpoints());
+        result.setEffects(getEffects());
         return result;
     }
 }
