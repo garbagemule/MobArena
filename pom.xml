@@ -9,6 +9,10 @@
   <name>MobArena</name>
   <version>0.100.3-SNAPSHOT</version>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <build>
     <plugins>
       <!-- Use Java 8 for compilation -->
