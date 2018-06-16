@@ -696,6 +696,7 @@ public class ArenaMasterImpl implements ArenaMaster
         config = plugin.getConfig();
         initialize();
         plugin.reloadSigns();
+        plugin.reloadAnnouncementsFile();
         if (wasEnabled) setEnabled(true);
     }
 

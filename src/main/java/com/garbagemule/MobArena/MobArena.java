@@ -82,7 +82,7 @@ public class MobArena extends JavaPlugin
         saveConfig();
 
         // Initialize announcements-file
-        loadAnnouncementsFile();
+        reloadAnnouncementsFile();
 
         // Load boss abilities
         loadAbilities();
@@ -201,7 +201,7 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    private void loadAnnouncementsFile() {
+    void reloadAnnouncementsFile() {
         // Create if missing
         File file = new File(getDataFolder(), "announcements.yml");
         try {
