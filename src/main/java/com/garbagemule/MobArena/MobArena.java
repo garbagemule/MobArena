@@ -192,15 +192,6 @@ public class MobArena extends JavaPlugin
         signListeners.register(bootstrap);
     }
 
-    @Override
-    public void saveConfig() {
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     void reloadAnnouncementsFile() {
         // Create if missing
         File file = new File(getDataFolder(), "announcements.yml");
@@ -228,6 +219,15 @@ public class MobArena extends JavaPlugin
         }
     }
     
+    @Override
+    public void saveConfig() {
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void registerListeners() {
         // Bind the /ma, /mobarena commands to MACommands.
         commandHandler = new CommandHandler(this);
