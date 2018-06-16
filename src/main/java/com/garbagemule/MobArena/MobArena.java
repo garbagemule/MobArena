@@ -221,8 +221,10 @@ public class MobArena extends JavaPlugin
             yaml.load(file);
             ConfigUtils.addMissingRemoveObsolete(file, Msg.toYaml(), yaml);
             Msg.load(yaml);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reading the announcements-file:\n" + e.getMessage());
+        } catch (InvalidConfigurationException e) {
+            throw new RuntimeException("\n\n>>>\n>>> There is an error in your announements-file! Handle it!\n>>> Here's what snakeyaml says:\n>>>\n\n" + e.getMessage());
         }
     }
     
