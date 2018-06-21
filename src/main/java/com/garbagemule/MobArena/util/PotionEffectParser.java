@@ -29,6 +29,10 @@ public class PotionEffectParser
     }
     
     public static PotionEffect parsePotionEffect(String p) {
+        return parsePotionEffect(p, true);
+    }
+    
+    public static PotionEffect parsePotionEffect(String p, boolean logFailure) {
         if (p == null || p.isEmpty())
             return null;
         
@@ -48,7 +52,9 @@ public class PotionEffectParser
         }
         
         if (result == null) {
-            Bukkit.getLogger().warning("[MobArena] Failed to parse potion effect: " + p);
+            if (logFailure) {
+                Bukkit.getLogger().warning("[MobArena] Failed to parse potion effect: " + p);
+            }
             return null;
         }
         

@@ -331,6 +331,9 @@ public class ArenaMasterImpl implements ArenaMaster
         // Load armor
         loadClassArmor(section, arenaClass);
 
+        // Load potion effects
+        loadClassPotionEffects(section, arenaClass);
+
         // Per-class permissions
         loadClassPermissions(arenaClass, section);
         loadClassLobbyPermissions(arenaClass, section);
@@ -400,6 +403,24 @@ public class ArenaMasterImpl implements ArenaMaster
             return;
         }
         setter.accept(thing);
+    }
+
+    private void loadClassPotionEffects(ConfigurationSection section, ArenaClass arenaClass) {
+        List<String> effects = section.getStringList("effects");
+        if (effects == null || effects.isEmpty()) {
+            String value = section.getString("effects", "");
+            effects = Arrays.asList(value.split(","));
+        }
+
+        // Prepend "effect:" for the potion effect thing parser
+        List<Thing> things = effects.stream()
+            .map(String::trim)
+            .map(s -> "effect:" + s)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        arenaClass.setEffects(things);
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
@@ -667,6 +688,8 @@ public class ArenaMasterImpl implements ArenaMaster
         plugin.reloadConfig();
         config = plugin.getConfig();
         initialize();
+        plugin.reloadSigns();
+        plugin.reloadAnnouncementsFile();
         if (wasEnabled) setEnabled(true);
     }
 

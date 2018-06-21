@@ -25,6 +25,7 @@ import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
 import com.garbagemule.MobArena.util.timer.StartDelayTimer;
+import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.SheepBouncer;
 import com.garbagemule.MobArena.waves.WaveManager;
 import org.bukkit.Bukkit;
@@ -1118,6 +1119,14 @@ public class ArenaImpl implements Arena
     
     private void clearPlayer(Player p)
     {
+        // Remove from boss health bar
+        monsterManager.getBossMonsters().forEach(entity -> {
+            MABoss boss = monsterManager.getBoss(entity);
+            if (boss != null) {
+                boss.getHealthBar().removePlayer(p);
+            }
+        });
+        
         // Remove pets.
         monsterManager.removePets(p);
         
@@ -1162,6 +1171,9 @@ public class ArenaImpl implements Arena
         }
         
         InventoryManager.clearInventory(p);
+        p.getActivePotionEffects().stream()
+            .map(PotionEffect::getType)
+            .forEach(p::removePotionEffect);
         
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);

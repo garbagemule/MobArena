@@ -5,15 +5,23 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
+import com.garbagemule.MobArena.metrics.ArenaCountChart;
+import com.garbagemule.MobArena.metrics.ClassCountChart;
+import com.garbagemule.MobArena.metrics.VaultChart;
+import com.garbagemule.MobArena.signs.ArenaSign;
+import com.garbagemule.MobArena.signs.SignBootstrap;
+import com.garbagemule.MobArena.signs.SignListeners;
 import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -48,6 +56,8 @@ public class MobArena extends JavaPlugin
     private Messenger messenger;
     private ThingManager thingman;
 
+    private SignListeners signListeners;
+
     @Override
     public void onLoad() {
         thingman = new ThingManager(this);
@@ -57,6 +67,7 @@ public class MobArena extends JavaPlugin
         // Initialize config-file
         configFile = new File(getDataFolder(), "config.yml");
         config = new YamlConfiguration();
+        ConfigurationSerialization.registerClass(ArenaSign.class);
         reloadConfig();
 
         // Initialize global messenger
@@ -71,7 +82,7 @@ public class MobArena extends JavaPlugin
         saveConfig();
 
         // Initialize announcements-file
-        loadAnnouncementsFile();
+        reloadAnnouncementsFile();
 
         // Load boss abilities
         loadAbilities();
@@ -84,8 +95,14 @@ public class MobArena extends JavaPlugin
         arenaMaster = new ArenaMasterImpl(this);
         arenaMaster.initialize();
 
+        // Load signs after Messenger and ArenaMaster
+        reloadSigns();
+
         // Register event listeners
         registerListeners();
+
+        // Setup bStats metrics
+        setupMetrics();
 
         // Announce enable!
         getLogger().info("v" + this.getDescription().getVersion() + " enabled.");
@@ -104,6 +121,7 @@ public class MobArena extends JavaPlugin
         }
         arenaMaster.resetArenaMap();
         VersionChecker.shutdown();
+        ConfigurationSerialization.unregisterClass(ArenaSign.class);
 
         getLogger().info("disabled.");
     }
@@ -119,6 +137,16 @@ public class MobArena extends JavaPlugin
 
     @Override
     public void reloadConfig() {
+        // Make sure the data folder exists
+        File data = new File(getDataFolder(), "data");
+        if (!data.exists()) {
+            boolean created = data.mkdir();
+            if (!created) {
+                throw new IllegalStateException("Failed to create data folder!");
+            }
+            getLogger().info("Created data folder.");
+        }
+
         // Check if the config-file exists
         if (!configFile.exists()) {
             getLogger().info("No config-file found, creating default...");
@@ -155,16 +183,16 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    @Override
-    public void saveConfig() {
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
+    void reloadSigns() {
+        if (signListeners != null) {
+            signListeners.unregister();
         }
+        SignBootstrap bootstrap = SignBootstrap.create(this);
+        signListeners = new SignListeners();
+        signListeners.register(bootstrap);
     }
 
-    private void loadAnnouncementsFile() {
+    void reloadAnnouncementsFile() {
         // Create if missing
         File file = new File(getDataFolder(), "announcements.yml");
         try {
@@ -184,11 +212,22 @@ public class MobArena extends JavaPlugin
             yaml.load(file);
             ConfigUtils.addMissingRemoveObsolete(file, Msg.toYaml(), yaml);
             Msg.load(yaml);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reading the announcements-file:\n" + e.getMessage());
+        } catch (InvalidConfigurationException e) {
+            throw new RuntimeException("\n\n>>>\n>>> There is an error in your announements-file! Handle it!\n>>> Here's what snakeyaml says:\n>>>\n\n" + e.getMessage());
         }
     }
     
+    @Override
+    public void saveConfig() {
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void registerListeners() {
         // Bind the /ma, /mobarena commands to MACommands.
         commandHandler = new CommandHandler(this);
@@ -223,6 +262,13 @@ public class MobArena extends JavaPlugin
 
         getLogger().info("MagicSpells found, loading config-file.");
         this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
+    }
+
+    private void setupMetrics() {
+        Metrics metrics = new Metrics(this);
+        metrics.addCustomChart(new VaultChart(this));
+        metrics.addCustomChart(new ArenaCountChart(this));
+        metrics.addCustomChart(new ClassCountChart(this));
     }
     
     private void loadAbilities() {

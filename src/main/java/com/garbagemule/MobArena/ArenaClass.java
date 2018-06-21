@@ -28,6 +28,7 @@ public class ArenaClass
     private Thing helmet, chestplate, leggings, boots;
     private List<Thing> armor;
     private List<Thing> items;
+    private List<Thing> effects;
     private Map<String,Boolean> perms;
     private Map<String,Boolean> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
@@ -44,6 +45,7 @@ public class ArenaClass
         
         this.items = new ArrayList<>();
         this.armor = new ArrayList<>(4);
+        this.effects = new ArrayList<>();
         this.perms = new HashMap<>();
         this.lobbyperms = new HashMap<>();
 
@@ -128,6 +130,10 @@ public class ArenaClass
     public void setArmor(List<Thing> armor) {
         this.armor = armor;
     }
+
+    public void setEffects(List<Thing> effects) {
+        this.effects = effects;
+    }
     
     public boolean hasPermission(Player p) {
         String perm = "mobarena.classes." + configName;
@@ -156,6 +162,9 @@ public class ArenaClass
         if (chestplate != null) chestplate.giveTo(p);
         if (leggings   != null) leggings.giveTo(p);
         if (boots      != null) boots.giveTo(p);
+
+        // Potion effects
+        effects.forEach(thing -> thing.giveTo(p));
     }
     
     /**

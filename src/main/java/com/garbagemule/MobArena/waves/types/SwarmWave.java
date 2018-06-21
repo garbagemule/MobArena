@@ -50,6 +50,7 @@ public class SwarmWave extends AbstractWave
         result.setHealthMultiplier(getHealthMultiplier());
         result.setName(getName());
         result.setSpawnpoints(getSpawnpoints());
+        result.setEffects(getEffects());
         return result;
     }
 }

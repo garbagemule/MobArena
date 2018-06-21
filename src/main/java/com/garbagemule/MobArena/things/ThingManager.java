@@ -13,6 +13,7 @@ public class ThingManager implements ThingParser {
         parsers = new ArrayList<>();
         parsers.add(new CommandThingParser());
         parsers.add(new MoneyThingParser(plugin));
+        parsers.add(new PotionEffectThingParser());
         items = parser;
     }
 

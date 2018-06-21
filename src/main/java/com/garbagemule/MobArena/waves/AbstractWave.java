@@ -4,7 +4,9 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.WaveBranch;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import org.bukkit.Location;
+import org.bukkit.potion.PotionEffect;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +22,12 @@ public abstract class AbstractWave implements Wave
     private int firstWave, frequency, priority;
     
     private List<Location> spawnpoints;
+    private List<PotionEffect> effects;
     
+    public AbstractWave() {
+        this.effects = new ArrayList<>();
+    }
+
     @Override
     public abstract Map<MACreature, Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena);
 
@@ -38,6 +45,16 @@ public abstract class AbstractWave implements Wave
         this.spawnpoints = spawnpoints;
     }
     
+    @Override
+    public List<PotionEffect> getEffects() {
+        return effects;
+    }
+
+    @Override
+    public void setEffects(List<PotionEffect> effects) {
+        this.effects = effects;
+    }
+
     @Override
     public void announce(Arena arena, int wave) {
         type.announce(arena, wave);

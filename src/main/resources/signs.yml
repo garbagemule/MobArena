@@ -1,0 +1,55 @@
+# MobArena Sign Templates
+#
+# Use this file to set up sign templates for use in MobArena. All of
+# the templates in this file can be used for any of the three sign
+# types (info, join, leave).
+#
+# Here is an example of a template:
+#
+# potato:
+# - '<arena-name>'
+# - '---------------'
+# - 'Hit the sign to'
+# - 'join the arena!'
+#
+# The template ID is 'potato', and the template uses the <arena-name>
+# variable, which is translated into the name of the arena. To use the
+# template in a join sign for an arena called 'castle', just place a
+# sign in-game with the following lines:
+#
+#   [MA]      <-- needed by MobArena
+#   castle    <-- arena name
+#   join      <-- sign type
+#   potato    <-- template (optional)
+#
+# For detailed information about the available variables and the state
+# suffixes (-idle, -joining, -running), please visit the documentation.
+
+info-idle:
+- '&a<arena-name>'
+- '---------------'
+- 'Waiting for'
+- 'players to join'
+info-joining:
+- '&a<arena-name>'
+- '---------------'
+- 'Ready: <ready-players>/<lobby-players>'
+info-running:
+- '&a<arena-name>'
+- '---------------'
+- 'Wave: <current-wave>'
+- 'Alive: <live-players>/<initial-players>'
+
+join:
+- '&a<arena-name>'
+- '---------------'
+- 'Hit to join'
+join-running:
+- '&a<arena-name>'
+- '---------------'
+- 'In progress'
+
+leave:
+- '&a<arena-name>'
+- '---------------'
+- 'Hit to leave'

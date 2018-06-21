@@ -24,6 +24,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -74,6 +75,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
@@ -632,6 +634,7 @@ public class ArenaListener
                 event.getDrops().addAll(drops);
             }
             boss.setDead(true);
+            boss.getHealthBar().setProgress(0);
         }
 
         List<ItemStack> loot = monsters.getLoot(damagee);
@@ -682,6 +685,10 @@ public class ArenaListener
             }
         }
 
+        MABoss boss = (damagee instanceof LivingEntity)
+            ? monsters.getBoss((LivingEntity) damagee)
+            : null;
+
         // Pet wolf
         if (damagee instanceof Wolf && arena.hasPet(damagee)) {
             onPetDamage(event, (Wolf) damagee, damager);
@@ -697,6 +704,10 @@ public class ArenaListener
         // Snowmen melting
         else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
             event.setCancelled(true);
+        }
+        // Boss monster
+        else if (boss != null) {
+            onBossDamage(event, boss, damager);
         }
         // Regular monster
         else if (monsters.getMonsters().contains(damagee)) {
@@ -735,6 +746,16 @@ public class ArenaListener
 
     private void onMountDamage(EntityDamageEvent event, Horse mount, Entity damager) {
         event.setCancelled(true);
+    }
+
+    private void onBossDamage(EntityDamageEvent event, MABoss boss, Entity damager) {
+        onMonsterDamage(event, boss.getEntity(), damager);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        double progress = boss.getHealth() / boss.getMaxHealth();
+        boss.getHealthBar().setProgress(progress);
     }
     
     private void onMonsterDamage(EntityDamageEvent event, Entity monster, Entity damager) {
@@ -1267,8 +1288,8 @@ public class ArenaListener
         arena.playerLeave(p);
     }
 
-    public void onVehicleExit(VehicleExitEvent event) {
-        LivingEntity entity = event.getExited();
+    public void onVehicleEnter(VehicleEnterEvent event) {
+        Entity entity = event.getEntered();
         if (!(entity instanceof Player)) return;
 
         Player p = (Player) entity;
@@ -1277,8 +1298,16 @@ public class ArenaListener
         Vehicle vehicle = event.getVehicle();
         if (!(vehicle instanceof Horse)) return;
 
-        if (monsters.hasMount(vehicle)) {
+        Horse horse = (Horse) vehicle;
+        if (!monsters.hasMount(horse)) return;
+
+        AnimalTamer tamer = horse.getOwner();
+        if (!tamer.equals(p)) {
             event.setCancelled(true);
         }
+    }
+
+    public void onVehicleExit(VehicleExitEvent event) {
+        // OK BOSS
     }
 }

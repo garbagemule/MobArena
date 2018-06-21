@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.WaveBranch;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import org.bukkit.Location;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,22 @@ public interface Wave
      */
     void setSpawnpoints(List<Location> spawnpoints);
     
+    /**
+     * Get a list of potion effects that the monsters of this wave
+     * will be given when they spawn.
+     *
+     * @return a list of potion effects, may be empty
+     */
+    List<PotionEffect> getEffects();
+
+    /**
+     * Set the list of potion effects that the monsters of this wave
+     * will be given when they spawn.
+     *
+     * @param effects a list of potion effects, must be non-null
+     */
+    void setEffects(List<PotionEffect> effects);
+
     /**
      * Announce to all players that this wave is spawning.
      * @param arena an arena
