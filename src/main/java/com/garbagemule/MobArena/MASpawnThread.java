@@ -3,6 +3,8 @@ package com.garbagemule.MobArena;
 import com.garbagemule.MobArena.events.ArenaCompleteEvent;
 import com.garbagemule.MobArena.events.NewWaveEvent;
 import com.garbagemule.MobArena.framework.Arena;
+import com.garbagemule.MobArena.healthbar.CreatesHealthBar;
+import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.waves.MABoss;
@@ -31,6 +33,7 @@ public class MASpawnThread implements Runnable
     private RewardManager rewardManager;
     private WaveManager waveManager;
     private MonsterManager monsterManager;
+    private CreatesHealthBar createsHealthBar;
 
     private int playerCount, monsterLimit;
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
@@ -48,6 +51,7 @@ public class MASpawnThread implements Runnable
         this.rewardManager = arena.getRewardManager();
         this.waveManager = arena.getWaveManager();
         this.monsterManager = arena.getMonsterManager();
+        this.createsHealthBar = new CreatesHealthBar(arena.getSettings().getString("boss-health-bar", "none"));
 
         reset();
     }
@@ -195,6 +199,10 @@ public class MASpawnThread implements Runnable
                         BossWave bw = (BossWave) w;
                         double maxHealth = bw.getMaxHealth(playerCount);
                         MABoss boss = monsterManager.addBoss(e, maxHealth);
+                        HealthBar healthbar = createsHealthBar.create(e, bw.getBossName());
+                        arena.getPlayersInArena().forEach(healthbar::addPlayer);
+                        healthbar.setProgress(1);
+                        boss.setHealthBar(healthbar);
                         boss.setReward(bw.getReward());
                         boss.setDrops(bw.getDrops());
                         bw.addMABoss(boss);

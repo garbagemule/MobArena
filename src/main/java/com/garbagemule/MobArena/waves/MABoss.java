@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.waves;
 
+import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
@@ -13,6 +14,7 @@ public class MABoss
     private boolean dead;
     private Thing reward;
     private List<ItemStack> drops;
+    private HealthBar healthbar;
     
     /**
      * Create an MABoss from the given entity with the given max health.
@@ -73,6 +75,7 @@ public class MABoss
      */
     public void setDead(boolean dead) {
         this.dead = dead;
+        healthbar.removeAll();
     }
     
     public void setReward(Thing reward) {
@@ -89,5 +92,13 @@ public class MABoss
 
     public List<ItemStack> getDrops() {
         return drops;
+    }
+
+    public HealthBar getHealthBar() {
+        return healthbar;
+    }
+
+    public void setHealthBar(HealthBar healthbar) {
+        this.healthbar = healthbar;
     }
 }

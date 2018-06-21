@@ -34,6 +34,7 @@ auto-start-timer: 0
 start-delay-timer: 0
 auto-ready: false
 use-class-chests: false
+boss-health-bar: boss-bar
 display-waves-as-level: false
 display-timer-as-level: false
 use-scoreboards: true
