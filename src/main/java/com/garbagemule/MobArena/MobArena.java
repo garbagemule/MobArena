@@ -6,7 +6,12 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.metrics.ArenaCountChart;
+import com.garbagemule.MobArena.metrics.ClassChestsChart;
 import com.garbagemule.MobArena.metrics.ClassCountChart;
+import com.garbagemule.MobArena.metrics.FoodRegenChart;
+import com.garbagemule.MobArena.metrics.IsolatedChatChart;
+import com.garbagemule.MobArena.metrics.MonsterInfightChart;
+import com.garbagemule.MobArena.metrics.PvpEnabledChart;
 import com.garbagemule.MobArena.metrics.VaultChart;
 import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
@@ -269,6 +274,11 @@ public class MobArena extends JavaPlugin
         metrics.addCustomChart(new VaultChart(this));
         metrics.addCustomChart(new ArenaCountChart(this));
         metrics.addCustomChart(new ClassCountChart(this));
+        metrics.addCustomChart(new ClassChestsChart(this));
+        metrics.addCustomChart(new FoodRegenChart(this));
+        metrics.addCustomChart(new IsolatedChatChart(this));
+        metrics.addCustomChart(new MonsterInfightChart(this));
+        metrics.addCustomChart(new PvpEnabledChart(this));
     }
     
     private void loadAbilities() {
