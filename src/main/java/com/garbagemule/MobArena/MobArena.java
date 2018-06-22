@@ -145,7 +145,7 @@ public class MobArena extends JavaPlugin
         // Make sure the data folder exists
         File data = new File(getDataFolder(), "data");
         if (!data.exists()) {
-            boolean created = data.mkdir();
+            boolean created = data.mkdirs();
             if (!created) {
                 throw new IllegalStateException("Failed to create data folder!");
             }
