@@ -1033,12 +1033,6 @@ public class ArenaImpl implements Arena
         }
     }
     
-    private void removePotionEffects(Player p) {
-        for (PotionEffect effect : p.getActivePotionEffects()) {
-            p.removePotionEffect(effect.getType());
-        }
-    }
-    
     private void startSpawner() {
         // Set the spawn flags to enable monster spawning.
         world.setSpawnFlags(true, true);
@@ -1171,10 +1165,7 @@ public class ArenaImpl implements Arena
         }
         
         InventoryManager.clearInventory(p);
-        p.getActivePotionEffects().stream()
-            .map(PotionEffect::getType)
-            .forEach(p::removePotionEffect);
-        
+        removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
 
@@ -1343,6 +1334,12 @@ public class ArenaImpl implements Arena
         p.recalculatePermissions();
     }
     
+    private void removePotionEffects(Player p) {
+        p.getActivePotionEffects().stream()
+            .map(PotionEffect::getType)
+            .forEach(p::removePotionEffect);
+    }
+
     private void cleanup() {
         removeMonsters();
         removeBlocks();
