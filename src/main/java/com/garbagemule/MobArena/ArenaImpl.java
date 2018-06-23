@@ -1185,6 +1185,7 @@ public class ArenaImpl implements Arena
         }
         
         InventoryManager.clearInventory(p);
+        removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
         
         PlayerInventory inv = p.getInventory();
