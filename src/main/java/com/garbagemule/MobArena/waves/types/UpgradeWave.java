@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -182,7 +183,8 @@ public class UpgradeWave extends AbstractWave
         public void upgrade(Arena arena, Player p) {
             if (perm == null) return;
 
-            arena.addPermission(p, perm, value);
+            PermissionAttachment attachment = p.addAttachment(arena.getPlugin());
+            attachment.setPermission(perm, value);
         }
     }
 }
