@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.waves;
 
-import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.ability.Ability;
@@ -20,18 +20,13 @@ import com.garbagemule.MobArena.waves.types.SpecialWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.SwarmWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.ArmorUpgrade;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.GenericUpgrade;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.PermissionUpgrade;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.Upgrade;
-import com.garbagemule.MobArena.waves.types.UpgradeWave.WeaponUpgrade;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -242,7 +237,8 @@ public class WaveParser
     }
     
     private static Wave parseUpgradeWave(Arena arena, String name, ConfigurationSection config) {
-        Map<String,List<Upgrade>> upgrades = getUpgradeMap(config);
+        ThingManager thingman = arena.getPlugin().getThingManager();
+        Map<String,List<Thing>> upgrades = getUpgradeMap(config, thingman);
         if (upgrades == null || upgrades.isEmpty()) {
             arena.getPlugin().getLogger().warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
             return null;
@@ -435,7 +431,7 @@ public class WaveParser
             .collect(Collectors.toList());
     }
     
-    private static Map<String,List<Upgrade>> getUpgradeMap(ConfigurationSection config) {
+    private static Map<String,List<Thing>> getUpgradeMap(ConfigurationSection config, ThingManager thingman) {
         ConfigurationSection section = config.getConfigurationSection("upgrades");
         if (section == null) {
             return null;
@@ -446,50 +442,59 @@ public class WaveParser
             return null;
         }
         
-        Map<String,List<Upgrade>> upgrades = new HashMap<>();
+        Map<String,List<Thing>> upgrades = new HashMap<>();
         String path = "upgrades.";
         
         for (String className : classes) {
-            String itemList;
             // Legacy support
             Object val = config.get(path + className, null);
             if (val instanceof String) {
-                itemList = (String) val;
-                List<ItemStack> stacks = ItemParser.parseItems(itemList);
-                List<Upgrade> list = new ArrayList<>();
-                for (ItemStack stack : stacks) {
-                    list.add(new GenericUpgrade(stack));
-                }
-                upgrades.put(className.toLowerCase(), list);
+                String s = (String) val;
+                List<Thing> things = Arrays.asList(s.split(",")).stream()
+                    .map(String::trim)
+                    .map(thingman::parse)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+                upgrades.put(className.toLowerCase(), things);
             }
             // New complex setup
             else if (val instanceof ConfigurationSection) {
                 ConfigurationSection classSection = (ConfigurationSection) val;
-                List<Upgrade> list = new ArrayList<>();
+                List<Thing> list = new ArrayList<>();
 
-                // Items (Generic + Weapons)
-                itemList = classSection.getString("items", null);
-                if (itemList != null) {
-                    for (ItemStack stack : ItemParser.parseItems(itemList)) {
-                        list.add(ArenaClass.isWeapon(stack) ? new WeaponUpgrade(stack) : new GenericUpgrade(stack));
-                    }
+                // Items
+                List<String> items = classSection.getStringList("items");
+                if (items == null || items.isEmpty()) {
+                    String value = classSection.getString("items", "");
+                    items = Arrays.asList(value.split(","));
                 }
+                items.stream()
+                    .map(String::trim)
+                    .map(thingman::parse)
+                    .filter(Objects::nonNull)
+                    .forEach(list::add);
 
                 // Armor
-                itemList = classSection.getString("armor", null);
-                if (itemList != null) {
-                    for (ItemStack stack : ItemParser.parseItems(itemList)) {
-                        list.add(new ArmorUpgrade(stack));
-                    }
+                List<String> armor = classSection.getStringList("armor");
+                if (armor == null || armor.isEmpty()) {
+                    String value = classSection.getString("armor", "");
+                    armor = Arrays.asList(value.split(","));
                 }
 
-                // Permissions
-                List<String> perms = classSection.getStringList("permissions");
-                if (!perms.isEmpty()) {
-                    for (String perm : perms) {
-                        list.add(new PermissionUpgrade(perm));
-                    }
-                }
+                // Prepend "armor:" for the armor thing parser
+                armor.stream()
+                    .map(String::trim)
+                    .map(s -> "armor:" + s)
+                    .map(thingman::parse)
+                    .filter(Objects::nonNull)
+                    .forEach(list::add);
+
+                // Prepend "perm:" for the permission thing parser
+                classSection.getStringList("permissions").stream()
+                    .map(perm -> "perm:" + perm)
+                    .map(thingman::parse)
+                    .filter(Objects::nonNull)
+                    .forEach(list::add);
 
                 // Put in the map
                 upgrades.put(className.toLowerCase(), list);
