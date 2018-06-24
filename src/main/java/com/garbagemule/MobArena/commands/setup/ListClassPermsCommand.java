@@ -4,11 +4,11 @@ import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.command.CommandSender;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 @CommandInfo(
     name    = "listclassperms",
@@ -33,18 +33,14 @@ public class ListClassPermsCommand implements Command
         }
         
         am.getGlobalMessenger().tell(sender, "Permissions for '" + className + "':");
-        Map<String,Boolean> perms = arenaClass.getPermissions();
+        List<Thing> perms = arenaClass.getPermissions();
         if (perms.isEmpty()) {
             am.getGlobalMessenger().tell(sender, "<none>");
             return true;
         }
         
-        for (Entry<String,Boolean> entry : arenaClass.getPermissions().entrySet()) {
-            String perm = entry.getKey();
-            if (!entry.getValue()) {
-                perm = "^" + perm;
-            }
-            am.getGlobalMessenger().tell(sender, "- " + perm);
+        for (Thing perm : perms) {
+            am.getGlobalMessenger().tell(sender, perm.toString());
         }
         return true;
     }

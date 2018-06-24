@@ -1166,7 +1166,7 @@ public class ArenaImpl implements Arena
         removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
-        arenaClass.grantLobbyPermissions(plugin, p);
+        arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);
     }
@@ -1240,7 +1240,7 @@ public class ArenaImpl implements Arena
         inv.setBoots(boots);
         inv.setItemInOffHand(offhand);
 
-        arenaClass.grantLobbyPermissions(plugin, p);
+        arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);
     }
@@ -1290,7 +1290,7 @@ public class ArenaImpl implements Arena
             return;
         }
         removePermissionAttachments(player);
-        arenaClass.grantPermissions(plugin, player);
+        arenaClass.grantPermissions(player);
     }
 
     private void removePermissionAttachments(Player player) {

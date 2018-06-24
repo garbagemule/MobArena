@@ -425,33 +425,19 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        List<String> perms = section.getStringList("permissions");
-        if (perms.isEmpty()) return;
-
-        for (String perm : perms) {
-            // If the permission starts with - or ^, it must be revoked.
-            boolean value = true;
-            if (perm.startsWith("-") || perm.startsWith("^")) {
-                perm = perm.substring(1).trim();
-                value = false;
-            }
-            arenaClass.addPermission(perm, value);
-        }
+        section.getStringList("permissions").stream()
+            .map(perm -> "perm:" + perm)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .forEach(arenaClass::addPermission);
     }
 
     private void loadClassLobbyPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        List<String> perms = section.getStringList("lobby-permissions");
-        if (perms.isEmpty()) return;
-
-        for (String perm : perms) {
-            // If the permission starts with - or ^, it must be revoked.
-            boolean value = true;
-            if (perm.startsWith("-") || perm.startsWith("^")) {
-                perm = perm.substring(1).trim();
-                value = false;
-            }
-            arenaClass.addLobbyPermission(perm, value);
-        }
+        section.getStringList("lobby-permissions").stream()
+            .map(perm -> "perm:" + perm)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .forEach(arenaClass::addLobbyPermission);
     }
 
     public ArenaClass createClassNode(String classname, PlayerInventory inv, boolean safe) {
