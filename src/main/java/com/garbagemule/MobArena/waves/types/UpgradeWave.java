@@ -29,7 +29,7 @@ public class UpgradeWave extends AbstractWave
         return new HashMap<>();
     }
 
-    public void grantItems(Arena arena, Player p, String className) {
+    public void grantItems(Player p, String className) {
         List<Thing> list = upgrades.get(className);
         if (list == null) return;
 
