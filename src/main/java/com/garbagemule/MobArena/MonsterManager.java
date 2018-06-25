@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena;
 
+import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class MonsterManager
@@ -43,6 +45,11 @@ public class MonsterManager
     }
     
     public void clear() {
+        bosses.values().stream()
+            .map(MABoss::getHealthBar)
+            .filter(Objects::nonNull)
+            .forEach(HealthBar::removeAll);
+
         removeAll(monsters);
         removeAll(sheep);
         removeAll(golems);
