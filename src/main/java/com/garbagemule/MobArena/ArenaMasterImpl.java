@@ -3,11 +3,9 @@ package com.garbagemule.MobArena;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 
-import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
-import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,8 +14,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -437,55 +433,6 @@ public class ArenaMasterImpl implements ArenaMaster
             .map(plugin.getThingManager()::parse)
             .filter(Objects::nonNull)
             .forEach(arenaClass::addLobbyPermission);
-    }
-
-    public ArenaClass createClassNode(String classname, PlayerInventory inv, boolean safe) {
-        String path = "classes." + classname;
-        if (safe && config.getConfigurationSection(path) != null) {
-            return null;
-        }
-
-        // Create the node.
-        config.set(path, "");
-
-        // Grab the section, create if missing
-        ConfigurationSection section = config.getConfigurationSection(path);
-        if (section == null) section = config.createSection(path);
-
-        // Take the current items and armor.
-        section.set("items", ItemParser.parseString(inv.getContents()));
-        section.set("armor", ItemParser.parseString(inv.getArmorContents()));
-
-        // If the helmet isn't a real helmet, set it explicitly.
-        ItemStack helmet = inv.getHelmet();
-        if (helmet != null && ArmorType.getType(helmet) != ArmorType.HELMET) {
-            section.set("helmet", ItemParser.parseString(helmet));
-        }
-
-        // Include the off-hand
-        ItemStack offhand = inv.getItemInOffHand();
-        if (offhand != null) {
-            section.set("offhand", ItemParser.parseString(offhand));
-        }
-
-        // Save changes.
-        plugin.saveConfig();
-
-        // Load the class
-        return loadClass(classname);
-    }
-
-    public void removeClassNode(String classname) {
-        String lowercase = classname.toLowerCase();
-        if (!classes.containsKey(lowercase))
-            throw new IllegalArgumentException("Class does not exist!");
-
-        // Remove the class from the config-file and save it.
-        config.set("classes." + classname, null);
-        plugin.saveConfig();
-
-        // Remove the class from the map.
-        classes.remove(lowercase);
     }
 
     /**

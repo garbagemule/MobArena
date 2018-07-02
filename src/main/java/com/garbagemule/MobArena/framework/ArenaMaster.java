@@ -107,10 +107,6 @@ public interface ArenaMaster
      */
     void loadClasses();
     
-    ArenaClass createClassNode(String className, PlayerInventory inv, boolean safe);
-    
-    void removeClassNode(String className);
-    
     /**
      * Load all arena-related stuff.
      */
