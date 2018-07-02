@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -176,14 +175,6 @@ public class ArenaClass
      */
     public void addPermission(Thing permission) {
         perms.add(permission);
-    }
-    
-    /**
-     * Get an unmodifiable map of permissions and values for the class.
-     * @return a map of permissions and values
-     */
-    public List<Thing> getPermissions() {
-        return Collections.unmodifiableList(perms);
     }
 
     public void addLobbyPermission(Thing permission) {
