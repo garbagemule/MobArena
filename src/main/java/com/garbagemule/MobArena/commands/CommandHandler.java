@@ -22,7 +22,6 @@ import com.garbagemule.MobArena.commands.setup.RemoveContainerCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveLeaderboardCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveSpawnpointCommand;
 import com.garbagemule.MobArena.commands.setup.SetClassCommand;
-import com.garbagemule.MobArena.commands.setup.SetClassPriceCommand;
 import com.garbagemule.MobArena.commands.setup.SettingCommand;
 import com.garbagemule.MobArena.commands.setup.SetupCommand;
 import com.garbagemule.MobArena.commands.user.ArenaListCommand;
@@ -240,7 +239,6 @@ public class CommandHandler implements CommandExecutor
 
         register(ListClassesCommand.class);
         register(SetClassCommand.class);
-        register(SetClassPriceCommand.class);
         register(RemoveClassCommand.class);
         register(ClassChestCommand.class);
 
