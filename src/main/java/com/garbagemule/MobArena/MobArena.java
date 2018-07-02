@@ -69,6 +69,8 @@ public class MobArena extends JavaPlugin
     }
 
     public void onEnable() {
+        ServerVersionCheck.check(getServer());
+
         // Initialize config-file
         configFile = new File(getDataFolder(), "config.yml");
         config = new YamlConfiguration();
