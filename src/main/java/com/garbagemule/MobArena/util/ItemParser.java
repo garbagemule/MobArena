@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.util;
 
-import com.garbagemule.MobArena.MobArena;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
