@@ -8,7 +8,6 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ItemParser;
-import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -487,64 +486,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
         // Remove the class from the map.
         classes.remove(lowercase);
-    }
-
-    public boolean addClassPermission(String classname, String perm) {
-        return addRemoveClassPermission(classname, perm, true);
-    }
-
-    public boolean removeClassPermission(String classname, String perm) {
-        return addRemoveClassPermission(classname, perm, false);
-    }
-
-    private boolean addRemoveClassPermission(String classname, String perm, boolean add) {
-        classname = TextUtils.camelCase(classname);
-        String path = "classes." + classname;
-        if (config.getConfigurationSection(path) == null)
-            return false;
-
-        // Grab the class section
-        ConfigurationSection section = config.getConfigurationSection(path);
-
-        // Get any previous nodes
-        List<String> nodes = section.getStringList("permissions");
-        if (nodes.contains(perm) && add) {
-            return false;
-        }
-        else if (nodes.contains(perm) && !add) {
-            nodes.remove(perm);
-        }
-        else if (!nodes.contains(perm) && add) {
-            removeContradictions(nodes, perm);
-            nodes.add(perm);
-        }
-        else if (!nodes.contains(perm) && !add) {
-            return false;
-        }
-
-        // Replace the set.
-        section.set("permissions", nodes);
-        plugin.saveConfig();
-
-        // Reload the class.
-        loadClass(classname);
-        return true;
-    }
-
-    /**
-     * Removes any nodes that would contradict the permission, e.g. if the node
-     * 'mobarena.use' is in the set, and the perm node is '-mobarena.use', the
-     * '-mobarena.use' node is removed as to not contradict the new
-     * 'mobarena.use' node.
-     */
-    private void removeContradictions(List<String> nodes, String perm) {
-        if (perm.startsWith("^") || perm.startsWith("-")) {
-            nodes.remove(perm.substring(1).trim());
-        }
-        else {
-            nodes.remove("^" + perm);
-            nodes.remove("-" + perm);
-        }
     }
 
     /**

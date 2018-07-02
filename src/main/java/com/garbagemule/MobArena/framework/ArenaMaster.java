@@ -111,10 +111,6 @@ public interface ArenaMaster
     
     void removeClassNode(String className);
     
-    boolean addClassPermission(String className, String perm);
-    
-    boolean removeClassPermission(String className, String perm);
-    
     /**
      * Load all arena-related stuff.
      */
