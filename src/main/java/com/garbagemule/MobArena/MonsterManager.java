@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
@@ -19,26 +20,29 @@ import java.util.Set;
 public class MonsterManager
 {
     private Set<LivingEntity> monsters, sheep, golems;
-    private Set<Wolf> pets;
+    private Set<Wolf> petWolves;
+    private Set<Ocelot> petOcelots;
     private Map<LivingEntity,MABoss> bosses;
     private Map<LivingEntity,List<ItemStack>> suppliers;
     private Set<LivingEntity> mounts;
     
     public MonsterManager() {
-        this.monsters  = new HashSet<>();
-        this.sheep     = new HashSet<>();
-        this.golems    = new HashSet<>();
-        this.pets      = new HashSet<>();
-        this.bosses    = new HashMap<>();
-        this.suppliers = new HashMap<>();
-        this.mounts    = new HashSet<>();
+        this.monsters   = new HashSet<>();
+        this.sheep      = new HashSet<>();
+        this.golems     = new HashSet<>();
+        this.petWolves  = new HashSet<>();
+        this.petOcelots = new HashSet<>();
+        this.bosses     = new HashMap<>();
+        this.suppliers  = new HashMap<>();
+        this.mounts     = new HashSet<>();
     }
     
     public void reset() {
         monsters.clear();
         sheep.clear();
         golems.clear();
-        pets.clear();
+        petWolves.clear();
+        petOcelots.clear();
         bosses.clear();
         suppliers.clear();
         mounts.clear();
@@ -53,7 +57,8 @@ public class MonsterManager
         removeAll(monsters);
         removeAll(sheep);
         removeAll(golems);
-        removeAll(pets);
+        removeAll(petWolves);
+        removeAll(petOcelots);
         removeAll(bosses.keySet());
         removeAll(suppliers.keySet());
         removeAll(mounts);
@@ -73,7 +78,8 @@ public class MonsterManager
         if (monsters.remove(e)) {
             sheep.remove(e);
             golems.remove(e);
-            pets.remove(e);
+            petWolves.remove(e);
+            petOcelots.remove(e);
             suppliers.remove(e);
             MABoss boss = bosses.remove(e);
             if (boss != null) {
@@ -118,25 +124,32 @@ public class MonsterManager
         return golems.remove(e);
     }
     
-    public Set<Wolf> getPets() {
-        return pets;
-    }
-    
     public void addPet(Wolf w) {
-        pets.add(w);
+        petWolves.add(w);
+    }
+
+    public void addPet(Ocelot o) {
+        petOcelots.add(o);
     }
     
     public boolean hasPet(Entity e) {
-        return pets.contains(e);
+        return petWolves.contains(e) || petOcelots.contains(e);
     }
     
     public void removePets(Player p) {
-        for (Wolf w : pets) {
+        for (Wolf w : petWolves) {
             if (w == null || !(w.getOwner() instanceof Player) || !w.getOwner().getName().equals(p.getName()))
                 continue;
             
             w.setOwner(null);
             w.remove();
+        }
+        for (Ocelot o : petOcelots) {
+            if (o == null || !(o.getOwner() instanceof Player) || !o.getOwner().getName().equals(p.getName()))
+                continue;
+
+            o.setOwner(null);
+            o.remove();
         }
     }
     

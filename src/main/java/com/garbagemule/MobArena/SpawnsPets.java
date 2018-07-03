@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.PlayerInventory;
@@ -10,9 +11,11 @@ import org.bukkit.inventory.PlayerInventory;
 public class SpawnsPets {
 
     private final Material wolfMaterial;
+    private final Material ocelotMaterial;
 
-    SpawnsPets(Material wolfMaterial) {
+    SpawnsPets(Material wolfMaterial, Material ocelotMaterial) {
         this.wolfMaterial = wolfMaterial;
+        this.ocelotMaterial = ocelotMaterial;
     }
 
     void spawn(Arena arena) {
@@ -29,6 +32,7 @@ public class SpawnsPets {
             return;
         }
         spawnWolfPets(player, arena);
+        spawnOcelotPets(player, arena);
     }
 
     private void spawnWolfPets(Player player, Arena arena) {
@@ -47,6 +51,27 @@ public class SpawnsPets {
             wolf.setTamed(true);
             wolf.setOwner(player);
             arena.getMonsterManager().addPet(wolf);
+        }
+
+        inv.setItem(index, null);
+    }
+
+    private void spawnOcelotPets(Player player, Arena arena) {
+        if (ocelotMaterial == null) {
+            return;
+        }
+        PlayerInventory inv = player.getInventory();
+        int index = inv.first(ocelotMaterial);
+        if (index == -1) {
+            return;
+        }
+
+        int amount = inv.getItem(index).getAmount();
+        for (int i = 0; i < amount; i++) {
+            Ocelot ocelot = (Ocelot) arena.getWorld().spawnEntity(player.getLocation(), EntityType.OCELOT);
+            ocelot.setTamed(true);
+            ocelot.setOwner(player);
+            arena.getMonsterManager().addPet(ocelot);
         }
 
         inv.setItem(index, null);

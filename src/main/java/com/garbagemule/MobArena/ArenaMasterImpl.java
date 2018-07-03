@@ -57,7 +57,7 @@ public class ArenaMasterImpl implements ArenaMaster
         this.classes = new HashMap<>();
 
         this.allowedCommands = new HashSet<>();
-        this.spawnsPets = new SpawnsPets(Material.BONE);
+        this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
         
         this.enabled = config.getBoolean("global-settings.enabled", true);
     }
@@ -266,14 +266,19 @@ public class ArenaMasterImpl implements ArenaMaster
 
     private void loadPetItems(ConfigurationSection settings) {
         String wolf = settings.getString("pet-items.wolf", "");
+        String ocelot = settings.getString("pet-items.ocelot", "");
 
         Material wolfMaterial = Material.getMaterial(wolf.toUpperCase());
+        Material ocelotMaterial = Material.getMaterial(ocelot.toUpperCase());
 
         if (wolfMaterial == null && !wolf.isEmpty()) {
             plugin.getLogger().warning("Unknown item type for wolf pet item: " + wolf);
         }
+        if (ocelotMaterial == null && !ocelot.isEmpty()) {
+            plugin.getLogger().warning("Unknown item type for ocelot pet item: " + ocelot);
+        }
 
-        spawnsPets = new SpawnsPets(wolfMaterial);
+        spawnsPets = new SpawnsPets(wolfMaterial, ocelotMaterial);
     }
 
     /**
