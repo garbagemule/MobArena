@@ -9,12 +9,17 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ScoreboardManager {
     private static final String DISPLAY_NAME = ChatColor.GREEN + "Kills       " + ChatColor.AQUA + "Wave ";
 
     private Arena arena;
     private Scoreboard scoreboard;
     private Objective kills;
+
+    private Map<Player, Scoreboard> scoreboards;
     
     /**
      * Create a new scoreboard for the given arena.
@@ -23,6 +28,7 @@ public class ScoreboardManager {
     ScoreboardManager(Arena arena) {
         this.arena = arena;
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        scoreboards = new HashMap<>();
     }
     
     /**
@@ -34,6 +40,7 @@ public class ScoreboardManager {
         /* Set the player's scoreboard and give them an initial non-zero
          * score. This is necessary due to either Minecraft or Bukkit
          * not wanting to show non-zero scores initially. */
+        scoreboards.put(player, player.getScoreboard());
         player.setScoreboard(scoreboard);
         kills.getScore(player).setScore(8);
     }
@@ -45,7 +52,12 @@ public class ScoreboardManager {
      */
     void removePlayer(Player player) {
         try {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            Scoreboard scoreboard = scoreboards.remove(player);
+            if (scoreboard != null) {
+                player.setScoreboard(scoreboard);
+            } else {
+                player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            }
         } catch (IllegalStateException e) {
             // Happens if the player is logging out, just swallow it
         }
