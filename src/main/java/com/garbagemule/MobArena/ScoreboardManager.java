@@ -103,11 +103,7 @@ public class ScoreboardManager {
         final Score fake = kills.getScore(name);
         if (value == 0) {
             fake.setScore(8);
-            arena.scheduleTask(new Runnable() {
-                public void run() {
-                    fake.setScore(0);
-                }
-            }, 1);
+            arena.scheduleTask(() -> fake.setScore(0), 1);
         } else {
             fake.setScore(value);
         }
@@ -131,13 +127,7 @@ public class ScoreboardManager {
          * It is necessary to delay the reset of the player scores, and the
          * reset is necessary because of non-zero crappiness. */
         resetKills();
-        arena.scheduleTask(new Runnable() {
-            public void run() {
-                for (Player p : arena.getPlayersInArena()) {
-                    kills.getScore(p.getName()).setScore(0);
-                }
-            }
-        }, 1);
+        arena.scheduleTask(this::resetPlayerScores, 1);
     }
     
     private void resetKills() {
@@ -147,6 +137,13 @@ public class ScoreboardManager {
         kills = scoreboard.registerNewObjective("kills", "ma-kills");
         kills.setDisplaySlot(DisplaySlot.SIDEBAR);
         updateWave(0);
+    }
+
+    private void resetPlayerScores() {
+        arena.getPlayersInArena().stream()
+            .map(Player::getName)
+            .map(kills::getScore)
+            .forEach(score -> score.setScore(0));
     }
 
     static class NullScoreboardManager extends ScoreboardManager {
