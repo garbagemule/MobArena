@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.framework;
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.SpawnsPets;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -122,6 +123,8 @@ public interface ArenaMaster
     
     void removeArenaNode(Arena arena);
     
+    SpawnsPets getSpawnsPets();
+
     
     
     /*/////////////////////////////////////////////////////////////////////////

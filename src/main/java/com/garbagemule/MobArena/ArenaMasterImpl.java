@@ -9,6 +9,7 @@ import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,6 +40,7 @@ public class ArenaMasterImpl implements ArenaMaster
     private Map<String, ArenaClass> classes;
 
     private Set<String> allowedCommands;
+    private SpawnsPets spawnsPets;
     
     private boolean enabled;
 
@@ -55,6 +57,7 @@ public class ArenaMasterImpl implements ArenaMaster
         this.classes = new HashMap<>();
 
         this.allowedCommands = new HashSet<>();
+        this.spawnsPets = new SpawnsPets(Material.BONE);
         
         this.enabled = config.getBoolean("global-settings.enabled", true);
     }
@@ -257,6 +260,20 @@ public class ArenaMasterImpl implements ArenaMaster
         for (String part : parts) {
             allowedCommands.add(part.trim().toLowerCase());
         }
+
+        loadPetItems(section);
+    }
+
+    private void loadPetItems(ConfigurationSection settings) {
+        String wolf = settings.getString("pet-items.wolf", "");
+
+        Material wolfMaterial = Material.getMaterial(wolf.toUpperCase());
+
+        if (wolfMaterial == null && !wolf.isEmpty()) {
+            plugin.getLogger().warning("Unknown item type for wolf pet item: " + wolf);
+        }
+
+        spawnsPets = new SpawnsPets(wolfMaterial);
     }
 
     /**
@@ -558,6 +575,10 @@ public class ArenaMasterImpl implements ArenaMaster
 
         config.set("arenas." + arena.configName(), null);
         plugin.saveConfig();
+    }
+
+    public SpawnsPets getSpawnsPets() {
+        return spawnsPets;
     }
 
     public void reloadConfig() {

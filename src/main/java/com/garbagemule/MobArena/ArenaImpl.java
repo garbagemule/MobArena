@@ -42,7 +42,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -134,6 +133,8 @@ public class ArenaImpl implements Arena
     private Map<Player, Step> histories;
     private StepFactory playerJoinArena;
     private StepFactory playerSpecArena;
+
+    private SpawnsPets spawnsPets;
 
     /**
      * Primary constructor. Requires a name and a world.
@@ -231,6 +232,8 @@ public class ArenaImpl implements Arena
         this.histories = new HashMap<>();
         this.playerJoinArena = PlayerJoinArena.create(this);
         this.playerSpecArena = PlayerSpecArena.create(this);
+
+        this.spawnsPets = plugin.getArenaMaster().getSpawnsPets();
     }
     
     
@@ -538,7 +541,7 @@ public class ArenaImpl implements Arena
         running = true;
         
         // Spawn pets (must happen after 'running = true;')
-        spawnPets();
+        spawnsPets.spawn(this);
         
         // Spawn mounts
         spawnMounts();
@@ -922,42 +925,6 @@ public class ArenaImpl implements Arena
         }
     }
 
-    private void spawnPets() {
-        for (Player p : arenaPlayers) {
-            // Skip players who are either null or offline
-            if (p == null || !p.isOnline()) continue;
-
-            // Skip the My Items class
-            ArenaClass ac = arenaPlayerMap.get(p).getArenaClass();
-            if (ac == null || ac.getConfigName().equals("My Items")) continue;
-
-            // Grab the inventory
-            PlayerInventory inv = p.getInventory();
-            if (inv == null) continue;
-
-            // Find the first slot containing bones
-            int bone = inv.first(Material.BONE);
-            if (bone == -1) continue;
-            
-            // Get the amount of pets to spawn
-            int amount = inv.getItem(bone).getAmount();
-            
-            // Spawn each pet
-            for (int i = 0; i < amount; i++) {
-                Wolf wolf = (Wolf) world.spawnEntity(p.getLocation(), EntityType.WOLF);
-                wolf.setTamed(true);
-                wolf.setOwner(p);
-                wolf.setHealth(wolf.getMaxHealth());
-                if (settings.getBoolean("hellhounds"))
-                    wolf.setFireTicks(32768);
-                monsterManager.addPet(wolf);
-            }
-            
-            // Remove the bones
-            inv.setItem(bone, null);
-        }
-    }
-    
     private void spawnMounts() {
         for (Player p : arenaPlayers) {
             // Skip players who are either null or offline
