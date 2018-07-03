@@ -241,7 +241,7 @@ public class SetupCommand implements Command, Listener {
             Player p = event.getPlayer();
             if (!p.equals(player)) return;
 
-            ItemStack tool = p.getItemInHand();
+            ItemStack tool = p.getInventory().getItemInMainHand();
             if (!isTool(tool)) return;
 
             event.setCancelled(true);
@@ -264,7 +264,7 @@ public class SetupCommand implements Command, Listener {
 
             if (event.getHand() == EquipmentSlot.OFF_HAND) return;
 
-            ItemStack tool = p.getItemInHand();
+            ItemStack tool = p.getInventory().getItemInMainHand();
             if (!isTool(tool)) return;
 
             String name = tool.getItemMeta().getDisplayName();
