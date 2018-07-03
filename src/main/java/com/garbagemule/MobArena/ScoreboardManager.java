@@ -42,7 +42,7 @@ public class ScoreboardManager {
          * not wanting to show non-zero scores initially. */
         scoreboards.put(player, player.getScoreboard());
         player.setScoreboard(scoreboard);
-        kills.getScore(player).setScore(8);
+        kills.getScore(player.getName()).setScore(8);
     }
     
     /**
@@ -68,7 +68,7 @@ public class ScoreboardManager {
      * @param player a player
      */
     void addKill(Player player) {
-        Score score = kills.getScore(player);
+        Score score = kills.getScore(player.getName());
         score.setScore(score.getScore() + 1);
     }
 
@@ -86,13 +86,13 @@ public class ScoreboardManager {
             name = name.substring(0, 15);
         }
 
-        Score score = kills.getScore(player);
+        Score score = kills.getScore(player.getName());
         if (score == null) {
             return;
         }
 
         int value = score.getScore();
-        scoreboard.resetScores(player);
+        scoreboard.resetScores(player.getName());
 
         /* In case the player has no kills, they will not show up on the
          * scoreboard unless they are first given a different score.
@@ -100,7 +100,7 @@ public class ScoreboardManager {
          * 0), and then in the next tick, it's set to 0. Otherwise, the
          * score is just set to its current value.
          */
-        final Score fake = kills.getScore(Bukkit.getOfflinePlayer(name));
+        final Score fake = kills.getScore(name);
         if (value == 0) {
             fake.setScore(8);
             arena.scheduleTask(new Runnable() {
@@ -134,7 +134,7 @@ public class ScoreboardManager {
         arena.scheduleTask(new Runnable() {
             public void run() {
                 for (Player p : arena.getPlayersInArena()) {
-                    kills.getScore(p).setScore(0);
+                    kills.getScore(p.getName()).setScore(0);
                 }
             }
         }, 1);
