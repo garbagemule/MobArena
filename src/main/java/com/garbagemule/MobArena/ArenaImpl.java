@@ -844,7 +844,7 @@ public class ArenaImpl implements Arena
     private void clearInv(Player p) {
         InventoryView view = p.getOpenInventory();
         if (view != null) {
-            view.setCursor(new ItemStack(0));
+            view.setCursor(new ItemStack(Material.AIR));
             view.getBottomInventory().clear();
             view.close();
         }
