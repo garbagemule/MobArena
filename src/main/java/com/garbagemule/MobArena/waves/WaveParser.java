@@ -243,14 +243,7 @@ public class WaveParser
             arena.getPlugin().getLogger().warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
             return null;
         }
-
-        UpgradeWave result = new UpgradeWave(upgrades);
-
-        // Determine if all items should be given
-        boolean giveAll = config.getBoolean("give-all-items", false);
-        result.setGiveAll(giveAll);
-
-        return result;
+        return new UpgradeWave(upgrades);
     }
     
     private static Wave parseBossWave(Arena arena, String name, ConfigurationSection config) {

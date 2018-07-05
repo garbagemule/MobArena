@@ -12,12 +12,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class UpgradeWave extends AbstractWave
 {
     private Map<String,List<Thing>> upgrades;
-    private boolean giveAll;
 
     public UpgradeWave(Map<String,List<Thing>> upgrades) {
         this.upgrades = upgrades;
@@ -33,25 +31,15 @@ public class UpgradeWave extends AbstractWave
         List<Thing> list = upgrades.get(className);
         if (list == null) return;
 
-        if (giveAll) {
-            list.forEach(thing -> thing.giveTo(p));
-        } else {
-            int index = new Random().nextInt(list.size());
-            list.get(index).giveTo(p);
-        }
+        list.forEach(thing -> thing.giveTo(p));
     }
     
-    public void setGiveAll(boolean giveAll) {
-        this.giveAll = giveAll;
-    }
-
     public Wave copy() {
         Map<String,List<Thing>> upgrades = new HashMap<>();
         for (Map.Entry<String,List<Thing>> entry : this.upgrades.entrySet()) {
             upgrades.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         UpgradeWave result = new UpgradeWave(upgrades);
-        result.giveAll = this.giveAll;
 
         // From AbstractWave
         result.setAmountMultiplier(getAmountMultiplier());
