@@ -1133,6 +1133,7 @@ public class ArenaImpl implements Arena
         removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
+        arenaClass.grantPotionEffects(p);
         arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);
@@ -1207,6 +1208,7 @@ public class ArenaImpl implements Arena
         inv.setBoots(boots);
         inv.setItemInOffHand(offhand);
 
+        arenaClass.grantPotionEffects(p);
         arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);

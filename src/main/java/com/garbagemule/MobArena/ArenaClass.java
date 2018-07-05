@@ -165,8 +165,9 @@ public class ArenaClass
         if (leggings   != null) leggings.giveTo(p);
         if (boots      != null) boots.giveTo(p);
         if (offhand    != null) offhand.giveTo(p);
+    }
 
-        // Potion effects
+    public void grantPotionEffects(Player p) {
         effects.forEach(thing -> thing.giveTo(p));
     }
     
