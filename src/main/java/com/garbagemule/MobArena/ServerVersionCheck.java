@@ -7,8 +7,8 @@ import java.util.StringJoiner;
 
 class ServerVersionCheck {
 
-    private static final String[] EXACTS = {"1.11", "1.12"};
-    private static final String[] PREFIXES = {"1.11.", "1.12."};
+    private static final String[] EXACTS = {"1.8", "1.9", "1.10"};
+    private static final String[] PREFIXES = {"1.8.", "1.9.", "1.10."};
 
     static void check(Server server) {
         String version = getMinecraftVersion(server);
