@@ -41,12 +41,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayDeque;
@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.Level;
@@ -101,7 +100,6 @@ public class ArenaImpl implements Arena
     // Classes stuff
     private ArenaClass defaultClass;
     private Map<String,ArenaClass> classes;
-    private Map<Player,PermissionAttachment> attachments;
     
     // Blocks and pets
     private PriorityBlockingQueue<Repairable> repairQueue;
@@ -134,6 +132,8 @@ public class ArenaImpl implements Arena
     private Map<Player, Step> histories;
     private StepFactory playerJoinArena;
     private StepFactory playerSpecArena;
+
+    private SpawnsPets spawnsPets;
 
     /**
      * Primary constructor. Requires a name and a world.
@@ -172,7 +172,6 @@ public class ArenaImpl implements Arena
 
         // Classes, items and permissions
         this.classes      = plugin.getArenaMaster().getClasses();
-        this.attachments  = new HashMap<>();
         this.limitManager = new ClassLimitManager(this, classes, makeSection(section, "class-limits"));
 
         String defaultClassName = settings.getString("default-class", null);
@@ -232,6 +231,8 @@ public class ArenaImpl implements Arena
         this.histories = new HashMap<>();
         this.playerJoinArena = PlayerJoinArena.create(this);
         this.playerSpecArena = PlayerSpecArena.create(this);
+
+        this.spawnsPets = plugin.getArenaMaster().getSpawnsPets();
     }
     
     
@@ -520,7 +521,7 @@ public class ArenaImpl implements Arena
             p.teleport(region.getArenaWarp());
             movingPlayers.remove(p);
 
-            assignClassPermissions(p);
+            addClassPermissions(p);
             arenaPlayerMap.get(p).resetStats();
 
             Thing price = arenaPlayerMap.get(p).getArenaClass().getPrice();
@@ -539,7 +540,7 @@ public class ArenaImpl implements Arena
         running = true;
         
         // Spawn pets (must happen after 'running = true;')
-        spawnPets();
+        spawnsPets.spawn(this);
         
         // Spawn mounts
         spawnMounts();
@@ -771,7 +772,7 @@ public class ArenaImpl implements Arena
             clearInv(p);
         }
         
-        removeClassPermissions(p);
+        removePermissionAttachments(p);
         removePotionEffects(p);
         
         boolean refund = inLobby(p);
@@ -842,7 +843,7 @@ public class ArenaImpl implements Arena
     private void clearInv(Player p) {
         InventoryView view = p.getOpenInventory();
         if (view != null) {
-            view.setCursor(new ItemStack(0));
+            view.setCursor(new ItemStack(Material.AIR));
             view.getBottomInventory().clear();
             view.close();
         }
@@ -871,7 +872,7 @@ public class ArenaImpl implements Arena
     @Override
     @SuppressWarnings("deprecation")
     public void revivePlayer(Player p) {
-        removeClassPermissions(p);
+        removePermissionAttachments(p);
         removePotionEffects(p);
         
         discardPlayer(p);
@@ -923,42 +924,6 @@ public class ArenaImpl implements Arena
         }
     }
 
-    private void spawnPets() {
-        for (Player p : arenaPlayers) {
-            // Skip players who are either null or offline
-            if (p == null || !p.isOnline()) continue;
-
-            // Skip the My Items class
-            ArenaClass ac = arenaPlayerMap.get(p).getArenaClass();
-            if (ac == null || ac.getConfigName().equals("My Items")) continue;
-
-            // Grab the inventory
-            PlayerInventory inv = p.getInventory();
-            if (inv == null) continue;
-
-            // Find the first slot containing bones
-            int bone = inv.first(Material.BONE);
-            if (bone == -1) continue;
-            
-            // Get the amount of pets to spawn
-            int amount = inv.getItem(bone).getAmount();
-            
-            // Spawn each pet
-            for (int i = 0; i < amount; i++) {
-                Wolf wolf = (Wolf) world.spawnEntity(p.getLocation(), EntityType.WOLF);
-                wolf.setTamed(true);
-                wolf.setOwner(p);
-                wolf.setHealth(wolf.getMaxHealth());
-                if (settings.getBoolean("hellhounds"))
-                    wolf.setFireTicks(32768);
-                monsterManager.addPet(wolf);
-            }
-            
-            // Remove the bones
-            inv.setItem(bone, null);
-        }
-    }
-    
     private void spawnMounts() {
         for (Player p : arenaPlayers) {
             // Skip players who are either null or offline
@@ -1030,12 +995,6 @@ public class ArenaImpl implements Arena
             case 2:  return Material.GOLD_BARDING;
             case 3:  return Material.DIAMOND_BARDING;
             default: return null;
-        }
-    }
-    
-    private void removePotionEffects(Player p) {
-        for (PotionEffect effect : p.getActivePotionEffects()) {
-            p.removePotionEffect(effect.getType());
         }
     }
     
@@ -1171,15 +1130,11 @@ public class ArenaImpl implements Arena
         }
         
         InventoryManager.clearInventory(p);
-        p.getActivePotionEffects().stream()
-            .map(PotionEffect::getType)
-            .forEach(p::removePotionEffect);
-        
+        removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
         arenaClass.grantItems(p);
-
-        PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
-        replacePermissions(p, pa);
+        arenaClass.grantPotionEffects(p);
+        arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);
     }
@@ -1194,6 +1149,8 @@ public class ArenaImpl implements Arena
         }
         
         InventoryManager.clearInventory(p);
+        removePermissionAttachments(p);
+        removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
         
         PlayerInventory inv = p.getInventory();
@@ -1242,24 +1199,12 @@ public class ArenaImpl implements Arena
         inv.setLeggings(leggings);
         inv.setBoots(boots);
 
-        PermissionAttachment pa = arenaClass.grantLobbyPermissions(plugin, p);
-        replacePermissions(p, pa);
+        arenaClass.grantPotionEffects(p);
+        arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);
     }
 
-    private void replacePermissions(Player p, PermissionAttachment rep) {
-        PermissionAttachment old = attachments.get(p);
-        if (old != null) {
-            old.remove();
-            p.recalculatePermissions();
-        }
-        if (rep != null) {
-            attachments.put(p, rep);
-            p.recalculatePermissions();
-        }
-    }
-    
     private void autoReady(Player p) {
         if (settings.getBoolean("auto-ready", false)) {
             if (autoStartTimer.getRemaining() <= 0) {
@@ -1295,45 +1240,33 @@ public class ArenaImpl implements Arena
         messenger.tell(p, Msg.LOBBY_CLASS_PICKED, this.classes.get(className).getConfigName());
     }
 
-    @Override
-    public void assignClassPermissions(Player p)
-    {
-        PermissionAttachment pa = arenaPlayerMap.get(p).getArenaClass().grantPermissions(plugin, p);
-        replacePermissions(p, pa);
+    private void addClassPermissions(Player player) {
+        ArenaPlayer arenaPlayer = arenaPlayerMap.get(player);
+        if (arenaPlayer == null) {
+            return;
+        }
+        ArenaClass arenaClass = arenaPlayer.getArenaClass();
+        if (arenaClass == null) {
+            return;
+        }
+        removePermissionAttachments(player);
+        arenaClass.grantPermissions(player);
     }
 
-    @Override
-    public void removeClassPermissions(Player p)
-    {
-        PermissionAttachment pa = attachments.remove(p);
-        if (pa == null) return;
-        
-        try {
-            p.removeAttachment(pa);
-        }
-        catch (Exception e) {
-            for (Entry<String,Boolean> entry : pa.getPermissions().entrySet()) {
-                String perm = entry.getKey() + ":" + entry.getValue();
-                String name = p.getName();
-
-                plugin.getLogger().warning("[PERM01] Failed to remove permission attachment '" + perm + "' from player '" + name
-                                  + "'.\nThis should not be a big issue, but please verify that the player doesn't have any permissions they shouldn't have.");
-            }
-        }
-        p.recalculatePermissions();
-    }
-
-    @Override
-    public void addPermission(Player p, String perm, boolean value) {
-        PermissionAttachment pa = attachments.get(p);
-        if (pa == null) {
-            pa = p.addAttachment(plugin);
-            attachments.put(p, pa);
-        }
-        pa.setPermission(perm, value);
-        p.recalculatePermissions();
+    private void removePermissionAttachments(Player player) {
+        player.getEffectivePermissions().stream()
+            .filter(info -> info.getAttachment() != null)
+            .filter(info -> info.getAttachment().getPlugin().equals(plugin))
+            .map(PermissionAttachmentInfo::getAttachment)
+            .forEach(PermissionAttachment::remove);
     }
     
+    private void removePotionEffects(Player p) {
+        p.getActivePotionEffects().stream()
+            .map(PotionEffect::getType)
+            .forEach(p::removePotionEffect);
+    }
+
     private void cleanup() {
         removeMonsters();
         removeBlocks();

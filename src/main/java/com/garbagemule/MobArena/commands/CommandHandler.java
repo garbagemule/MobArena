@@ -8,7 +8,6 @@ import com.garbagemule.MobArena.commands.admin.ForceCommand;
 import com.garbagemule.MobArena.commands.admin.KickCommand;
 import com.garbagemule.MobArena.commands.admin.RestoreCommand;
 import com.garbagemule.MobArena.commands.setup.AddArenaCommand;
-import com.garbagemule.MobArena.commands.setup.AddClassPermCommand;
 import com.garbagemule.MobArena.commands.setup.AutoDegenerateCommand;
 import com.garbagemule.MobArena.commands.setup.AutoGenerateCommand;
 import com.garbagemule.MobArena.commands.setup.CheckDataCommand;
@@ -16,16 +15,11 @@ import com.garbagemule.MobArena.commands.setup.CheckSpawnsCommand;
 import com.garbagemule.MobArena.commands.setup.ClassChestCommand;
 import com.garbagemule.MobArena.commands.setup.ConfigCommand;
 import com.garbagemule.MobArena.commands.setup.EditArenaCommand;
-import com.garbagemule.MobArena.commands.setup.ListClassPermsCommand;
 import com.garbagemule.MobArena.commands.setup.ListClassesCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveArenaCommand;
-import com.garbagemule.MobArena.commands.setup.RemoveClassCommand;
-import com.garbagemule.MobArena.commands.setup.RemoveClassPermCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveContainerCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveLeaderboardCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveSpawnpointCommand;
-import com.garbagemule.MobArena.commands.setup.SetClassCommand;
-import com.garbagemule.MobArena.commands.setup.SetClassPriceCommand;
 import com.garbagemule.MobArena.commands.setup.SettingCommand;
 import com.garbagemule.MobArena.commands.setup.SetupCommand;
 import com.garbagemule.MobArena.commands.user.ArenaListCommand;
@@ -242,13 +236,7 @@ public class CommandHandler implements CommandExecutor
         register(RemoveContainerCommand.class);
 
         register(ListClassesCommand.class);
-        register(SetClassCommand.class);
-        register(SetClassPriceCommand.class);
-        register(RemoveClassCommand.class);
         register(ClassChestCommand.class);
-        register(ListClassPermsCommand.class);
-        register(AddClassPermCommand.class);
-        register(RemoveClassPermCommand.class);
 
         register(RemoveLeaderboardCommand.class);
         register(AutoGenerateCommand.class);

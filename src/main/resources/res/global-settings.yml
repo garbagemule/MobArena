@@ -2,3 +2,6 @@ enabled: true
 allowed-commands: /list, /pl
 update-notification: true
 prefix: '&a[MobArena] '
+pet-items:
+  wolf: bone
+  ocelot: raw_fish

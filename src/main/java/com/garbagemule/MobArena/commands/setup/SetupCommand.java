@@ -31,7 +31,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -241,7 +240,7 @@ public class SetupCommand implements Command, Listener {
             Player p = event.getPlayer();
             if (!p.equals(player)) return;
 
-            ItemStack tool = p.getItemInHand();
+            ItemStack tool = p.getInventory().getItemInHand();
             if (!isTool(tool)) return;
 
             event.setCancelled(true);

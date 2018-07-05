@@ -10,16 +10,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.IntStream;
 
 public class ArenaClass
@@ -29,8 +23,8 @@ public class ArenaClass
     private List<Thing> armor;
     private List<Thing> items;
     private List<Thing> effects;
-    private Map<String,Boolean> perms;
-    private Map<String,Boolean> lobbyperms;
+    private List<Thing> perms;
+    private List<Thing> lobbyperms;
     private boolean unbreakableWeapons, unbreakableArmor;
     private Thing price;
     private Location classchest;
@@ -46,8 +40,8 @@ public class ArenaClass
         this.items = new ArrayList<>();
         this.armor = new ArrayList<>(4);
         this.effects = new ArrayList<>();
-        this.perms = new HashMap<>();
-        this.lobbyperms = new HashMap<>();
+        this.perms = new ArrayList<>();
+        this.lobbyperms = new ArrayList<>();
 
         this.unbreakableWeapons = unbreakableWeapons;
         this.unbreakableArmor = unbreakableArmor;
@@ -162,73 +156,35 @@ public class ArenaClass
         if (chestplate != null) chestplate.giveTo(p);
         if (leggings   != null) leggings.giveTo(p);
         if (boots      != null) boots.giveTo(p);
+    }
 
-        // Potion effects
+    public void grantPotionEffects(Player p) {
         effects.forEach(thing -> thing.giveTo(p));
     }
     
     /**
      * Add a permission value to the class.
-     * @param perm the permission
-     * @param value the value
      */
-    public void addPermission(String perm, boolean value) {
-        perms.put(perm, value);
-    }
-    
-    /**
-     * Get an unmodifiable map of permissions and values for the class.
-     * @return a map of permissions and values
-     */
-    public Map<String,Boolean> getPermissions() {
-        return Collections.unmodifiableMap(perms);
+    public void addPermission(Thing permission) {
+        perms.add(permission);
     }
 
-    public void addLobbyPermission(String perm, boolean value) {
-        lobbyperms.put(perm, value);
+    public void addLobbyPermission(Thing permission) {
+        lobbyperms.add(permission);
     }
 
-    public Map<String,Boolean> getLobbyPermissions() {
-        return Collections.unmodifiableMap(lobbyperms);
-    }
-    
     /**
      * Grant the given player all the permissions of the class.
      * All permissions will be attached to a PermissionAttachment object, which
      * will be returned to the caller.
-     * @param plugin a MobArena instance
      * @param p a player
-     * @return the PermissionAttachment with all the permissions
      */
-    public PermissionAttachment grantPermissions(MobArena plugin, Player p) {
-        if (perms.isEmpty()) return null;
-        
-        PermissionAttachment pa = p.addAttachment(plugin);
-        grantPerms(pa, perms, p);
-        return pa;
+    public void grantPermissions(Player p) {
+        perms.forEach(perm -> perm.giveTo(p));
     }
 
-    public PermissionAttachment grantLobbyPermissions(MobArena plugin, Player p) {
-        if (lobbyperms.isEmpty()) return null;
-
-        PermissionAttachment pa = p.addAttachment(plugin);
-        grantPerms(pa, lobbyperms, p);
-        return pa;
-    }
-
-    private void grantPerms(PermissionAttachment pa, Map<String,Boolean> map, Player p) {
-        for (Entry<String,Boolean> entry : map.entrySet()) {
-            try {
-                pa.setPermission(entry.getKey(), entry.getValue());
-            }
-            catch (Exception e) {
-                String perm   = entry.getKey() + ":" + entry.getValue();
-                String player = p.getName();
-
-                pa.getPlugin().getLogger().warning("[PERM00] Failed to attach permission '" + perm + "' to player '" + player + " with class " + this.configName
-                                + "'.\nPlease verify that your class permissions are well-formed.");
-            }
-        }
+    public void grantLobbyPermissions(Player p) {
+        lobbyperms.forEach(perm -> perm.giveTo(p));
     }
 
     public Location getClassChest() {

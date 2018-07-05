@@ -3,22 +3,18 @@ package com.garbagemule.MobArena;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 
-import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
-import com.garbagemule.MobArena.util.ItemParser;
-import com.garbagemule.MobArena.util.TextUtils;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +40,7 @@ public class ArenaMasterImpl implements ArenaMaster
     private Map<String, ArenaClass> classes;
 
     private Set<String> allowedCommands;
+    private SpawnsPets spawnsPets;
     
     private boolean enabled;
 
@@ -60,6 +57,7 @@ public class ArenaMasterImpl implements ArenaMaster
         this.classes = new HashMap<>();
 
         this.allowedCommands = new HashSet<>();
+        this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
         
         this.enabled = config.getBoolean("global-settings.enabled", true);
     }
@@ -262,6 +260,25 @@ public class ArenaMasterImpl implements ArenaMaster
         for (String part : parts) {
             allowedCommands.add(part.trim().toLowerCase());
         }
+
+        loadPetItems(section);
+    }
+
+    private void loadPetItems(ConfigurationSection settings) {
+        String wolf = settings.getString("pet-items.wolf", "");
+        String ocelot = settings.getString("pet-items.ocelot", "");
+
+        Material wolfMaterial = Material.getMaterial(wolf.toUpperCase());
+        Material ocelotMaterial = Material.getMaterial(ocelot.toUpperCase());
+
+        if (wolfMaterial == null && !wolf.isEmpty()) {
+            plugin.getLogger().warning("Unknown item type for wolf pet item: " + wolf);
+        }
+        if (ocelotMaterial == null && !ocelot.isEmpty()) {
+            plugin.getLogger().warning("Unknown item type for ocelot pet item: " + ocelot);
+        }
+
+        spawnsPets = new SpawnsPets(wolfMaterial, ocelotMaterial);
     }
 
     /**
@@ -424,134 +441,19 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        List<String> perms = section.getStringList("permissions");
-        if (perms.isEmpty()) return;
-
-        for (String perm : perms) {
-            // If the permission starts with - or ^, it must be revoked.
-            boolean value = true;
-            if (perm.startsWith("-") || perm.startsWith("^")) {
-                perm = perm.substring(1).trim();
-                value = false;
-            }
-            arenaClass.addPermission(perm, value);
-        }
+        section.getStringList("permissions").stream()
+            .map(perm -> "perm:" + perm)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .forEach(arenaClass::addPermission);
     }
 
     private void loadClassLobbyPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        List<String> perms = section.getStringList("lobby-permissions");
-        if (perms.isEmpty()) return;
-
-        for (String perm : perms) {
-            // If the permission starts with - or ^, it must be revoked.
-            boolean value = true;
-            if (perm.startsWith("-") || perm.startsWith("^")) {
-                perm = perm.substring(1).trim();
-                value = false;
-            }
-            arenaClass.addLobbyPermission(perm, value);
-        }
-    }
-
-    public ArenaClass createClassNode(String classname, PlayerInventory inv, boolean safe) {
-        String path = "classes." + classname;
-        if (safe && config.getConfigurationSection(path) != null) {
-            return null;
-        }
-
-        // Create the node.
-        config.set(path, "");
-
-        // Grab the section, create if missing
-        ConfigurationSection section = config.getConfigurationSection(path);
-        if (section == null) section = config.createSection(path);
-
-        // Take the current items and armor.
-        section.set("items", ItemParser.parseString(inv.getContents()));
-        section.set("armor", ItemParser.parseString(inv.getArmorContents()));
-
-        // If the helmet isn't a real helmet, set it explicitly.
-        ItemStack helmet = inv.getHelmet();
-        if (helmet != null && ArmorType.getType(helmet) != ArmorType.HELMET) {
-            section.set("helmet", ItemParser.parseString(helmet));
-        }
-
-        // Save changes.
-        plugin.saveConfig();
-
-        // Load the class
-        return loadClass(classname);
-    }
-
-    public void removeClassNode(String classname) {
-        String lowercase = classname.toLowerCase();
-        if (!classes.containsKey(lowercase))
-            throw new IllegalArgumentException("Class does not exist!");
-
-        // Remove the class from the config-file and save it.
-        config.set("classes." + classname, null);
-        plugin.saveConfig();
-
-        // Remove the class from the map.
-        classes.remove(lowercase);
-    }
-
-    public boolean addClassPermission(String classname, String perm) {
-        return addRemoveClassPermission(classname, perm, true);
-    }
-
-    public boolean removeClassPermission(String classname, String perm) {
-        return addRemoveClassPermission(classname, perm, false);
-    }
-
-    private boolean addRemoveClassPermission(String classname, String perm, boolean add) {
-        classname = TextUtils.camelCase(classname);
-        String path = "classes." + classname;
-        if (config.getConfigurationSection(path) == null)
-            return false;
-
-        // Grab the class section
-        ConfigurationSection section = config.getConfigurationSection(path);
-
-        // Get any previous nodes
-        List<String> nodes = section.getStringList("permissions");
-        if (nodes.contains(perm) && add) {
-            return false;
-        }
-        else if (nodes.contains(perm) && !add) {
-            nodes.remove(perm);
-        }
-        else if (!nodes.contains(perm) && add) {
-            removeContradictions(nodes, perm);
-            nodes.add(perm);
-        }
-        else if (!nodes.contains(perm) && !add) {
-            return false;
-        }
-
-        // Replace the set.
-        section.set("permissions", nodes);
-        plugin.saveConfig();
-
-        // Reload the class.
-        loadClass(classname);
-        return true;
-    }
-
-    /**
-     * Removes any nodes that would contradict the permission, e.g. if the node
-     * 'mobarena.use' is in the set, and the perm node is '-mobarena.use', the
-     * '-mobarena.use' node is removed as to not contradict the new
-     * 'mobarena.use' node.
-     */
-    private void removeContradictions(List<String> nodes, String perm) {
-        if (perm.startsWith("^") || perm.startsWith("-")) {
-            nodes.remove(perm.substring(1).trim());
-        }
-        else {
-            nodes.remove("^" + perm);
-            nodes.remove("-" + perm);
-        }
+        section.getStringList("lobby-permissions").stream()
+            .map(perm -> "perm:" + perm)
+            .map(plugin.getThingManager()::parse)
+            .filter(Objects::nonNull)
+            .forEach(arenaClass::addLobbyPermission);
     }
 
     /**
@@ -677,6 +579,10 @@ public class ArenaMasterImpl implements ArenaMaster
 
         config.set("arenas." + arena.configName(), null);
         plugin.saveConfig();
+    }
+
+    public SpawnsPets getSpawnsPets() {
+        return spawnsPets;
     }
 
     public void reloadConfig() {

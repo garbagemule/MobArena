@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.util;
 
-import com.garbagemule.MobArena.MobArena;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -8,101 +7,36 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.material.Dye;
+import org.bukkit.material.Wool;
+import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 
 public class ItemParser
 {
-    private static final int WOOL_ID = Material.WOOL.getId();
-    private static final int DYE_ID  = Material.INK_SACK.getId();
-    
-    public static String parseString(ItemStack... stacks) {
-        String result = "";
-        
-        // Parse each stack
-        for (ItemStack stack : stacks) {
-            if (stack == null || stack.getTypeId() == 0) continue;
-            
-            result += ", " + parseString(stack); 
-        }
-        
-        // Trim off the leading ', ' if it is there
-        if (!result.equals("")) {
-            result = result.substring(2);
-        }
-        
-        return result;
+    private static final Map<Short, PotionType> POTION_TYPE_MAP = new HashMap<>();
+    static {
+        POTION_TYPE_MAP.put((short) 8193, PotionType.REGEN);
+        POTION_TYPE_MAP.put((short) 8194, PotionType.SPEED);
+        POTION_TYPE_MAP.put((short) 8195, PotionType.FIRE_RESISTANCE);
+        POTION_TYPE_MAP.put((short) 8196, PotionType.POISON);
+        POTION_TYPE_MAP.put((short) 8197, PotionType.INSTANT_HEAL);
+        POTION_TYPE_MAP.put((short) 8198, PotionType.NIGHT_VISION);
+        POTION_TYPE_MAP.put((short) 8200, PotionType.WEAKNESS);
+        POTION_TYPE_MAP.put((short) 8201, PotionType.STRENGTH);
+        POTION_TYPE_MAP.put((short) 8202, PotionType.SLOWNESS);
+        POTION_TYPE_MAP.put((short) 8203, PotionType.JUMP);
+        POTION_TYPE_MAP.put((short) 8204, PotionType.INSTANT_DAMAGE);
+        POTION_TYPE_MAP.put((short) 8205, PotionType.WATER_BREATHING);
+        POTION_TYPE_MAP.put((short) 8206, PotionType.INVISIBILITY);
     }
-    
-    public static String parseString(ItemStack stack) {
-        if (stack.getTypeId() == 0) return null;
-        
-        // <item> part
-        String type = stack.getType().toString().toLowerCase();
 
-        // <data> part
-        MaterialData md = stack.getData();
-        short data = (md != null ? md.getData() : 0);
-        
-        // Take wool into account
-        if (stack.getType() == Material.WOOL) {
-            data = (byte) (15 - data);
-        }
-        
-        // Take potions into account
-        else if (stack.getType() == Material.POTION) {
-            data = stack.getDurability();
-        }
-        
-        // <amount> part
-        int amount = stack.getAmount();
-        
-        // Enchantments
-        Map<Enchantment,Integer> enchants = null;
-        if (stack.getType() == Material.ENCHANTED_BOOK) {
-            EnchantmentStorageMeta esm = (EnchantmentStorageMeta) stack.getItemMeta();
-            enchants = esm.getStoredEnchants();
-        } else {
-            enchants = stack.getEnchantments();
-        }
-        String enchantments = "";
-        for (Entry<Enchantment,Integer> entry : enchants.entrySet()) {
-            int id  = entry.getKey().getId();
-            int lvl = entry.getValue();
-            
-            // <eid>:<level>;
-            enchantments += ";" + id + ":" + lvl;
-        }
-        
-        // Trim off the leading ';' if it is there
-        if (!enchantments.equals("")) {
-            enchantments = enchantments.substring(1);
-        }
-        
-        // <item>
-        String result = type;
-        
-        // <item>(:<data>)
-        if (data != 0) {
-            result += ":" + data;
-        }
-        
-        // <item>((:<data>):<amount>) - force if there is data
-        if (amount > 1 || data != 0) {
-            result += ":" + amount;
-        }
-        
-        // <item>((:<data>):<amount>) (<eid>:<level>(;<eid>:<level>(; ... )))
-        if (!enchantments.equals("")) {
-            result += " " + enchantments;
-        }
-        
-        return result;
-    }
-    
     public static List<ItemStack> parseItems(String s) {
         if (s == null) {
             return new ArrayList<>(1);
@@ -146,7 +80,7 @@ public class ItemParser
                 result = withDataAndAmount(parts[0], parts[1], parts[2]);
                 break;
         }
-        if (result == null || result.getTypeId() == 0) {
+        if (result == null || result.getType() == Material.AIR) {
             if (logFailure) {
                 Bukkit.getLogger().warning("[MobArena] Failed to parse item: " + item);
             }
@@ -161,43 +95,140 @@ public class ItemParser
     }
     
     private static ItemStack singleItem(String item) {
-        int id = getTypeId(item);
-        return new ItemStack(id);
+        return getType(item)
+            .map(ItemStack::new)
+            .orElse(null);
     }
     
     private static ItemStack withAmount(String item, String amount) {
-        int id = getTypeId(item);
-        int a  = getAmount(amount);
-        return new ItemStack(id,a);
+        return getType(item)
+            .map(type -> new ItemStack(type, getAmount(amount)))
+            .orElse(null);
     }
     
     private static ItemStack withDataAndAmount(String item, String data, String amount) {
-        int   id = getTypeId(item);
-        short d  = getData(data, id);
-        int   a  = getAmount(amount);
-        return new ItemStack(id,a,d);
-    }
-
-    private static int getTypeId(String item) {
-        if (item.matches("(-)?[0-9]*")) {
-            return Integer.parseInt(item);
+        ItemStack stack = withAmount(item, amount);
+        if (stack == null) {
+            return null;
         }
-        Material m = Enums.getEnumFromString(Material.class, item);
-        return (m != null ? m.getId() : 0);
+
+        Material type = stack.getType();
+        if (type == Material.POTION) {
+            return withPotionMeta(stack, data);
+        }
+
+        MaterialData md = getData(data, type);
+        if (md == null) {
+            return null;
+        }
+
+        return md.toItemStack(stack.getAmount());
     }
     
-    private static short getData(String data, int id) {
-        // Wool and ink are special
-        if (id == WOOL_ID) {
-            DyeColor dye = Enums.getEnumFromString(DyeColor.class, data);
-            if (dye == null) dye = DyeColor.getByWoolData(Byte.parseByte(data));
-            return dye.getWoolData();
-        } else if (id == DYE_ID) {
-            DyeColor dye = Enums.getEnumFromString(DyeColor.class, data);
-            if (dye == null) dye = DyeColor.getByDyeData(Byte.parseByte(data));
-            return dye.getDyeData();
+    private static ItemStack withPotionMeta(ItemStack stack, String data) {
+        PotionType type = getPotionType(data);
+        if (type == null) {
+            return null;
         }
-        return (data.matches("(-)?[0-9]+") ? Short.parseShort(data) : 0);
+        PotionMeta meta = (PotionMeta) stack.getItemMeta();
+        meta.setMainEffect(type.getEffectType());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private static PotionType getPotionType(String data) {
+        if (data.matches("[0-9]+")) {
+            short d = Short.parseShort(data);
+
+            // Compensate for splash potions
+            if (d > (2 * 8192)) {
+                d -= 8192;
+            }
+
+            boolean extended = (d & 64) > 0;
+            boolean upgraded = (d & 32) > 0;
+            if (extended) {
+                d -= 64;
+            }
+            if (upgraded) {
+                d -= 32;
+            }
+
+            PotionType type = POTION_TYPE_MAP.get(d);
+            if (type != null) {
+                warn(type.name(), data);
+            }
+            return type;
+        }
+        try {
+            return PotionType.valueOf(data.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static Optional<Material> getType(String item) {
+        if (item.matches("(-)?[1-9][0-9]*")) {
+            Material type = Material.getMaterial(Integer.parseInt(item));
+            if (type == null) {
+                return Optional.empty();
+            }
+
+            warn(type.name(), item);
+
+            return Optional.of(type);
+        }
+        return Optional.ofNullable(Material.getMaterial(item.toUpperCase()));
+    }
+    
+    private static MaterialData getData(String data, Material type) {
+        if (type == Material.INK_SACK) {
+            return getDyeData(data);
+        }
+        if (type == Material.WOOL) {
+            return getWoolData(data);
+        }
+        return null;
+    }
+
+    private static Wool getWoolData(String data) {
+        if (data.matches("(-)?[1-9][0-9]*")) {
+            DyeColor color = DyeColor.getByWoolData(Byte.parseByte(data));
+            if (color == null) {
+                return null;
+            }
+
+            warn(color.name(), data);
+
+            return new Wool(color);
+        }
+        try {
+            return new Wool(DyeColor.valueOf(data.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static Dye getDyeData(String data) {
+        if (data.matches("(-)?[1-9][0-9]*")) {
+            DyeColor color = DyeColor.getByDyeData(Byte.parseByte(data));
+            if (color == null) {
+                return null;
+            }
+
+            warn(color.name(), data);
+
+            Dye dye = new Dye();
+            dye.setColor(color);
+            return dye;
+        }
+        try {
+            Dye dye = new Dye();
+            dye.setColor(DyeColor.valueOf(data.toUpperCase()));
+            return dye;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
     
     private static int getAmount(String amount) {
@@ -218,24 +249,45 @@ public class ItemParser
     
     private static void addEnchantment(ItemStack stack, String ench) {
         String[] parts = ench.split(":");
-        if (parts.length != 2 || !(parts[0].matches("[0-9]*") && parts[1].matches("[0-9]*"))) {
+        if (parts.length != 2 || !parts[1].matches("[0-9]*")) {
             return;
         }
-        
-        int id  = Integer.parseInt(parts[0]);
+
+        Enchantment enchantment = getEnchantment(parts[0]);
+        if (enchantment == null) {
+            return;
+        }
         int lvl = Integer.parseInt(parts[1]);
-        
-        Enchantment e = Enchantment.getById(id);
-        if (e == null) {// || !e.canEnchantItem(stack) || lvl > e.getMaxLevel() || lvl < e.getStartLevel()) {
-            return;
-        }
-        
+
         if (stack.getType() == Material.ENCHANTED_BOOK) {
             EnchantmentStorageMeta esm = (EnchantmentStorageMeta) stack.getItemMeta();
-            esm.addStoredEnchant(e, lvl, true);
+            esm.addStoredEnchant(enchantment, lvl, true);
             stack.setItemMeta(esm);
         } else {
-            stack.addUnsafeEnchantment(e, lvl);
+            stack.addUnsafeEnchantment(enchantment, lvl);
         }
+    }
+
+    private static Enchantment getEnchantment(String ench) {
+        if (ench.matches("[1-9][0-9]*")) {
+            Enchantment enchantment = Enchantment.getById(Integer.parseInt(ench));
+            if (enchantment == null) {
+                return null;
+            }
+
+            warn(enchantment.getName(), ench);
+
+            return enchantment;
+        }
+        return Enchantment.getByName(ench.toUpperCase());
+    }
+
+    private static void warn(String name, String value) {
+        String msg = String.format(
+            "Consider using '%s' instead of '%s'",
+            name.toLowerCase(),
+            value
+        );
+        Bukkit.getLogger().warning("[MobArena] " + msg);
     }
 }

@@ -28,6 +28,7 @@ import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
@@ -595,6 +596,9 @@ public class ArenaListener
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
             damager = (Player) ((Wolf) damager).getOwner();
         }
+        else if (damager instanceof Ocelot && arena.hasPet(damager)) {
+            damager = (Player) ((Ocelot) damager).getOwner();
+        }
 
         // If the damager was a player, add to kills.
         if (damager instanceof Player) {
@@ -693,6 +697,9 @@ public class ArenaListener
         if (damagee instanceof Wolf && arena.hasPet(damagee)) {
             onPetDamage(event, (Wolf) damagee, damager);
         }
+        else if (damagee instanceof Ocelot && arena.hasPet(damagee)) {
+            onPetDamage(event, (Ocelot) damagee, damager);
+        }
         // Mount
         else if (damagee instanceof Horse && monsters.hasMount(damagee)) {
             onMountDamage(event, (Horse) damagee, damager);
@@ -744,6 +751,10 @@ public class ArenaListener
         event.setCancelled(true);
     }
 
+    private void onPetDamage(EntityDamageEvent event, Ocelot pet, Entity damager) {
+        event.setCancelled(true);
+    }
+
     private void onMountDamage(EntityDamageEvent event, Horse mount, Entity damager) {
         event.setCancelled(true);
     }
@@ -773,6 +784,11 @@ public class ArenaListener
         else if (damager instanceof Wolf && arena.hasPet(damager)) {
             //event.setDamage(1);
             Player p = (Player) ((Wolf) damager).getOwner();
+            ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
+            aps.add("dmgDone", event.getDamage());
+        }
+        else if (damager instanceof Ocelot && arena.hasPet(damager)) {
+            Player p = (Player) ((Ocelot) damager).getOwner();
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
         }

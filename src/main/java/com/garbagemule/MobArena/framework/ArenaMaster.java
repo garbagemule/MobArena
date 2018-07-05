@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.framework;
 import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.SpawnsPets;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -107,14 +108,6 @@ public interface ArenaMaster
      */
     void loadClasses();
     
-    ArenaClass createClassNode(String className, PlayerInventory inv, boolean safe);
-    
-    void removeClassNode(String className);
-    
-    boolean addClassPermission(String className, String perm);
-    
-    boolean removeClassPermission(String className, String perm);
-    
     /**
      * Load all arena-related stuff.
      */
@@ -130,6 +123,8 @@ public interface ArenaMaster
     
     void removeArenaNode(Arena arena);
     
+    SpawnsPets getSpawnsPets();
+
     
     
     /*/////////////////////////////////////////////////////////////////////////

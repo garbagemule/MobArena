@@ -191,13 +191,7 @@ public interface Arena
     void addRandomPlayer(Player p);
     
     void assignRandomClass(Player p);
-    
-    void assignClassPermissions(Player p);
-    
-    void removeClassPermissions(Player p);
 
-    void addPermission(Player p, String perm, boolean value);
-    
     
     
     /*////////////////////////////////////////////////////////////////////

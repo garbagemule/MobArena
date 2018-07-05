@@ -9,12 +9,17 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ScoreboardManager {
     private static final String DISPLAY_NAME = ChatColor.GREEN + "Kills       " + ChatColor.AQUA + "Wave ";
 
     private Arena arena;
     private Scoreboard scoreboard;
     private Objective kills;
+
+    private Map<Player, Scoreboard> scoreboards;
     
     /**
      * Create a new scoreboard for the given arena.
@@ -23,6 +28,7 @@ public class ScoreboardManager {
     ScoreboardManager(Arena arena) {
         this.arena = arena;
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        scoreboards = new HashMap<>();
     }
     
     /**
@@ -34,8 +40,9 @@ public class ScoreboardManager {
         /* Set the player's scoreboard and give them an initial non-zero
          * score. This is necessary due to either Minecraft or Bukkit
          * not wanting to show non-zero scores initially. */
+        scoreboards.put(player, player.getScoreboard());
         player.setScoreboard(scoreboard);
-        kills.getScore(player).setScore(8);
+        kills.getScore(player.getName()).setScore(8);
     }
     
     /**
@@ -45,7 +52,12 @@ public class ScoreboardManager {
      */
     void removePlayer(Player player) {
         try {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            Scoreboard scoreboard = scoreboards.remove(player);
+            if (scoreboard != null) {
+                player.setScoreboard(scoreboard);
+            } else {
+                player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            }
         } catch (IllegalStateException e) {
             // Happens if the player is logging out, just swallow it
         }
@@ -56,7 +68,7 @@ public class ScoreboardManager {
      * @param player a player
      */
     void addKill(Player player) {
-        Score score = kills.getScore(player);
+        Score score = kills.getScore(player.getName());
         score.setScore(score.getScore() + 1);
     }
 
@@ -74,13 +86,13 @@ public class ScoreboardManager {
             name = name.substring(0, 15);
         }
 
-        Score score = kills.getScore(player);
+        Score score = kills.getScore(player.getName());
         if (score == null) {
             return;
         }
 
         int value = score.getScore();
-        scoreboard.resetScores(player);
+        scoreboard.resetScores(player.getName());
 
         /* In case the player has no kills, they will not show up on the
          * scoreboard unless they are first given a different score.
@@ -88,14 +100,10 @@ public class ScoreboardManager {
          * 0), and then in the next tick, it's set to 0. Otherwise, the
          * score is just set to its current value.
          */
-        final Score fake = kills.getScore(Bukkit.getOfflinePlayer(name));
+        final Score fake = kills.getScore(name);
         if (value == 0) {
             fake.setScore(8);
-            arena.scheduleTask(new Runnable() {
-                public void run() {
-                    fake.setScore(0);
-                }
-            }, 1);
+            arena.scheduleTask(() -> fake.setScore(0), 1);
         } else {
             fake.setScore(value);
         }
@@ -119,13 +127,7 @@ public class ScoreboardManager {
          * It is necessary to delay the reset of the player scores, and the
          * reset is necessary because of non-zero crappiness. */
         resetKills();
-        arena.scheduleTask(new Runnable() {
-            public void run() {
-                for (Player p : arena.getPlayersInArena()) {
-                    kills.getScore(p).setScore(0);
-                }
-            }
-        }, 1);
+        arena.scheduleTask(this::resetPlayerScores, 1);
     }
     
     private void resetKills() {
@@ -135,6 +137,13 @@ public class ScoreboardManager {
         kills = scoreboard.registerNewObjective("kills", "ma-kills");
         kills.setDisplaySlot(DisplaySlot.SIDEBAR);
         updateWave(0);
+    }
+
+    private void resetPlayerScores() {
+        arena.getPlayersInArena().stream()
+            .map(Player::getName)
+            .map(kills::getScore)
+            .forEach(score -> score.setScore(0));
     }
 
     static class NullScoreboardManager extends ScoreboardManager {
