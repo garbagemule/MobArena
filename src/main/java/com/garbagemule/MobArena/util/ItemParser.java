@@ -7,9 +7,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.material.MaterialData;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.Dye;
 import org.bukkit.material.Wool;
+import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
@@ -114,7 +114,8 @@ public class ItemParser
 
         Material type = stack.getType();
         if (type == Material.POTION) {
-            return withPotionMeta(stack, data);
+            boolean splash = item.equals("splash_potion");
+            return withPotionMeta(stack, data, splash);
         }
 
         MaterialData md = getData(data, type);
@@ -125,14 +126,14 @@ public class ItemParser
         return md.toItemStack(stack.getAmount());
     }
     
-    private static ItemStack withPotionMeta(ItemStack stack, String data) {
+    private static ItemStack withPotionMeta(ItemStack stack, String data, boolean splash) {
         PotionType type = getPotionType(data);
         if (type == null) {
             return null;
         }
-        PotionMeta meta = (PotionMeta) stack.getItemMeta();
-        meta.setMainEffect(type.getEffectType());
-        stack.setItemMeta(meta);
+        Potion potion = new Potion(type, 1);
+        potion.setSplash(splash);
+        potion.apply(stack);
         return stack;
     }
 
@@ -177,6 +178,9 @@ public class ItemParser
             warn(type.name(), item);
 
             return Optional.of(type);
+        }
+        if (item.equals("splash_potion")) {
+            return Optional.of(Material.POTION);
         }
         return Optional.ofNullable(Material.getMaterial(item.toUpperCase()));
     }
