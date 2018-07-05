@@ -1,11 +1,11 @@
 package com.garbagemule.MobArena.repairable;
 
 import org.bukkit.Material;
-import org.bukkit.material.Attachable;
-import org.bukkit.material.Bed;
-import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Redstone;
+import org.bukkit.block.data.Attachable;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Bed;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.RedstoneWire;
 
 import java.util.Comparator;
 
@@ -28,8 +28,8 @@ public class RepairableComparator implements Comparator<Repairable>
     private boolean restoreLast(Repairable r)
     {
         Material t = r.getType();
-        MaterialData m = r.getState().getData();
+        BlockData data = r.getData();
         
-        return (m instanceof Attachable || m instanceof Redstone || m instanceof Door || m instanceof Bed || t == Material.STATIONARY_LAVA || t == Material.STATIONARY_WATER || t == Material.FIRE);
+        return (data instanceof Attachable || data instanceof RedstoneWire || data instanceof Door || data instanceof Bed || t == Material.LAVA || t == Material.WATER || t == Material.FIRE);
     }
 }

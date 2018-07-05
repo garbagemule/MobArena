@@ -19,6 +19,6 @@ public class RepairableBed extends RepairableBlock
             return;
         
         super.repair();
-        other.getBlock().setTypeIdAndData(getId(), (byte) (getData() + 8), false);
+        other.getBlock().setBlockData(other.getBlockData());
     }
 }

@@ -307,7 +307,7 @@ public class ArenaListener
         // Otherwise, block was placed during a session.
         arena.addBlock(b);
 
-        if (b.getType() == Material.WOODEN_DOOR || b.getType() == Material.IRON_DOOR_BLOCK) {
+        if (b.getType().name().endsWith("_DOOR")) {
             // For doors, add the block just above (so we get both halves)
             arena.addBlock(b.getRelative(0, 1, 0));
         }
@@ -393,7 +393,6 @@ public class ArenaListener
     private boolean isWater(Block block) {
         switch (block.getType()) {
             case WATER:
-            case STATIONARY_WATER:
                 return true;
             default:
                 return false;
@@ -534,7 +533,7 @@ public class ArenaListener
 
             // Cakes and liquids should just get removed. If player-placed block, drop as item.
             Material mat = state.getType();
-            if (mat == Material.CAKE_BLOCK || mat == Material.WATER || mat == Material.LAVA)
+            if (mat == Material.CAKE || mat == Material.WATER || mat == Material.LAVA)
                 arena.removeBlock(b);
             else if (arena.removeBlock(b))
                 arena.getWorld().dropItemNaturally(b.getLocation(), new ItemStack(state.getType(), 1));
@@ -852,19 +851,19 @@ public class ArenaListener
 
     private static final EnumSet<Material> REPAIRABLE_TYPES = EnumSet.of(
             // Tools and swords
-            Material.GOLD_AXE,    Material.GOLD_HOE,    Material.GOLD_PICKAXE,    Material.GOLD_SPADE,    Material.GOLD_SWORD,
-            Material.WOOD_AXE,    Material.WOOD_HOE,    Material.WOOD_PICKAXE,    Material.WOOD_SPADE,    Material.WOOD_SWORD,
-            Material.STONE_AXE,   Material.STONE_HOE,   Material.STONE_PICKAXE,   Material.STONE_SPADE,   Material.STONE_SWORD,
-            Material.IRON_AXE,    Material.IRON_HOE,    Material.IRON_PICKAXE,    Material.IRON_SPADE,    Material.IRON_SWORD,
-            Material.DIAMOND_AXE, Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, Material.DIAMOND_SPADE, Material.DIAMOND_SWORD,
+            Material.GOLDEN_AXE,  Material.GOLDEN_HOE,  Material.GOLDEN_PICKAXE,  Material.GOLDEN_SHOVEL,  Material.GOLDEN_SWORD,
+            Material.WOODEN_AXE,  Material.WOODEN_HOE,  Material.WOODEN_PICKAXE,  Material.WOODEN_SHOVEL,  Material.WOODEN_SWORD,
+            Material.STONE_AXE,   Material.STONE_HOE,   Material.STONE_PICKAXE,   Material.STONE_SHOVEL,   Material.STONE_SWORD,
+            Material.IRON_AXE,    Material.IRON_HOE,    Material.IRON_PICKAXE,    Material.IRON_SHOVEL,    Material.IRON_SWORD,
+            Material.DIAMOND_AXE, Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, Material.DIAMOND_SHOVEL, Material.DIAMOND_SWORD,
             // Armor
             Material.LEATHER_HELMET,   Material.LEATHER_CHESTPLATE,   Material.LEATHER_LEGGINGS,   Material.LEATHER_BOOTS,
-            Material.GOLD_HELMET,      Material.GOLD_CHESTPLATE,      Material.GOLD_LEGGINGS,      Material.GOLD_BOOTS,
+            Material.GOLDEN_HELMET,    Material.GOLDEN_CHESTPLATE,    Material.GOLDEN_LEGGINGS,    Material.GOLDEN_BOOTS,
             Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS,
             Material.IRON_HELMET,      Material.IRON_CHESTPLATE,      Material.IRON_LEGGINGS,      Material.IRON_BOOTS,
             Material.DIAMOND_HELMET,   Material.DIAMOND_CHESTPLATE,   Material.DIAMOND_LEGGINGS,   Material.DIAMOND_BOOTS,
             // Misc
-            Material.BOW, Material.FLINT_AND_STEEL, Material.FISHING_ROD, Material.SHEARS, Material.CARROT_STICK, Material.SHIELD
+            Material.BOW, Material.FLINT_AND_STEEL, Material.FISHING_ROD, Material.SHEARS, Material.CARROT_ON_A_STICK, Material.SHIELD
     );
 
     private void repairWeapon(Player p) {

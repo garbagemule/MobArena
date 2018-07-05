@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.repairable;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 
 public interface Repairable
 {
@@ -11,8 +12,7 @@ public interface Repairable
     BlockState getState();
     
     Material getType();
-    int getId();
-    byte getData();
+    BlockData getData();
     
     World getWorld();
     int getX();

@@ -3,14 +3,15 @@ package com.garbagemule.MobArena.repairable;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 
 public class RepairableBlock implements Repairable
 {
     private BlockState state;
     private World world;
-    private int id, x, y, z;
+    private BlockData data;
+    private int x, y, z;
     private Material type;
-    private byte data;
     
     public RepairableBlock(BlockState state)
     {
@@ -22,9 +23,8 @@ public class RepairableBlock implements Repairable
         y = state.getY();
         z = state.getZ();
         
-        id   = state.getTypeId();
+        data = state.getBlockData();
         type = state.getType();
-        data = state.getRawData();
     }
     
     /**
@@ -32,7 +32,7 @@ public class RepairableBlock implements Repairable
      */
     public void repair()
     {
-        world.getBlockAt(x,y,z).setTypeIdAndData(id, data, false);
+        world.getBlockAt(x,y,z).setBlockData(data);
     }
 
     public BlockState getState()
@@ -50,12 +50,7 @@ public class RepairableBlock implements Repairable
         return type;
     }
     
-    public int getId()
-    {
-        return id;
-    }
-    
-    public byte getData()
+    public BlockData getData()
     {
         return data;
     }

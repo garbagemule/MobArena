@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.repairable;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -27,10 +28,10 @@ public class RepairableDoor extends RepairableAttachable//RepairableBlock
             return;
 
         Block b = getWorld().getBlockAt(x,y,z);
-        if (b.getTypeId() == 0)
-            b.setTypeId(1);
+        if (b.getType() == Material.AIR)
+            b.setType(Material.STONE);
         
         super.repair();
-        other.getBlock().setTypeIdAndData(getId(), (byte) (getData() + 8), false);
+        other.getBlock().setBlockData(other.getBlockData());
     }
 }

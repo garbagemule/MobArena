@@ -161,31 +161,31 @@ public class SetupCommand implements Command, Listener {
         private ItemStack[] getToolbox() {
             // Arena region tool
             ItemStack areg = makeTool(
-                Material.GOLD_AXE, AREG_NAME,
+                Material.GOLDEN_AXE, AREG_NAME,
                 color("Set &ep1"),
                 color("Set &ep2")
             );
             // Warps tool
             ItemStack warps = makeTool(
-                Material.GOLD_HOE, WARPS_NAME,
+                Material.GOLDEN_HOE, WARPS_NAME,
                 color("&eSet &rselected warp"),
                 color("&eCycle &rbetween warps")
             );
             // Spawns tool
             ItemStack spawns = makeTool(
-                Material.GOLD_SWORD, SPAWNS_NAME,
+                Material.GOLDEN_SWORD, SPAWNS_NAME,
                 color("&eAdd &rspawnpoint on block"),
                 color("&eRemove &rspawnpoint on block")
             );
             // Chests tool
             ItemStack chests = makeTool(
-                Material.GOLD_SPADE, CHESTS_NAME,
+                Material.GOLDEN_SHOVEL, CHESTS_NAME,
                 color("&eAdd &rcontainer"),
                 color("&eRemove &rcontainer")
             );
             // Lobby region tool
             ItemStack lreg = makeTool(
-                Material.GOLD_AXE, LREG_NAME,
+                Material.GOLDEN_AXE, LREG_NAME,
                 color("Set &el1"),
                 color("Set &el2")
             );
@@ -640,7 +640,7 @@ public class SetupCommand implements Command, Listener {
                       toShow.equals("spec")      ? region.getSpecWarp()  :
                       toShow.equals("spectator") ? region.getSpecWarp()  :
                       toShow.equals("exit")      ? region.getExitWarp()  : null;
-                region.showBlock(player, loc, 35, (byte) 14);
+                region.showBlock(player, loc);
                 return this;
             }
 

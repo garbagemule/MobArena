@@ -11,9 +11,11 @@ import com.garbagemule.MobArena.util.Enums;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -650,18 +652,19 @@ public class ArenaRegion
         showBlocks(p, map.values());
     }
 
-    public void showBlock(final Player p, final Location loc, final int id, final byte data) {
+    public void showBlock(final Player p, final Location loc) {
+        BlockData wool = Material.RED_WOOL.createBlockData();
         arena.scheduleTask(new Runnable() {
             @Override
             public void run() {
-                p.sendBlockChange(loc, id, data);
+                p.sendBlockChange(loc, wool);
                 arena.scheduleTask(new Runnable() {
                     @Override
                     public void run() {
                         if (!p.isOnline()) return;
 
                         Block b = loc.getBlock();
-                        p.sendBlockChange(loc, b.getTypeId(), b.getData());
+                        p.sendBlockChange(loc, b.getBlockData());
                     }
                 }, 100);
             }
@@ -669,6 +672,7 @@ public class ArenaRegion
     }
 
     private void showBlocks(final Player p, final Collection<Location> points) {
+        BlockData wool = Material.RED_WOOL.createBlockData();
         arena.scheduleTask(new Runnable() {
             @Override
             public void run() {
@@ -677,7 +681,7 @@ public class ArenaRegion
                 for (Location l : points) {
                     Block b = l.getBlock();
                     blocks.put(l, b.getState());
-                    p.sendBlockChange(l, 35, (byte) 14);
+                    p.sendBlockChange(l, wool);
                 }
                 arena.scheduleTask(new Runnable() {
                     public void run() {
@@ -690,10 +694,9 @@ public class ArenaRegion
                         for (Map.Entry<Location,BlockState> entry : blocks.entrySet()) {
                             Location l   = entry.getKey();
                             BlockState b = entry.getValue();
-                            int id       = b.getTypeId();
-                            byte data    = b.getRawData();
+                            BlockData data = b.getBlockData();
 
-                            p.sendBlockChange(l, id, data);
+                            p.sendBlockChange(l, data);
                         }
                     }
                 }, 100);

@@ -989,9 +989,9 @@ public class ArenaImpl implements Arena
 
     private Material bardingFromAmount(int amount) {
         switch ((amount >> 3) % 4) {
-            case 1:  return Material.IRON_BARDING;
-            case 2:  return Material.GOLD_BARDING;
-            case 3:  return Material.DIAMOND_BARDING;
+            case 1:  return Material.IRON_HORSE_ARMOR;
+            case 2:  return Material.GOLDEN_HORSE_ARMOR;
+            case 3:  return Material.DIAMOND_HORSE_ARMOR;
             default: return null;
         }
     }

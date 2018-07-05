@@ -4,4 +4,4 @@ update-notification: true
 prefix: '&a[MobArena] '
 pet-items:
   wolf: bone
-  ocelot: raw_fish
+  ocelot: salmon

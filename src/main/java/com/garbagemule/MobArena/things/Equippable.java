@@ -15,28 +15,28 @@ class Equippable {
         Material.LEATHER_HELMET,
         Material.IRON_HELMET,
         Material.CHAINMAIL_HELMET,
-        Material.GOLD_HELMET,
+        Material.GOLDEN_HELMET,
         Material.DIAMOND_HELMET
     );
     private static EnumSet<Material> chestplates = EnumSet.of(
         Material.LEATHER_CHESTPLATE,
         Material.IRON_CHESTPLATE,
         Material.CHAINMAIL_CHESTPLATE,
-        Material.GOLD_CHESTPLATE,
+        Material.GOLDEN_CHESTPLATE,
         Material.DIAMOND_CHESTPLATE
     );
     private static EnumSet<Material> leggings = EnumSet.of(
         Material.LEATHER_LEGGINGS,
         Material.IRON_LEGGINGS,
         Material.CHAINMAIL_LEGGINGS,
-        Material.GOLD_LEGGINGS,
+        Material.GOLDEN_LEGGINGS,
         Material.DIAMOND_LEGGINGS
     );
     private static EnumSet<Material> boots = EnumSet.of(
         Material.LEATHER_BOOTS,
         Material.IRON_BOOTS,
         Material.CHAINMAIL_BOOTS,
-        Material.GOLD_BOOTS,
+        Material.GOLDEN_BOOTS,
         Material.DIAMOND_BOOTS
     );
 

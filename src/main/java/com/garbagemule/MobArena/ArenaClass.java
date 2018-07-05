@@ -220,12 +220,12 @@ public class ArenaClass
      * Used by isWeapon() to determine if an ItemStack is a weapon type.
      */
     private static EnumSet<Material> weaponTypes = EnumSet.of(
-        WOOD_SWORD,   GOLD_SWORD,   STONE_SWORD,   IRON_SWORD,   DIAMOND_SWORD,
-        WOOD_AXE,     GOLD_AXE,     STONE_AXE,     IRON_AXE,     DIAMOND_AXE,
-        WOOD_PICKAXE, GOLD_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE,
-        WOOD_SPADE,   GOLD_SPADE,   STONE_SPADE,   IRON_SPADE,   DIAMOND_SPADE,
-        WOOD_HOE,     GOLD_HOE,     STONE_HOE,     IRON_HOE,     DIAMOND_HOE,
-        BOW, FISHING_ROD, FLINT_AND_STEEL, SHEARS, CARROT_STICK, SHIELD
+        WOODEN_SWORD,   GOLDEN_SWORD,   STONE_SWORD,   IRON_SWORD,   DIAMOND_SWORD,
+        WOODEN_AXE,     GOLDEN_AXE,     STONE_AXE,     IRON_AXE,     DIAMOND_AXE,
+        WOODEN_PICKAXE, GOLDEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE,
+        WOODEN_SHOVEL,  GOLDEN_SHOVEL,  STONE_SHOVEL,  IRON_SHOVEL,  DIAMOND_SHOVEL,
+        WOODEN_HOE,     GOLDEN_HOE,     STONE_HOE,     IRON_HOE,     DIAMOND_HOE,
+        BOW, FISHING_ROD, FLINT_AND_STEEL, SHEARS, CARROT_ON_A_STICK, SHIELD
     );
 
     /**
@@ -258,28 +258,28 @@ public class ArenaClass
                 case CHAINMAIL_HELMET:
                 case IRON_HELMET:
                 case DIAMOND_HELMET:
-                case GOLD_HELMET:
+                case GOLDEN_HELMET:
                     return HELMET;
 
                 case LEATHER_CHESTPLATE:
                 case CHAINMAIL_CHESTPLATE:
                 case IRON_CHESTPLATE:
                 case DIAMOND_CHESTPLATE:
-                case GOLD_CHESTPLATE:
+                case GOLDEN_CHESTPLATE:
                     return CHESTPLATE;
 
                 case LEATHER_LEGGINGS:
                 case CHAINMAIL_LEGGINGS:
                 case IRON_LEGGINGS:
                 case DIAMOND_LEGGINGS:
-                case GOLD_LEGGINGS:
+                case GOLDEN_LEGGINGS:
                     return LEGGINGS;
 
                 case LEATHER_BOOTS:
                 case CHAINMAIL_BOOTS:
                 case IRON_BOOTS:
                 case DIAMOND_BOOTS:
-                case GOLD_BOOTS:
+                case GOLDEN_BOOTS:
                     return BOOTS;
 
                 default:

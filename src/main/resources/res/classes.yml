@@ -6,7 +6,7 @@ Tank:
   armor: diamond_helmet, diamond_chestplate, diamond_leggings, diamond_boots
   effects: slow, health_boost
 Archer:
-  items: wood_sword, bow, arrow:256, potion:instant_heal:3, bone
+  items: wooden_sword, bow, arrow:256, potion:instant_heal:3, bone
   armor: leather_helmet, leather_chestplate, leather_leggings, leather_boots
   effects: speed
 Chemist:

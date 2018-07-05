@@ -10,7 +10,9 @@ import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ocelot;
@@ -359,9 +361,11 @@ public class MAUtils
         // Place the hippie signs
         //Iterator<String> iterator = am.getClasses().iterator();
         Iterator<String> iterator = am.getClasses().keySet().iterator();
+        Rotatable signData = (Rotatable) Material.SIGN.createBlockData();
+        signData.setRotation(BlockFace.NORTH);
         for (int i = lx1+2; i <= lx2-2; i++) // Signs
         {
-            world.getBlockAt(i,ly1+1,lz2-1).setTypeIdAndData(63, (byte)0x8, false);
+            world.getBlockAt(i,ly1+1,lz2-1).setBlockData(signData);
             Sign sign = (Sign) world.getBlockAt(i,ly1+1,lz2-1).getState();
             sign.setLine(0, TextUtils.camelCase(iterator.next()));
             sign.update();

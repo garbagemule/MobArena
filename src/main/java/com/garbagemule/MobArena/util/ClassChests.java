@@ -48,7 +48,7 @@ public class ClassChests {
         Block blockBehind = blockBelow.getRelative(backwards);
 
         // If the block below this sign is a class sign, swap the order
-        if (blockBelow.getType() == Material.WALL_SIGN || blockBelow.getType() == Material.SIGN_POST) {
+        if (blockBelow.getType() == Material.WALL_SIGN || blockBelow.getType() == Material.SIGN) {
             String className = ChatColor.stripColor(((Sign) blockBelow.getState()).getLine(0)).toLowerCase();
             if (arena.getClasses().containsKey(className)) {
                 blockSign = blockBehind;  // Use blockSign as a temp while swapping

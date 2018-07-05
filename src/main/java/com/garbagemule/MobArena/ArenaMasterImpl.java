@@ -57,7 +57,7 @@ public class ArenaMasterImpl implements ArenaMaster
         this.classes = new HashMap<>();
 
         this.allowedCommands = new HashSet<>();
-        this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
+        this.spawnsPets = new SpawnsPets(Material.BONE, Material.SALMON);
 
         this.joinInterruptTimer = new JoinInterruptTimer();
     }

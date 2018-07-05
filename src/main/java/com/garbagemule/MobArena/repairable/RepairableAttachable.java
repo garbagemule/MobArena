@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.repairable;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -23,14 +24,14 @@ public class RepairableAttachable extends RepairableBlock
         y = attached.getY();
         z = attached.getZ();
         
-        state.getBlock().setTypeId(1);
+        state.getBlock().setType(Material.STONE);
     }
 
     public void repair()
     {
         Block b = getWorld().getBlockAt(x,y,z);
-        if (b.getTypeId() == 0)
-            b.setTypeId(1);
+        if (b.getType() == Material.AIR)
+            b.setType(Material.STONE);
         
         super.repair();
     }
