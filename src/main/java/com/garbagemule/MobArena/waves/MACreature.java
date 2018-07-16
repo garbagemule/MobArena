@@ -13,6 +13,7 @@ import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
@@ -76,6 +77,7 @@ public class MACreature
     public static final MACreature BABYZOMBIE = new MACreature("babyzombie", EntityType.ZOMBIE);
     public static final MACreature BABYPIGMAN = new MACreature("babypigman", "babypigmen", EntityType.PIG_ZOMBIE);
     public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE);
+    public static final MACreature WITHERSKELETON = new MACreature("witherskeleton", EntityType.SKELETON);
 
     // 1.6 creatures
     public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.HORSE);
@@ -179,6 +181,10 @@ public class MACreature
                 break;
             case "undeadhorse":
                 ((Horse) e).setVariant(Horse.Variant.UNDEAD_HORSE);
+                break;
+            case "witherskeleton":
+                ((Skeleton) e).setSkeletonType(Skeleton.SkeletonType.WITHER);
+                e.getEquipment().setItemInHand(new ItemStack(Material.STONE_SWORD));
                 break;
             default:
                 break;
