@@ -1065,13 +1065,6 @@ public class ArenaListener
         Player p = event.getPlayer();
         if (!arena.inLobby(p)) return;
 
-        // Player is in the lobby, so disallow using items.
-        Action a = event.getAction();
-        if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) {
-            event.setUseItemInHand(Result.DENY);
-            event.setCancelled(true);
-        }
-
         // Bail if off-hand or if there's no block involved.
         if (event.getHand() == EquipmentSlot.OFF_HAND || !event.hasBlock())
             return;
