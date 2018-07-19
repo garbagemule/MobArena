@@ -1081,6 +1081,11 @@ public class ArenaListener
         Player p = event.getPlayer();
         if (!arena.inLobby(p)) return;
 
+        // Prevent placing blocks and using held items
+        if (event.hasItem()) {
+            event.setUseItemInHand(Result.DENY);
+        }
+
         // Bail if off-hand or if there's no block involved.
         if (event.getHand() == EquipmentSlot.OFF_HAND || !event.hasBlock())
             return;
