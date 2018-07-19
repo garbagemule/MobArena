@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -104,6 +105,13 @@ public class MAGlobalListener implements Listener
 //        for (Arena arena : am.getArenas())
 //            arena.getEventListener().onBlockFromTo(event);
 //    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void blockFade(BlockFadeEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onBlockFade(event);
+        }
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void blockIgnite(BlockIgniteEvent event) {

@@ -43,6 +43,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -332,6 +333,21 @@ public class ArenaListener
         // If a snowman forms some snow on its path, add the block
         if (event.getNewState().getType() == Material.SNOW)
             arena.addBlock(event.getBlock());
+    }
+
+    public void onBlockFade(BlockFadeEvent event) {
+        if (!protect) {
+            return;
+        }
+        if (!arena.getRegion().contains(event.getBlock().getLocation())) {
+            return;
+        }
+        switch (event.getBlock().getType()) {
+            case ICE:
+            case SNOW:
+                event.setCancelled(true);
+                break;
+        }
     }
 
     /*
