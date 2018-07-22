@@ -4,7 +4,6 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.Thing;
-import com.garbagemule.MobArena.util.EntityPosition;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
@@ -19,11 +18,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,10 +30,6 @@ import java.util.Set;
 
 public class MAUtils
 {         
-    public static final String sep = File.separator;
-    
-      
-    
     /* ///////////////////////////////////////////////////////////////////// //
     
             INITIALIZATION METHODS
@@ -260,9 +250,6 @@ public class MAUtils
      */
     public static boolean doooooItHippieMonster(Location loc, int radius, String name, MobArena plugin)
     {
-        // Try to restore the old patch first.
-        undoItHippieMonster(name, plugin, false);
-        
         // Grab the Configuration and ArenaMaster
         ArenaMaster am = plugin.getArenaMaster();
                 
@@ -284,37 +271,6 @@ public class MAUtils
         int ly2 = y1-2;
         int lz1 = z1;
         int lz2 = z1 + 6;
-        
-        // Save the precious patch
-        HashMap<EntityPosition,Integer> preciousPatch = new HashMap<>();
-        Location lo;
-        int id;
-        for (int i = x1; i <= x2; i++)
-        {
-            for (int j = ly1; j <= y2; j++)
-            {
-                for (int k = z1; k <= z2; k++)
-                {
-                    lo = world.getBlockAt(i,j,k).getLocation();
-                    id = world.getBlockAt(i,j,k).getTypeId();
-                    preciousPatch.put(new EntityPosition(lo),id);
-                }
-            }
-        }
-        try
-        {
-            new File("plugins" + sep + "MobArena" + sep + "agbackup").mkdir();
-            FileOutputStream fos = new FileOutputStream("plugins" + sep + "MobArena" + sep + "agbackup" + sep + name + ".tmp");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(preciousPatch);
-            oos.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            plugin.getLogger().warning("Couldn't create backup file. Aborting auto-generate...");
-            return false;
-        }
         
         // Build some monster walls.
         for (int i = x1; i <= x2; i++)
@@ -431,43 +387,6 @@ public class MAUtils
         region.save();
         
         am.reloadConfig();
-        return true;
-    }
-    
-    /**
-     * This fixes everything!
-     */
-    @SuppressWarnings("unchecked")
-    public static boolean undoItHippieMonster(String name, MobArena plugin, boolean error)
-    {
-        File file = new File("plugins" + sep + "MobArena" + sep + "agbackup" + sep + name + ".tmp");
-        HashMap<EntityPosition,Integer> preciousPatch;
-        try
-        {
-            FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            preciousPatch = (HashMap<EntityPosition,Integer>) ois.readObject();
-            ois.close();
-        }
-        catch (Exception e)
-        {
-            if (error) plugin.getLogger().warning("Couldn't find backup file for arena '" + name + "'");
-            return false;
-        }
-        
-        World world = plugin.getServer().getWorld(preciousPatch.keySet().iterator().next().getWorld());
-        
-        for (Map.Entry<EntityPosition,Integer> entry : preciousPatch.entrySet())
-        {
-            world.getBlockAt(entry.getKey().getLocation(world)).setTypeId(entry.getValue());
-        }
-
-        plugin.getConfig().set("arenas." + name, null);
-        plugin.saveConfig();
-        
-        file.delete();
-        
-        plugin.getArenaMaster().reloadConfig();
         return true;
     }
 }

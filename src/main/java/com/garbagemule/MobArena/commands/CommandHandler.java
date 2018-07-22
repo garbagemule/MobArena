@@ -8,7 +8,6 @@ import com.garbagemule.MobArena.commands.admin.ForceCommand;
 import com.garbagemule.MobArena.commands.admin.KickCommand;
 import com.garbagemule.MobArena.commands.admin.RestoreCommand;
 import com.garbagemule.MobArena.commands.setup.AddArenaCommand;
-import com.garbagemule.MobArena.commands.setup.AutoDegenerateCommand;
 import com.garbagemule.MobArena.commands.setup.AutoGenerateCommand;
 import com.garbagemule.MobArena.commands.setup.CheckDataCommand;
 import com.garbagemule.MobArena.commands.setup.CheckSpawnsCommand;
@@ -240,7 +239,6 @@ public class CommandHandler implements CommandExecutor
 
         register(RemoveLeaderboardCommand.class);
         register(AutoGenerateCommand.class);
-        register(AutoDegenerateCommand.class);
     }
     
     /**
