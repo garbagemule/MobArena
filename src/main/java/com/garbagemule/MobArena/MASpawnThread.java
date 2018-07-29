@@ -37,6 +37,7 @@ public class MASpawnThread implements Runnable
 
     private int playerCount, monsterLimit;
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
+    private int waveInterval;
 
     /**
      * Create a new monster spawner for the input arena.
@@ -68,6 +69,7 @@ public class MASpawnThread implements Runnable
         bossClear = arena.getSettings().getBoolean("clear-boss-before-next", false);
         preBossClear = arena.getSettings().getBoolean("clear-wave-before-boss", false);
         wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
+        waveInterval = arena.getSettings().getInt("wave-interval", 3);
     }
 
     public void run() {
@@ -126,7 +128,7 @@ public class MASpawnThread implements Runnable
         updateStats(nextWave);
 
         // Reschedule the spawner for the next wave.
-        arena.scheduleTask(this, arena.getSettings().getInt("wave-interval", 3) * 20);
+        arena.scheduleTask(this, waveInterval * 20);
     }
 
     private void spawnWave(int wave) {
