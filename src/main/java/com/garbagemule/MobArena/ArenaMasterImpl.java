@@ -376,7 +376,10 @@ public class ArenaMasterImpl implements ArenaMaster
     private void loadClassItems(ConfigurationSection section, ArenaClass arenaClass) {
         List<String> items = section.getStringList("items");
         if (items == null || items.isEmpty()) {
-            String value = section.getString("items", "");
+            String value = section.getString("items", null);
+            if (value == null || value.isEmpty()) {
+                return;
+            }
             items = Arrays.asList(value.split(","));
         }
 
