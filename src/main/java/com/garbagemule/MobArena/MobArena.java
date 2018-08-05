@@ -100,7 +100,12 @@ public class MobArena extends JavaPlugin
 
         // Set up the ArenaMaster
         arenaMaster = new ArenaMasterImpl(this);
-        arenaMaster.initialize();
+        try {
+            arenaMaster.initialize();
+        } catch (ConfigError e) {
+            getLogger().severe(e.getMessage());
+            return;
+        }
 
         // Load signs after Messenger and ArenaMaster
         reloadSigns();

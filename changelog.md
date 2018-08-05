@@ -15,6 +15,7 @@ These changes will (most likely) be included in the next version.
 - The new per-arena setting `join-interrupt-timer` makes it possible to add a "delay" to the join and spec commands. If the player moves or takes damage during this delay, the command is interrupted. This should help prevent exploits on PvP servers.
 - Right-clicking is now allowed in the lobby. This makes it possible to activate blocks like buttons and levers.
 - Snow and ice no longer melts in arenas.
+- Much of the parsing logic has been rewritten so that MobArena now logs more user-friendly errors when it encounters invalid values in the config-file.
 
 Thanks to:
 - PrinceIonia and Nesseley for help with test of dev builds

@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
@@ -66,13 +67,9 @@ public class MAUtils
             for (String reward : rewards.split(",")) {
                 try {
                     Thing thing = plugin.getThingManager().parse(reward.trim());
-                    if (thing == null) {
-                        plugin.getLogger().warning("Failed to parse reward: " + reward.trim());
-                    } else {
-                        things.add(thing);
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().severe("Exception parsing reward '" + reward.trim() + "': " + e.getLocalizedMessage());
+                    things.add(thing);
+                } catch (InvalidThingInputString e) {
+                    throw new ConfigError("Failed to parse reward for wave " + wave + " in the '" + type + "' branch of arena " + arena + ": " + e.getInput());
                 }
             }
             result.put(wave, things);

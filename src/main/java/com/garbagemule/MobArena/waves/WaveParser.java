@@ -1,7 +1,9 @@
 package com.garbagemule.MobArena.waves;
 
+import com.garbagemule.MobArena.ConfigError;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.util.ItemParser;
@@ -134,7 +136,7 @@ public class WaveParser
         List<Location> spawnpoints = getSpawnpoints(arena, name, config);
         
         // Potion effects
-        List<PotionEffect> effects = getPotionEffects(config);
+        List<PotionEffect> effects = getPotionEffects(arena, name, config);
 
         // Recurrent must have priority + frequency, single must have firstWave
         if (branch == WaveBranch.RECURRENT && (priority == -1 || frequency <= 0)) {
@@ -238,7 +240,7 @@ public class WaveParser
     
     private static Wave parseUpgradeWave(Arena arena, String name, ConfigurationSection config) {
         ThingManager thingman = arena.getPlugin().getThingManager();
-        Map<String,List<Thing>> upgrades = getUpgradeMap(config, thingman);
+        Map<String,List<Thing>> upgrades = getUpgradeMap(config, name, arena, thingman);
         if (upgrades == null || upgrades.isEmpty()) {
             arena.getPlugin().getLogger().warning(WaveError.UPGRADE_MAP_MISSING.format(name, arena.configName()));
             return null;
@@ -307,13 +309,9 @@ public class WaveParser
         if (rew != null) {
             try {
                 Thing thing = arena.getPlugin().getThingManager().parse(rew.trim());
-                if (thing == null) {
-                    arena.getPlugin().getLogger().warning("Failed to parse boss reward: " + rew.trim());
-                } else {
-                    result.setReward(thing);
-                }
-            } catch (Exception e) {
-                arena.getPlugin().getLogger().severe("Exception parsing boss reward '" + rew.trim() + "': " + e.getLocalizedMessage());
+                result.setReward(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse boss reward in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
             }
         }
 
@@ -404,27 +402,41 @@ public class WaveParser
         return result;
     }
 
-    private static List<PotionEffect> getPotionEffects(ConfigurationSection config) {
-        String value = config.getString("effects");
-        if (value == null) {
-            value = config.getString("potions");
+    private static List<PotionEffect> getPotionEffects(Arena arena, String name, ConfigurationSection config) {
+        /*
+         * TODO: Make this consistent with the rest somehow
+         * - Things only work for Players (currently)
+         */
+        List<String> effects = config.getStringList("effects");
+        if (effects == null || effects.isEmpty()) {
+            String value = config.getString("effects", null);
+            if (value != null && !value.isEmpty()) {
+                effects = Arrays.asList(value.split(","));
+            } else {
+                effects = config.getStringList("potions");
+                if (effects == null || effects.isEmpty()) {
+                    value = config.getString("potions", null);
+                    if (value != null && !value.isEmpty()) {
+                        effects = Arrays.asList(value.split(","));
+                    } else {
+                        return Collections.emptyList();
+                    }
+                }
+            }
         }
-        if (value != null) {
-            List<PotionEffect> parsed = PotionEffectParser.parsePotionEffects(value);
-            return (parsed != null) ? parsed : Collections.emptyList();
-        }
-
-        List<String> list = config.getStringList("effects");
-        if (list.isEmpty()) {
-            list = config.getStringList("potions");
-        }
-        return list.stream()
-            .map(PotionEffectParser::parsePotionEffect)
-            .filter(Objects::nonNull)
+        return effects.stream()
+            .map(String::trim)
+            .map(input -> {
+                PotionEffect effect = PotionEffectParser.parsePotionEffect(input, false);
+                if (effect == null) {
+                    throw new ConfigError("Failed to parse potion effect for wave " + name + " of arena " + arena.configName() + ": " + input);
+                }
+                return effect;
+            })
             .collect(Collectors.toList());
     }
     
-    private static Map<String,List<Thing>> getUpgradeMap(ConfigurationSection config, ThingManager thingman) {
+    private static Map<String,List<Thing>> getUpgradeMap(ConfigurationSection config, String name, Arena arena, ThingManager thingman) {
         ConfigurationSection section = config.getConfigurationSection("upgrades");
         if (section == null) {
             return null;
@@ -442,59 +454,85 @@ public class WaveParser
             // Legacy support
             Object val = config.get(path + className, null);
             if (val instanceof String) {
-                String s = (String) val;
-                List<Thing> things = Arrays.asList(s.split(",")).stream()
-                    .map(String::trim)
-                    .map(thingman::parse)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                List<Thing> things = loadUpgradesFromString(className, (String) val, name, arena, thingman);
                 upgrades.put(className.toLowerCase(), things);
             }
             // New complex setup
             else if (val instanceof ConfigurationSection) {
-                ConfigurationSection classSection = (ConfigurationSection) val;
-                List<Thing> list = new ArrayList<>();
-
-                // Items
-                List<String> items = classSection.getStringList("items");
-                if (items == null || items.isEmpty()) {
-                    String value = classSection.getString("items", "");
-                    items = Arrays.asList(value.split(","));
-                }
-                items.stream()
-                    .map(String::trim)
-                    .map(thingman::parse)
-                    .filter(Objects::nonNull)
-                    .forEach(list::add);
-
-                // Armor
-                List<String> armor = classSection.getStringList("armor");
-                if (armor == null || armor.isEmpty()) {
-                    String value = classSection.getString("armor", "");
-                    armor = Arrays.asList(value.split(","));
-                }
-
-                // Prepend "armor:" for the armor thing parser
-                armor.stream()
-                    .map(String::trim)
-                    .map(s -> "armor:" + s)
-                    .map(thingman::parse)
-                    .filter(Objects::nonNull)
-                    .forEach(list::add);
-
-                // Prepend "perm:" for the permission thing parser
-                classSection.getStringList("permissions").stream()
-                    .map(perm -> "perm:" + perm)
-                    .map(thingman::parse)
-                    .filter(Objects::nonNull)
-                    .forEach(list::add);
-
-                // Put in the map
+                List<Thing> list = loadUpgradesFromSection(className, (ConfigurationSection) val, name, arena, thingman);
                 upgrades.put(className.toLowerCase(), list);
             }
         }
         
         return upgrades;
+    }
+
+    private static List<Thing> loadUpgradesFromString(String className, String value, String name, Arena arena, ThingManager thingman) {
+        if (value == null || value.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .map(thingman::parse)
+                .collect(Collectors.toList());
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        }
+    }
+
+    private static List<Thing> loadUpgradesFromSection(String className, ConfigurationSection classSection, String name, Arena arena, ThingManager thingman) {
+        List<Thing> list = new ArrayList<>();
+
+        // Items
+        List<String> items = classSection.getStringList("items");
+        if (items == null || items.isEmpty()) {
+            String value = classSection.getString("items", null);
+            if (value == null || value.isEmpty()) {
+                items = Collections.emptyList();
+            } else {
+                items = Arrays.asList(value.split(","));
+            }
+        }
+        try {
+            items.stream()
+                .map(String::trim)
+                .map(thingman::parse)
+                .forEach(list::add);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse item upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        }
+
+        // Armor
+        List<String> armor = classSection.getStringList("armor");
+        if (armor == null || armor.isEmpty()) {
+            String value = classSection.getString("armor", null);
+            if (value == null || value.isEmpty()) {
+                armor = Collections.emptyList();
+            } else {
+                armor = Arrays.asList(value.split(","));
+            }
+        }
+        try {
+            // Prepend "armor:" for the armor thing parser
+            armor.stream()
+                .map(String::trim)
+                .map(s -> thingman.parse("armor", s))
+                .forEach(list::add);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse armor upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        }
+
+        try {
+            // Prepend "perm:" for the permission thing parser
+            classSection.getStringList("permissions").stream()
+                .map(perm -> thingman.parse("perm", perm))
+                .forEach(list::add);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse permission upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        }
+
+        return list;
     }
     
     public static Wave createDefaultWave() {

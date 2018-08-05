@@ -20,6 +20,7 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
@@ -205,13 +206,9 @@ public class ArenaImpl implements Arena
             for (String fee : feeString.split(",")) {
                 try {
                     Thing thing = plugin.getThingManager().parse(fee.trim());
-                    if (thing == null) {
-                        plugin.getLogger().warning("Failed to parse entry fee: " + fee.trim());
-                    } else {
-                        this.entryFee.add(thing);
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().severe("Exception parsing entry fee '" + fee.trim() + "': " + e.getLocalizedMessage());
+                    this.entryFee.add(thing);
+                } catch (InvalidThingInputString e) {
+                    throw new ConfigError("Failed to parse entry fee of arena " + name + ": " + e.getInput());
                 }
             }
         }

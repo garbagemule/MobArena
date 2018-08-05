@@ -5,6 +5,7 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.JoinInterruptTimer;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
@@ -340,9 +341,8 @@ public class ArenaMasterImpl implements ArenaMaster
         if (priceString != null) {
             try {
                 price = plugin.getThingManager().parse(priceString);
-            } catch (Exception e) {
-                plugin.getLogger().warning("Exception parsing class price: " + e.getLocalizedMessage());
-                price = null;
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse price of class " + classname + ": " + e.getInput());
             }
         }
 
@@ -380,13 +380,15 @@ public class ArenaMasterImpl implements ArenaMaster
             items = Arrays.asList(value.split(","));
         }
 
-        List<Thing> things = items.stream()
-            .map(String::trim)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-        arenaClass.setItems(things);
+        try {
+            List<Thing> things = items.stream()
+                .map(String::trim)
+                .map(plugin.getThingManager()::parse)
+                .collect(Collectors.toList());
+            arenaClass.setItems(things);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse item for class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     private void loadClassArmor(ConfigurationSection section, ArenaClass arenaClass) {
@@ -394,76 +396,91 @@ public class ArenaMasterImpl implements ArenaMaster
         loadClassArmorLegacyNode(section, arenaClass);
 
         // Specific armor pieces
-        loadClassArmorPiece(section, "helmet",     arenaClass::setHelmet);
-        loadClassArmorPiece(section, "chestplate", arenaClass::setChestplate);
-        loadClassArmorPiece(section, "leggings",   arenaClass::setLeggings);
-        loadClassArmorPiece(section, "boots",      arenaClass::setBoots);
-        loadClassArmorPiece(section, "offhand",    arenaClass::setOffHand);
+        String name = arenaClass.getConfigName();
+        loadClassArmorPiece(section, "helmet",     name, arenaClass::setHelmet);
+        loadClassArmorPiece(section, "chestplate", name, arenaClass::setChestplate);
+        loadClassArmorPiece(section, "leggings",   name, arenaClass::setLeggings);
+        loadClassArmorPiece(section, "boots",      name, arenaClass::setBoots);
+        loadClassArmorPiece(section, "offhand",    name, arenaClass::setOffHand);
     }
 
     private void loadClassArmorLegacyNode(ConfigurationSection section, ArenaClass arenaClass) {
         List<String> armor = section.getStringList("armor");
         if (armor == null || armor.isEmpty()) {
-            String value = section.getString("armor", "");
+            String value = section.getString("armor", null);
+            if (value == null || value.isEmpty()) {
+                return;
+            }
             armor = Arrays.asList(value.split(","));
         }
 
-        // Prepend "armor:" for the armor thing parser
-        List<Thing> things = armor.stream()
-            .map(String::trim)
-            .map(s -> "armor:" + s)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-        arenaClass.setArmor(things);
+        try {
+            // Prepend "armor:" for the armor thing parser
+            List<Thing> things = armor.stream()
+                .map(String::trim)
+                .map(s -> plugin.getThingManager().parse("armor", s))
+                .collect(Collectors.toList());
+            arenaClass.setArmor(things);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse armor for class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
-    private void loadClassArmorPiece(ConfigurationSection section, String slot, Consumer<Thing> setter) {
+    private void loadClassArmorPiece(ConfigurationSection section, String slot, String name, Consumer<Thing> setter) {
         String value = section.getString(slot, null);
         if (value == null) {
             return;
         }
-        // Prepend the slot name for the item parser
-        Thing thing =  plugin.getThingManager().parse(slot + ":" + value);
-        if (thing == null) {
-            return;
+        try {
+            // Prepend the slot name for the item parser
+            Thing thing = plugin.getThingManager().parse(slot, value);
+            setter.accept(thing);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse " + slot + " slot for class " + name + ": " + e.getInput());
         }
-        setter.accept(thing);
     }
 
     private void loadClassPotionEffects(ConfigurationSection section, ArenaClass arenaClass) {
         List<String> effects = section.getStringList("effects");
         if (effects == null || effects.isEmpty()) {
-            String value = section.getString("effects", "");
+            String value = section.getString("effects", null);
+            if (value == null || value.isEmpty()) {
+                return;
+            }
             effects = Arrays.asList(value.split(","));
         }
 
-        // Prepend "effect:" for the potion effect thing parser
-        List<Thing> things = effects.stream()
-            .map(String::trim)
-            .map(s -> "effect:" + s)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        try {
+            // Prepend "effect:" for the potion effect thing parser
+            List<Thing> things = effects.stream()
+                .map(String::trim)
+                .map(s -> plugin.getThingManager().parse("effect", s))
+                .collect(Collectors.toList());
 
-        arenaClass.setEffects(things);
+            arenaClass.setEffects(things);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse potion effect of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        section.getStringList("permissions").stream()
-            .map(perm -> "perm:" + perm)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .forEach(arenaClass::addPermission);
+        try {
+            section.getStringList("permissions").stream()
+                .map(s -> plugin.getThingManager().parse("perm", s))
+                .forEach(arenaClass::addPermission);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse permission of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     private void loadClassLobbyPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        section.getStringList("lobby-permissions").stream()
-            .map(perm -> "perm:" + perm)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .forEach(arenaClass::addLobbyPermission);
+        try {
+            section.getStringList("lobby-permissions").stream()
+                .map(s -> plugin.getThingManager().parse("perm", s))
+                .forEach(arenaClass::addLobbyPermission);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse lobby-permission of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     /**

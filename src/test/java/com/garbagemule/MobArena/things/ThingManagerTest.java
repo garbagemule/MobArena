@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.things;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,12 +9,17 @@ import static org.mockito.Mockito.when;
 
 import com.garbagemule.MobArena.MobArena;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InOrder;
 
 public class ThingManagerTest {
 
     private ThingManager subject;
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -27,6 +31,7 @@ public class ThingManagerTest {
     public void afterCoreParsersInOrder() {
         ThingParser first = mock(ThingParser.class);
         ThingParser second = mock(ThingParser.class);
+        when(second.parse(anyString())).thenReturn(mock(Thing.class));
         subject.register(first /*, false */);
         subject.register(second /*, false */);
 
@@ -41,6 +46,7 @@ public class ThingManagerTest {
     public void beforeCoreParsersInverseOrder() {
         ThingParser first = mock(ThingParser.class);
         ThingParser second = mock(ThingParser.class);
+        when(first.parse(anyString())).thenReturn(mock(Thing.class));
         subject.register(first, true);
         subject.register(second, true);
 
@@ -72,7 +78,7 @@ public class ThingManagerTest {
     }
 
     @Test
-    public void returnsNullIfNoParsersSucceed() {
+    public void throwsIfNoParsersSucceed() {
         ThingParser first = mock(ThingParser.class);
         ThingParser second = mock(ThingParser.class);
         when(first.parse("thing")).thenReturn(null);
@@ -80,9 +86,9 @@ public class ThingManagerTest {
         subject.register(first);
         subject.register(second);
 
-        Thing result = subject.parse("thing");
+        exception.expect(InvalidThingInputString.class);
 
-        assertThat(result, nullValue());
+        subject.parse("thing");
     }
 
 }
