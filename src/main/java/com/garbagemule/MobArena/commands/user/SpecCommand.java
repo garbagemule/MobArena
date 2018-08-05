@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.commands.user;
 
+import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
@@ -31,27 +32,43 @@ public class SpecCommand implements Command
         
         // Run some rough sanity checks, and grab the arena to spec.
         Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
-        if (toArena == null) {
+        if (toArena == null || !canSpec(p, toArena)) {
             return true;
         }
 
-        // Deny spectating from other arenas
-        Arena fromArena = am.getArenaWithPlayer(p);
-        if (fromArena != null && (fromArena.inArena(p) || fromArena.inLobby(p))) {
-            fromArena.getMessenger().tell(p, Msg.SPEC_ALREADY_PLAYING);
-            return true;
-        }
-        
-        // Per-arena sanity checks
-        if (!toArena.canSpec(p)) {
-            return true;
-        }
-
-        // Force leave previous arena
-        if (fromArena != null) fromArena.playerLeave(p);
-        
         // Spec the arena!
-        toArena.playerSpec(p, p.getLocation());
+        int seconds = toArena.getSettings().getInt("join-interrupt-timer", 0);
+        if (seconds > 0) {
+            boolean started = am.getJoinInterruptTimer().start(p, toArena, seconds, () -> trySpec(p, toArena));
+            if (started) {
+                toArena.getMessenger().tell(p, Msg.JOIN_AFTER_DELAY, String.valueOf(seconds));
+            } else {
+                toArena.getMessenger().tell(p, Msg.SPEC_ALREADY_PLAYING);
+            }
+        } else {
+            trySpec(p, toArena);
+        }
         return true;
+    }
+
+    private boolean canSpec(Player player, Arena arena) {
+        MobArena plugin = arena.getPlugin();
+        ArenaMaster am = plugin.getArenaMaster();
+        if (am.getJoinInterruptTimer().isWaiting(player)) {
+            plugin.getGlobalMessenger().tell(player, Msg.SPEC_ALREADY_PLAYING);
+            return false;
+        }
+        Arena current = arena.getPlugin().getArenaMaster().getArenaWithPlayer(player);
+        if (current != null) {
+            current.getMessenger().tell(player, Msg.SPEC_ALREADY_PLAYING);
+            return false;
+        }
+        return arena.canSpec(player);
+    }
+
+    private void trySpec(Player player, Arena arena) {
+        if (canSpec(player, arena)) {
+            arena.playerSpec(player, player.getLocation());
+        }
     }
 }

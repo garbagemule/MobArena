@@ -12,6 +12,7 @@ These changes will (most likely) be included in the next version.
 
 ## [Unreleased]
 - It is now possible to add a fixed delay (in seconds) between waves with the new per-arena setting `next-wave-delay`.
+- The new per-arena setting `join-interrupt-timer` makes it possible to add a "delay" to the join and spec commands. If the player moves or takes damage during this delay, the command is interrupted. This should help prevent exploits on PvP servers.
 - Right-clicking is now allowed in the lobby. This makes it possible to activate blocks like buttons and levers.
 - Snow and ice no longer melts in arenas.
 

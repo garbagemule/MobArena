@@ -6,6 +6,7 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.util.JoinInterruptTimer;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -44,6 +45,8 @@ public class ArenaMasterImpl implements ArenaMaster
     
     private boolean enabled;
 
+    private JoinInterruptTimer joinInterruptTimer;
+
     /**
      * Default constructor.
      */
@@ -60,6 +63,8 @@ public class ArenaMasterImpl implements ArenaMaster
         this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
         
         this.enabled = config.getBoolean("global-settings.enabled", true);
+
+        this.joinInterruptTimer = new JoinInterruptTimer();
     }
 
     /*
@@ -112,6 +117,10 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public boolean isAllowed(String command) {
         return allowedCommands.contains(command);
+    }
+
+    public JoinInterruptTimer getJoinInterruptTimer() {
+        return joinInterruptTimer;
     }
 
     /*

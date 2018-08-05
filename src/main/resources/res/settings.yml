@@ -20,6 +20,7 @@ share-items-in-arena: true
 min-players: 0
 max-players: 0
 max-join-distance: 0
+join-interrupt-timer: 0
 first-wave-delay: 5
 next-wave-delay: 0
 wave-interval: 15
