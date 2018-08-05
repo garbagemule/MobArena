@@ -29,8 +29,10 @@ public class MACreature
     static {
         map = new HashMap<>();
         for (EntityType type : EntityType.values()) {
-            // Instantiating a new creature registers it
-            new MACreature(type);
+            if (type.isAlive()) {
+                // Instantiating a new creature registers it
+                new MACreature(type);
+            }
         }
     }
 
