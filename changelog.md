@@ -19,6 +19,7 @@ These changes will (most likely) be included in the next version.
 - If MobArena fails to load due to config-file errors, it now enters a type of "error state". In this state, it responds to all commands (except for the reload command) with a short message explaining why it's disabled.
 - It is now possible to reload config-files with `/ma reload`.
 - The reload command now also reloads global settings, e.g. the global messenger prefix.
+- Armor stands can now be placed in arenas and lobbies.
 
 Thanks to:
 - PrinceIonia and Nesseley for help with test of dev builds

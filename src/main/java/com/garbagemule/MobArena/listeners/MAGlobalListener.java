@@ -33,6 +33,7 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -302,6 +303,13 @@ public class MAGlobalListener implements Listener
         if (!am.isEnabled()) return;
         for (Arena arena : am.getArenas())
             arena.getEventListener().onPlayerInteract(event);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void playerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+        if (!am.isEnabled()) return;
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onPlayerArmorStandManipulate(event);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
