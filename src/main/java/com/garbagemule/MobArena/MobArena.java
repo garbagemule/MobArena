@@ -124,9 +124,7 @@ public class MobArena extends JavaPlugin
     }
 
     private void setupCommandHandler() {
-        CommandHandler handler = new CommandHandler(this);
-        getCommand("ma").setExecutor(handler);
-        getCommand("mobarena").setExecutor(handler);
+        getCommand("ma").setExecutor(new CommandHandler(this));
     }
 
     private void registerConfigurationSerializers() {

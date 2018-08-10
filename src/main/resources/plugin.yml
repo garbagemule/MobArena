@@ -11,13 +11,7 @@ commands:
             Find the error in your server log, copy it into
             http://pastebin.com, and then paste the link
             in the IRC or on the forums.
-    mobarena:
-        description: Base command for MobArena
-        usage: |
-            YOU HAVE AN ERROR!
-            Find the error in your server log, copy it into
-            http://pastebin.com, and then paste the link
-            in the IRC or on the forums.
+        aliases: [mobarena]
 permissions:
     mobarena.use.join:
         description: Join command
