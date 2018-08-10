@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.commands.CommandHandler;
+import com.garbagemule.MobArena.config.LoadsConfigFile;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
@@ -35,10 +36,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 
 /**
  * MobArena
@@ -47,13 +46,13 @@ import java.util.Random;
 public class MobArena extends JavaPlugin
 {
     private ArenaMaster arenaMaster;
-    private CommandHandler commandHandler;
     
     // Vault
     private Economy economy;
 
-    private File configFile;
     private FileConfiguration config;
+    private LoadsConfigFile loadsConfigFile;
+    private Throwable lastFailureCause;
     
     public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
     public static Random random = new Random();
@@ -70,141 +69,155 @@ public class MobArena extends JavaPlugin
 
     public void onEnable() {
         ServerVersionCheck.check(getServer());
+        try {
+            setup();
+            reload();
+            checkForUpdates();
+        } catch (ConfigError e) {
+            getLogger().log(Level.SEVERE, "You have an error in your config-file!\n\n  " + e.getMessage() + "\n");
+            getLogger().log(Level.SEVERE, "Fix it, then run /ma load");
+        }
+    }
+    
+    public void onDisable() {
+        if (arenaMaster != null) {
+            arenaMaster.getArenas().forEach(Arena::forceEnd);
+            arenaMaster.resetArenaMap();
+            arenaMaster = null;
+        }
+        loadsConfigFile = null;
+        ConfigurationSerialization.unregisterClass(ArenaSign.class);
+        VersionChecker.shutdown();
+    }
 
-        // Initialize config-file
-        configFile = new File(getDataFolder(), "config.yml");
-        config = new YamlConfiguration();
+    private void setup() {
+        try {
+            createDataFolder();
+            setupArenaMaster();
+            setupCommandHandler();
+
+            registerConfigurationSerializers();
+            setupVault();
+            setupMagicSpells();
+            setupBossAbilities();
+            setupListeners();
+            setupMetrics();
+        } catch (RuntimeException e) {
+            setLastFailureCauseAndRethrow(e);
+        }
+        lastFailureCause = null;
+    }
+
+    private void createDataFolder() {
+        File dir = getDataFolder();
+        if (!dir.exists()) {
+            if (dir.mkdir()) {
+                getLogger().info("Data folder plugins/MobArena created.");
+            } else {
+                getLogger().warning("Failed to create data folder plugins/MobArena!");
+            }
+        }
+    }
+    
+    private void setupArenaMaster() {
+        arenaMaster = new ArenaMasterImpl(this);
+    }
+
+    private void setupCommandHandler() {
+        CommandHandler handler = new CommandHandler(this);
+        getCommand("ma").setExecutor(handler);
+        getCommand("mobarena").setExecutor(handler);
+    }
+
+    private void registerConfigurationSerializers() {
         ConfigurationSerialization.registerClass(ArenaSign.class);
-        reloadConfig();
+    }
+    
+    private void setupVault() {
+        Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
+        if (vaultPlugin == null) {
+            getLogger().info("Vault was not found. Economy rewards will not work.");
+            return;
+        }
+        
+        ServicesManager manager = this.getServer().getServicesManager();
+        RegisteredServiceProvider<Economy> e = manager.getRegistration(net.milkbowl.vault.economy.Economy.class);
+        
+        if (e != null) {
+            economy = e.getProvider();
+            getLogger().info("Vault found; economy rewards enabled.");
+        } else {
+            getLogger().warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
+        }
+    }
+    
+    private void setupMagicSpells() {
+        Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
+        if (spells == null) {
+            return;
+        }
 
-        // Initialize global messenger
+        getLogger().info("MagicSpells found, loading config-file.");
+        this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
+    }
+
+    private void setupBossAbilities() {
+        AbilityManager.loadCoreAbilities();
+        AbilityManager.loadCustomAbilities(getDataFolder());
+    }
+
+    private void setupListeners() {
+        PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
+    }
+
+    private void setupMetrics() {
+        Metrics metrics = new Metrics(this);
+        metrics.addCustomChart(new VaultChart(this));
+        metrics.addCustomChart(new ArenaCountChart(this));
+        metrics.addCustomChart(new ClassCountChart(this));
+        metrics.addCustomChart(new ClassChestsChart(this));
+        metrics.addCustomChart(new FoodRegenChart(this));
+        metrics.addCustomChart(new IsolatedChatChart(this));
+        metrics.addCustomChart(new MonsterInfightChart(this));
+        metrics.addCustomChart(new PvpEnabledChart(this));
+    }
+    
+    public void reload() {
+        try {
+            reloadConfig();
+            reloadGlobalMessenger();
+            reloadArenaMaster();
+            reloadAnnouncementsFile();
+            reloadSigns();
+        } catch (RuntimeException e) {
+            setLastFailureCauseAndRethrow(e);
+        }
+        lastFailureCause = null;
+    }
+
+    @Override
+    public void reloadConfig() {
+        if (loadsConfigFile == null) {
+            loadsConfigFile = new LoadsConfigFile(this);
+        }
+        config = loadsConfigFile.load();
+    }
+
+    private void reloadGlobalMessenger() {
         String prefix = config.getString("global-settings.prefix", "");
         if (prefix.isEmpty()) {
             prefix = ChatColor.GREEN + "[MobArena] ";
         }
         messenger = new Messenger(prefix);
-
-        // Set the header and save
-        getConfig().options().header(getHeader());
-        saveConfig();
-
-        // Initialize announcements-file
-        reloadAnnouncementsFile();
-
-        // Load boss abilities
-        loadAbilities();
-
-        // Set up soft dependencies
-        setupVault();
-        setupMagicSpells();
-
-        // Set up the ArenaMaster
-        arenaMaster = new ArenaMasterImpl(this);
-        try {
-            arenaMaster.initialize();
-        } catch (ConfigError e) {
-            getLogger().severe(e.getMessage());
-            return;
-        }
-
-        // Load signs after Messenger and ArenaMaster
-        reloadSigns();
-
-        // Register event listeners
-        registerListeners();
-
-        // Setup bStats metrics
-        setupMetrics();
-
-        // Announce enable!
-        getLogger().info("v" + this.getDescription().getVersion() + " enabled.");
-
-        // Check for updates
-        if (getConfig().getBoolean("global-settings.update-notification", false)) {
-            VersionChecker.checkForUpdates(this, null);
-        }
-    }
-    
-    public void onDisable() {
-        // Force all arenas to end.
-        if (arenaMaster == null) return;
-        for (Arena arena : arenaMaster.getArenas()) {
-            arena.forceEnd();
-        }
-        arenaMaster.resetArenaMap();
-        VersionChecker.shutdown();
-        ConfigurationSerialization.unregisterClass(ArenaSign.class);
-
-        getLogger().info("disabled.");
     }
 
-    public File getPluginFile() {
-        return getFile();
+    private void reloadArenaMaster() {
+        arenaMaster.getArenas().forEach(Arena::forceEnd);
+        arenaMaster.initialize();
     }
 
-    @Override
-    public FileConfiguration getConfig() {
-        return config;
-    }
-
-    @Override
-    public void reloadConfig() {
-        // Make sure the data folder exists
-        File data = new File(getDataFolder(), "data");
-        if (!data.exists()) {
-            boolean created = data.mkdirs();
-            if (!created) {
-                throw new IllegalStateException("Failed to create data folder!");
-            }
-            getLogger().info("Created data folder.");
-        }
-
-        // Check if the config-file exists
-        if (!configFile.exists()) {
-            getLogger().info("No config-file found, creating default...");
-            saveDefaultConfig();
-        }
-
-        // Check for tab characters in config-file
-        try {
-            Path path = getDataFolder().toPath().resolve("config.yml");
-            List<String> lines = Files.readAllLines(path);
-            for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i);
-                int index = line.indexOf('\t');
-                if (index != -1) {
-                    String indent = new String(new char[index]).replace('\0', ' ');
-                    throw new IllegalArgumentException(
-                        "Found tab in config-file on line " + (i + 1) + "! NEVER use tabs! ALWAYS use spaces!\n\n" +
-                        line + "\n" +
-                        indent + "^"
-                    );
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("There was an error reading the config-file:\n" + e.getMessage());
-        }
-
-        // Reload the config-file
-        try {
-            config.load(configFile);
-        } catch (IOException e) {
-            throw new RuntimeException("There was an error reading the config-file:\n" + e.getMessage());
-        } catch (InvalidConfigurationException e) {
-            throw new RuntimeException("\n\n>>>\n>>> There is an error in your config-file! Handle it!\n>>> Here is what snakeyaml says:\n>>>\n\n" + e.getMessage());
-        }
-    }
-
-    void reloadSigns() {
-        if (signListeners != null) {
-            signListeners.unregister();
-        }
-        SignBootstrap bootstrap = SignBootstrap.create(this);
-        signListeners = new SignListeners();
-        signListeners.register(bootstrap);
-    }
-
-    void reloadAnnouncementsFile() {
+    private void reloadAnnouncementsFile() {
         // Create if missing
         File file = new File(getDataFolder(), "announcements.yml");
         try {
@@ -230,87 +243,47 @@ public class MobArena extends JavaPlugin
             throw new RuntimeException("\n\n>>>\n>>> There is an error in your announements-file! Handle it!\n>>> Here's what snakeyaml says:\n>>>\n\n" + e.getMessage());
         }
     }
-    
+
+    private void reloadSigns() {
+        if (signListeners != null) {
+            signListeners.unregister();
+        }
+        SignBootstrap bootstrap = SignBootstrap.create(this);
+        signListeners = new SignListeners();
+        signListeners.register(bootstrap);
+    }
+
+    private void checkForUpdates() {
+        if (getConfig().getBoolean("global-settings.update-notification", false)) {
+            VersionChecker.checkForUpdates(this, null);
+        }
+    }
+
+    private void setLastFailureCauseAndRethrow(RuntimeException up) {
+        lastFailureCause = up;
+        throw up;
+    }
+
+    public Throwable getLastFailureCause() {
+        return lastFailureCause;
+    }
+
+    public File getPluginFile() {
+        return getFile();
+    }
+
     @Override
-    public void saveConfig() {
-        try {
-            config.save(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public FileConfiguration getConfig() {
+        if (config == null) {
+            reloadConfig();
         }
-    }
-
-    private void registerListeners() {
-        // Bind the /ma, /mobarena commands to MACommands.
-        commandHandler = new CommandHandler(this);
-        getCommand("ma").setExecutor(commandHandler);
-        getCommand("mobarena").setExecutor(commandHandler);
-        
-        PluginManager pm = this.getServer().getPluginManager();
-        pm.registerEvents(new MAGlobalListener(this, arenaMaster), this);
-    }
-    
-    private void setupVault() {
-        Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
-        if (vaultPlugin == null) {
-            getLogger().info("Vault was not found. Economy rewards will not work.");
-            return;
-        }
-        
-        ServicesManager manager = this.getServer().getServicesManager();
-        RegisteredServiceProvider<Economy> e = manager.getRegistration(net.milkbowl.vault.economy.Economy.class);
-        
-        if (e != null) {
-            economy = e.getProvider();
-            getLogger().info("Vault found; economy rewards enabled.");
-        } else {
-            getLogger().warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
-        }
-    }
-    
-    private void setupMagicSpells() {
-        Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
-        if (spells == null) return;
-
-        getLogger().info("MagicSpells found, loading config-file.");
-        this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
-    }
-
-    private void setupMetrics() {
-        Metrics metrics = new Metrics(this);
-        metrics.addCustomChart(new VaultChart(this));
-        metrics.addCustomChart(new ArenaCountChart(this));
-        metrics.addCustomChart(new ClassCountChart(this));
-        metrics.addCustomChart(new ClassChestsChart(this));
-        metrics.addCustomChart(new FoodRegenChart(this));
-        metrics.addCustomChart(new IsolatedChatChart(this));
-        metrics.addCustomChart(new MonsterInfightChart(this));
-        metrics.addCustomChart(new PvpEnabledChart(this));
-    }
-    
-    private void loadAbilities() {
-        File dir = new File(this.getDataFolder(), "abilities");
-        if (!dir.exists()) dir.mkdir();
-
-        AbilityManager.loadCoreAbilities();
-        AbilityManager.loadCustomAbilities(dir);
+        return config;
     }
     
     public ArenaMaster getArenaMaster() {
         return arenaMaster;
     }
 
-    public CommandHandler getCommandHandler() {
-        return commandHandler;
-    }
-    
-    private String getHeader() {
-        String sep = System.getProperty("line.separator");
-        return "MobArena v" + this.getDescription().getVersion() + " - Config-file" + sep + 
-               "Read the Wiki for details on how to set up this file: http://goo.gl/F5TTc" + sep +
-               "Note: You -must- use spaces instead of tabs!";
-    }
-    
     public Economy getEconomy() {
         return economy;
     }

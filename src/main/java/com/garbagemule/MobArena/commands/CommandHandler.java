@@ -1,5 +1,7 @@
 package com.garbagemule.MobArena.commands;
 
+import com.garbagemule.MobArena.ConfigError;
+import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.admin.DisableCommand;
@@ -12,7 +14,6 @@ import com.garbagemule.MobArena.commands.setup.AutoGenerateCommand;
 import com.garbagemule.MobArena.commands.setup.CheckDataCommand;
 import com.garbagemule.MobArena.commands.setup.CheckSpawnsCommand;
 import com.garbagemule.MobArena.commands.setup.ClassChestCommand;
-import com.garbagemule.MobArena.commands.setup.ConfigCommand;
 import com.garbagemule.MobArena.commands.setup.EditArenaCommand;
 import com.garbagemule.MobArena.commands.setup.ListClassesCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveArenaCommand;
@@ -44,13 +45,13 @@ import java.util.Map.Entry;
 public class CommandHandler implements CommandExecutor
 {
     private MobArena plugin;
-    private ArenaMaster am;
+    private Messenger fallbackMessenger;
     
     private Map<String,Command> commands;
     
     public CommandHandler(MobArena plugin) {
         this.plugin = plugin;
-        this.am     = plugin.getArenaMaster();
+        this.fallbackMessenger = new Messenger("&a[MobArena] ");
         
         registerCommands();
     }
@@ -68,7 +69,17 @@ public class CommandHandler implements CommandExecutor
         
         // If there's no base argument, show a helpful message.
         if (base.equals("")) {
-            am.getGlobalMessenger().tell(sender, Msg.MISC_HELP);
+            return safeTell(sender, Msg.MISC_HELP);
+        }
+
+        // Reloads are special
+        if (base.equals("reload") || (base.equals("config") && args.length > 1 && args[1].equals("reload"))) {
+            return reload(sender);
+        }
+
+        Throwable lastFailureCause = plugin.getLastFailureCause();
+        if (lastFailureCause != null) {
+            fallbackMessenger.tell(sender, "MobArena is disabled, because:\n" + ChatColor.RED + lastFailureCause.getMessage());
             return true;
         }
         
@@ -78,6 +89,8 @@ public class CommandHandler implements CommandExecutor
             return true;
         }
         
+        ArenaMaster am = plugin.getArenaMaster();
+
         // Get all commands that match the base.
         List<Command> matches = getMatchingCommands(base);
         
@@ -116,6 +129,31 @@ public class CommandHandler implements CommandExecutor
         String[] params = trimFirstArg(args);
         if (!command.execute(am, sender, params)) {
             showUsage(command, sender, true);
+        }
+        return true;
+    }
+
+    private boolean reload(CommandSender sender) {
+        if (!sender.hasPermission("mobarena.setup.load") && !sender.hasPermission("mobarena.setup.config")) {
+            return safeTell(sender, Msg.MISC_NO_ACCESS);
+        }
+        try {
+            plugin.reload();
+            plugin.getArenaMaster().getGlobalMessenger().tell(sender, "Reload complete.");
+        } catch (ConfigError e) {
+            fallbackMessenger.tell(sender, "Reload failed due to config-file error:\n" + ChatColor.RED + e.getMessage());
+        } catch (Exception e) {
+            fallbackMessenger.tell(sender, "Reload failed:\n" + ChatColor.RED + e.getMessage());
+        }
+        return true;
+    }
+
+    private boolean safeTell(CommandSender sender, Msg msg) {
+        ArenaMaster am = plugin.getArenaMaster();
+        if (am != null) {
+            am.getGlobalMessenger().tell(sender, msg);
+        } else {
+            fallbackMessenger.tell(sender, msg);
         }
         return true;
     }
@@ -187,6 +225,8 @@ public class CommandHandler implements CommandExecutor
                  .append(ChatColor.YELLOW).append(info.desc());
         }
 
+        ArenaMaster am = plugin.getArenaMaster();
+
         if (admin.length() == 0 && setup.length() == 0) {
             am.getGlobalMessenger().tell(sender, "Available commands: " + user.toString());
         } else {
@@ -221,7 +261,6 @@ public class CommandHandler implements CommandExecutor
         register(RestoreCommand.class);
         
         // mobarena.setup
-        register(ConfigCommand.class);
         register(SetupCommand.class);
         register(SettingCommand.class);
 

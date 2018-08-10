@@ -16,6 +16,9 @@ These changes will (most likely) be included in the next version.
 - Right-clicking is now allowed in the lobby. This makes it possible to activate blocks like buttons and levers.
 - Snow and ice no longer melts in arenas.
 - Much of the parsing logic has been rewritten so that MobArena now logs more user-friendly errors when it encounters invalid values in the config-file.
+- If MobArena fails to load due to config-file errors, it now enters a type of "error state". In this state, it responds to all commands (except for the reload command) with a short message explaining why it's disabled.
+- It is now possible to reload config-files with `/ma reload`.
+- The reload command now also reloads global settings, e.g. the global messenger prefix.
 
 Thanks to:
 - PrinceIonia and Nesseley for help with test of dev builds

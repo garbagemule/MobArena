@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 public class ArenaMasterImpl implements ArenaMaster
 {
     private MobArena plugin;
-    private FileConfiguration config;
 
     private List<Arena> arenas;
     private Map<Player, Arena> arenaMap;
@@ -53,7 +52,6 @@ public class ArenaMasterImpl implements ArenaMaster
      */
     public ArenaMasterImpl(MobArena plugin) {
         this.plugin = plugin;
-        this.config = plugin.getConfig();
 
         this.arenas = new ArrayList<>();
         this.arenaMap = new HashMap<>();
@@ -62,8 +60,6 @@ public class ArenaMasterImpl implements ArenaMaster
 
         this.allowedCommands = new HashSet<>();
         this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
-        
-        this.enabled = config.getBoolean("global-settings.enabled", true);
 
         this.joinInterruptTimer = new JoinInterruptTimer();
     }
@@ -84,16 +80,21 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return plugin.getLastFailureCause() == null && enabled;
     }
 
     public void setEnabled(boolean value) {
         enabled = value;
-        config.set("global-settings.enabled", enabled);
+        FileConfiguration config = plugin.getConfig();
+        if (config != null) {
+            config.set("global-settings.enabled", enabled);
+            plugin.saveConfig();
+        }
     }
 
     public boolean notifyOnUpdates() {
-        return config.getBoolean("global-settings.update-notification", false);
+        FileConfiguration config = plugin.getConfig();
+        return config != null && config.getBoolean("global-settings.update-notification", false);
     }
 
     public List<Arena> getArenas() {
@@ -257,6 +258,8 @@ public class ArenaMasterImpl implements ArenaMaster
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("global-settings");
         ConfigUtils.addMissingRemoveObsolete(plugin, "global-settings.yml", section);
 
+        enabled = section.getBoolean("enabled", true);
+
         // Grab the commands string
         String cmds = section.getString("allowed-commands", "");
 
@@ -316,6 +319,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Helper method for loading a single class.
      */
     private ArenaClass loadClass(String classname) {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = config.getConfigurationSection("classes." + classname);
         String lowercase = classname.toLowerCase().replace(" ", "");
 
@@ -490,6 +494,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Load all arena-related stuff.
      */
     public void loadArenas() {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = makeSection(config, "arenas");
         Set<String> arenanames = section.getKeys(false);
 
@@ -505,6 +510,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
     
     public void loadArenasInWorld(String worldName) {
+        FileConfiguration config = plugin.getConfig();
         Set<String> arenaNames = config.getConfigurationSection("arenas").getKeys(false);
         if (arenaNames == null || arenaNames.isEmpty()) {
             return;
@@ -521,6 +527,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
     
     public void unloadArenasInWorld(String worldName) {
+        FileConfiguration config = plugin.getConfig();
         Set<String> arenaNames = config.getConfigurationSection("arenas").getKeys(false);
         if (arenaNames == null || arenaNames.isEmpty()) {
             return;
@@ -539,6 +546,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     // Load an already existing arena node
     private Arena loadArena(String arenaname) {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section  = makeSection(config, "arenas." + arenaname);
         ConfigurationSection settings = makeSection(section, "settings");
         String worldName = settings.getString("world", "");
@@ -573,7 +581,6 @@ public class ArenaMasterImpl implements ArenaMaster
         arenas.remove(arena);
 
         plugin.reloadConfig();
-        config = plugin.getConfig();
 
         loadArena(name);
         return true;
@@ -582,6 +589,7 @@ public class ArenaMasterImpl implements ArenaMaster
     // Create and load a new arena node
     @Override
     public Arena createArenaNode(String arenaName, World world) {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = makeSection(config, "arenas");
         return createArenaNode(section, arenaName, world, true);
     }
@@ -607,6 +615,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public void removeArenaNode(Arena arena) {
         arenas.remove(arena);
 
+        FileConfiguration config = plugin.getConfig();
         config.set("arenas." + arena.configName(), null);
         plugin.saveConfig();
     }
@@ -616,17 +625,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public void reloadConfig() {
-        boolean wasEnabled = isEnabled();
-        if (wasEnabled) setEnabled(false);
-        for (Arena a : arenas) {
-            a.forceEnd();
-        }
-        plugin.reloadConfig();
-        config = plugin.getConfig();
-        initialize();
-        plugin.reloadSigns();
-        plugin.reloadAnnouncementsFile();
-        if (wasEnabled) setEnabled(true);
+        plugin.reload();
     }
 
     public void saveConfig() {
