@@ -46,13 +46,13 @@ public class CommandHandler implements CommandExecutor
 {
     private MobArena plugin;
     private Messenger fallbackMessenger;
-    
+
     private Map<String,Command> commands;
     
     public CommandHandler(MobArena plugin) {
         this.plugin = plugin;
         this.fallbackMessenger = new Messenger("&a[MobArena] ");
-        
+
         registerCommands();
     }
 
@@ -66,7 +66,7 @@ public class CommandHandler implements CommandExecutor
         if (sender instanceof Conversable && ((Conversable) sender).isConversing()) {
             return true;
         }
-        
+
         // If there's no base argument, show a helpful message.
         if (base.equals("")) {
             return safeTell(sender, Msg.MISC_HELP);
@@ -82,13 +82,13 @@ public class CommandHandler implements CommandExecutor
             fallbackMessenger.tell(sender, "MobArena is disabled, because:\n" + ChatColor.RED + lastFailureCause.getMessage());
             return true;
         }
-        
+
         // The help command is a little special
         if (base.equals("?") || base.equals("help")) {
             showHelp(sender);
             return true;
         }
-        
+
         ArenaMaster am = plugin.getArenaMaster();
 
         // Get all commands that match the base.
