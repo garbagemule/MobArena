@@ -282,10 +282,10 @@ public class ArenaMasterImpl implements ArenaMaster
         Material ocelotMaterial = Material.getMaterial(ocelot.toUpperCase());
 
         if (wolfMaterial == null && !wolf.isEmpty()) {
-            plugin.getLogger().warning("Unknown item type for wolf pet item: " + wolf);
+            throw new ConfigError("Failed to parse item type for wolf pet item: " + wolf);
         }
         if (ocelotMaterial == null && !ocelot.isEmpty()) {
-            plugin.getLogger().warning("Unknown item type for ocelot pet item: " + ocelot);
+            throw new ConfigError("Failed to parse item type for ocelot pet item: " + ocelot);
         }
 
         spawnsPets = new SpawnsPets(wolfMaterial, ocelotMaterial);
