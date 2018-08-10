@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -36,13 +35,12 @@ public class ArenaMasterImpl implements ArenaMaster
 
     private List<Arena> arenas;
     private Map<Player, Arena> arenaMap;
-    private Arena selectedArena;
 
     private Map<String, ArenaClass> classes;
 
     private Set<String> allowedCommands;
     private SpawnsPets spawnsPets;
-    
+
     private boolean enabled;
 
     private JoinInterruptTimer joinInterruptTimer;
@@ -134,7 +132,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getEnabledArenas() {
         return getEnabledArenas(arenas);
     }
-    
+
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
@@ -301,7 +299,6 @@ public class ArenaMasterImpl implements ArenaMaster
         ConfigurationSection section = makeSection(plugin.getConfig(), "classes");
         ConfigUtils.addIfEmpty(plugin, "classes.yml", section);
 
-
         // Establish the map.
         classes = new HashMap<>();
         Set<String> classNames = section.getKeys(false);
@@ -334,7 +331,7 @@ public class ArenaMasterImpl implements ArenaMaster
             plugin.getLogger().severe("Failed to load class '" + classname + "'.");
             return null;
         }
-        
+
         // Check if weapons and armor for this class should be unbreakable
         boolean weps = section.getBoolean("unbreakable-weapons", true);
         boolean arms = section.getBoolean("unbreakable-armor", true);
@@ -502,13 +499,13 @@ public class ArenaMasterImpl implements ArenaMaster
         if (arenanames == null || arenanames.isEmpty()) {
             createArenaNode(section, "default", plugin.getServer().getWorlds().get(0), false);
         }
-        
+
         arenas = new ArrayList<>();
         for (World w : Bukkit.getServer().getWorlds()) {
             loadArenasInWorld(w.getName());
         }
     }
-    
+
     public void loadArenasInWorld(String worldName) {
         FileConfiguration config = plugin.getConfig();
         Set<String> arenaNames = config.getConfigurationSection("arenas").getKeys(false);
@@ -518,14 +515,14 @@ public class ArenaMasterImpl implements ArenaMaster
         for (String arenaName : arenaNames) {
             Arena arena = getArenaWithName(arenaName);
             if (arena != null) continue;
-            
+
             String arenaWorld = config.getString("arenas." + arenaName + ".settings.world", "");
             if (!arenaWorld.equals(worldName)) continue;
-            
+
             loadArena(arenaName);
         }
     }
-    
+
     public void unloadArenasInWorld(String worldName) {
         FileConfiguration config = plugin.getConfig();
         Set<String> arenaNames = config.getConfigurationSection("arenas").getKeys(false);
@@ -535,10 +532,10 @@ public class ArenaMasterImpl implements ArenaMaster
         for (String arenaName : arenaNames) {
             Arena arena = getArenaWithName(arenaName);
             if (arena == null) continue;
-            
+
             String arenaWorld = arena.getWorld().getName();
             if (!arenaWorld.equals(worldName)) continue;
-            
+
             arena.forceEnd();
             arenas.remove(arena);
         }
