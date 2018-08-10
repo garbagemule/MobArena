@@ -46,14 +46,14 @@ import java.util.logging.Level;
 public class MobArena extends JavaPlugin
 {
     private ArenaMaster arenaMaster;
-    
+
     // Vault
     private Economy economy;
 
     private FileConfiguration config;
     private LoadsConfigFile loadsConfigFile;
     private Throwable lastFailureCause;
-    
+
     public static final double MIN_PLAYER_DISTANCE_SQUARED = 225D;
     public static Random random = new Random();
 
@@ -78,7 +78,7 @@ public class MobArena extends JavaPlugin
             getLogger().log(Level.SEVERE, "Fix it, then run /ma load");
         }
     }
-    
+
     public void onDisable() {
         if (arenaMaster != null) {
             arenaMaster.getArenas().forEach(Arena::forceEnd);
@@ -132,17 +132,17 @@ public class MobArena extends JavaPlugin
     private void registerConfigurationSerializers() {
         ConfigurationSerialization.registerClass(ArenaSign.class);
     }
-    
+
     private void setupVault() {
         Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
         if (vaultPlugin == null) {
             getLogger().info("Vault was not found. Economy rewards will not work.");
             return;
         }
-        
+
         ServicesManager manager = this.getServer().getServicesManager();
         RegisteredServiceProvider<Economy> e = manager.getRegistration(net.milkbowl.vault.economy.Economy.class);
-        
+
         if (e != null) {
             economy = e.getProvider();
             getLogger().info("Vault found; economy rewards enabled.");
@@ -150,7 +150,7 @@ public class MobArena extends JavaPlugin
             getLogger().warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
         }
     }
-    
+
     private void setupMagicSpells() {
         Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
         if (spells == null) {
@@ -182,7 +182,7 @@ public class MobArena extends JavaPlugin
         metrics.addCustomChart(new MonsterInfightChart(this));
         metrics.addCustomChart(new PvpEnabledChart(this));
     }
-    
+
     public void reload() {
         try {
             reloadConfig();
@@ -279,7 +279,7 @@ public class MobArena extends JavaPlugin
         }
         return config;
     }
-    
+
     public ArenaMaster getArenaMaster() {
         return arenaMaster;
     }
