@@ -64,6 +64,7 @@ public enum Msg {
     LOBBY_CLASS_PRICE("This class costs &c%&r (paid on arena start)."),
     LOBBY_CLASS_TOO_EXPENSIVE("You can't afford that class (&c%&r)"),
     LOBBY_NO_SUCH_CLASS("There is no class named &c%&r."),
+    NOT_IN_LOBBY("You are not in the lobby"),
     WARP_TO_ARENA("Warping to the arena not allowed!"),
     WARP_FROM_ARENA("Warping from the arena not allowed!"),
     WAVE_DEFAULT("Wave &b#%&r!"),
