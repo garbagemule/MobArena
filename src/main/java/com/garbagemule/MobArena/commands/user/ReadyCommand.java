@@ -45,8 +45,6 @@ public class ReadyCommand implements Command {
             arena.getMessenger().tell(p, Msg.LOBBY_PICK_CLASS);
         }
 
-        arena.playerReady(p);
-
         return true;
     }
 
