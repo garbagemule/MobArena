@@ -6,6 +6,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.healthbar.CreatesHealthBar;
 import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.MACreature;
@@ -130,6 +131,9 @@ public class MASpawnThread implements Runnable
             // Then force leave everyone
             List<Player> players = new ArrayList<>(arena.getPlayersInArena());
             for (Player p : players) {
+                if (arena.getSettings().getBoolean("keep-exp", false)) {
+                    arena.getRewardManager().addReward(p, new ExperienceThing(p.getTotalExperience()));
+                }
                 arena.playerLeave(p);
             }
             return;

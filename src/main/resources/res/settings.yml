@@ -27,6 +27,7 @@ wave-interval: 15
 final-wave: 0
 monster-limit: 100
 monster-exp: false
+keep-exp: false
 food-regen: false
 lock-food-level: true
 player-time-in-arena: world

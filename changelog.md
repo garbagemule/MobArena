@@ -22,6 +22,7 @@ These changes will (most likely) be included in the next version.
 - Armor stands can now be placed in arenas and lobbies.
 - The new command `/ma ready` (`/ma rdy` for short) can be used as an alternative to the iron block for readying up.  
 - Total experience is now correctly stored, reset, and restored on arena join/leave. This fixes a potential bug where total experience could increase in the arena, but levels and progress would still get reset at arena end.
+- The per-arena setting `keep-exp` returns. If enabled, any experience collected during an arena session is added as a reward on death or when the final wave is reached.
 
 Thanks to:
 - Sait for adding the /ma ready command

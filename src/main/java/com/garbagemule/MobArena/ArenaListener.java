@@ -13,6 +13,7 @@ import com.garbagemule.MobArena.repairable.RepairableBlock;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.repairable.RepairableDoor;
 import com.garbagemule.MobArena.repairable.RepairableSign;
+import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.waves.MABoss;
@@ -575,6 +576,9 @@ public class ArenaListener
             }
             if (arena.getSettings().getBoolean("show-death-messages", true)) {
                 arena.announce(event.getDeathMessage());
+            }
+            if (arena.getSettings().getBoolean("keep-exp", false)) {
+                arena.getRewardManager().addReward(player, new ExperienceThing(player.getTotalExperience()));
             }
             event.setDeathMessage(null);
             arena.getScoreboard().death(player);
