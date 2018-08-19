@@ -20,8 +20,10 @@ These changes will (most likely) be included in the next version.
 - It is now possible to reload config-files with `/ma reload`.
 - The reload command now also reloads global settings, e.g. the global messenger prefix.
 - Armor stands can now be placed in arenas and lobbies.
+- The new command `/ma ready` (`/ma rdy` for short) can be used as an alternative to the iron block for readying up.  
 
 Thanks to:
+- Sait for adding the /ma ready command
 - PrinceIonia and Nesseley for help with test of dev builds
 
 ## [0.102] - 2018-07-05
