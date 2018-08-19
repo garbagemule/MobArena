@@ -29,6 +29,7 @@ import com.garbagemule.MobArena.commands.user.NotReadyCommand;
 import com.garbagemule.MobArena.commands.user.PickClassCommand;
 import com.garbagemule.MobArena.commands.user.PlayerListCommand;
 import com.garbagemule.MobArena.commands.user.SpecCommand;
+import com.garbagemule.MobArena.commands.user.ReadyCommand;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -252,6 +253,7 @@ public class CommandHandler implements CommandExecutor
         register(PlayerListCommand.class);
         register(NotReadyCommand.class);
         register(PickClassCommand.class);
+        register(ReadyCommand.class);
 
         // mobarena.admin
         register(EnableCommand.class);
