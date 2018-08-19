@@ -75,7 +75,7 @@ public class MobArena extends JavaPlugin
             checkForUpdates();
         } catch (ConfigError e) {
             getLogger().log(Level.SEVERE, "You have an error in your config-file!\n\n  " + e.getMessage() + "\n");
-            getLogger().log(Level.SEVERE, "Fix it, then run /ma load");
+            getLogger().log(Level.SEVERE, "Fix it, then run /ma reload");
         }
     }
 
