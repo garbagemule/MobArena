@@ -51,6 +51,10 @@ public enum WaveType
     public abstract void announce(Arena arena, int wave);
     
     public static WaveType fromString(String string) {
-        return WaveUtils.getEnumFromString(WaveType.class, string);
+        try {
+            return WaveType.valueOf(string.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

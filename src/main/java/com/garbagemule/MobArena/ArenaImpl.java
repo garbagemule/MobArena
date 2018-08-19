@@ -20,6 +20,7 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
@@ -204,13 +205,9 @@ public class ArenaImpl implements Arena
             for (String fee : feeString.split(",")) {
                 try {
                     Thing thing = plugin.getThingManager().parse(fee.trim());
-                    if (thing == null) {
-                        plugin.getLogger().warning("Failed to parse entry fee: " + fee.trim());
-                    } else {
-                        this.entryFee.add(thing);
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().severe("Exception parsing entry fee '" + fee.trim() + "': " + e.getLocalizedMessage());
+                    this.entryFee.add(thing);
+                } catch (InvalidThingInputString e) {
+                    throw new ConfigError("Failed to parse entry fee of arena " + name + ": " + e.getInput());
                 }
             }
         }
@@ -588,6 +585,7 @@ public class ArenaImpl implements Arena
         
         // Stop spawning.
         stopSpawner();
+        stopBouncingSheep();
 
         // Announce and clean arena floor, etc.
         if (settings.getBoolean("global-end-announce", false)) {
@@ -999,26 +997,15 @@ public class ArenaImpl implements Arena
     }
     
     private void startSpawner() {
-        // Set the spawn flags to enable monster spawning.
-        world.setSpawnFlags(true, true);
-        //world.setDifficulty(Difficulty.NORMAL);
-        
-        // Create a spawner if one doesn't exist, otherwise reset it
-        if (spawnThread == null) {
-            spawnThread  = new MASpawnThread(plugin, this);
-        } else {
-            spawnThread.reset();
+        if (spawnThread != null) {
+            spawnThread.stop();
+            spawnThread = null;
         }
-        
-        // Schedule it for the initial first wave delay.
-        scheduleTask(spawnThread, settings.getInt("first-wave-delay", 5) * 20);
-        
-        // Schedule to enable PvP if pvp-enabled: true
-        scheduleTask(new Runnable() {
-            public void run() {
-                eventListener.pvpActivate();
-            }
-        }, settings.getInt("first-wave-delay", 5) * 20);
+
+        world.setSpawnFlags(true, true);
+
+        spawnThread = new MASpawnThread(plugin, this);
+        spawnThread.start();
     }
     
     /**
@@ -1033,20 +1020,35 @@ public class ArenaImpl implements Arena
     }
     
     private void stopSpawner() {
+        if (spawnThread == null) {
+            plugin.getLogger().warning("Can't stop non-existent spawner in arena " + configName() + ". This should never happen.");
+            return;
+        }
+
+        spawnThread.stop();
+        spawnThread = null;
+
         world.setSpawnFlags(allowMonsters, allowAnimals);
-        eventListener.pvpDeactivate();
-        //world.setDifficulty(spawnMonsters);
     }
     
-    private void startBouncingSheep()
-    {
-        // Create a new bouncer if necessary.
-        if (sheepBouncer == null) {
-            sheepBouncer = new SheepBouncer(this);
+    private void startBouncingSheep() {
+        if (sheepBouncer != null) {
+            sheepBouncer.stop();
+            sheepBouncer = null;
         }
-        
-        // Start bouncing!
-        scheduleTask(sheepBouncer, settings.getInt("first-wave-delay", 5) * 20);
+
+        sheepBouncer = new SheepBouncer(this);
+        sheepBouncer.start();
+    }
+
+    private void stopBouncingSheep() {
+        if (sheepBouncer == null) {
+            plugin.getLogger().warning("Can't stop non-existent sheep bouncer in arena " + configName() + ". This should never happen.");
+            return;
+        }
+
+        sheepBouncer.stop();
+        sheepBouncer = null;
     }
 
     @Override

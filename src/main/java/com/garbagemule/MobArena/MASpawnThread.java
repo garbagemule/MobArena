@@ -6,6 +6,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.healthbar.CreatesHealthBar;
 import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.region.ArenaRegion;
+import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.MACreature;
@@ -15,11 +16,13 @@ import com.garbagemule.MobArena.waves.enums.WaveType;
 import com.garbagemule.MobArena.waves.types.BossWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,10 @@ public class MASpawnThread implements Runnable
 
     private int playerCount, monsterLimit;
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
+    private int waveInterval;
+    private int nextWaveDelay;
+
+    private BukkitTask task;
 
     /**
      * Create a new monster spawner for the input arena.
@@ -68,6 +75,34 @@ public class MASpawnThread implements Runnable
         bossClear = arena.getSettings().getBoolean("clear-boss-before-next", false);
         preBossClear = arena.getSettings().getBoolean("clear-wave-before-boss", false);
         wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
+        waveInterval = arena.getSettings().getInt("wave-interval", 3);
+        nextWaveDelay = arena.getSettings().getInt("next-wave-delay", 0);
+    }
+
+    public void start() {
+        if (task != null) {
+            plugin.getLogger().warning("Starting spawner in arena " + arena.configName() + " with existing spawner still running. This should never happen.");
+            task.cancel();
+            task = null;
+        }
+
+        int delay = arena.getSettings().getInt("first-wave-delay", 5) * 20;
+        task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            arena.getEventListener().pvpActivate();
+            this.run();
+        }, delay);
+    }
+
+    public void stop() {
+        if (task == null) {
+            plugin.getLogger().warning("Can't stop non-existent spawner in arena " + arena.configName() + ". This should never happen.");
+            return;
+        }
+
+        arena.getEventListener().pvpDeactivate();
+
+        task.cancel();
+        task = null;
     }
 
     public void run() {
@@ -102,6 +137,18 @@ public class MASpawnThread implements Runnable
             return;
         }
 
+        // Delay the next wave
+        if (nextWaveDelay > 0) {
+            task = Bukkit.getScheduler().runTaskLater(plugin, this::spawnNextWave, nextWaveDelay * 20);
+        } else {
+            spawnNextWave();
+        }
+    }
+
+    private void spawnNextWave() {
+        // Grab the wave number.
+        int nextWave = waveManager.getWaveNumber() + 1;
+
         // Grant rewards (if any) for the wave that just ended
         grantRewards(nextWave - 1);
 
@@ -114,6 +161,9 @@ public class MASpawnThread implements Runnable
             // Then force leave everyone
             List<Player> players = new ArrayList<>(arena.getPlayersInArena());
             for (Player p : players) {
+                if (arena.getSettings().getBoolean("keep-exp", false)) {
+                    arena.getRewardManager().addReward(p, new ExperienceThing(p.getTotalExperience()));
+                }
                 arena.playerLeave(p);
             }
             return;
@@ -126,7 +176,7 @@ public class MASpawnThread implements Runnable
         updateStats(nextWave);
 
         // Reschedule the spawner for the next wave.
-        arena.scheduleTask(this, arena.getSettings().getInt("wave-interval", 3) * 20);
+        task = Bukkit.getScheduler().runTaskLater(plugin, this, waveInterval * 20);
     }
 
     private void spawnWave(int wave) {

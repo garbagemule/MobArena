@@ -93,11 +93,16 @@ public class AbilityManager
     
     /**
      * Load the custom abilities from the specified directory.
-     * @param classDir a directory of .class (and/or .java) files
+     * @param dataDir main plugin data folder
      */
-    public static void loadCustomAbilities(File classDir) {
+    public static void loadCustomAbilities(File dataDir) {
         if (abilities == null) abilities = new HashMap<>();
-        
+
+        File classDir = new File(dataDir, "abilities");
+        if (!classDir.exists()) {
+            return;
+        }
+
         // Grab the source directory.
         File javaDir = new File(classDir, "src");
         

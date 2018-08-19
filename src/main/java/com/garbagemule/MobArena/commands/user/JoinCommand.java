@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.commands.user;
 
+import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
@@ -31,26 +32,43 @@ public class JoinCommand implements Command
         
         // Run some rough sanity checks, and grab the arena to join.
         Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
-        if (toArena == null) {
+        if (toArena == null || !canJoin(p, toArena)) {
             return true;
         }
-        
-        // Deny joining from other arenas
-        Arena fromArena = am.getArenaWithPlayer(p);
-        if (fromArena != null && (fromArena.inArena(p) || fromArena.inLobby(p))) {
-            fromArena.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
-            return true;
-        }
-        
-        // Per-arena sanity checks
-        if (!toArena.canJoin(p)) {
-            return true;
-        }
-
-        // Force leave previous arena
-        if (fromArena != null) fromArena.playerLeave(p);
         
         // Join the arena!
-        return toArena.playerJoin(p, p.getLocation());
+        int seconds = toArena.getSettings().getInt("join-interrupt-timer", 0);
+        if (seconds > 0) {
+            boolean started = am.getJoinInterruptTimer().start(p, toArena, seconds, () -> tryJoin(p, toArena));
+            if (started) {
+                toArena.getMessenger().tell(p, Msg.JOIN_AFTER_DELAY, String.valueOf(seconds));
+            } else {
+                toArena.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
+            }
+        } else {
+            tryJoin(p, toArena);
+        }
+        return true;
+    }
+
+    private boolean canJoin(Player player, Arena arena) {
+        MobArena plugin = arena.getPlugin();
+        ArenaMaster am = plugin.getArenaMaster();
+        if (am.getJoinInterruptTimer().isWaiting(player)) {
+            plugin.getGlobalMessenger().tell(player, Msg.JOIN_ALREADY_PLAYING);
+            return false;
+        }
+        Arena current = am.getArenaWithPlayer(player);
+        if (current != null) {
+            current.getMessenger().tell(player, Msg.JOIN_ALREADY_PLAYING);
+            return false;
+        }
+        return arena.canJoin(player);
+    }
+
+    private void tryJoin(Player player, Arena arena) {
+        if (canJoin(player, arena)) {
+            arena.playerJoin(player, player.getLocation());
+        }
     }
 }

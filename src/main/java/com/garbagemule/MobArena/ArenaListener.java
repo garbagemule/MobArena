@@ -13,6 +13,7 @@ import com.garbagemule.MobArena.repairable.RepairableBlock;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.repairable.RepairableDoor;
 import com.garbagemule.MobArena.repairable.RepairableSign;
+import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.waves.MABoss;
@@ -25,7 +26,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.AnimalTamer;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Ocelot;
@@ -42,6 +45,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -67,6 +71,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -333,6 +338,21 @@ public class ArenaListener
             arena.addBlock(event.getBlock());
     }
 
+    public void onBlockFade(BlockFadeEvent event) {
+        if (!protect) {
+            return;
+        }
+        if (!arena.getRegion().contains(event.getBlock().getLocation())) {
+            return;
+        }
+        switch (event.getBlock().getType()) {
+            case ICE:
+            case SNOW:
+                event.setCancelled(true);
+                break;
+        }
+    }
+
     /*
      * TODO: Figure out a solution to this problem with soft-restore.
      *
@@ -434,6 +454,10 @@ public class ArenaListener
 
     public void onCreatureSpawn(CreatureSpawnEvent event) {
         if (!arena.getRegion().contains(event.getLocation())) {
+            return;
+        }
+
+        if (arena.inEditMode() && event.getEntityType() == EntityType.ARMOR_STAND) {
             return;
         }
 
@@ -551,6 +575,9 @@ public class ArenaListener
             }
             if (arena.getSettings().getBoolean("show-death-messages", true)) {
                 arena.announce(event.getDeathMessage());
+            }
+            if (arena.getSettings().getBoolean("keep-exp", false)) {
+                arena.getRewardManager().addReward(player, new ExperienceThing(player.getTotalExperience()));
             }
             event.setDeathMessage(null);
             arena.getScoreboard().death(player);
@@ -700,6 +727,9 @@ public class ArenaListener
         else if (damagee instanceof Ocelot && arena.hasPet(damagee)) {
             onPetDamage(event, (Ocelot) damagee, damager);
         }
+        else if (damagee instanceof ArmorStand) {
+            onArmorStandDamage(event);
+        }
         // Mount
         else if (damagee instanceof Horse && monsters.hasMount(damagee)) {
             onMountDamage(event, (Horse) damagee, damager);
@@ -753,6 +783,12 @@ public class ArenaListener
 
     private void onPetDamage(EntityDamageEvent event, Ocelot pet, Entity damager) {
         event.setCancelled(true);
+    }
+
+    private void onArmorStandDamage(EntityDamageEvent event) {
+        if (protect && !arena.inEditMode() && region.contains(event.getEntity().getLocation())) {
+            event.setCancelled(true);
+        }
     }
 
     private void onMountDamage(EntityDamageEvent event, Horse mount, Entity damager) {
@@ -1063,11 +1099,9 @@ public class ArenaListener
         Player p = event.getPlayer();
         if (!arena.inLobby(p)) return;
 
-        // Player is in the lobby, so disallow using items.
-        Action a = event.getAction();
-        if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) {
+        // Prevent placing blocks and using held items
+        if (event.hasItem()) {
             event.setUseItemInHand(Result.DENY);
-            event.setCancelled(true);
         }
 
         // Bail if there's no block involved.
@@ -1082,6 +1116,12 @@ public class ArenaListener
         else if (event.getClickedBlock().getState() instanceof Sign) {
             Sign sign = (Sign) event.getClickedBlock().getState();
             handleSign(sign, p);
+        }
+    }
+
+    public void onPlayerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+        if (protect && !arena.inEditMode() && region.contains(event.getRightClicked().getLocation())) {
+            event.setCancelled(true);
         }
     }
 

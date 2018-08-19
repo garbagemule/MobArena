@@ -5,7 +5,9 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.util.JoinInterruptTimer;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -31,25 +32,24 @@ import java.util.stream.Collectors;
 public class ArenaMasterImpl implements ArenaMaster
 {
     private MobArena plugin;
-    private FileConfiguration config;
 
     private List<Arena> arenas;
     private Map<Player, Arena> arenaMap;
-    private Arena selectedArena;
 
     private Map<String, ArenaClass> classes;
 
     private Set<String> allowedCommands;
     private SpawnsPets spawnsPets;
-    
+
     private boolean enabled;
+
+    private JoinInterruptTimer joinInterruptTimer;
 
     /**
      * Default constructor.
      */
     public ArenaMasterImpl(MobArena plugin) {
         this.plugin = plugin;
-        this.config = plugin.getConfig();
 
         this.arenas = new ArrayList<>();
         this.arenaMap = new HashMap<>();
@@ -58,8 +58,8 @@ public class ArenaMasterImpl implements ArenaMaster
 
         this.allowedCommands = new HashSet<>();
         this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
-        
-        this.enabled = config.getBoolean("global-settings.enabled", true);
+
+        this.joinInterruptTimer = new JoinInterruptTimer();
     }
 
     /*
@@ -78,16 +78,21 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return plugin.getLastFailureCause() == null && enabled;
     }
 
     public void setEnabled(boolean value) {
         enabled = value;
-        config.set("global-settings.enabled", enabled);
+        FileConfiguration config = plugin.getConfig();
+        if (config != null) {
+            config.set("global-settings.enabled", enabled);
+            plugin.saveConfig();
+        }
     }
 
     public boolean notifyOnUpdates() {
-        return config.getBoolean("global-settings.update-notification", false);
+        FileConfiguration config = plugin.getConfig();
+        return config != null && config.getBoolean("global-settings.update-notification", false);
     }
 
     public List<Arena> getArenas() {
@@ -114,6 +119,10 @@ public class ArenaMasterImpl implements ArenaMaster
         return allowedCommands.contains(command);
     }
 
+    public JoinInterruptTimer getJoinInterruptTimer() {
+        return joinInterruptTimer;
+    }
+
     /*
      * /////////////////////////////////////////////////////////////////////////
      * // // Arena getters //
@@ -123,7 +132,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getEnabledArenas() {
         return getEnabledArenas(arenas);
     }
-    
+
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
@@ -247,6 +256,8 @@ public class ArenaMasterImpl implements ArenaMaster
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("global-settings");
         ConfigUtils.addMissingRemoveObsolete(plugin, "global-settings.yml", section);
 
+        enabled = section.getBoolean("enabled", true);
+
         // Grab the commands string
         String cmds = section.getString("allowed-commands", "");
 
@@ -272,10 +283,10 @@ public class ArenaMasterImpl implements ArenaMaster
         Material ocelotMaterial = Material.getMaterial(ocelot.toUpperCase());
 
         if (wolfMaterial == null && !wolf.isEmpty()) {
-            plugin.getLogger().warning("Unknown item type for wolf pet item: " + wolf);
+            throw new ConfigError("Failed to parse item type for wolf pet item: " + wolf);
         }
         if (ocelotMaterial == null && !ocelot.isEmpty()) {
-            plugin.getLogger().warning("Unknown item type for ocelot pet item: " + ocelot);
+            throw new ConfigError("Failed to parse item type for ocelot pet item: " + ocelot);
         }
 
         spawnsPets = new SpawnsPets(wolfMaterial, ocelotMaterial);
@@ -287,7 +298,6 @@ public class ArenaMasterImpl implements ArenaMaster
     public void loadClasses() {
         ConfigurationSection section = makeSection(plugin.getConfig(), "classes");
         ConfigUtils.addIfEmpty(plugin, "classes.yml", section);
-
 
         // Establish the map.
         classes = new HashMap<>();
@@ -306,6 +316,7 @@ public class ArenaMasterImpl implements ArenaMaster
      * Helper method for loading a single class.
      */
     private ArenaClass loadClass(String classname) {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = config.getConfigurationSection("classes." + classname);
         String lowercase = classname.toLowerCase().replace(" ", "");
 
@@ -320,7 +331,7 @@ public class ArenaMasterImpl implements ArenaMaster
             plugin.getLogger().severe("Failed to load class '" + classname + "'.");
             return null;
         }
-        
+
         // Check if weapons and armor for this class should be unbreakable
         boolean weps = section.getBoolean("unbreakable-weapons", true);
         boolean arms = section.getBoolean("unbreakable-armor", true);
@@ -331,9 +342,8 @@ public class ArenaMasterImpl implements ArenaMaster
         if (priceString != null) {
             try {
                 price = plugin.getThingManager().parse(priceString);
-            } catch (Exception e) {
-                plugin.getLogger().warning("Exception parsing class price: " + e.getLocalizedMessage());
-                price = null;
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse price of class " + classname + ": " + e.getInput());
             }
         }
 
@@ -367,17 +377,22 @@ public class ArenaMasterImpl implements ArenaMaster
     private void loadClassItems(ConfigurationSection section, ArenaClass arenaClass) {
         List<String> items = section.getStringList("items");
         if (items == null || items.isEmpty()) {
-            String value = section.getString("items", "");
+            String value = section.getString("items", null);
+            if (value == null || value.isEmpty()) {
+                return;
+            }
             items = Arrays.asList(value.split(","));
         }
 
-        List<Thing> things = items.stream()
-            .map(String::trim)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-        arenaClass.setItems(things);
+        try {
+            List<Thing> things = items.stream()
+                .map(String::trim)
+                .map(plugin.getThingManager()::parse)
+                .collect(Collectors.toList());
+            arenaClass.setItems(things);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse item for class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     private void loadClassArmor(ConfigurationSection section, ArenaClass arenaClass) {
@@ -385,81 +400,97 @@ public class ArenaMasterImpl implements ArenaMaster
         loadClassArmorLegacyNode(section, arenaClass);
 
         // Specific armor pieces
-        loadClassArmorPiece(section, "helmet",     arenaClass::setHelmet);
-        loadClassArmorPiece(section, "chestplate", arenaClass::setChestplate);
-        loadClassArmorPiece(section, "leggings",   arenaClass::setLeggings);
-        loadClassArmorPiece(section, "boots",      arenaClass::setBoots);
+        String name = arenaClass.getConfigName();
+        loadClassArmorPiece(section, "helmet",     name, arenaClass::setHelmet);
+        loadClassArmorPiece(section, "chestplate", name, arenaClass::setChestplate);
+        loadClassArmorPiece(section, "leggings",   name, arenaClass::setLeggings);
+        loadClassArmorPiece(section, "boots",      name, arenaClass::setBoots);
     }
 
     private void loadClassArmorLegacyNode(ConfigurationSection section, ArenaClass arenaClass) {
         List<String> armor = section.getStringList("armor");
         if (armor == null || armor.isEmpty()) {
-            String value = section.getString("armor", "");
+            String value = section.getString("armor", null);
+            if (value == null || value.isEmpty()) {
+                return;
+            }
             armor = Arrays.asList(value.split(","));
         }
 
-        // Prepend "armor:" for the armor thing parser
-        List<Thing> things = armor.stream()
-            .map(String::trim)
-            .map(s -> "armor:" + s)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-        arenaClass.setArmor(things);
+        try {
+            // Prepend "armor:" for the armor thing parser
+            List<Thing> things = armor.stream()
+                .map(String::trim)
+                .map(s -> plugin.getThingManager().parse("armor", s))
+                .collect(Collectors.toList());
+            arenaClass.setArmor(things);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse armor for class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
-    private void loadClassArmorPiece(ConfigurationSection section, String slot, Consumer<Thing> setter) {
+    private void loadClassArmorPiece(ConfigurationSection section, String slot, String name, Consumer<Thing> setter) {
         String value = section.getString(slot, null);
         if (value == null) {
             return;
         }
-        // Prepend the slot name for the item parser
-        Thing thing =  plugin.getThingManager().parse(slot + ":" + value);
-        if (thing == null) {
-            return;
+        try {
+            // Prepend the slot name for the item parser
+            Thing thing = plugin.getThingManager().parse(slot, value);
+            setter.accept(thing);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse " + slot + " slot for class " + name + ": " + e.getInput());
         }
-        setter.accept(thing);
     }
 
     private void loadClassPotionEffects(ConfigurationSection section, ArenaClass arenaClass) {
         List<String> effects = section.getStringList("effects");
         if (effects == null || effects.isEmpty()) {
-            String value = section.getString("effects", "");
+            String value = section.getString("effects", null);
+            if (value == null || value.isEmpty()) {
+                return;
+            }
             effects = Arrays.asList(value.split(","));
         }
 
-        // Prepend "effect:" for the potion effect thing parser
-        List<Thing> things = effects.stream()
-            .map(String::trim)
-            .map(s -> "effect:" + s)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        try {
+            // Prepend "effect:" for the potion effect thing parser
+            List<Thing> things = effects.stream()
+                .map(String::trim)
+                .map(s -> plugin.getThingManager().parse("effect", s))
+                .collect(Collectors.toList());
 
-        arenaClass.setEffects(things);
+            arenaClass.setEffects(things);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse potion effect of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        section.getStringList("permissions").stream()
-            .map(perm -> "perm:" + perm)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .forEach(arenaClass::addPermission);
+        try {
+            section.getStringList("permissions").stream()
+                .map(s -> plugin.getThingManager().parse("perm", s))
+                .forEach(arenaClass::addPermission);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse permission of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     private void loadClassLobbyPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        section.getStringList("lobby-permissions").stream()
-            .map(perm -> "perm:" + perm)
-            .map(plugin.getThingManager()::parse)
-            .filter(Objects::nonNull)
-            .forEach(arenaClass::addLobbyPermission);
+        try {
+            section.getStringList("lobby-permissions").stream()
+                .map(s -> plugin.getThingManager().parse("perm", s))
+                .forEach(arenaClass::addLobbyPermission);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse lobby-permission of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        }
     }
 
     /**
      * Load all arena-related stuff.
      */
     public void loadArenas() {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = makeSection(config, "arenas");
         Set<String> arenanames = section.getKeys(false);
 
@@ -467,14 +498,15 @@ public class ArenaMasterImpl implements ArenaMaster
         if (arenanames == null || arenanames.isEmpty()) {
             createArenaNode(section, "default", plugin.getServer().getWorlds().get(0), false);
         }
-        
+
         arenas = new ArrayList<>();
         for (World w : Bukkit.getServer().getWorlds()) {
             loadArenasInWorld(w.getName());
         }
     }
-    
+
     public void loadArenasInWorld(String worldName) {
+        FileConfiguration config = plugin.getConfig();
         Set<String> arenaNames = config.getConfigurationSection("arenas").getKeys(false);
         if (arenaNames == null || arenaNames.isEmpty()) {
             return;
@@ -482,15 +514,16 @@ public class ArenaMasterImpl implements ArenaMaster
         for (String arenaName : arenaNames) {
             Arena arena = getArenaWithName(arenaName);
             if (arena != null) continue;
-            
+
             String arenaWorld = config.getString("arenas." + arenaName + ".settings.world", "");
             if (!arenaWorld.equals(worldName)) continue;
-            
+
             loadArena(arenaName);
         }
     }
-    
+
     public void unloadArenasInWorld(String worldName) {
+        FileConfiguration config = plugin.getConfig();
         Set<String> arenaNames = config.getConfigurationSection("arenas").getKeys(false);
         if (arenaNames == null || arenaNames.isEmpty()) {
             return;
@@ -498,10 +531,10 @@ public class ArenaMasterImpl implements ArenaMaster
         for (String arenaName : arenaNames) {
             Arena arena = getArenaWithName(arenaName);
             if (arena == null) continue;
-            
+
             String arenaWorld = arena.getWorld().getName();
             if (!arenaWorld.equals(worldName)) continue;
-            
+
             arena.forceEnd();
             arenas.remove(arena);
         }
@@ -509,6 +542,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     // Load an already existing arena node
     private Arena loadArena(String arenaname) {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section  = makeSection(config, "arenas." + arenaname);
         ConfigurationSection settings = makeSection(section, "settings");
         String worldName = settings.getString("world", "");
@@ -543,7 +577,6 @@ public class ArenaMasterImpl implements ArenaMaster
         arenas.remove(arena);
 
         plugin.reloadConfig();
-        config = plugin.getConfig();
 
         loadArena(name);
         return true;
@@ -552,6 +585,7 @@ public class ArenaMasterImpl implements ArenaMaster
     // Create and load a new arena node
     @Override
     public Arena createArenaNode(String arenaName, World world) {
+        FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = makeSection(config, "arenas");
         return createArenaNode(section, arenaName, world, true);
     }
@@ -577,6 +611,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public void removeArenaNode(Arena arena) {
         arenas.remove(arena);
 
+        FileConfiguration config = plugin.getConfig();
         config.set("arenas." + arena.configName(), null);
         plugin.saveConfig();
     }
@@ -586,17 +621,7 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public void reloadConfig() {
-        boolean wasEnabled = isEnabled();
-        if (wasEnabled) setEnabled(false);
-        for (Arena a : arenas) {
-            a.forceEnd();
-        }
-        plugin.reloadConfig();
-        config = plugin.getConfig();
-        initialize();
-        plugin.reloadSigns();
-        plugin.reloadAnnouncementsFile();
-        if (wasEnabled) setEnabled(true);
+        plugin.reload();
     }
 
     public void saveConfig() {

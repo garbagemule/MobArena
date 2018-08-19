@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.ArenaClass;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.SpawnsPets;
+import com.garbagemule.MobArena.util.JoinInterruptTimer;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -87,6 +88,8 @@ public interface ArenaMaster
     Arena getArenaWithName(Collection<Arena> arenas, String configName);
     
     boolean isAllowed(String command);
+
+    JoinInterruptTimer getJoinInterruptTimer();
     
     
     

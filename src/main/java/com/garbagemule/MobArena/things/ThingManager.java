@@ -64,6 +64,22 @@ public class ThingManager implements ThingParser {
 
     @Override
     public Thing parse(String s) {
+        Thing thing = parseThing(s);
+        if (thing != null) {
+            return thing;
+        }
+        throw new InvalidThingInputString(s);
+    }
+
+    public Thing parse(String prefix, String s) {
+        Thing thing = parseThing(prefix + ":" + s);
+        if (thing != null) {
+            return thing;
+        }
+        throw new InvalidThingInputString(s);
+    }
+
+    private Thing parseThing(String s) {
         for (ThingParser parser : parsers) {
             Thing thing = parser.parse(s);
             if (thing != null) {

@@ -2,7 +2,6 @@ package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.WaveBranch;
-import com.garbagemule.MobArena.waves.enums.WaveError;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.SortedSet;
@@ -48,13 +47,18 @@ public class WaveManager
         finalWave = section.getParent().getInt("settings.final-wave", 0);
         
         if (recurrentWaves.isEmpty()) {
-            arena.getPlugin().getLogger().warning(WaveError.NO_RECURRENT_WAVES.format(arena.configName()));
-            
-            Wave def = WaveParser.createDefaultWave();
-            recurrentWaves.add(def);
+            if (singleWaves.isEmpty()) {
+                arena.getPlugin().getLogger().warning("Found no waves for arena " + arena.configName() + ", using default wave.");
+            } else {
+                arena.getPlugin().getLogger().info("Found no 'recurrent' waves for arena " + arena.configName() + ", using default wave.");
+            }
+            defaultWave = WaveParser.createDefaultWave();
+        } else {
+            if (singleWaves.isEmpty()) {
+                arena.getPlugin().getLogger().info("Found no 'single' waves for arena " + arena.configName());
+            }
+            defaultWave = recurrentWaves.first();
         }
-        
-        defaultWave = recurrentWaves.first();
     }
     
     /**

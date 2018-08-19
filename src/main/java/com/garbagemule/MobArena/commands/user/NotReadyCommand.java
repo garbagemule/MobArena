@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 @CommandInfo(
     name    = "notready",
-    pattern = "notr.*|ready",
+    pattern = "notr.*",
     usage   = "/ma notready (<arena>)",
     desc    = "see which players aren't ready",
     permission = "mobarena.use.notready"

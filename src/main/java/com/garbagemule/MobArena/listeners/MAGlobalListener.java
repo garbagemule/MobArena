@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -32,6 +33,7 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -104,6 +106,13 @@ public class MAGlobalListener implements Listener
 //        for (Arena arena : am.getArenas())
 //            arena.getEventListener().onBlockFromTo(event);
 //    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void blockFade(BlockFadeEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onBlockFade(event);
+        }
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void blockIgnite(BlockIgniteEvent event) {
@@ -294,6 +303,13 @@ public class MAGlobalListener implements Listener
         if (!am.isEnabled()) return;
         for (Arena arena : am.getArenas())
             arena.getEventListener().onPlayerInteract(event);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void playerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+        if (!am.isEnabled()) return;
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onPlayerArmorStandManipulate(event);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
