@@ -10,11 +10,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @CommandInfo(
-        name    = "join",
-        pattern = "ready|rd",
-        usage   = "/ma ready",
-        desc    = "ready to start the battle",
-        permission = "mobarena.use.ready"
+    name    = "join",
+    pattern = "ready|rdy",
+    usage   = "/ma ready",
+    desc    = "ready to start the battle",
+    permission = "mobarena.use.ready"
 )
 public class ReadyCommand implements Command {
     @Override
@@ -29,16 +29,9 @@ public class ReadyCommand implements Command {
         Arena arena = am.getArenaWithPlayer(p);
         if (arena == null) {
             am.getGlobalMessenger().tell(p, Msg.NOT_IN_LOBBY);
-            return true;
-        } else if (arena.inArena(p)) {
-            arena.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
-            return true;
         } else if (!arena.inLobby(p)) {
             arena.getMessenger().tell(p, Msg.NOT_IN_LOBBY);
-            return true;
-        }
-
-        if (arena.getArenaPlayer(p).getArenaClass() != null) {
+        } else if (arena.getArenaPlayer(p).getArenaClass() != null) {
             arena.getMessenger().tell(p, Msg.LOBBY_PLAYER_READY);
             arena.playerReady(p);
         } else {
