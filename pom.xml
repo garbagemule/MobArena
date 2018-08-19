@@ -87,6 +87,12 @@
       <id>bstats-repo</id>
       <url>http://repo.bstats.org/content/repositories/releases/</url>
     </repository>
+
+    <!-- JitPack for MagicSpells -->
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -113,13 +119,12 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Magic Spells (tentative) -->
+    <!-- MagicSpells -->
     <dependency>
-      <groupId>com.nisovin</groupId>
-      <artifactId>magicspells</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/MagicSpells.jar</systemPath>
+      <groupId>com.github.TheComputerGeek2</groupId>
+      <artifactId>MagicSpells</artifactId>
+      <version>0ad7c1f1a1</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- JUnit -->
