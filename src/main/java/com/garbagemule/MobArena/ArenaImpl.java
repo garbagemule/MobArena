@@ -996,26 +996,15 @@ public class ArenaImpl implements Arena
     }
     
     private void startSpawner() {
-        // Set the spawn flags to enable monster spawning.
-        world.setSpawnFlags(true, true);
-        //world.setDifficulty(Difficulty.NORMAL);
-        
-        // Create a spawner if one doesn't exist, otherwise reset it
-        if (spawnThread == null) {
-            spawnThread  = new MASpawnThread(plugin, this);
-        } else {
-            spawnThread.reset();
+        if (spawnThread != null) {
+            spawnThread.stop();
+            spawnThread = null;
         }
-        
-        // Schedule it for the initial first wave delay.
-        scheduleTask(spawnThread, settings.getInt("first-wave-delay", 5) * 20);
-        
-        // Schedule to enable PvP if pvp-enabled: true
-        scheduleTask(new Runnable() {
-            public void run() {
-                eventListener.pvpActivate();
-            }
-        }, settings.getInt("first-wave-delay", 5) * 20);
+
+        world.setSpawnFlags(true, true);
+
+        spawnThread = new MASpawnThread(plugin, this);
+        spawnThread.start();
     }
     
     /**
@@ -1030,9 +1019,15 @@ public class ArenaImpl implements Arena
     }
     
     private void stopSpawner() {
+        if (spawnThread == null) {
+            plugin.getLogger().warning("Can't stop non-existent spawner in arena " + configName() + ". This should never happen.");
+            return;
+        }
+
+        spawnThread.stop();
+        spawnThread = null;
+
         world.setSpawnFlags(allowMonsters, allowAnimals);
-        eventListener.pvpDeactivate();
-        //world.setDifficulty(spawnMonsters);
     }
     
     private void startBouncingSheep()

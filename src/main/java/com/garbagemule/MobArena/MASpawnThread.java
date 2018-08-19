@@ -16,11 +16,13 @@ import com.garbagemule.MobArena.waves.enums.WaveType;
 import com.garbagemule.MobArena.waves.types.BossWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,8 @@ public class MASpawnThread implements Runnable
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
     private int waveInterval;
     private int nextWaveDelay;
+
+    private BukkitTask task;
 
     /**
      * Create a new monster spawner for the input arena.
@@ -73,6 +77,32 @@ public class MASpawnThread implements Runnable
         wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
         waveInterval = arena.getSettings().getInt("wave-interval", 3);
         nextWaveDelay = arena.getSettings().getInt("next-wave-delay", 0);
+    }
+
+    public void start() {
+        if (task != null) {
+            plugin.getLogger().warning("Starting spawner in arena " + arena.configName() + " with existing spawner still running. This should never happen.");
+            task.cancel();
+            task = null;
+        }
+
+        int delay = arena.getSettings().getInt("first-wave-delay", 5) * 20;
+        task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            arena.getEventListener().pvpActivate();
+            this.run();
+        }, delay);
+    }
+
+    public void stop() {
+        if (task == null) {
+            plugin.getLogger().warning("Can't stop non-existent spawner in arena " + arena.configName() + ". This should never happen.");
+            return;
+        }
+
+        arena.getEventListener().pvpDeactivate();
+
+        task.cancel();
+        task = null;
     }
 
     public void run() {
@@ -109,7 +139,7 @@ public class MASpawnThread implements Runnable
 
         // Delay the next wave
         if (nextWaveDelay > 0) {
-            arena.scheduleTask(this::spawnNextWave, nextWaveDelay * 20);
+            task = Bukkit.getScheduler().runTaskLater(plugin, this::spawnNextWave, nextWaveDelay * 20);
         } else {
             spawnNextWave();
         }
@@ -146,7 +176,7 @@ public class MASpawnThread implements Runnable
         updateStats(nextWave);
 
         // Reschedule the spawner for the next wave.
-        arena.scheduleTask(this, waveInterval * 20);
+        task = Bukkit.getScheduler().runTaskLater(plugin, this, waveInterval * 20);
     }
 
     private void spawnWave(int wave) {
