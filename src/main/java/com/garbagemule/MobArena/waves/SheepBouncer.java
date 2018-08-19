@@ -1,9 +1,11 @@
 package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,11 +15,34 @@ public class SheepBouncer implements Runnable
     public static final int BOUNCE_INTERVAL = 20;
     private Arena arena;
     private Set<LivingEntity> sheep;
+
+    private BukkitTask task;
     
     public SheepBouncer(Arena arena) {
         this.arena = arena;
     }
     
+    public void start() {
+        if (task != null) {
+            arena.getPlugin().getLogger().warning("Starting sheep bouncer in arena " + arena.configName() + " with existing bouncer still running. This should never happen.");
+            task.cancel();
+            task = null;
+        }
+
+        int delay = arena.getSettings().getInt("first-wave-delay", 5) * 20;
+        task = Bukkit.getScheduler().runTaskLater(arena.getPlugin(), this, delay);
+    }
+
+    public void stop() {
+        if (task == null) {
+            arena.getPlugin().getLogger().warning("Can't stop non-existent sheep bouncer in arena " + arena.configName() + ". This should never happen.");
+            return;
+        }
+
+        task.cancel();
+        task = null;
+    }
+
     @Override
     public void run() {
         // If the arena isn't running or has no players, bail out
@@ -63,7 +88,7 @@ public class SheepBouncer implements Runnable
         }
         
         // Reschedule for more bouncy madness!
-        arena.scheduleTask(this, BOUNCE_INTERVAL);
+        task = Bukkit.getScheduler().runTaskLater(arena.getPlugin(), this, BOUNCE_INTERVAL);
     }
     
     /*private boolean isTargetNearby(Creature c, LivingEntity t) {

@@ -586,6 +586,7 @@ public class ArenaImpl implements Arena
         
         // Stop spawning.
         stopSpawner();
+        stopBouncingSheep();
 
         // Announce and clean arena floor, etc.
         if (settings.getBoolean("global-end-announce", false)) {
@@ -1030,15 +1031,24 @@ public class ArenaImpl implements Arena
         world.setSpawnFlags(allowMonsters, allowAnimals);
     }
     
-    private void startBouncingSheep()
-    {
-        // Create a new bouncer if necessary.
-        if (sheepBouncer == null) {
-            sheepBouncer = new SheepBouncer(this);
+    private void startBouncingSheep() {
+        if (sheepBouncer != null) {
+            sheepBouncer.stop();
+            sheepBouncer = null;
         }
-        
-        // Start bouncing!
-        scheduleTask(sheepBouncer, settings.getInt("first-wave-delay", 5) * 20);
+
+        sheepBouncer = new SheepBouncer(this);
+        sheepBouncer.start();
+    }
+
+    private void stopBouncingSheep() {
+        if (sheepBouncer == null) {
+            plugin.getLogger().warning("Can't stop non-existent sheep bouncer in arena " + configName() + ". This should never happen.");
+            return;
+        }
+
+        sheepBouncer.stop();
+        sheepBouncer = null;
     }
 
     @Override
