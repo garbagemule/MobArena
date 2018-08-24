@@ -30,6 +30,18 @@ public class JoinCommand implements Command
         Player p    = Commands.unwrap(sender);
         String arg1 = (args.length > 0 ? args[0] : null);
         
+        // If the player is currently in an arena, leave it first
+        Arena current = am.getArenaWithPlayer(p);
+        if (current != null) {
+            if (current.inArena(p) || current.inLobby(p)) {
+                current.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
+                return true;
+            }
+            if (!current.playerLeave(p)) {
+                return true;
+            }
+        }
+
         // Run some rough sanity checks, and grab the arena to join.
         Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
         if (toArena == null || !canJoin(p, toArena)) {
@@ -56,11 +68,6 @@ public class JoinCommand implements Command
         ArenaMaster am = plugin.getArenaMaster();
         if (am.getJoinInterruptTimer().isWaiting(player)) {
             plugin.getGlobalMessenger().tell(player, Msg.JOIN_ALREADY_PLAYING);
-            return false;
-        }
-        Arena current = am.getArenaWithPlayer(player);
-        if (current != null) {
-            current.getMessenger().tell(player, Msg.JOIN_ALREADY_PLAYING);
             return false;
         }
         return arena.canJoin(player);

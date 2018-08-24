@@ -20,6 +20,16 @@ class InvokesSignAction {
 
     void invoke(ArenaSign sign, Player player) {
         if (sign.type.equals("join")) {
+            Arena current = arenaMaster.getArenaWithPlayer(player);
+            if (current != null) {
+                if (current.inArena(player) || current.inLobby(player)) {
+                    current.getMessenger().tell(player, Msg.JOIN_ALREADY_PLAYING);
+                    return;
+                }
+                if (!current.playerLeave(player)) {
+                    return;
+                }
+            }
             withArena(sign, player, arena -> {
                 if (arena.canJoin(player)) {
                     // Join message is sent in playerJoin
