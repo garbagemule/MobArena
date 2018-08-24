@@ -27,7 +27,7 @@ These changes will (most likely) be included in the next version.
 
 Thanks to:
 - Sait for adding the /ma ready command
-- PrinceIonia and Nesseley for help with test of dev builds
+- PrinceIonia, Nesseley, and Diamond\_Cat for help with test of dev builds
 
 ## [0.102] - 2018-07-05
 - It is now possible to change which items are turned into wolf pets in the global-settings in the config-file.
