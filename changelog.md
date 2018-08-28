@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.103] - 2018-08-28
 - It is now possible to add a fixed delay (in seconds) between waves with the new per-arena setting `next-wave-delay`.
 - The new per-arena setting `join-interrupt-timer` makes it possible to add a "delay" to the join and spec commands. If the player moves or takes damage during this delay, the command is interrupted. This should help prevent exploits on PvP servers.
 - Right-clicking is now allowed in the lobby. This makes it possible to activate blocks like buttons and levers.
@@ -99,7 +101,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.102...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103...HEAD
+[0.103]: https://github.com/garbagemule/MobArena/compare/0.102...0.103
 [0.102]: https://github.com/garbagemule/MobArena/compare/0.101...0.102
 [0.101]: https://github.com/garbagemule/MobArena/compare/0.100.2...0.101
 [0.100.2]: https://github.com/garbagemule/MobArena/compare/0.100.1...0.100.2
