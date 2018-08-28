@@ -29,18 +29,6 @@ public class JoinCommand implements Command
         // Unwrap the sender, grab the argument, if any.
         Player p    = Commands.unwrap(sender);
         String arg1 = (args.length > 0 ? args[0] : null);
-        
-        // If the player is currently in an arena, leave it first
-        Arena current = am.getArenaWithPlayer(p);
-        if (current != null) {
-            if (current.inArena(p) || current.inLobby(p)) {
-                current.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
-                return true;
-            }
-            if (!current.playerLeave(p)) {
-                return true;
-            }
-        }
 
         // Run some rough sanity checks, and grab the arena to join.
         Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
@@ -51,14 +39,14 @@ public class JoinCommand implements Command
         // Join the arena!
         int seconds = toArena.getSettings().getInt("join-interrupt-timer", 0);
         if (seconds > 0) {
-            boolean started = am.getJoinInterruptTimer().start(p, toArena, seconds, () -> tryJoin(p, toArena));
+            boolean started = am.getJoinInterruptTimer().start(p, toArena, seconds, () -> tryJoin(am, p, toArena));
             if (started) {
                 toArena.getMessenger().tell(p, Msg.JOIN_AFTER_DELAY, String.valueOf(seconds));
             } else {
                 toArena.getMessenger().tell(p, Msg.JOIN_ALREADY_PLAYING);
             }
         } else {
-            tryJoin(p, toArena);
+            tryJoin(am, p, toArena);
         }
         return true;
     }
@@ -73,7 +61,18 @@ public class JoinCommand implements Command
         return arena.canJoin(player);
     }
 
-    private void tryJoin(Player player, Arena arena) {
+    private void tryJoin(ArenaMaster am, Player player, Arena arena) {
+        // If the player is currently in an arena, leave it first
+        Arena current = am.getArenaWithPlayer(player);
+        if (current != null) {
+            if (current.inArena(player) || current.inLobby(player)) {
+                current.getMessenger().tell(player, Msg.JOIN_ALREADY_PLAYING);
+                return;
+            }
+            if (!current.playerLeave(player)) {
+                return;
+            }
+        }
         if (canJoin(player, arena)) {
             arena.playerJoin(player, player.getLocation());
         }
