@@ -33,6 +33,9 @@ permissions:
     mobarena.use.class:
         description: Pick a class by name
         default: true
+    mobarena.use.ready:
+        description: Ready to start the battle
+        default: true
     
     mobarena.admin:
         description: Gives access to all admin commands
