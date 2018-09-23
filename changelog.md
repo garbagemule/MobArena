@@ -11,6 +11,7 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- Like the other user commands, the permission for `/ma ready` now defaults to true. 
 
 ## [0.103] - 2018-08-28
 - It is now possible to add a fixed delay (in seconds) between waves with the new per-arena setting `next-wave-delay`.
