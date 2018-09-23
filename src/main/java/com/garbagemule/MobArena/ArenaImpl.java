@@ -1139,6 +1139,23 @@ public class ArenaImpl implements Arena
         arenaClass.grantPotionEffects(p);
         arenaClass.grantLobbyPermissions(p);
 
+        if (arenaClass.hasUnbreakableWeapons()) {
+            PlayerInventory inv = p.getInventory();
+            for (ItemStack stack : inv.getContents()) {
+                if (ArenaClass.isWeapon(stack)) {
+                    makeUnbreakable(stack);
+                }
+            }
+        }
+        if (arenaClass.hasUnbreakableArmor()) {
+            PlayerInventory inv = p.getInventory();
+            for (ItemStack stack : inv.getArmorContents()) {
+                if (stack != null && ArmorType.getType(stack) != null) {
+                    makeUnbreakable(stack);
+                }
+            }
+        }
+
         autoReady(p);
     }
     
@@ -1186,9 +1203,9 @@ public class ArenaImpl implements Arena
                 makeUnbreakable(stack);
             }
             switch (type) {
-                case CHESTPLATE: chestplate = contents[i].clone(); break;
-                case LEGGINGS:   leggings   = contents[i].clone(); break;
-                case BOOTS:      boots      = contents[i].clone(); break;
+                case CHESTPLATE: chestplate = stack; break;
+                case LEGGINGS:   leggings   = stack; break;
+                case BOOTS:      boots      = stack; break;
                 default: break;
             }
             contents[i] = null;
