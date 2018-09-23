@@ -87,7 +87,6 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
@@ -708,10 +707,7 @@ public class ArenaListener
                 }
             }
 
-            // Repair weapons if necessary
-            if (damager instanceof Player) {
-                repairWeapon((Player) damager);
-            } else if (damager instanceof TNTPrimed) {
+            if (damager instanceof TNTPrimed) {
                 damager = getPlanter(damager);
             }
         }
@@ -764,9 +760,6 @@ public class ArenaListener
         }
 
         if (arena.inArena(player)) {
-            // Repair armor if necessary
-            repairArmor(player);
-
             // Cancel PvP damage if disabled
             if (!pvpEnabled && damager instanceof Player && !damager.equals(player)) {
                 event.setCancelled(true);
@@ -846,51 +839,6 @@ public class ArenaListener
             if (!pvpEnabled) {
                 event.setCancelled(true);
             }
-        }
-    }
-
-    private static final EnumSet<Material> REPAIRABLE_TYPES = EnumSet.of(
-            // Tools and swords
-            Material.GOLDEN_AXE,  Material.GOLDEN_HOE,  Material.GOLDEN_PICKAXE,  Material.GOLDEN_SHOVEL,  Material.GOLDEN_SWORD,
-            Material.WOODEN_AXE,  Material.WOODEN_HOE,  Material.WOODEN_PICKAXE,  Material.WOODEN_SHOVEL,  Material.WOODEN_SWORD,
-            Material.STONE_AXE,   Material.STONE_HOE,   Material.STONE_PICKAXE,   Material.STONE_SHOVEL,   Material.STONE_SWORD,
-            Material.IRON_AXE,    Material.IRON_HOE,    Material.IRON_PICKAXE,    Material.IRON_SHOVEL,    Material.IRON_SWORD,
-            Material.DIAMOND_AXE, Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, Material.DIAMOND_SHOVEL, Material.DIAMOND_SWORD,
-            // Armor
-            Material.LEATHER_HELMET,   Material.LEATHER_CHESTPLATE,   Material.LEATHER_LEGGINGS,   Material.LEATHER_BOOTS,
-            Material.GOLDEN_HELMET,    Material.GOLDEN_CHESTPLATE,    Material.GOLDEN_LEGGINGS,    Material.GOLDEN_BOOTS,
-            Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS,
-            Material.IRON_HELMET,      Material.IRON_CHESTPLATE,      Material.IRON_LEGGINGS,      Material.IRON_BOOTS,
-            Material.DIAMOND_HELMET,   Material.DIAMOND_CHESTPLATE,   Material.DIAMOND_LEGGINGS,   Material.DIAMOND_BOOTS,
-            // Misc
-            Material.BOW, Material.FLINT_AND_STEEL, Material.FISHING_ROD, Material.SHEARS, Material.CARROT_ON_A_STICK, Material.SHIELD
-    );
-
-    private void repairWeapon(Player p) {
-        ArenaPlayer ap = arena.getArenaPlayer(p);
-        if (ap != null) {
-            ArenaClass ac = ap.getArenaClass();
-            if (ac != null && ac.hasUnbreakableWeapons()) {
-                repair(p.getInventory().getItemInMainHand());
-                repair(p.getInventory().getItemInOffHand());
-            }
-        }
-    }
-
-    private void repairArmor(Player p) {
-        ArenaClass ac = arena.getArenaPlayer(p).getArenaClass();
-        if (ac != null && ac.hasUnbreakableArmor()) {
-            PlayerInventory inv = p.getInventory();
-            repair(inv.getHelmet());
-            repair(inv.getChestplate());
-            repair(inv.getLeggings());
-            repair(inv.getBoots());
-        }
-    }
-
-    private void repair(ItemStack stack) {
-        if (stack != null && REPAIRABLE_TYPES.contains(stack.getType())) {
-            stack.setDurability((short) 0);
         }
     }
 
