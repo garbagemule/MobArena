@@ -27,6 +27,7 @@ Any player on the server can use these commands by default.
 |                           | ready in arena lobby       |                     |
 +---------------------------+----------------------------+---------------------+
 | ``/ma spec (<arena>)``    | Enter an arena's spectator | ``/ma s (<arena>)`` |
+|                           | arena                      |                     |
 +---------------------------+----------------------------+---------------------+
 | ``/ma arenas``            | List all arenas. Green     |                     |
 |                           | names are enabled, gray    |                     |
