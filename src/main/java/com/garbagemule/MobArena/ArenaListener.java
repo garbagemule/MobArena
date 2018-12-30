@@ -690,9 +690,6 @@ public class ArenaListener
 
     public void onEntityDamage(EntityDamageEvent event) {
         Entity damagee = event.getEntity();
-        if (!arena.isRunning() && !arena.getRegion().contains(damagee.getLocation())) {
-            return;
-        }
 
         EntityDamageByEntityEvent edbe = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
         Entity damager = null;
@@ -736,7 +733,9 @@ public class ArenaListener
         }
         // Snowmen melting
         else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
-            event.setCancelled(true);
+            if (arena.isRunning() && arena.getRegion().contains(damagee.getLocation())) {
+                event.setCancelled(true);
+            }
         }
         // Boss monster
         else if (boss != null) {
