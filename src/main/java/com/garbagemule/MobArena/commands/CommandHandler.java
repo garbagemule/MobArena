@@ -60,8 +60,8 @@ public class CommandHandler implements CommandExecutor
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command bcmd, String label, String[] args) {
         // Grab the base and arguments.
-        String base = (args.length > 0 ? args[0] : "");
-        String last = (args.length > 0 ? args[args.length - 1] : "");
+        String base = (args.length > 0 ? args[0] : "").toLowerCase();
+        String last = (args.length > 0 ? args[args.length - 1] : "").toLowerCase();
 
         // If the player is in a convo (Setup Mode), bail
         if (sender instanceof Conversable && ((Conversable) sender).isConversing()) {
