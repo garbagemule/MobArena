@@ -885,6 +885,9 @@ public class ArenaListener
     }
     
     public void onEntityTeleport(EntityTeleportEvent event) {
+        if (monsters.hasPet(event.getEntity()) && region.contains(event.getTo())) {
+            return;
+        }
         if (region.contains(event.getFrom()) || region.contains(event.getTo())) {
             event.setCancelled(true);
         }
