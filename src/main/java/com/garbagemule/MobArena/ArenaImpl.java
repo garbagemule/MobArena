@@ -47,6 +47,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
@@ -1138,6 +1139,23 @@ public class ArenaImpl implements Arena
         arenaClass.grantPotionEffects(p);
         arenaClass.grantLobbyPermissions(p);
 
+        if (arenaClass.hasUnbreakableWeapons()) {
+            PlayerInventory inv = p.getInventory();
+            for (ItemStack stack : inv.getContents()) {
+                if (ArenaClass.isWeapon(stack)) {
+                    makeUnbreakable(stack);
+                }
+            }
+        }
+        if (arenaClass.hasUnbreakableArmor()) {
+            PlayerInventory inv = p.getInventory();
+            for (ItemStack stack : inv.getArmorContents()) {
+                if (stack != null && ArmorType.getType(stack) != null) {
+                    makeUnbreakable(stack);
+                }
+            }
+        }
+
         autoReady(p);
     }
     
@@ -1168,6 +1186,9 @@ public class ArenaImpl implements Arena
         int last = contents.length-1;
         if (contents[last] != null) {
             helmet = contents[last].clone();
+            if (arenaClass.hasUnbreakableArmor()) {
+                makeUnbreakable(helmet);
+            }
             contents[last] = null;
         }
 
@@ -1177,10 +1198,14 @@ public class ArenaImpl implements Arena
             ArmorType type = ArmorType.getType(contents[i]);
             if (type == null || type == ArmorType.HELMET) continue;
             
+            ItemStack stack = contents[i].clone();
+            if (arenaClass.hasUnbreakableArmor()) {
+                makeUnbreakable(stack);
+            }
             switch (type) {
-                case CHESTPLATE: chestplate = contents[i].clone(); break;
-                case LEGGINGS:   leggings   = contents[i].clone(); break;
-                case BOOTS:      boots      = contents[i].clone(); break;
+                case CHESTPLATE: chestplate = stack; break;
+                case LEGGINGS:   leggings   = stack; break;
+                case BOOTS:      boots      = stack; break;
                 default: break;
             }
             contents[i] = null;
@@ -1190,6 +1215,12 @@ public class ArenaImpl implements Arena
         ItemStack fifth = contents[contents.length - 5];
         if (fifth != null) {
             offhand = fifth.clone();
+            if (arenaClass.hasUnbreakableWeapons() && ArenaClass.isWeapon(fifth)) {
+                makeUnbreakable(offhand);
+            }
+            if (arenaClass.hasUnbreakableArmor() && ArmorType.getType(fifth) != null) {
+                makeUnbreakable(offhand);
+            }
             contents[contents.length - 5] = null;
         }
 
@@ -1197,7 +1228,7 @@ public class ArenaImpl implements Arena
         if (arenaClass.hasUnbreakableWeapons()) {
             for (ItemStack stack : contents) {
                 if (stack != null && arenaClass.isWeapon(stack)) {
-                    stack.setDurability(Short.MIN_VALUE);
+                    makeUnbreakable(stack);
                 }
             }
         }
@@ -1214,6 +1245,12 @@ public class ArenaImpl implements Arena
         arenaClass.grantLobbyPermissions(p);
 
         autoReady(p);
+    }
+
+    private void makeUnbreakable(ItemStack stack) {
+        ItemMeta meta = stack.getItemMeta();
+        meta.setUnbreakable(true);
+        stack.setItemMeta(meta);
     }
 
     private void autoReady(Player p) {
