@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.103.1] - 2018-12-31
 - Like the other user commands, the permission for `/ma ready` now defaults to true. 
 - Unbreakable weapons and armor now use the unbreakable item flag instead of item durability and on-hit repairs. This means that MobArena's unbreakable items are now compatible with plugins that depend on special durability values, such as QualityArmory. 
 - Spectators can no longer take damage when the arena isn't running.
@@ -107,7 +109,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103.1...HEAD
+[0.103.1]: https://github.com/garbagemule/MobArena/compare/0.103...0.103.1
 [0.103]: https://github.com/garbagemule/MobArena/compare/0.102...0.103
 [0.102]: https://github.com/garbagemule/MobArena/compare/0.101...0.102
 [0.101]: https://github.com/garbagemule/MobArena/compare/0.100.2...0.101
