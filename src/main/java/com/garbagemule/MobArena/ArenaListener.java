@@ -691,9 +691,6 @@ public class ArenaListener
 
     public void onEntityDamage(EntityDamageEvent event) {
         Entity damagee = event.getEntity();
-        if (!arena.isRunning() && !arena.getRegion().contains(damagee.getLocation())) {
-            return;
-        }
 
         EntityDamageByEntityEvent edbe = (event instanceof EntityDamageByEntityEvent) ? (EntityDamageByEntityEvent) event : null;
         Entity damager = null;
@@ -740,7 +737,9 @@ public class ArenaListener
         }
         // Snowmen melting
         else if (damagee instanceof Snowman && event.getCause() == DamageCause.MELTING) {
-            event.setCancelled(true);
+            if (arena.isRunning() && arena.getRegion().contains(damagee.getLocation())) {
+                event.setCancelled(true);
+            }
         }
         // Boss monster
         else if (boss != null) {
@@ -937,6 +936,9 @@ public class ArenaListener
     }
     
     public void onEntityTeleport(EntityTeleportEvent event) {
+        if (monsters.hasPet(event.getEntity()) && region.contains(event.getTo())) {
+            return;
+        }
         if (region.contains(event.getFrom()) || region.contains(event.getTo())) {
             event.setCancelled(true);
         }
@@ -1313,7 +1315,7 @@ public class ArenaListener
         }
 
         // This is safe, because commands will always have at least one element.
-        String base = event.getMessage().split(" ")[0];
+        String base = event.getMessage().split(" ")[0].toLowerCase();
 
         // Check if the entire base command is allowed.
         if (plugin.getArenaMaster().isAllowed(base)) {
@@ -1321,7 +1323,7 @@ public class ArenaListener
         }
 
         // If not, check if the specific command is allowed.
-        String noslash = event.getMessage().substring(1);
+        String noslash = event.getMessage().substring(1).toLowerCase();
         if (plugin.getArenaMaster().isAllowed(noslash)) {
             return;
         }

@@ -11,6 +11,12 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- Like the other user commands, the permission for `/ma ready` now defaults to true. 
+- Unbreakable weapons and armor now use the unbreakable item flag instead of item durability and on-hit repairs. This means that MobArena's unbreakable items are now compatible with plugins that depend on special durability values, such as QualityArmory. 
+- Spectators can no longer take damage when the arena isn't running.
+- Pets can now teleport back to their owners if they get too far away.
+- Enchantment names are now case insensitive (i.e. `FIRE_PROTECTION` is the same as `fire_protection`).
+- All commands are now case insensitive. This means that typing `/ma join` is the same as typing `/MA JOIN`. This should help reduce the confusion with commands like `/ma l` where the L can be confused with a 1 (one).
 
 ## [0.103] - 2018-08-28
 - It is now possible to add a fixed delay (in seconds) between waves with the new per-arena setting `next-wave-delay`.

@@ -19,12 +19,9 @@ started using the plugin.
 ## Getting Help
 
 If you run into problems or need help with something, feel free to hop on the
-MobArena Discord server or IRC channel to have a chat:
+MobArena Discord server to have a chat: [Instant Invite](https://discord.gg/5tnwQvC)
 
-- Discord: [Instant Invite](https://discordapp.com/invite/sddqVJd)
-- IRC (#mobarena @ EsperNet): [KiwiIRC Web Client](https://kiwiirc.com/nextclient/#irc://irc.esper.net/#mobarena)
-
-Remember, though, that these communication channels are _idle chat_, which
+Remember, though, that this communication channel is _idle chat_, which
 means you likely won't get a response immediately. It could take anything from
 a couple of seconds to a day, but your message _will_ be seen.
 
