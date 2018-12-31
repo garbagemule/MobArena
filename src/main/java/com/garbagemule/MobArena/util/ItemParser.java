@@ -160,6 +160,6 @@ public class ItemParser
     }
 
     private static Enchantment getEnchantment(String ench) {
-        return Enchantment.getByKey(NamespacedKey.minecraft(ench));
+        return Enchantment.getByKey(NamespacedKey.minecraft(ench.toLowerCase()));
     }
 }
