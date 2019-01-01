@@ -2,90 +2,118 @@
 Commands
 ########
 
-Note: All MobArena commands start with ``/ma``, and most of them can be
-disabled using [[Permissions]].
+This page documents the commands available in MobArena, both for players and
+administrators.
 
-If you are looking for ways to disable non-MobArena commands, look in
-the ``global-settings``-section of the [[config-file setup page\|setting
-up the config-file]].
+*Note*: Parentheses (``()``) around an parameter means it's optional (i.e. not
+required to work).
 
+
+***************
 Player commands
-~~~~~~~~~~~~~~~
+***************
 
-These commands can be issued by all players. They include joining,
-leaving, spectating and listing arenas as well as listing players.
+Any player on the server can use these commands by default.
 
--  ``/ma join (<arena>)`` or ``/ma j (<arena>)`` - Join the arena with
-   the given name.
--  ``/ma leave`` or ``/ma l`` - Leave the current arena, or the
-   spectator area.
--  ``/ma notready`` - Get a list of all players who aren't ready.
--  ``/ma spec (<arena>)`` or ``/ma s (<arena>)`` - Spectate the arena
-   with the given name.
--  ``/ma arenas`` - Get a list of all arenas. Green names are enabled,
-   gray names are disabled.
--  ``/ma players`` - Get a list of all arena players.
--  ``/ma players <arena>`` - Get a list of arena players in the
-   specified arena.
--  ``/ma class <class>`` - While in the lobby, manually pick the given
-   class instead of punching signs.
++---------------------------+----------------------------+---------------------+
+| Command                   | Description                | Alias               |
++===========================+============================+=====================+
+| ``/ma join (<arena>)``    | Join arena with given name | ``/ma j (<arena>)`` |
++---------------------------+----------------------------+---------------------+
+| ``/ma leave``             | Leave current arena or     | ``/ma l``           |
+|                           | spectator area             |                     |
++---------------------------+----------------------------+---------------------+
+| ``/ma notready``          | List players who are not   |                     |
+|                           | ready in arena lobby       |                     |
++---------------------------+----------------------------+---------------------+
+| ``/ma spec (<arena>)``    | Enter an arena's spectator | ``/ma s (<arena>)`` |
+|                           | arena                      |                     |
++---------------------------+----------------------------+---------------------+
+| ``/ma arenas``            | List all arenas. Green     |                     |
+|                           | names are enabled, gray    |                     |
+|                           | names are disabled         |                     |
++---------------------------+----------------------------+---------------------+
+| ``/ma players (<arena>)`` | List all players in an     |                     |
+|                           | area                       |                     |
++---------------------------+----------------------------+---------------------+
+| ``/ma class <class>``     | Manually choose a class in |                     |
+|                           | an arena lobby (instead of |                     |
+|                           | punching sign)             |                     |
++---------------------------+----------------------------+---------------------+
 
+
+**************
 Admin commands
-~~~~~~~~~~~~~~
+**************
 
-Only ops and the console can issue these commands. They include
-forcefully starting or ending arenas, enabling/disabling individual
-arenas or MobArena entirely.
+Players with OP privileges or assigned permissions can use these commands.
 
--  ``/ma enable`` - Enable MobArena.
--  ``/ma disable`` - Disable MobArena.
--  ``/ma enable <arena>`` - Enable the arena with the specified name.
--  ``/ma disable <arena>`` - Disable the arena with the specified name.
--  ``/ma force end`` - Forcefully end all arenas.
--  ``/ma force end <arena>`` - Forcefully end the arena with the
-   specified name; forces all players to leave.
--  ``/ma force start <arena>`` - Forcefully start the arena with the
-   specified name; forces all players who aren't ready to leave.
--  ``/ma notready <arena>`` - Get a list of all players in the given
-   arena who aren't ready.
--  ``/ma restore <player>`` - Restore the inventory of the player with
-   the given name, if possible.
--  ``/ma config reload`` - Reload the config-file into memory. This is
-   useful if changes are made in the config-file while the server is
-   running.
++-----------------------------+------------------------------------------------+
+| Command                     | Description                                    |
++=============================+================================================+
+| ``/ma enable (<arena>)``    | Enable MobArena (optionally a specific arena)  |
++-----------------------------+------------------------------------------------+
+| ``/ma disable``             | Disable MobArena (optionally a specific arena) |
++-----------------------------+------------------------------------------------+
+| ``/ma force end (<arena>)`` | Forcefully end all arenas or a specific arena  |
++-----------------------------+------------------------------------------------+
+| ``/ma force start <arena>`` | Forcefully start an arena (players that aren't |
+|                             | ready are removed from arena)                  |
++-----------------------------+------------------------------------------------+
+| ``/ma notready <arena>``    | List all players in an arena that aren't ready |
++-----------------------------+------------------------------------------------+
+| ``/ma restore <player>``    | Restore a player's inventory (if possible)     |
++-----------------------------+------------------------------------------------+
+| ``/ma config reload``       | Reload config file into memory                 |
++-----------------------------+------------------------------------------------+
 
+
+**************
 Setup commands
-~~~~~~~~~~~~~~
+**************
 
-Only ops (and the console, if it makes sense) can issue these commands.
-They include setting warp points, spawnpoints and region points.
+Players with OP privileges or assigned permissions can use these commands.
 
--  ``/ma setup <arena>`` - Enter [[Setup Mode\|Arena Setup]] for the
-   given arena.
--  ``/ma addarena <arena>`` - Create a new arena-node in the current
-   world.
--  ``/ma delarena <arena>`` - Delete the arena with the given name.
--  ``/ma editarena <arena>`` - Toggle Edit Mode for the given arena.
--  ``/ma editarena <arena> [true|false]`` - Turn on or off Edit Mode for
-   the given arena.
--  ``/ma setting <arena>`` - List all per-arena settings for the given
-   arena.
--  ``/ma setting <arena> <setting>`` - Check the current value of the
-   given setting for the given arena.
--  ``/ma setting <arena> <setting> <value>`` - Set the value of the
-   given setting for the given arena to the given value.
--  ``/ma checkspawns`` - Shows the spawnpoints (of the arena you are
-   currently standing in) which cover your current location as red wool
-   blocks. This command can be used to check if specific points in your
-   arena are actually covered by spawnpoints or not.
--  ``/ma classchest <class>`` - While looking at a chest, link the chest
-   to the given class as a [[linked class chest\|Class Chests]]. Linking
-   a class chest means MobArena will always copy the items from the
-   linked chest, regardless of any local class chests in arena lobbies.
-   This is useful if you want a global class chest for a class.
--  ``/ma auto-generate <arena>`` - Auto-generate a new arena with the
-   given name. The arena will be generated just below the player in the
-   world they are standing in.
--  ``/ma auto-degenerate <arena>`` - Degenerate the arena with the given
-   name, effectively restoring the patch that was "bulldozed" with the
-   auto-generator.
++-----------------------------+------------------------------------------------+
+| Command                     | Description                                    |
++=============================+================================================+
+| ``/ma setup <arena>``       | Enter Setup Mode for an arena (see             |
+|                             | :doc:`arena-setup` for more info)              |
++-----------------------------+------------------------------------------------+
+| ``/ma addarena <arena>``    | Create new arena node in current world         |
++-----------------------------+------------------------------------------------+
+| ``/ma delarena <arena>``    | Delete arena with given name                   |
++-----------------------------+------------------------------------------------+
+| ``/ma editarena <arena>``   | Toggle Edit Mode for an arena                  |
++-----------------------------+------------------------------------------------+
+| ``/ma editarena <arena>``   | Turn Edit Mode on or off for an arena          |
+| ``[true|false]``            |                                                |
++-----------------------------+------------------------------------------------+
+| ``/ma setting <arena>``     | List per-arena settings for an arena           |
++-----------------------------+------------------------------------------------+
+| ``/ma setting <arena>``     | Check current value of a setting for an arena  |
+| ``<setting>``               |                                                |
++-----------------------------+------------------------------------------------+
+| ``/ma setting <arena>``     | Change a setting for an arena to given value   |
+| ``<setting> <value>``       |                                                |
++-----------------------------+------------------------------------------------+
+| ``/ma checkspawns``         | Show all spawnpoints in arena you are standing |
+|                             | in as red wool blocks (helpful to check        |
+|                             | spawnpoint coverage)                           |
++-----------------------------+------------------------------------------------+
+| ``/ma classchest <class>``  | Create a linked class chest for a class (see   |
+|                             | :doc:`class-chests` for more info)             |
++-----------------------------+------------------------------------------------+
+| ``/ma auto-generate``       | Auto-generate new arena with given name        |
+| ``<arena>``                 | (generated directly below player)              |
++-----------------------------+------------------------------------------------+
+| ``/ma auto-degenerate``     | Degenerate an auto-generated arena with given  |
+| ``<arena>``                 | name                                           |
++-----------------------------+------------------------------------------------+
+
+
+***********
+Permissions
+***********
+
+See :doc:`permissions`.
