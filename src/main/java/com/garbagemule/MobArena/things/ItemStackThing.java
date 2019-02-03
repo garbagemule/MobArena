@@ -13,12 +13,12 @@ public class ItemStackThing implements Thing {
 
     @Override
     public boolean giveTo(Player player) {
-        return player.getInventory().addItem(stack).isEmpty();
+        return player.getInventory().addItem(stack.clone()).isEmpty();
     }
 
     @Override
     public boolean takeFrom(Player player) {
-        return player.getInventory().removeItem(stack).isEmpty();
+        return player.getInventory().removeItem(stack.clone()).isEmpty();
     }
 
     @Override

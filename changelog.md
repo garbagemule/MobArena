@@ -12,6 +12,7 @@ These changes will (most likely) be included in the next version.
 
 ## [Unreleased]
 - MobArena no longer touches the `flySpeed` player attribute when players join an arena. This should fix issues where a crash would result in players being "locked in the air" when trying to fly outside of the arena. It also introduces compatibility with plugins that use flight to augment player abilities.
+- Fixed a bug introduced by a breaking API change in Spigot where a player with a nearly full inventory might cause item rewards to change stack amounts.
 
 ## [0.103.1] - 2018-12-31
 - Like the other user commands, the permission for `/ma ready` now defaults to true. 
