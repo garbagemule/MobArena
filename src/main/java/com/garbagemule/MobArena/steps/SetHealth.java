@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.steps;
 
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 
 class SetHealth extends PlayerStep {
-    private static final double FULL_HEALTH = 20.0;
     private static final int NORMAL_FIRE = -20;
     private static final int NORMAL_AIR = 300;
 
@@ -23,7 +23,9 @@ class SetHealth extends PlayerStep {
 
         player.setRemainingAir(NORMAL_AIR);
         player.setFireTicks(NORMAL_FIRE);
-        player.setHealth(FULL_HEALTH);
+
+        double full = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        player.setHealth(full);
     }
 
     @Override
