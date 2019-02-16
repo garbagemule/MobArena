@@ -1214,7 +1214,7 @@ public class ArenaListener
          * transition and are removed from that state as soon as the transition
          * is complete.
          */
-        if (arena.isMoving(p) || p.hasPermission("mobarena.admin.teleport")) {
+        if (arena.isMoving(p)) {
             return TeleportResponse.ALLOW;
         }
 

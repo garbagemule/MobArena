@@ -366,7 +366,7 @@ public class MAGlobalListener implements Listener
         }
         
         // Only cancel if at least one arena has rejected the teleport.
-        if (!allow) {
+        if (!allow && !event.getPlayer().hasPermission("mobarena.admin.teleport")) {
             event.setCancelled(true);
         }
     }
