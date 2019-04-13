@@ -29,6 +29,11 @@ public class ScoreboardManager {
         this.arena = arena;
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         scoreboards = new HashMap<>();
+
+        if (arena.getSettings().getBoolean("show-health-under-name", true)) {
+            Objective health = this.scoreboard.registerNewObjective("health", "health", ChatColor.RED + "\u2764");
+            health.setDisplaySlot(DisplaySlot.BELOW_NAME);
+        }
     }
     
     /**

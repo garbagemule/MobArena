@@ -40,6 +40,7 @@ boss-health-bar: boss-bar
 display-waves-as-level: false
 display-timer-as-level: false
 use-scoreboards: true
+show-health-under-name: true
 isolated-chat: false
 global-join-announce: false
 global-end-announce: false
