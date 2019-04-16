@@ -15,6 +15,7 @@ These changes will (most likely) be included in the next version.
 - Fixed a bug introduced by a breaking API change in Spigot where a player with a nearly full inventory might cause item rewards to change stack amounts.
 - MobArena no longer uncancels teleport events that occur outside of its own context when players have the `mobarena.admin.teleport` permission. This fixes a bug where the permission could override the cancellation of events that weren't related to MobArena.
 - When resetting player health, MobArena now uses the player max health attribute base value rather than a fixed value of 20. This fixes crashes associated with max health values lower than 20, and ensures that players always get a full heal with values higher than 20.
+- The server version check on the main build (currently for 1.13) now explicitly looks for incompatible versions rather than compatible versions. This brings back the "works unless otherwise specified" nature of the plugin, and thus a MobArena build for Minecraft 1.13 should (knock-on-wood) work on 1.14.
 
 Thanks to:
 - minoneer for help with fixing and testing the teleport bug
