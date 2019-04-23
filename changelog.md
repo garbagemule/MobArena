@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.103.2] - 2019-04-23
 - MobArena no longer touches the `flySpeed` player attribute when players join an arena. This should fix issues where a crash would result in players being "locked in the air" when trying to fly outside of the arena. It also introduces compatibility with plugins that use flight to augment player abilities.
 - Fixed a bug introduced by a breaking API change in Spigot where a player with a nearly full inventory might cause item rewards to change stack amounts.
 - MobArena no longer uncancels teleport events that occur outside of its own context when players have the `mobarena.admin.teleport` permission. This fixes a bug where the permission could override the cancellation of events that weren't related to MobArena.
@@ -117,7 +119,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103.1...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103.2...HEAD
+[0.103.2]: https://github.com/garbagemule/MobArena/compare/0.103.1...0.103.2
 [0.103.1]: https://github.com/garbagemule/MobArena/compare/0.103...0.103.1
 [0.103]: https://github.com/garbagemule/MobArena/compare/0.102...0.103
 [0.102]: https://github.com/garbagemule/MobArena/compare/0.101...0.102
