@@ -35,6 +35,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
@@ -833,8 +834,10 @@ public class ArenaImpl implements Arena
             endArena();
             return;
         }
-        
-        p.setHealth(20.0);
+
+        double full = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        p.setHealth(full);
+
         plugin.getServer().getScheduler()
             .scheduleSyncDelayedTask(plugin, () -> revivePlayer(p));
         endArena();

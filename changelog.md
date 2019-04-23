@@ -11,6 +11,18 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.103.2] - 2019-04-23
+- MobArena no longer touches the `flySpeed` player attribute when players join an arena. This should fix issues where a crash would result in players being "locked in the air" when trying to fly outside of the arena. It also introduces compatibility with plugins that use flight to augment player abilities.
+- Fixed a bug introduced by a breaking API change in Spigot where a player with a nearly full inventory might cause item rewards to change stack amounts.
+- MobArena no longer uncancels teleport events that occur outside of its own context when players have the `mobarena.admin.teleport` permission. This fixes a bug where the permission could override the cancellation of events that weren't related to MobArena.
+- When resetting player health, MobArena now uses the player max health attribute base value rather than a fixed value of 20. This fixes crashes associated with max health values lower than 20, and ensures that players always get a full heal with values higher than 20.
+- The server version check on the main build (currently for 1.13) now explicitly looks for incompatible versions rather than compatible versions. This brings back the "works unless otherwise specified" nature of the plugin, and thus a MobArena build for Minecraft 1.13 should (knock-on-wood) work on 1.14.
+
+Thanks to:
+- minoneer for help with fixing and testing the teleport bug
+
+## [0.103.1] - 2018-12-31
 - Like the other user commands, the permission for `/ma ready` now defaults to true. 
 - Unbreakable weapons and armor now use the unbreakable item flag instead of item durability and on-hit repairs. This means that MobArena's unbreakable items are now compatible with plugins that depend on special durability values, such as QualityArmory. 
 - Spectators can no longer take damage when the arena isn't running.
@@ -107,7 +119,9 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103.2...HEAD
+[0.103.2]: https://github.com/garbagemule/MobArena/compare/0.103.1...0.103.2
+[0.103.1]: https://github.com/garbagemule/MobArena/compare/0.103...0.103.1
 [0.103]: https://github.com/garbagemule/MobArena/compare/0.102...0.103
 [0.102]: https://github.com/garbagemule/MobArena/compare/0.101...0.102
 [0.101]: https://github.com/garbagemule/MobArena/compare/0.100.2...0.101
