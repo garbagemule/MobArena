@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 class SetFlying extends PlayerStep {
     private boolean allow;
     private boolean flying;
-    private float speed;
 
     private SetFlying(Player player) {
         super(player);
@@ -15,9 +14,7 @@ class SetFlying extends PlayerStep {
     public void run() {
         allow = player.getAllowFlight();
         flying = player.isFlying();
-        speed = player.getFlySpeed();
 
-        player.setFlySpeed(0);
         player.setFlying(false);
         player.setAllowFlight(false);
     }
@@ -26,7 +23,6 @@ class SetFlying extends PlayerStep {
     public void undo() {
         player.setAllowFlight(allow);
         player.setFlying(flying);
-        player.setFlySpeed(speed);
     }
 
     static StepFactory create() {
