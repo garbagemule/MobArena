@@ -21,6 +21,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityCombustByBlockEvent;
+import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -177,8 +179,20 @@ public class MAGlobalListener implements Listener
         for (Arena arena : am.getArenas())
             arena.getEventListener().onEntityChangeBlock(event);
     }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityCombustByEntity(EntityCombustByEntityEvent event) {
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onEntityCombustByEntity(event);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityCombustByBlock(EntityCombustByBlockEvent event) {
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onEntityCombustByBlock(event);
+    }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void entityCombust(EntityCombustEvent event) {
         for (Arena arena : am.getArenas())
             arena.getEventListener().onEntityCombust(event);
