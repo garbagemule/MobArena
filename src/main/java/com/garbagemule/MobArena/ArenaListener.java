@@ -128,6 +128,7 @@ public class ArenaListener
             canShare,
             allowMonsters,
             autoIgniteTNT;
+    private boolean sun = true;
 
     private Set<Player> banned;
 
@@ -841,13 +842,32 @@ public class ArenaListener
         }
     }
 
-    public void onEntityCombust(EntityCombustEvent event) {
-        if (monsters.getMonsters().contains(event.getEntity())) {
-            if (event instanceof EntityCombustByBlockEvent || event instanceof EntityCombustByEntityEvent) {
-                return;
-            }
-            event.setCancelled(true);
-        }
+    public void onEntityCombustByEntity(EntityCombustByEntityEvent event)
+    {
+    	if (monsters.getMonsters().contains(event.getEntity()))
+    	{
+                    sun = false;
+    	}
+    }
+
+    public void onEntityCombustByBlock(EntityCombustByBlockEvent event)
+    {
+    	if (monsters.getMonsters().contains(event.getEntity()))
+    	{
+                    sun = false;
+    	}
+    }
+    
+    public void onEntityCombust(EntityCombustEvent event)
+    {
+    	if (monsters.getMonsters().contains(event.getEntity()))
+    	{
+                if (sun)
+                     {
+                	event.setCancelled(true);
+                      }
+                sun = true;
+    	}
     }
 
     public void onEntityTarget(EntityTargetEvent event) {
