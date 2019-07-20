@@ -177,6 +177,9 @@ public class MACreature
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
                 break;
+            case "witherskeleton":
+                e.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_SWORD, 1));
+                break;
             default:
                 break;
         }

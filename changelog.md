@@ -13,6 +13,7 @@ These changes will (most likely) be included in the next version.
 ## [Unreleased]
 - MobArena no longer crashes when players try to join with items that lower their max health below the default of 20. Players with lower max health will notice missing health in the lobby, but it will quickly regenerate to full.
 - Food levels no longer deplete for players in the lobby and spectator area.
+- Wither skeletons now correctly spawn with stone swords.
 
 ## [0.103.2] - 2019-04-23
 - MobArena no longer touches the `flySpeed` player attribute when players join an arena. This should fix issues where a crash would result in players being "locked in the air" when trying to fly outside of the arena. It also introduces compatibility with plugins that use flight to augment player abilities.
