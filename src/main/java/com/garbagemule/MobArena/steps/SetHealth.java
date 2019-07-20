@@ -24,13 +24,16 @@ class SetHealth extends PlayerStep {
         player.setRemainingAir(NORMAL_AIR);
         player.setFireTicks(NORMAL_FIRE);
 
-        double full = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        double full = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
         player.setHealth(full);
     }
 
     @Override
     public void undo() {
-        player.setHealth(health);
+        double max = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+        double capped = Math.min(health, max);
+        player.setHealth(capped);
+
         player.setFireTicks(fire);
         player.setRemainingAir(air);
     }

@@ -835,7 +835,7 @@ public class ArenaImpl implements Arena
             return;
         }
         
-        double full = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        double full = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
         p.setHealth(full);
 
         plugin.getServer().getScheduler()

@@ -11,6 +11,7 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- MobArena no longer crashes when players try to join with items that lower their max health below the default of 20. Players with lower max health will notice missing health in the lobby, but it will quickly regenerate to full.
 - Food levels no longer deplete for players in the lobby and spectator area.
 
 ## [0.103.2] - 2019-04-23
