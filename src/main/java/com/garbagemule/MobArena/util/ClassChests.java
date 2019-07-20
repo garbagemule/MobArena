@@ -10,6 +10,9 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +45,15 @@ public class ClassChests {
         }
 
         // Start the search
-        BlockFace backwards = ((org.bukkit.material.Sign) sign.getData()).getFacing().getOppositeFace();
+        BlockFace backwards;
+        BlockData data = sign.getBlockData();
+        if (data instanceof Directional) {
+            backwards = ((Directional) data).getFacing().getOppositeFace();
+        } else if (data instanceof Rotatable) {
+            backwards = ((Rotatable) data).getRotation().getOppositeFace();
+        } else {
+            return false;
+        }
         Block blockSign   = sign.getBlock();
         Block blockBelow  = blockSign.getRelative(BlockFace.DOWN);
         Block blockBehind = blockBelow.getRelative(backwards);
