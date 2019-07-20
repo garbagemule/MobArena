@@ -6,9 +6,12 @@ import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,7 +137,11 @@ public class Leaderboard
         Sign current = this.topLeftSign;
         
         // Calculate matrix dimensions.
-        this.direction = getRightDirection(current);
+        BlockFace direction = getRightDirection(current);
+        if (direction == null) {
+            return false;
+        }
+        this.direction = direction;
         this.rows = getSignCount(current, BlockFace.DOWN);
         this.cols = getSignCount(current, direction);
         
@@ -145,7 +152,7 @@ public class Leaderboard
         
         // Get the left-most sign in the current row.
         Sign first = getAdjacentSign(current, BlockFace.DOWN);
-        
+
         for (int i = 1; i < rows; i++)
         {
             // Back to the first sign of the row.
@@ -222,11 +229,22 @@ public class Leaderboard
     private int getSignCount(Sign s, BlockFace direction)
     {
         int i = 1;
-        
+
         BlockState state = s.getBlock().getState();
-        while ((state = state.getBlock().getRelative(direction).getState()) instanceof Sign)
+        while (state != null) {
+            Block current = state.getBlock();
+            if (current == null) break;
+
+            Block relative = current.getRelative(direction);
+            if (relative == null) break;
+
+            state = relative.getState();
+            if (!(state instanceof Sign)) {
+                break;
+            }
             i++;
-        
+        }
+
         return i;
     }
     
@@ -240,13 +258,16 @@ public class Leaderboard
     
     private BlockFace getRightDirection(Sign s)
     {
-        byte data = s.getRawData();
-
-        if (data == 2) return BlockFace.WEST;//BlockFace.NORTH;
-        if (data == 3) return BlockFace.EAST;//BlockFace.SOUTH;
-        if (data == 4) return BlockFace.SOUTH;//BlockFace.WEST;
-        if (data == 5) return BlockFace.NORTH;//BlockFace.EAST;
-        
+        BlockData data = s.getBlockData();
+        if (data instanceof Directional) {
+            BlockFace direction = ((Directional) data).getFacing();
+            switch (direction) {
+                case NORTH: return BlockFace.WEST;
+                case SOUTH: return BlockFace.EAST;
+                case WEST: return BlockFace.SOUTH;
+                case EAST: return BlockFace.NORTH;
+            }
+        }
         return null;
     }
     
