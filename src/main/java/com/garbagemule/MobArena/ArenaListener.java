@@ -949,15 +949,22 @@ public class ArenaListener
     }
 
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        if (!arena.isRunning())
+        if (!(event.getEntity() instanceof Player)) {
             return;
+        }
 
-        if (!(event.getEntity() instanceof Player) || !arena.inArena((Player) event.getEntity()))
-            return;
+        Player p = (Player) event.getEntity();
 
-        // If the food level is locked, cancel all changes.
-        if (lockFoodLevel)
-            event.setCancelled(true);
+        if (arena.isRunning()) {
+            if (lockFoodLevel) {
+                event.setCancelled(true);
+            }
+        } else {
+            // Always locked in lobby/spec
+            if (arena.inLobby(p) || arena.inSpec(p)) {
+                event.setCancelled(true);
+            }
+        }
     }
 
     public void onPlayerAnimation(PlayerAnimationEvent event) {
