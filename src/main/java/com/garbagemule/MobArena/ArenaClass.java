@@ -1,7 +1,5 @@
 package com.garbagemule.MobArena;
 
-import static org.bukkit.Material.*;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
@@ -12,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -214,78 +211,6 @@ public class ArenaClass
 
     public Thing getPrice() {
         return price;
-    }
-    
-    /**
-     * Used by isWeapon() to determine if an ItemStack is a weapon type.
-     */
-    private static EnumSet<Material> weaponTypes = EnumSet.of(
-        WOODEN_SWORD,   GOLDEN_SWORD,   STONE_SWORD,   IRON_SWORD,   DIAMOND_SWORD,
-        WOODEN_AXE,     GOLDEN_AXE,     STONE_AXE,     IRON_AXE,     DIAMOND_AXE,
-        WOODEN_PICKAXE, GOLDEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE,
-        WOODEN_SHOVEL,  GOLDEN_SHOVEL,  STONE_SHOVEL,  IRON_SHOVEL,  DIAMOND_SHOVEL,
-        WOODEN_HOE,     GOLDEN_HOE,     STONE_HOE,     IRON_HOE,     DIAMOND_HOE,
-        BOW, FISHING_ROD, FLINT_AND_STEEL, SHEARS, CARROT_ON_A_STICK, SHIELD
-    );
-
-    /**
-     * Returns true, if the ItemStack appears to be a weapon, in which case
-     * the addItem() method will set the weapon durability to the absolute
-     * maximum, as to give them "infinite" durability.
-     * @param stack an ItemStack
-     * @return true, if the item is a weapon
-     */
-    public static boolean isWeapon(ItemStack stack) {
-        if (stack == null) return false;
-        return weaponTypes.contains(stack.getType());
-    }
-
-    /**
-     * Used by the grantItems() method to determine the armor type of a given
-     * ItemStack. Armor pieces are auto-equipped.
-     * Note: This enum is only necessary for backward-compatibility with the
-     * 'armor'-node.
-     */
-    public enum ArmorType {
-        HELMET,
-        CHESTPLATE,
-        LEGGINGS,
-        BOOTS;
-
-        public static ArmorType getType(ItemStack stack) {
-            switch (stack.getType()) {
-                case LEATHER_HELMET:
-                case CHAINMAIL_HELMET:
-                case IRON_HELMET:
-                case DIAMOND_HELMET:
-                case GOLDEN_HELMET:
-                    return HELMET;
-
-                case LEATHER_CHESTPLATE:
-                case CHAINMAIL_CHESTPLATE:
-                case IRON_CHESTPLATE:
-                case DIAMOND_CHESTPLATE:
-                case GOLDEN_CHESTPLATE:
-                    return CHESTPLATE;
-
-                case LEATHER_LEGGINGS:
-                case CHAINMAIL_LEGGINGS:
-                case IRON_LEGGINGS:
-                case DIAMOND_LEGGINGS:
-                case GOLDEN_LEGGINGS:
-                    return LEGGINGS;
-
-                case LEATHER_BOOTS:
-                case CHAINMAIL_BOOTS:
-                case IRON_BOOTS:
-                case DIAMOND_BOOTS:
-                case GOLDEN_BOOTS:
-                    return BOOTS;
-
-                default:
-                    return null;
-            }
-        }
     }
     
     @Override

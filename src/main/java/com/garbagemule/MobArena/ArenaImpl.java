@@ -2,7 +2,6 @@ package com.garbagemule.MobArena;
 
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
-import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 import com.garbagemule.MobArena.steps.Step;
 import com.garbagemule.MobArena.steps.StepFactory;
@@ -48,6 +47,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -1145,17 +1145,13 @@ public class ArenaImpl implements Arena
         if (arenaClass.hasUnbreakableWeapons()) {
             PlayerInventory inv = p.getInventory();
             for (ItemStack stack : inv.getContents()) {
-                if (ArenaClass.isWeapon(stack)) {
-                    makeUnbreakable(stack);
-                }
+                makeUnbreakable(stack);
             }
         }
         if (arenaClass.hasUnbreakableArmor()) {
             PlayerInventory inv = p.getInventory();
             for (ItemStack stack : inv.getArmorContents()) {
-                if (stack != null && ArmorType.getType(stack) != null) {
-                    makeUnbreakable(stack);
-                }
+                makeUnbreakable(stack);
             }
         }
 
@@ -1198,17 +1194,19 @@ public class ArenaImpl implements Arena
         // Check the remaining three of the four last slots for armor
         for (int i = contents.length-1; i > contents.length-5; i--) {
             if (contents[i] == null) continue;
-            ArmorType type = ArmorType.getType(contents[i]);
-            if (type == null || type == ArmorType.HELMET) continue;
-            
+
+            String[] parts = contents[i].getType().name().split("_");
+            String type = parts[parts.length - 1];
+            if (type.equals("HELMET")) continue;
+
             ItemStack stack = contents[i].clone();
             if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(stack);
             }
             switch (type) {
-                case CHESTPLATE: chestplate = stack; break;
-                case LEGGINGS:   leggings   = stack; break;
-                case BOOTS:      boots      = stack; break;
+                case "CHESTPLATE": chestplate = stack; break;
+                case "LEGGINGS":   leggings   = stack; break;
+                case "BOOTS":      boots      = stack; break;
                 default: break;
             }
             contents[i] = null;
@@ -1218,10 +1216,10 @@ public class ArenaImpl implements Arena
         ItemStack fifth = contents[contents.length - 5];
         if (fifth != null) {
             offhand = fifth.clone();
-            if (arenaClass.hasUnbreakableWeapons() && ArenaClass.isWeapon(fifth)) {
+            if (arenaClass.hasUnbreakableWeapons()) {
                 makeUnbreakable(offhand);
             }
-            if (arenaClass.hasUnbreakableArmor() && ArmorType.getType(fifth) != null) {
+            if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(offhand);
             }
             contents[contents.length - 5] = null;
@@ -1230,9 +1228,7 @@ public class ArenaImpl implements Arena
         // Check the remaining slots for weapons
         if (arenaClass.hasUnbreakableWeapons()) {
             for (ItemStack stack : contents) {
-                if (stack != null && arenaClass.isWeapon(stack)) {
-                    makeUnbreakable(stack);
-                }
+                makeUnbreakable(stack);
             }
         }
 
@@ -1251,7 +1247,13 @@ public class ArenaImpl implements Arena
     }
 
     private void makeUnbreakable(ItemStack stack) {
+        if (stack == null) {
+            return;
+        }
         ItemMeta meta = stack.getItemMeta();
+        if (!(meta instanceof Damageable)) {
+            return;
+        }
         meta.setUnbreakable(true);
         stack.setItemMeta(meta);
     }

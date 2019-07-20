@@ -11,6 +11,7 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- Tridents and crossbows are now considered weapons with regards to the `unbreakable-weapons` flag. All class items that have durability now have their unbreakable flag set to true unless the `unbreakable-weapons` and/or `unbreakable-armor` flags are set to `false`.
 - MobArena no longer crashes when players try to join with items that lower their max health below the default of 20. Players with lower max health will notice missing health in the lobby, but it will quickly regenerate to full.
 - Food levels no longer deplete for players in the lobby and spectator area.
 - Wither skeletons now correctly spawn with stone swords.
