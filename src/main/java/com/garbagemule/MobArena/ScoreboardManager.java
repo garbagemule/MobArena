@@ -134,7 +134,7 @@ public class ScoreboardManager {
         if (kills != null) {
             kills.unregister();
         }
-        kills = scoreboard.registerNewObjective("kills", "ma-kills");
+        kills = scoreboard.registerNewObjective("kills", "ma-kills", "Kills");
         kills.setDisplaySlot(DisplaySlot.SIDEBAR);
         updateWave(0);
     }
