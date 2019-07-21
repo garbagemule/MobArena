@@ -960,7 +960,7 @@ public class ArenaImpl implements Arena
             mount.setTamed(true);
             mount.setOwner(p);
             mount.addPassenger(p);
-            mount.setHealth(mount.getMaxHealth());
+            mount.setHealth(mount.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 
             // Add saddle
             mount.getInventory().addItem(new ItemStack(Material.SADDLE));
