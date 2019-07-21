@@ -62,7 +62,7 @@ public class PotionEffectParser
     }
     
     private static PotionEffect parseSingle(String type) {
-        PotionEffectType effect = getType(type);
+        PotionEffectType effect = PotionEffectType.getByName(type);
         
         if (effect == null) {
             return null;
@@ -72,7 +72,7 @@ public class PotionEffectParser
     }
     
     private static PotionEffect withAmplifier(String type, String amplifier) {
-        PotionEffectType effect = getType(type);
+        PotionEffectType effect = PotionEffectType.getByName(type);
         int amp = getAmplification(amplifier);
         
         if (effect == null || amp == -1) {
@@ -83,7 +83,7 @@ public class PotionEffectParser
     }
     
     private static PotionEffect withAmplifierAndDuration(String type, String amplifier, String duration) {
-        PotionEffectType effect = getType(type);
+        PotionEffectType effect = PotionEffectType.getByName(type);
         int amp = getAmplification(amplifier);
         int dur = getDuration(duration);
         
@@ -92,18 +92,6 @@ public class PotionEffectParser
         } else {
             return new PotionEffect(effect, dur * TICKS_PER_SECOND, amp);
         }
-    }
-    
-    private static PotionEffectType getType(String type) {
-        PotionEffectType effect = null;
-        
-        if (type.matches("[0-9]+")) {
-            effect = PotionEffectType.getById(Integer.parseInt(type));
-        } else {
-            effect = PotionEffectType.getByName(type.toUpperCase());
-        }
-        
-        return effect;
     }
     
     private static int getDuration(String duration) {
