@@ -203,6 +203,7 @@ public class SetupCommand implements Command, Listener {
                     color("&9Left&r: &r" + left),
                     color("&cRight&r: &r" + right)
             ));
+            meta.setUnbreakable(true);
             tool.setItemMeta(meta);
             return tool;
         }
@@ -245,7 +246,6 @@ public class SetupCommand implements Command, Listener {
             if (!isTool(tool)) return;
 
             event.setCancelled(true);
-            tool.setDurability((short) 0);
         }
 
         @EventHandler
