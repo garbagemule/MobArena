@@ -959,7 +959,7 @@ public class ArenaImpl implements Arena
             }
             mount.setTamed(true);
             mount.setOwner(p);
-            mount.setPassenger(p);
+            mount.addPassenger(p);
             mount.setHealth(mount.getMaxHealth());
 
             // Add saddle
