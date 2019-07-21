@@ -353,63 +353,6 @@ public class ArenaListener
         }
     }
 
-    /*
-     * TODO: Figure out a solution to this problem with soft-restore.
-     *
-     * When a player empties a water bucket, and the flowing water creates a
-     * new source block somewhere else because of it, currently, this source
-     * block is not added to the set of blocks to clear at arena end.
-     *
-     * This method fixes this, but it is currently not called from the global
-     * listener, because it introduces a new issue; source blocks formed when
-     * a player FILLS a water bucket (due to the other source blocks flowing
-     * back in) are also caught, which means the arena region will restore
-     * incorrectly, i.e. the method is not specific enough.
-     */
-    public void onBlockFromTo(BlockFromToEvent event) {
-        if (!protect) return;
-
-        if (!arena.isRunning())
-            return;
-
-        if (!arena.getRegion().contains(event.getBlock().getLocation()))
-            return;
-
-        Block from = event.getBlock();
-        Block to = event.getToBlock();
-
-        if (isWaterSource(from) && isWaterNonSource(to)) {
-            for (BlockFace face : EnumSet.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
-                Block adj = to.getRelative(face);
-                if (!adj.equals(from) && isWaterSource(adj)) {
-                    arena.addBlock(to);
-                    return;
-                }
-            }
-        }
-    }
-
-    private boolean isWater(Block block) {
-        switch (block.getType()) {
-            case WATER:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private boolean isSource(Block block) {
-        return block.getData() == 0x0;
-    }
-
-    private boolean isWaterSource(Block block) {
-        return isWater(block) && isSource(block);
-    }
-
-    private boolean isWaterNonSource(Block block) {
-        return isWater(block) && !isSource(block);
-    }
-
     public void onBlockIgnite(BlockIgniteEvent event) {
         // If the arena isn't protected, care
         if (!protect) return;

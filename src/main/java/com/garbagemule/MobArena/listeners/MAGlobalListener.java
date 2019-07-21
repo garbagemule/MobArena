@@ -100,13 +100,6 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onBlockForm(event);
     }
 
-//    // TODO: See ArenaListener.onBlockFromTo()
-//    @EventHandler(priority = EventPriority.NORMAL)
-//    public void blockFromTo(BlockFromToEvent event) {
-//        for (Arena arena : am.getArenas())
-//            arena.getEventListener().onBlockFromTo(event);
-//    }
-
     @EventHandler(priority = EventPriority.NORMAL)
     public void blockFade(BlockFadeEvent event) {
         for (Arena arena : am.getArenas()) {
