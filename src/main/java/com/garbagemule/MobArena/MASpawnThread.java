@@ -19,6 +19,7 @@ import com.garbagemule.MobArena.waves.types.UpgradeWave;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -227,10 +228,9 @@ public class MASpawnThread implements Runnable
                 monsterManager.addMonster(e);
 
                 // Set the health.
-                e.resetMaxHealth(); // Avoid conflicts/enormous multiplications from other plugins handling Mob health
-                int health = (int) Math.max(1D, e.getMaxHealth() * mul);
+                int health = (int) Math.max(1D, e.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() * mul);
                 try {
-                    e.setMaxHealth(health);
+                    e.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
                     e.setHealth(health);
                 } catch (IllegalArgumentException ex) {
                     // Spigot... *facepalm*
@@ -263,9 +263,9 @@ public class MASpawnThread implements Runnable
                         }
                         break;
                     case SWARM:
-                        health = (int) (mul < 1D ? e.getMaxHealth() * mul : 1);
+                        health = (int) (mul < 1D ? e.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() * mul : 1);
                         health = Math.max(1, health);
-                        e.setHealth(Math.min(health, e.getMaxHealth()));
+                        e.setHealth(Math.min(health, e.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
                         break;
                     case SUPPLY:
                         SupplyWave sw = (SupplyWave) w;
