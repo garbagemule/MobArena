@@ -100,22 +100,28 @@ public class ItemParser
     }
     
     private static ItemStack withPotionMeta(ItemStack stack, String data) {
-        PotionType type = getPotionType(data);
-        if (type == null) {
-            return null;
-        }
-        PotionMeta meta = (PotionMeta) stack.getItemMeta();
-        meta.setBasePotionData(new PotionData(type));
-        stack.setItemMeta(meta);
-        return stack;
-    }
+        PotionType type;
+        boolean extended = false;
+        boolean upgraded = false;
 
-    private static PotionType getPotionType(String data) {
+        if (data.startsWith("long_")) {
+            extended = true;
+            data = data.substring(5);
+        }
+        if (data.startsWith("strong_")) {
+            upgraded = true;
+            data = data.substring(7);
+        }
         try {
-            return PotionType.valueOf(data.toUpperCase());
+            type = PotionType.valueOf(data.toUpperCase());
         } catch (IllegalArgumentException e) {
             return null;
         }
+
+        PotionMeta meta = (PotionMeta) stack.getItemMeta();
+        meta.setBasePotionData(new PotionData(type, extended, upgraded));
+        stack.setItemMeta(meta);
+        return stack;
     }
 
     private static Optional<Material> getType(String item) {
