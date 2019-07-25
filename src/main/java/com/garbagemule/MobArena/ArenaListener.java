@@ -763,8 +763,7 @@ public class ArenaListener
             ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
             aps.add("dmgDone", event.getDamage());
         }
-        //TODO add in check for player made golems doing damage
-        else if (damager instanceof LivingEntity) {
+        else if (monsters.getMonsters().contains(damager)) {
             if (!monsterInfight)
                 event.setCancelled(true);
         }

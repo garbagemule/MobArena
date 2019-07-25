@@ -18,6 +18,7 @@ These changes will (most likely) be included in the next version.
 - MobArena no longer crashes when players try to join with items that lower their max health below the default of 20. Players with lower max health will notice missing health in the lobby, but it will quickly regenerate to full.
 - Food levels no longer deplete for players in the lobby and spectator area.
 - Wither skeletons now correctly spawn with stone swords.
+- Mobs now correctly take damage from player-made iron golems.
 - Support for denoting potion effects by magic number IDs has been dropped. This means that if your config-file has any such magic numbers in it, MobArena will no longer successfully parse them and will throw an error on startup.
 
 ## [0.103.2] - 2019-04-23
