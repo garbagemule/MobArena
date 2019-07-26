@@ -1,10 +1,9 @@
 package com.garbagemule.MobArena.steps;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
-import org.bukkit.entity.Wolf;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,34 +44,27 @@ class SitPets extends PlayerStep {
 
     private static Predicate<Entity> isPetOwnedBy(Player player) {
         return entity -> {
-            switch (entity.getType()) {
-                case WOLF:
-                case OCELOT:
-                    return player.equals(((Tameable) entity).getOwner());
+            if (entity instanceof Tameable) {
+                Tameable tameable = (Tameable) entity;
+                return player.equals(tameable.getOwner());
             }
             return false;
         };
     }
 
     private static boolean isFollowing(Entity entity) {
-        switch (entity.getType()) {
-            case WOLF:
-                return !((Wolf) entity).isSitting();
-            case OCELOT:
-                return !((Ocelot) entity).isSitting();
+        if (entity instanceof Sittable) {
+            Sittable sittable = (Sittable) entity;
+            return !sittable.isSitting();
         }
         return false;
     }
 
     private static Consumer<Entity> setSitting(boolean sitting) {
         return entity -> {
-            switch (entity.getType()) {
-                case WOLF:
-                    ((Wolf) entity).setSitting(sitting);
-                    break;
-                case OCELOT:
-                    ((Ocelot) entity).setSitting(sitting);
-                    break;
+            if (entity instanceof Sittable) {
+                Sittable sittable = (Sittable) entity;
+                sittable.setSitting(sitting);
             }
         };
     }
