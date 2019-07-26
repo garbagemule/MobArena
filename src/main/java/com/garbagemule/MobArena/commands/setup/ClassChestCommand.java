@@ -13,7 +13,11 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @CommandInfo(
     name    = "classchest",
@@ -57,5 +61,21 @@ public class ClassChestCommand implements Command {
         am.getGlobalMessenger().tell(sender, "Class chest updated for class " + ac.getConfigName());
         am.loadClasses();
         return true;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 1) {
+            return Collections.emptyList();
+        }
+
+        String prefix = args[0].toLowerCase();
+
+        Collection<ArenaClass> classes = am.getClasses().values();
+
+        return classes.stream()
+            .filter(cls -> cls.getConfigName().toLowerCase().startsWith(prefix))
+            .map(ArenaClass::getConfigName)
+            .collect(Collectors.toList());
     }
 }

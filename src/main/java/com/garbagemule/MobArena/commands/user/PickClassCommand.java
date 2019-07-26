@@ -13,6 +13,11 @@ import com.garbagemule.MobArena.util.ClassChests;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @CommandInfo(
     name    = "class",
     pattern = "(pick)?class",
@@ -100,5 +105,22 @@ public class PickClassCommand implements Command
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_RANDOM);
         }
         return true;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 1) {
+            return Collections.emptyList();
+        }
+
+        String prefix = args[0].toLowerCase();
+
+        Collection<ArenaClass> classes = am.getClasses().values();
+
+        return classes.stream()
+            .filter(cls -> cls.getConfigName().toLowerCase().startsWith(prefix))
+            .filter(cls -> cls.hasPermission(player))
+            .map(ArenaClass::getConfigName)
+            .collect(Collectors.toList());
     }
 }

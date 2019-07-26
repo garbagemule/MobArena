@@ -6,8 +6,13 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @CommandInfo(
     name    = "setting",
@@ -94,5 +99,38 @@ public class SettingCommand implements Command {
         buffy.append("!");
         am.getGlobalMessenger().tell(sender, buffy.toString());
         return true;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 2) {
+            return Collections.emptyList();
+        }
+
+        List<Arena> arenas = am.getArenas();
+
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase();
+
+            return arenas.stream()
+                .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+                .filter(arena -> !arena.isRunning())
+                .map(Arena::configName)
+                .collect(Collectors.toList());
+        }
+
+        Arena arena = am.getArenaWithName(args[0]);
+        if (arena == null) {
+            return Collections.emptyList();
+        }
+
+        String prefix = args[1].toLowerCase();
+
+        Collection<String> settings = arena.getSettings().getValues(false).keySet();
+
+        return settings.stream()
+            .filter(s -> s.toLowerCase().startsWith(prefix))
+            .sorted()
+            .collect(Collectors.toList());
     }
 }

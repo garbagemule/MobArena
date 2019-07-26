@@ -7,6 +7,11 @@ import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @CommandInfo(
     name    = "restore",
     pattern = "restore",
@@ -37,5 +42,21 @@ public class RestoreCommand implements Command
             am.getGlobalMessenger().tell(sender, "Failed to restore " + args[0] + "'s inventory.");
         }
         return true;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 1) {
+            return Collections.emptyList();
+        }
+
+        String prefix = args[0].toLowerCase();
+
+        Collection<? extends Player> players = am.getPlugin().getServer().getOnlinePlayers();
+
+        return players.stream()
+            .filter(p -> p.getDisplayName().toLowerCase().startsWith(prefix))
+            .map(Player::getDisplayName)
+            .collect(Collectors.toList());
     }
 }
