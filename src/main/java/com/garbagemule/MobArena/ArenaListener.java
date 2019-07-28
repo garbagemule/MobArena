@@ -898,7 +898,7 @@ public class ArenaListener
         Player p = (Player) event.getEntity();
 
         if (arena.isRunning()) {
-            if (lockFoodLevel) {
+            if (arena.inArena(p) && lockFoodLevel) {
                 event.setCancelled(true);
             }
         } else {
