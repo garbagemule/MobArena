@@ -21,6 +21,7 @@ These changes will (most likely) be included in the next version.
 - Wither skeletons now correctly spawn with stone swords.
 - Mobs now correctly take damage from player-made iron golems.
 - Cat and parrot pets now also sit when their owner joins an arena (although parrots perching on players' shoulders will still follow them into the arena).
+- Pig zombies are now angry immediately after they spawn as they should be.
 - Support for denoting potion effects by magic number IDs has been dropped. This means that if your config-file has any such magic numbers in it, MobArena will no longer successfully parse them and will throw an error on startup.
 
 ## [0.103.2] - 2019-04-23
