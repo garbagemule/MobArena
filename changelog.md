@@ -13,7 +13,7 @@ These changes will (most likely) be included in the next version.
 ## [Unreleased]
 - Extended and upgraded potions are now supported in the item syntax by prepending `long_` or `strong_` to the data portion of a potion item (e.g. `potion:strong_instant_heal:1` will yield a Potion of Healing II). Check the wiki for details.
 - MobArena now has basic tab completion support for most of the commands that take arguments.
-- The `pet-items` node in `global-settings` now supports any living entity as a pet (but only tameable entities will _behave_ as pets). This should allow 1.14 servers to replace `ocelot` with `cat` in their `pet-items` node to get cat pets working again.
+- The `pet-items` node in `global-settings` now supports any living entity as a pet - even zombies! Pets will aggro hostile mobs that damage their owner, but only tameable pets (wolves, cats, etc.) will properly follow their owners around. This should also allow 1.14 servers to replace `ocelot` with `cat` in their `pet-items` node to get cat pets working again.
 - Pets now have custom names that denote who their owner is, e.g. "garbagemule's pet".
 - Tridents and crossbows are now considered weapons with regards to the `unbreakable-weapons` flag. All class items that have durability now have their unbreakable flag set to true unless the `unbreakable-weapons` and/or `unbreakable-armor` flags are set to `false`.
 - Leaderboards now work again on servers running Minecraft 1.14+.

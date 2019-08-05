@@ -32,6 +32,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
@@ -706,6 +707,19 @@ public class ArenaListener
             }
             event.setCancelled(false);
             arena.getArenaPlayer(player).getStats().add("dmgTaken", event.getDamage());
+
+            // Redirect pet aggro (but not at players)
+            if (damager instanceof LivingEntity && !(damager instanceof Player)) {
+                LivingEntity target = (LivingEntity) damager;
+                monsters.getPets(player).forEach(pet -> {
+                    if (pet instanceof Mob) {
+                        Mob mob = (Mob) pet;
+                        if (mob.getTarget() == null) {
+                            mob.setTarget(target);
+                        }
+                    }
+                });
+            }
         }
     }
 
