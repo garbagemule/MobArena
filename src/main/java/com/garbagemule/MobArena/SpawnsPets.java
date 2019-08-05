@@ -57,6 +57,8 @@ public class SpawnsPets {
         int amount = inv.getItem(index).getAmount();
         for (int i = 0; i < amount; i++) {
             Entity pet = arena.getWorld().spawn(player.getLocation(), entity.getEntityClass());
+            pet.setCustomName(player.getDisplayName() + "'s pet");
+            pet.setCustomNameVisible(true);
             if (pet instanceof Tameable) {
                 Tameable tameable = (Tameable) pet;
                 tameable.setTamed(true);
