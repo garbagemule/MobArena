@@ -32,7 +32,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
@@ -40,7 +39,6 @@ import org.bukkit.entity.Snowman;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -561,12 +559,11 @@ public class ArenaListener
             if (shooter instanceof Entity) {
                 damager = (Entity) shooter;
             }
-        }
-        else if (damager instanceof Wolf && arena.hasPet(damager)) {
-            damager = (Player) ((Wolf) damager).getOwner();
-        }
-        else if (damager instanceof Ocelot && arena.hasPet(damager)) {
-            damager = (Player) ((Ocelot) damager).getOwner();
+        } else {
+            Player owner = arena.getMonsterManager().getOwner(damager);
+            if (owner != null) {
+                damager = owner;
+            }
         }
 
         // If the damager was a player, add to kills.
@@ -656,12 +653,9 @@ public class ArenaListener
             ? monsters.getBoss((LivingEntity) damagee)
             : null;
 
-        // Pet wolf
-        if (damagee instanceof Wolf && arena.hasPet(damagee)) {
-            onPetDamage(event, (Wolf) damagee, damager);
-        }
-        else if (damagee instanceof Ocelot && arena.hasPet(damagee)) {
-            onPetDamage(event, (Ocelot) damagee, damager);
+        // Pets
+        if (arena.hasPet(damagee)) {
+            onPetDamage(event, damagee, damager);
         }
         else if (damagee instanceof ArmorStand) {
             onArmorStandDamage(event);
@@ -712,11 +706,7 @@ public class ArenaListener
         }
     }
 
-    private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager) {
-        event.setCancelled(true);
-    }
-
-    private void onPetDamage(EntityDamageEvent event, Ocelot pet, Entity damager) {
+    private void onPetDamage(EntityDamageEvent event, Entity pet, Entity damager) {
         event.setCancelled(true);
     }
 
@@ -752,16 +742,12 @@ public class ArenaListener
             aps.add("dmgDone", event.getDamage());
             aps.inc("hits");
         }
-        else if (damager instanceof Wolf && arena.hasPet(damager)) {
-            //event.setDamage(1);
-            Player p = (Player) ((Wolf) damager).getOwner();
-            ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
-            aps.add("dmgDone", event.getDamage());
-        }
-        else if (damager instanceof Ocelot && arena.hasPet(damager)) {
-            Player p = (Player) ((Ocelot) damager).getOwner();
-            ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
-            aps.add("dmgDone", event.getDamage());
+        else if (arena.hasPet(damager)) {
+            Player owner = arena.getMonsterManager().getOwner(damager);
+            if (owner != null) {
+                ArenaPlayerStatistics aps = arena.getArenaPlayer(owner).getStats();
+                aps.add("dmgDone", event.getDamage());
+            }
         }
         else if (monsters.getMonsters().contains(damager)) {
             if (!monsterInfight)
