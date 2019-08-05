@@ -25,6 +25,7 @@ These changes will (most likely) be included in the next version.
 - Cat and parrot pets now also sit when their owner joins an arena (although parrots perching on players' shoulders will still follow them into the arena).
 - Pig zombies are now angry immediately after they spawn as they should be.
 - Support for denoting potion effects by magic number IDs has been dropped. This means that if your config-file has any such magic numbers in it, MobArena will no longer successfully parse them and will throw an error on startup.
+- Support for auto-respawning has been dropped. The hacky way it was implemented is not officially supported by the Bukkit API and is highly discouraged because it is very buggy.
 
 ## [0.103.2] - 2019-04-23
 - MobArena no longer touches the `flySpeed` player attribute when players join an arena. This should fix issues where a crash would result in players being "locked in the air" when trying to fly outside of the arena. It also introduces compatibility with plugins that use flight to augment player abilities.
