@@ -494,6 +494,9 @@ public class ArenaListener
         if (event instanceof PlayerDeathEvent) {
             onPlayerDeath((PlayerDeathEvent) event, (Player) event.getEntity());
         }
+        else if (monsters.hasPet(event.getEntity())) {
+            monsters.removePet(event.getEntity());
+        }
         else if (monsters.removeMonster(event.getEntity())) {
             onMonsterDeath(event);
         }

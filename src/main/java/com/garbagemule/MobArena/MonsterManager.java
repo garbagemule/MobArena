@@ -131,6 +131,18 @@ public class MonsterManager
         return petToPlayer.containsKey(e);
     }
 
+    public void removePet(Entity pet) {
+        pet.remove();
+
+        Player owner = petToPlayer.remove(pet);
+        if (owner != null) {
+            Set<Entity> pets = playerToPets.get(owner);
+            if (pets != null) {
+                pets.remove(pet);
+            }
+        }
+    }
+
     public Player getOwner(Entity pet) {
         return petToPlayer.get(pet);
     }
