@@ -286,6 +286,8 @@ public class MASpawnThread implements Runnable
             uw.grantItems(p, className);
             uw.grantItems(p, "all");
         }
+
+        plugin.getArenaMaster().getSpawnsPets().spawn(arena);
     }
 
     /**

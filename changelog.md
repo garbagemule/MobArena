@@ -15,6 +15,7 @@ These changes will (most likely) be included in the next version.
 - MobArena now has basic tab completion support for most of the commands that take arguments.
 - The `pet-items` node in `global-settings` now supports any living entity as a pet - even zombies! Pets will aggro hostile mobs that damage their owner, but only tameable pets (wolves, cats, etc.) will properly follow their owners around. This should also allow 1.14 servers to replace `ocelot` with `cat` in their `pet-items` node to get cat pets working again.
 - Pets now have custom names that denote who their owner is, e.g. "garbagemule's pet".
+- Pet items can now be used in Upgrade Waves. When an Upgrade Wave spawns, all pet items are transformed to pets just like when the arena session starts. Note that while only Upgrade Waves trigger this behavior, pet items obtained elsewhere (e.g. from Supply Wave drops) will also be transformed on subsequent Upgrade Waves.
 - Potion effects can now be used as upgrades in Upgrade Waves. Check the wiki for details.
 - Tridents and crossbows are now considered weapons with regards to the `unbreakable-weapons` flag. All class items that have durability now have their unbreakable flag set to true unless the `unbreakable-weapons` and/or `unbreakable-armor` flags are set to `false`.
 - Leaderboards now work again on servers running Minecraft 1.14+.
