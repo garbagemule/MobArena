@@ -41,13 +41,11 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -97,7 +95,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -122,10 +119,8 @@ public class ArenaListener
             foodRegen,
             lockFoodLevel,
             useClassChests;
-    @SuppressWarnings("unused")
     private boolean allowTeleport,
             canShare,
-            allowMonsters,
             autoIgniteTNT;
 
     private Set<Player> banned;
@@ -157,8 +152,6 @@ public class ArenaListener
         this.useClassChests   = s.getBoolean("use-class-chests",     false);
         
         this.classLimits = arena.getClassLimitManager();
-
-        this.allowMonsters = arena.getWorld().getAllowMonsters();
 
         this.banned = new HashSet<>();
     }
