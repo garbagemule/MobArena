@@ -402,22 +402,55 @@ public class ArenaListener
             return;
         }
 
-        if (event.getSpawnReason() != SpawnReason.CUSTOM) {
-            if (event.getSpawnReason() == SpawnReason.BUILD_IRONGOLEM || event.getSpawnReason() == SpawnReason.BUILD_SNOWMAN) {
-                monsters.addGolem(event.getEntity());
-            }
-            else {
-                event.setCancelled(true);
-                return;
-            }
+        if (!arena.isRunning()) {
+            // Just block everything if we're not running
+            event.setCancelled(true);
+            return;
         }
 
-        LivingEntity entity = event.getEntity();
-        if (arena.isRunning() && entity instanceof Slime)
-            monsters.addMonster(entity);
+        SpawnReason reason = event.getSpawnReason();
 
-        // If running == true, setCancelled(false), and vice versa.
-        event.setCancelled(!arena.isRunning());
+        // Allow player-made iron golems and snowmen
+        if (reason == SpawnReason.BUILD_IRONGOLEM || reason == SpawnReason.BUILD_SNOWMAN) {
+            event.setCancelled(false);
+            monsters.addGolem(event.getEntity());
+            return;
+        }
+
+        /*
+         * We normally want to block all "default" spawns, because this
+         * reason means MobArena didn't trigger the event. However, we
+         * make an exception for certain mobs that spawn as results of
+         * other entities spawning them, e.g. when Evokers summon Vexes.
+         */
+        if (reason == SpawnReason.DEFAULT) {
+            if (event.getEntityType() == EntityType.VEX) {
+                event.setCancelled(false);
+                monsters.addMonster(event.getEntity());
+            } else {
+                event.setCancelled(true);
+            }
+            return;
+        }
+
+        // If not custom, we probably don't want it, so get rid of it
+        if (reason != SpawnReason.CUSTOM) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Otherwise, we probably want it, so uncancel just in case
+        event.setCancelled(false);
+
+        /*
+         * Because MACreature works with the Creature interface rather
+         * than the Mob interface, it doesn't catch Slimes and Magma
+         * Cubes, so we catch them here.
+         */
+        LivingEntity entity = event.getEntity();
+        if (entity instanceof Slime) {
+            monsters.addMonster(entity);
+        }
     }
 
     public void onEntityExplode(EntityExplodeEvent event) {
