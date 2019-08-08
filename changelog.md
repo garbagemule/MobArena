@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.104] - 2019-08-08
 - Extended and upgraded potions are now supported in the item syntax by prepending `long_` or `strong_` to the data portion of a potion item (e.g. `potion:strong_instant_heal:1` will yield a Potion of Healing II). Check the wiki for details.
 - MobArena now has basic tab completion support for most of the commands that take arguments.
 - The `pet-items` node in `global-settings` now supports any living entity as a pet - even zombies! Pets will aggro hostile mobs that damage their owner, but only tameable pets (wolves, cats, etc.) will properly follow their owners around. This should also allow 1.14 servers to replace `ocelot` with `cat` in their `pet-items` node to get cat pets working again.
@@ -137,7 +139,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103.2...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104...HEAD
+[0.104]: https://github.com/garbagemule/MobArena/compare/0.103.2...0.104
 [0.103.2]: https://github.com/garbagemule/MobArena/compare/0.103.1...0.103.2
 [0.103.1]: https://github.com/garbagemule/MobArena/compare/0.103...0.103.1
 [0.103]: https://github.com/garbagemule/MobArena/compare/0.102...0.103
