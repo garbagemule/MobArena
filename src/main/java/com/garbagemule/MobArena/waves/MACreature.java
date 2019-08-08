@@ -11,6 +11,7 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Skeleton;
@@ -175,8 +176,15 @@ public class MACreature
             case "babyzombievillager":
                 ((Zombie) e).setVillager(true);
             case "babyzombie":
+                ((Zombie) e).setBaby(true);
+                break;
             case "babypigman":
                 ((Zombie) e).setBaby(true);
+                ((PigZombie) e).setAngry(true);
+                break;
+            case "pigzombie":
+            case "zombiepigman":
+                ((PigZombie) e).setAngry(true);
                 break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);

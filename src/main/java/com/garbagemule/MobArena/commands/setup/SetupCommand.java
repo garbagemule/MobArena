@@ -37,7 +37,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CommandInfo(
     name    = "setup",
@@ -85,6 +87,22 @@ public class SetupCommand implements Command, Listener {
         convo.setLocalEchoEnabled(false);
         convo.begin();
         return true;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 1) {
+            return Collections.emptyList();
+        }
+
+        String prefix = args[0].toLowerCase();
+
+        List<Arena> arenas = am.getArenas();
+
+        return arenas.stream()
+            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+            .map(Arena::configName)
+            .collect(Collectors.toList());
     }
 
     /**

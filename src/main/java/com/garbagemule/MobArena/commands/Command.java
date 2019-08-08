@@ -2,6 +2,10 @@ package com.garbagemule.MobArena.commands;
 
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.Collections;
+import java.util.List;
 
 public interface Command
 {
@@ -25,4 +29,16 @@ public interface Command
      * command handler should print the usage message to the sender
      */
     boolean execute(ArenaMaster am, CommandSender sender, String... args);
+
+    /**
+     * Tab complete the given arguments.
+     *
+     * @param am an ArenaMaster instance
+     * @param player the sender
+     * @param args array of arguments
+     * @return a list of possible completions, or null
+     */
+    default List<String> tab(ArenaMaster am, Player player, String... args) {
+        return Collections.emptyList();
+    }
 }

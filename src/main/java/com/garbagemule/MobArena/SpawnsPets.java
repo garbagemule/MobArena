@@ -2,20 +2,29 @@ package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Tameable;
 import org.bukkit.inventory.PlayerInventory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SpawnsPets {
 
-    private final Material wolfMaterial;
-    private final Material ocelotMaterial;
+    private final Map<Material, EntityType> materialToEntity;
 
-    SpawnsPets(Material wolfMaterial, Material ocelotMaterial) {
-        this.wolfMaterial = wolfMaterial;
-        this.ocelotMaterial = ocelotMaterial;
+    SpawnsPets() {
+        this.materialToEntity = new HashMap<>();
+    }
+
+    void register(Material material, EntityType entity) {
+        materialToEntity.put(material, entity);
+    }
+
+    void clear() {
+        materialToEntity.clear();
     }
 
     void spawn(Arena arena) {
@@ -31,47 +40,31 @@ public class SpawnsPets {
         if (ac == null || ac.getConfigName().equals("My Items")) {
             return;
         }
-        spawnWolfPets(player, arena);
-        spawnOcelotPets(player, arena);
+
+        for (Map.Entry<Material, EntityType> entry : materialToEntity.entrySet()) {
+            spawnPetsFor(player, arena, entry.getKey(), entry.getValue());
+        }
     }
 
-    private void spawnWolfPets(Player player, Arena arena) {
-        if (wolfMaterial == null) {
-            return;
-        }
+    private void spawnPetsFor(Player player, Arena arena, Material material, EntityType entity) {
         PlayerInventory inv = player.getInventory();
-        int index = inv.first(wolfMaterial);
-        if (index == -1) {
+
+        int index = inv.first(material);
+        if (index < 0) {
             return;
         }
 
         int amount = inv.getItem(index).getAmount();
         for (int i = 0; i < amount; i++) {
-            Wolf wolf = (Wolf) arena.getWorld().spawnEntity(player.getLocation(), EntityType.WOLF);
-            wolf.setTamed(true);
-            wolf.setOwner(player);
-            arena.getMonsterManager().addPet(wolf);
-        }
-
-        inv.setItem(index, null);
-    }
-
-    private void spawnOcelotPets(Player player, Arena arena) {
-        if (ocelotMaterial == null) {
-            return;
-        }
-        PlayerInventory inv = player.getInventory();
-        int index = inv.first(ocelotMaterial);
-        if (index == -1) {
-            return;
-        }
-
-        int amount = inv.getItem(index).getAmount();
-        for (int i = 0; i < amount; i++) {
-            Ocelot ocelot = (Ocelot) arena.getWorld().spawnEntity(player.getLocation(), EntityType.OCELOT);
-            ocelot.setTamed(true);
-            ocelot.setOwner(player);
-            arena.getMonsterManager().addPet(ocelot);
+            Entity pet = arena.getWorld().spawn(player.getLocation(), entity.getEntityClass());
+            pet.setCustomName(player.getDisplayName() + "'s pet");
+            pet.setCustomNameVisible(true);
+            if (pet instanceof Tameable) {
+                Tameable tameable = (Tameable) pet;
+                tameable.setTamed(true);
+                tameable.setOwner(player);
+            }
+            arena.getMonsterManager().addPet(player, pet);
         }
 
         inv.setItem(index, null);

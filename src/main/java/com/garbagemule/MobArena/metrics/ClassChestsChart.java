@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.metrics;
 
 import com.garbagemule.MobArena.MobArena;
-import com.garbagemule.MobArena.framework.Arena;
 import org.bstats.bukkit.Metrics;
 
 public class ClassChestsChart extends Metrics.SimplePie {

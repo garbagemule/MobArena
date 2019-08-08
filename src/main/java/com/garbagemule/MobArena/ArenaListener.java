@@ -27,11 +27,11 @@ import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Slime;
@@ -39,15 +39,12 @@ import org.bukkit.entity.Snowman;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Wolf;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -83,10 +80,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
@@ -98,7 +93,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -123,10 +117,8 @@ public class ArenaListener
             foodRegen,
             lockFoodLevel,
             useClassChests;
-    @SuppressWarnings("unused")
     private boolean allowTeleport,
             canShare,
-            allowMonsters,
             autoIgniteTNT;
 
     private Set<Player> banned;
@@ -158,8 +150,6 @@ public class ArenaListener
         this.useClassChests   = s.getBoolean("use-class-chests",     false);
         
         this.classLimits = arena.getClassLimitManager();
-
-        this.allowMonsters = arena.getWorld().getAllowMonsters();
 
         this.banned = new HashSet<>();
     }
@@ -353,64 +343,6 @@ public class ArenaListener
         }
     }
 
-    /*
-     * TODO: Figure out a solution to this problem with soft-restore.
-     *
-     * When a player empties a water bucket, and the flowing water creates a
-     * new source block somewhere else because of it, currently, this source
-     * block is not added to the set of blocks to clear at arena end.
-     *
-     * This method fixes this, but it is currently not called from the global
-     * listener, because it introduces a new issue; source blocks formed when
-     * a player FILLS a water bucket (due to the other source blocks flowing
-     * back in) are also caught, which means the arena region will restore
-     * incorrectly, i.e. the method is not specific enough.
-     */
-    public void onBlockFromTo(BlockFromToEvent event) {
-        if (!protect) return;
-
-        if (!arena.isRunning())
-            return;
-
-        if (!arena.getRegion().contains(event.getBlock().getLocation()))
-            return;
-
-        Block from = event.getBlock();
-        Block to = event.getToBlock();
-
-        if (isWaterSource(from) && isWaterNonSource(to)) {
-            for (BlockFace face : EnumSet.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST)) {
-                Block adj = to.getRelative(face);
-                if (!adj.equals(from) && isWaterSource(adj)) {
-                    arena.addBlock(to);
-                    return;
-                }
-            }
-        }
-    }
-
-    private boolean isWater(Block block) {
-        switch (block.getType()) {
-            case WATER:
-            case STATIONARY_WATER:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private boolean isSource(Block block) {
-        return block.getData() == 0x0;
-    }
-
-    private boolean isWaterSource(Block block) {
-        return isWater(block) && isSource(block);
-    }
-
-    private boolean isWaterNonSource(Block block) {
-        return isWater(block) && !isSource(block);
-    }
-
     public void onBlockIgnite(BlockIgniteEvent event) {
         // If the arena isn't protected, care
         if (!protect) return;
@@ -461,22 +393,39 @@ public class ArenaListener
             return;
         }
 
-        if (event.getSpawnReason() != SpawnReason.CUSTOM) {
-            if (event.getSpawnReason() == SpawnReason.BUILD_IRONGOLEM || event.getSpawnReason() == SpawnReason.BUILD_SNOWMAN) {
-                monsters.addGolem(event.getEntity());
-            }
-            else {
-                event.setCancelled(true);
-                return;
-            }
+        if (!arena.isRunning()) {
+            // Just block everything if we're not running
+            event.setCancelled(true);
+            return;
         }
 
-        LivingEntity entity = event.getEntity();
-        if (arena.isRunning() && entity instanceof Slime)
-            monsters.addMonster(entity);
+        SpawnReason reason = event.getSpawnReason();
 
-        // If running == true, setCancelled(false), and vice versa.
-        event.setCancelled(!arena.isRunning());
+        // Allow player-made iron golems and snowmen
+        if (reason == SpawnReason.BUILD_IRONGOLEM || reason == SpawnReason.BUILD_SNOWMAN) {
+            event.setCancelled(false);
+            monsters.addGolem(event.getEntity());
+            return;
+        }
+
+        // If not custom, we probably don't want it, so get rid of it
+        if (reason != SpawnReason.CUSTOM) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Otherwise, we probably want it, so uncancel just in case
+        event.setCancelled(false);
+
+        /*
+         * Because MACreature works with the Creature interface rather
+         * than the Mob interface, it doesn't catch Slimes and Magma
+         * Cubes, so we catch them here.
+         */
+        LivingEntity entity = event.getEntity();
+        if (entity instanceof Slime) {
+            monsters.addMonster(entity);
+        }
     }
 
     public void onEntityExplode(EntityExplodeEvent event) {
@@ -554,6 +503,9 @@ public class ArenaListener
         if (event instanceof PlayerDeathEvent) {
             onPlayerDeath((PlayerDeathEvent) event, (Player) event.getEntity());
         }
+        else if (monsters.hasPet(event.getEntity())) {
+            monsters.removePet(event.getEntity());
+        }
         else if (monsters.removeMonster(event.getEntity())) {
             onMonsterDeath(event);
         }
@@ -619,12 +571,11 @@ public class ArenaListener
             if (shooter instanceof Entity) {
                 damager = (Entity) shooter;
             }
-        }
-        else if (damager instanceof Wolf && arena.hasPet(damager)) {
-            damager = (Player) ((Wolf) damager).getOwner();
-        }
-        else if (damager instanceof Ocelot && arena.hasPet(damager)) {
-            damager = (Player) ((Ocelot) damager).getOwner();
+        } else {
+            Player owner = arena.getMonsterManager().getOwner(damager);
+            if (owner != null) {
+                damager = owner;
+            }
         }
 
         // If the damager was a player, add to kills.
@@ -705,10 +656,7 @@ public class ArenaListener
                 }
             }
 
-            // Repair weapons if necessary
-            if (damager instanceof Player) {
-                repairWeapon((Player) damager);
-            } else if (damager instanceof TNTPrimed) {
+            if (damager instanceof TNTPrimed) {
                 damager = getPlanter(damager);
             }
         }
@@ -717,12 +665,9 @@ public class ArenaListener
             ? monsters.getBoss((LivingEntity) damagee)
             : null;
 
-        // Pet wolf
-        if (damagee instanceof Wolf && arena.hasPet(damagee)) {
-            onPetDamage(event, (Wolf) damagee, damager);
-        }
-        else if (damagee instanceof Ocelot && arena.hasPet(damagee)) {
-            onPetDamage(event, (Ocelot) damagee, damager);
+        // Pets
+        if (arena.hasPet(damagee)) {
+            onPetDamage(event, damagee, damager);
         }
         else if (damagee instanceof ArmorStand) {
             onArmorStandDamage(event);
@@ -763,9 +708,6 @@ public class ArenaListener
         }
 
         if (arena.inArena(player)) {
-            // Repair armor if necessary
-            repairArmor(player);
-
             // Cancel PvP damage if disabled
             if (!pvpEnabled && damager instanceof Player && !damager.equals(player)) {
                 event.setCancelled(true);
@@ -773,14 +715,23 @@ public class ArenaListener
             }
             event.setCancelled(false);
             arena.getArenaPlayer(player).getStats().add("dmgTaken", event.getDamage());
+
+            // Redirect pet aggro (but not at players)
+            if (damager instanceof LivingEntity && !(damager instanceof Player)) {
+                LivingEntity target = (LivingEntity) damager;
+                monsters.getPets(player).forEach(pet -> {
+                    if (pet instanceof Creature) {
+                        Creature mob = (Creature) pet;
+                        if (mob.getTarget() == null) {
+                            mob.setTarget(target);
+                        }
+                    }
+                });
+            }
         }
     }
 
-    private void onPetDamage(EntityDamageEvent event, Wolf pet, Entity damager) {
-        event.setCancelled(true);
-    }
-
-    private void onPetDamage(EntityDamageEvent event, Ocelot pet, Entity damager) {
+    private void onPetDamage(EntityDamageEvent event, Entity pet, Entity damager) {
         event.setCancelled(true);
     }
 
@@ -816,19 +767,14 @@ public class ArenaListener
             aps.add("dmgDone", event.getDamage());
             aps.inc("hits");
         }
-        else if (damager instanceof Wolf && arena.hasPet(damager)) {
-            //event.setDamage(1);
-            Player p = (Player) ((Wolf) damager).getOwner();
-            ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
-            aps.add("dmgDone", event.getDamage());
+        else if (arena.hasPet(damager)) {
+            Player owner = arena.getMonsterManager().getOwner(damager);
+            if (owner != null) {
+                ArenaPlayerStatistics aps = arena.getArenaPlayer(owner).getStats();
+                aps.add("dmgDone", event.getDamage());
+            }
         }
-        else if (damager instanceof Ocelot && arena.hasPet(damager)) {
-            Player p = (Player) ((Ocelot) damager).getOwner();
-            ArenaPlayerStatistics aps = arena.getArenaPlayer(p).getStats();
-            aps.add("dmgDone", event.getDamage());
-        }
-        //TODO add in check for player made golems doing damage
-        else if (damager instanceof LivingEntity) {
+        else if (monsters.getMonsters().contains(damager)) {
             if (!monsterInfight)
                 event.setCancelled(true);
         }
@@ -845,50 +791,6 @@ public class ArenaListener
             if (!pvpEnabled) {
                 event.setCancelled(true);
             }
-        }
-    }
-
-    private static final EnumSet<Material> REPAIRABLE_TYPES = EnumSet.of(
-            // Tools and swords
-            Material.GOLD_AXE,    Material.GOLD_HOE,    Material.GOLD_PICKAXE,    Material.GOLD_SPADE,    Material.GOLD_SWORD,
-            Material.WOOD_AXE,    Material.WOOD_HOE,    Material.WOOD_PICKAXE,    Material.WOOD_SPADE,    Material.WOOD_SWORD,
-            Material.STONE_AXE,   Material.STONE_HOE,   Material.STONE_PICKAXE,   Material.STONE_SPADE,   Material.STONE_SWORD,
-            Material.IRON_AXE,    Material.IRON_HOE,    Material.IRON_PICKAXE,    Material.IRON_SPADE,    Material.IRON_SWORD,
-            Material.DIAMOND_AXE, Material.DIAMOND_HOE, Material.DIAMOND_PICKAXE, Material.DIAMOND_SPADE, Material.DIAMOND_SWORD,
-            // Armor
-            Material.LEATHER_HELMET,   Material.LEATHER_CHESTPLATE,   Material.LEATHER_LEGGINGS,   Material.LEATHER_BOOTS,
-            Material.GOLD_HELMET,      Material.GOLD_CHESTPLATE,      Material.GOLD_LEGGINGS,      Material.GOLD_BOOTS,
-            Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS,
-            Material.IRON_HELMET,      Material.IRON_CHESTPLATE,      Material.IRON_LEGGINGS,      Material.IRON_BOOTS,
-            Material.DIAMOND_HELMET,   Material.DIAMOND_CHESTPLATE,   Material.DIAMOND_LEGGINGS,   Material.DIAMOND_BOOTS,
-            // Misc
-            Material.BOW, Material.FLINT_AND_STEEL, Material.FISHING_ROD, Material.SHEARS, Material.CARROT_STICK
-    );
-
-    private void repairWeapon(Player p) {
-        ArenaPlayer ap = arena.getArenaPlayer(p);
-        if (ap != null) {
-            ArenaClass ac = ap.getArenaClass();
-            if (ac != null && ac.hasUnbreakableWeapons()) {
-                repair(p.getItemInHand());
-            }
-        }
-    }
-
-    private void repairArmor(Player p) {
-        ArenaClass ac = arena.getArenaPlayer(p).getArenaClass();
-        if (ac != null && ac.hasUnbreakableArmor()) {
-            PlayerInventory inv = p.getInventory();
-            repair(inv.getHelmet());
-            repair(inv.getChestplate());
-            repair(inv.getLeggings());
-            repair(inv.getBoots());
-        }
-    }
-
-    private void repair(ItemStack stack) {
-        if (stack != null && REPAIRABLE_TYPES.contains(stack.getType())) {
-            stack.setDurability((short) 0);
         }
     }
 

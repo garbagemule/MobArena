@@ -4,12 +4,11 @@ import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,32 +19,32 @@ import java.util.Set;
 public class MonsterManager
 {
     private Set<LivingEntity> monsters, sheep, golems;
-    private Set<Wolf> petWolves;
-    private Set<Ocelot> petOcelots;
     private Map<LivingEntity,MABoss> bosses;
     private Map<LivingEntity,List<ItemStack>> suppliers;
     private Set<LivingEntity> mounts;
+    private Map<Entity, Player> petToPlayer;
+    private Map<Player, Set<Entity>> playerToPets;
     
     public MonsterManager() {
         this.monsters   = new HashSet<>();
         this.sheep      = new HashSet<>();
         this.golems     = new HashSet<>();
-        this.petWolves  = new HashSet<>();
-        this.petOcelots = new HashSet<>();
         this.bosses     = new HashMap<>();
         this.suppliers  = new HashMap<>();
         this.mounts     = new HashSet<>();
+        this.petToPlayer = new HashMap<>();
+        this.playerToPets = new HashMap<>();
     }
     
     public void reset() {
         monsters.clear();
         sheep.clear();
         golems.clear();
-        petWolves.clear();
-        petOcelots.clear();
         bosses.clear();
         suppliers.clear();
         mounts.clear();
+        petToPlayer.clear();
+        playerToPets.clear();
     }
     
     public void clear() {
@@ -57,17 +56,16 @@ public class MonsterManager
         removeAll(monsters);
         removeAll(sheep);
         removeAll(golems);
-        removeAll(petWolves);
-        removeAll(petOcelots);
         removeAll(bosses.keySet());
         removeAll(suppliers.keySet());
         removeAll(mounts);
+        removeAll(petToPlayer.keySet());
         
         reset();
     }
     
-    private void removeAll(Collection<? extends LivingEntity> collection) {
-        for (LivingEntity e : collection) {
+    private void removeAll(Collection<? extends Entity> collection) {
+        for (Entity e : collection) {
             if (e != null) {
                 e.remove();
             }
@@ -78,8 +76,6 @@ public class MonsterManager
         if (monsters.remove(e)) {
             sheep.remove(e);
             golems.remove(e);
-            petWolves.remove(e);
-            petOcelots.remove(e);
             suppliers.remove(e);
             MABoss boss = bosses.remove(e);
             if (boss != null) {
@@ -124,32 +120,46 @@ public class MonsterManager
         return golems.remove(e);
     }
     
-    public void addPet(Wolf w) {
-        petWolves.add(w);
-    }
-
-    public void addPet(Ocelot o) {
-        petOcelots.add(o);
+    public void addPet(Player player, Entity pet) {
+        petToPlayer.put(pet, player);
+        playerToPets
+            .computeIfAbsent(player, (key) -> new HashSet<>())
+            .add(pet);
     }
     
     public boolean hasPet(Entity e) {
-        return petWolves.contains(e) || petOcelots.contains(e);
+        return petToPlayer.containsKey(e);
+    }
+
+    public void removePet(Entity pet) {
+        pet.remove();
+
+        Player owner = petToPlayer.remove(pet);
+        if (owner != null) {
+            Set<Entity> pets = playerToPets.get(owner);
+            if (pets != null) {
+                pets.remove(pet);
+            }
+        }
+    }
+
+    public Player getOwner(Entity pet) {
+        return petToPlayer.get(pet);
+    }
+
+    public Collection<Entity> getPets(Player owner) {
+        Set<Entity> pets = playerToPets.get(owner);
+        if (pets != null) {
+            return pets;
+        }
+        return Collections.emptySet();
     }
     
     public void removePets(Player p) {
-        for (Wolf w : petWolves) {
-            if (w == null || !(w.getOwner() instanceof Player) || !w.getOwner().getName().equals(p.getName()))
-                continue;
-            
-            w.setOwner(null);
-            w.remove();
-        }
-        for (Ocelot o : petOcelots) {
-            if (o == null || !(o.getOwner() instanceof Player) || !o.getOwner().getName().equals(p.getName()))
-                continue;
-
-            o.setOwner(null);
-            o.remove();
+        Set<Entity> pets = playerToPets.remove(p);
+        if (pets != null) {
+            pets.forEach(Entity::remove);
+            pets.clear();
         }
     }
     

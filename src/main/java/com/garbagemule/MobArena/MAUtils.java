@@ -5,7 +5,6 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
-import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,9 +12,7 @@ import org.bukkit.World;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,7 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 public class MAUtils
@@ -77,37 +73,6 @@ public class MAUtils
         return result;
     }
 
-    
-    
-    /* ///////////////////////////////////////////////////////////////////// //
-    
-            PET CLASS METHODS
-    
-    // ///////////////////////////////////////////////////////////////////// */
-    
-    /**
-     * Makes all nearby wolves sit if their owner is the given player.
-     */
-    public static void sitPets(Player p)
-    {
-        if (p == null)
-            return;
-        
-        List<Entity> entities = p.getNearbyEntities(80, 40, 80);
-        for (Entity e : entities)
-        {
-            if (e instanceof Wolf) {
-                Wolf w = (Wolf) e;
-                if (w.isTamed() && w.getOwner() != null && w.getOwner().equals(p))
-                    w.setSitting(true);
-            } else if (e instanceof Ocelot) {
-                Ocelot o = (Ocelot) e;
-                if (o.isTamed() && o.getOwner() != null && o.getOwner().equals(p))
-                    o.setSitting(true);
-            }
-        }
-    }
-    
     
     
     /* ///////////////////////////////////////////////////////////////////// //

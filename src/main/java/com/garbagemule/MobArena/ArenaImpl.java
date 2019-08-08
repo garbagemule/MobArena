@@ -2,7 +2,6 @@ package com.garbagemule.MobArena;
 
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
-import com.garbagemule.MobArena.ArenaClass.ArmorType;
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 import com.garbagemule.MobArena.steps.Step;
 import com.garbagemule.MobArena.steps.StepFactory;
@@ -827,15 +826,7 @@ public class ArenaImpl implements Arena
             clearInv(p);
         }
         
-        if (!settings.getBoolean("auto-respawn", true)) {
-            deadPlayers.add(p);
-            endArena();
-            return;
-        }
-        
-        p.setHealth(20.0);
-        plugin.getServer().getScheduler()
-            .scheduleSyncDelayedTask(plugin, () -> revivePlayer(p));
+        deadPlayers.add(p);
         endArena();
     }
 
@@ -859,10 +850,6 @@ public class ArenaImpl implements Arena
 
     @Override
     public void playerRespawn(Player p) {
-        if (settings.getBoolean("auto-respawn", true)) {
-            return;
-        }
-        
         deadPlayers.remove(p);
         plugin.getServer().getScheduler()
             .scheduleSyncDelayedTask(plugin, () -> revivePlayer(p));
@@ -1142,17 +1129,13 @@ public class ArenaImpl implements Arena
         if (arenaClass.hasUnbreakableWeapons()) {
             PlayerInventory inv = p.getInventory();
             for (ItemStack stack : inv.getContents()) {
-                if (ArenaClass.isWeapon(stack)) {
-                    makeUnbreakable(stack);
-                }
+                makeUnbreakable(stack);
             }
         }
         if (arenaClass.hasUnbreakableArmor()) {
             PlayerInventory inv = p.getInventory();
             for (ItemStack stack : inv.getArmorContents()) {
-                if (stack != null && ArmorType.getType(stack) != null) {
-                    makeUnbreakable(stack);
-                }
+                makeUnbreakable(stack);
             }
         }
 
@@ -1194,17 +1177,19 @@ public class ArenaImpl implements Arena
         // Check the remaining three of the four last slots for armor
         for (int i = contents.length-1; i > contents.length-5; i--) {
             if (contents[i] == null) continue;
-            ArmorType type = ArmorType.getType(contents[i]);
-            if (type == null || type == ArmorType.HELMET) continue;
-            
+
+            String[] parts = contents[i].getType().name().split("_");
+            String type = parts[parts.length - 1];
+            if (type.equals("HELMET")) continue;
+
             ItemStack stack = contents[i].clone();
             if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(stack);
             }
             switch (type) {
-                case CHESTPLATE: chestplate = stack; break;
-                case LEGGINGS:   leggings   = stack; break;
-                case BOOTS:      boots      = stack; break;
+                case "CHESTPLATE": chestplate = stack; break;
+                case "LEGGINGS":   leggings   = stack; break;
+                case "BOOTS":      boots      = stack; break;
                 default: break;
             }
             contents[i] = null;
@@ -1213,9 +1198,7 @@ public class ArenaImpl implements Arena
         // Check the remaining slots for weapons
         if (arenaClass.hasUnbreakableWeapons()) {
             for (ItemStack stack : contents) {
-                if (stack != null && arenaClass.isWeapon(stack)) {
-                    makeUnbreakable(stack);
-                }
+                makeUnbreakable(stack);
             }
         }
 
@@ -1233,6 +1216,9 @@ public class ArenaImpl implements Arena
     }
 
     private void makeUnbreakable(ItemStack stack) {
+        if (stack == null) {
+            return;
+        }
         stack.setDurability(Short.MIN_VALUE);
     }
 

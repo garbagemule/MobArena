@@ -542,6 +542,26 @@ public class WaveParser
             throw new ConfigError("Failed to parse armor upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
         }
 
+        // Effects
+        List<String> effects = classSection.getStringList("effects");
+        if (effects == null || effects.isEmpty()) {
+            String value = classSection.getString("effects", null);
+            if (value == null || value.isEmpty()) {
+                effects = Collections.emptyList();
+            } else {
+                effects = Arrays.asList(value.split(","));
+            }
+        }
+        try {
+            // Prepend "effect:" for the potion effect thing parser
+            effects.stream()
+                .map(String::trim)
+                .map(s -> thingman.parse("effect", s))
+                .forEach(list::add);
+        } catch (InvalidThingInputString e) {
+            throw new ConfigError("Failed to parse potion effects for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        }
+
         try {
             // Prepend "perm:" for the permission thing parser
             classSection.getStringList("permissions").stream()
