@@ -6,6 +6,11 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CommandInfo(
     name    = "editarena",
@@ -51,5 +56,21 @@ public class EditArenaCommand implements Command
         am.getGlobalMessenger().tell(sender, "Edit mode for arena '" + arena.configName() + "': " + ((arena.inEditMode()) ? ChatColor.GREEN + "true" : ChatColor.RED + "false"));
         if (arena.inEditMode()) am.getGlobalMessenger().tell(sender, "Remember to turn it back off after editing!");
         return true;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 1) {
+            return Collections.emptyList();
+        }
+
+        String prefix = args[0].toLowerCase();
+
+        List<Arena> arenas = am.getArenas();
+
+        return arenas.stream()
+            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+            .map(Arena::configName)
+            .collect(Collectors.toList());
     }
 }

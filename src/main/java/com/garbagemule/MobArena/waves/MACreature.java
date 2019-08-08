@@ -10,6 +10,7 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
@@ -171,11 +172,21 @@ public class MACreature
                 break;
             case "babyzombievillager":
             case "babyzombie":
+                ((Zombie) e).setBaby(true);
+                break;
             case "babypigman":
                 ((Zombie) e).setBaby(true);
+                ((PigZombie) e).setAngry(true);
+                break;
+            case "pigzombie":
+            case "zombiepigman":
+                ((PigZombie) e).setAngry(true);
                 break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
+                break;
+            case "witherskeleton":
+                e.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_SWORD, 1));
                 break;
             default:
                 break;

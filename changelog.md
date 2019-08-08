@@ -12,6 +12,26 @@ These changes will (most likely) be included in the next version.
 
 ## [Unreleased]
 
+## [0.104] - 2019-08-08
+- Extended and upgraded potions are now supported in the item syntax by prepending `long_` or `strong_` to the data portion of a potion item (e.g. `potion:strong_instant_heal:1` will yield a Potion of Healing II). Check the wiki for details.
+- MobArena now has basic tab completion support for most of the commands that take arguments.
+- The `pet-items` node in `global-settings` now supports any living entity as a pet - even zombies! Pets will aggro hostile mobs that damage their owner, but only tameable pets (wolves, cats, etc.) will properly follow their owners around. This should also allow 1.14 servers to replace `ocelot` with `cat` in their `pet-items` node to get cat pets working again.
+- Pets now have custom names that denote who their owner is, e.g. "garbagemule's pet".
+- Pet items can now be used in Upgrade Waves. When an Upgrade Wave spawns, all pet items are transformed to pets just like when the arena session starts. Note that while only Upgrade Waves trigger this behavior, pet items obtained elsewhere (e.g. from Supply Wave drops) will also be transformed on subsequent Upgrade Waves.
+- Potion effects can now be used as upgrades in Upgrade Waves. Check the wiki for details.
+- Tridents and crossbows are now considered weapons with regards to the `unbreakable-weapons` flag. All class items that have durability now have their unbreakable flag set to true unless the `unbreakable-weapons` and/or `unbreakable-armor` flags are set to `false`.
+- Leaderboards now work again on servers running Minecraft 1.14+.
+- Class chests (non-linked) now work again on servers running Minecraft 1.14+.
+- MobArena no longer crashes when players try to join with items that lower their max health below the default of 20. Players with lower max health will notice missing health in the lobby, but it will quickly regenerate to full.
+- Food levels no longer deplete for players in the lobby and spectator area.
+- Wither skeletons now correctly spawn with stone swords.
+- Mobs now correctly take damage from player-made iron golems.
+- Cat and parrot pets now also sit when their owner joins an arena (although parrots perching on players' shoulders will still follow them into the arena).
+- Pig zombies are now angry immediately after they spawn as they should be.
+- Vexes summoned by evokers are now kept track of, so they count towards `clear-wave-before-next`, and they are properly removed at arena end.
+- Support for denoting potion effects by magic number IDs has been dropped. This means that if your config-file has any such magic numbers in it, MobArena will no longer successfully parse them and will throw an error on startup.
+- Support for auto-respawning has been dropped. The hacky way it was implemented is not officially supported by the Bukkit API and is highly discouraged because it is very buggy.
+
 ## [0.103.2] - 2019-04-23
 - MobArena no longer touches the `flySpeed` player attribute when players join an arena. This should fix issues where a crash would result in players being "locked in the air" when trying to fly outside of the arena. It also introduces compatibility with plugins that use flight to augment player abilities.
 - Fixed a bug introduced by a breaking API change in Spigot where a player with a nearly full inventory might cause item rewards to change stack amounts.
@@ -119,7 +139,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.103.2...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104...HEAD
+[0.104]: https://github.com/garbagemule/MobArena/compare/0.103.2...0.104
 [0.103.2]: https://github.com/garbagemule/MobArena/compare/0.103.1...0.103.2
 [0.103.1]: https://github.com/garbagemule/MobArena/compare/0.103...0.103.1
 [0.103]: https://github.com/garbagemule/MobArena/compare/0.102...0.103

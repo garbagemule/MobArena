@@ -34,16 +34,20 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.conversations.Conversable;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
-public class CommandHandler implements CommandExecutor
+public class CommandHandler implements CommandExecutor, TabCompleter
 {
     private MobArena plugin;
     private Messenger fallbackMessenger;
@@ -237,6 +241,60 @@ public class CommandHandler implements CommandExecutor
         }
     }
     
+    @Override
+    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command bcmd, String alias, String[] args) {
+        // Only players can tab complete
+        if (!(sender instanceof Player)) {
+            return null;
+        }
+        Player player = (Player) sender;
+
+        // If the player is in a convo (Setup Mode), bail
+        if (player.isConversing()) {
+            return null;
+        }
+
+        // Grab the base argument.
+        String base = (args.length > 0 ? args[0] : "").toLowerCase();
+
+        // If there's no base argument, show it all
+        if (base.equals("")) {
+            return commands.values()
+                .stream()
+                .map(cmd -> cmd.getClass().getAnnotation(CommandInfo.class))
+                .filter(info -> info != null && player.hasPermission(info.permission()))
+                .map(CommandInfo::name)
+                .sorted()
+                .collect(Collectors.toList());
+        }
+
+        // Reloads are terminal
+        if (base.equals("reload") || (base.equals("config") && args.length > 1 && args[1].equals("reload"))) {
+            return Collections.emptyList();
+        }
+
+        // If we only have the base, terminate
+        if (args.length == 1) {
+            return commands.values().stream()
+                .map(cmd -> cmd.getClass().getAnnotation(CommandInfo.class))
+                .filter(info -> info.name().startsWith(base))
+                .map(CommandInfo::name)
+                .sorted()
+                .collect(Collectors.toList());
+        }
+
+        // Otherwise, find the command
+        List<Command> matches = getMatchingCommands(base);
+        if (matches.size() != 1) {
+            return Collections.emptyList();
+        }
+
+        // And pass completion
+        Command command = matches.get(0);
+        String[] params = trimFirstArg(args);
+        return command.tab(plugin.getArenaMaster(), player, params);
+    }
+
     /**
      * Register all the commands directly.
      * This could also be done with a somewhat dirty classloader/resource reader

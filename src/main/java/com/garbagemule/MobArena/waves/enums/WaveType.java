@@ -2,7 +2,6 @@ package com.garbagemule.MobArena.waves.enums;
 
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.waves.WaveUtils;
 
 public enum WaveType
 {

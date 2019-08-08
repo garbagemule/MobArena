@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.waves;
 import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
@@ -23,7 +24,7 @@ public class MABoss
      */
     public MABoss(LivingEntity entity, double maxHealth) {
         try {
-            entity.setMaxHealth(maxHealth);
+            entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
             entity.setHealth(maxHealth);
         } catch (IllegalArgumentException ex) {
             // Spigot... *facepalm*
@@ -55,7 +56,7 @@ public class MABoss
      * @return the maximum health of the boss
      */
     public double getMaxHealth() {
-        return entity.getMaxHealth();
+        return entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
     }
     
     /**

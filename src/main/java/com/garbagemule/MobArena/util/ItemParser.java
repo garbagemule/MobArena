@@ -227,7 +227,7 @@ public class ItemParser
             return null;
         }
     }
-    
+
     private static int getAmount(String amount) {
         if (amount.matches("(-)?[1-9][0-9]*")) {
             return Integer.parseInt(amount);

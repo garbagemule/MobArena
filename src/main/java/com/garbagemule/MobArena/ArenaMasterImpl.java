@@ -16,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class ArenaMasterImpl implements ArenaMaster
         this.classes = new HashMap<>();
 
         this.allowedCommands = new HashSet<>();
-        this.spawnsPets = new SpawnsPets(Material.BONE, Material.RAW_FISH);
+        this.spawnsPets = new SpawnsPets();
 
         this.joinInterruptTimer = new JoinInterruptTimer();
     }
@@ -254,7 +255,7 @@ public class ArenaMasterImpl implements ArenaMaster
      */
     public void loadSettings() {
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("global-settings");
-        ConfigUtils.addMissingRemoveObsolete(plugin, "global-settings.yml", section);
+        ConfigUtils.addIfEmpty(plugin, "global-settings.yml", section);
 
         enabled = section.getBoolean("enabled", true);
 
@@ -276,20 +277,35 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     private void loadPetItems(ConfigurationSection settings) {
-        String wolf = settings.getString("pet-items.wolf", "");
-        String ocelot = settings.getString("pet-items.ocelot", "");
+        spawnsPets.clear();
 
-        Material wolfMaterial = Material.getMaterial(wolf.toUpperCase());
-        Material ocelotMaterial = Material.getMaterial(ocelot.toUpperCase());
+        ConfigurationSection items = settings.getConfigurationSection("pet-items");
 
-        if (wolfMaterial == null && !wolf.isEmpty()) {
-            throw new ConfigError("Failed to parse item type for wolf pet item: " + wolf);
+        for (String key : items.getKeys(false)) {
+            EntityType entity;
+            try {
+                entity = EntityType.valueOf(key.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ConfigError("Failed to parse entity type for pet item: " + key);
+            }
+
+            if (!entity.isAlive()) {
+                throw new ConfigError("Invalid entity type for pet item: " + key);
+            }
+
+            Material material;
+            try {
+                material = Material.getMaterial(items.getString(key, "").toUpperCase());
+            } catch (Exception e) {
+                throw new ConfigError("Failed to parse material type for pet item: " + key);
+            }
+
+            if (material == null) {
+                throw new ConfigError("Failed to parse material type for pet item: " + key);
+            }
+
+            spawnsPets.register(material, entity);
         }
-        if (ocelotMaterial == null && !ocelot.isEmpty()) {
-            throw new ConfigError("Failed to parse item type for ocelot pet item: " + ocelot);
-        }
-
-        spawnsPets = new SpawnsPets(wolfMaterial, ocelotMaterial);
     }
 
     /**

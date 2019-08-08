@@ -6,6 +6,12 @@ import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CommandInfo(
     name    = "force",
@@ -81,5 +87,39 @@ public class ForceCommand implements Command
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String> tab(ArenaMaster am, Player player, String... args) {
+        if (args.length > 2) {
+            return Collections.emptyList();
+        }
+
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase();
+            List<String> result = new ArrayList<>(2);
+            if ("end".startsWith(prefix)) {
+                result.add("end");
+            }
+            if ("start".startsWith(prefix)) {
+                result.add("start");
+            }
+            return result;
+        }
+
+        if (!args[0].equals("end") && !args[0].equals("start")) {
+            return Collections.emptyList();
+        }
+
+        boolean start = args[0].equals("start");
+        String prefix = args[1].toLowerCase();
+
+        List<Arena> arenas = am.getArenas();
+
+        return arenas.stream()
+            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+            .filter(arena -> start != arena.isRunning())
+            .map(Arena::configName)
+            .collect(Collectors.toList());
     }
 }
