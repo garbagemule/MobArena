@@ -1507,7 +1507,7 @@ public class ArenaImpl implements Arena
     public boolean canJoin(Player p) {
         if (!enabled)
             messenger.tell(p, Msg.JOIN_ARENA_NOT_ENABLED);
-        else if (!region.isSetup() || waveManager.getRecurrentWaves().isEmpty())
+        else if (!region.isSetup())
             messenger.tell(p, Msg.JOIN_ARENA_NOT_SETUP);
         else if (edit)
             messenger.tell(p, Msg.JOIN_ARENA_EDIT_MODE);
