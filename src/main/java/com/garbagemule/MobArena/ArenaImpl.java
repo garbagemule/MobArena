@@ -1,24 +1,17 @@
 package com.garbagemule.MobArena;
 
-import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
-
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
-import com.garbagemule.MobArena.steps.Step;
-import com.garbagemule.MobArena.steps.StepFactory;
-import com.garbagemule.MobArena.steps.PlayerJoinArena;
-import com.garbagemule.MobArena.steps.PlayerSpecArena;
-import com.garbagemule.MobArena.events.ArenaEndEvent;
-import com.garbagemule.MobArena.events.ArenaPlayerDeathEvent;
-import com.garbagemule.MobArena.events.ArenaPlayerJoinEvent;
-import com.garbagemule.MobArena.events.ArenaPlayerLeaveEvent;
-import com.garbagemule.MobArena.events.ArenaPlayerReadyEvent;
-import com.garbagemule.MobArena.events.ArenaStartEvent;
+import com.garbagemule.MobArena.events.*;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.steps.PlayerJoinArena;
+import com.garbagemule.MobArena.steps.PlayerSpecArena;
+import com.garbagemule.MobArena.steps.Step;
+import com.garbagemule.MobArena.steps.StepFactory;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
@@ -28,21 +21,12 @@ import com.garbagemule.MobArena.util.timer.StartDelayTimer;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.SheepBouncer;
 import com.garbagemule.MobArena.waves.WaveManager;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.AbstractHorse;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -53,20 +37,12 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 public class ArenaImpl implements Arena
 {
@@ -775,6 +751,18 @@ public class ArenaImpl implements Arena
         
         removePermissionAttachments(p);
         removePotionEffects(p);
+
+        ArenaPlayer arenaPlayer = arenaPlayerMap.get(p);
+
+        if(!arenaPlayer.getProjectiles().isEmpty()) {
+            for(final Projectile projectile : arenaPlayer.getProjectiles()) {
+                projectile.remove();
+            }
+            arenaPlayer.getProjectiles().clear();
+        }
+
+
+
         
         boolean refund = inLobby(p);
 

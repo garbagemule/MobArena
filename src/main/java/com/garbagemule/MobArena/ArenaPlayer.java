@@ -2,6 +2,10 @@ package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArenaPlayer
 {
@@ -11,11 +15,14 @@ public class ArenaPlayer
     private ArenaPlayerStatistics stats;
     private boolean isDead;
 
+    private List<Projectile> projectiles;
+
     //private List<ItemStack> rewards;
     //private List<Block> blocks;
 
     public ArenaPlayer(Player player, Arena arena, MobArena plugin) {
         this.player = player;
+        projectiles = new ArrayList<>();
     }
 
     public Player getPlayer() {
@@ -56,5 +63,9 @@ public class ArenaPlayer
 
     public ArenaPlayerStatistics getStats() {
         return stats;
+    }
+
+    public List<Projectile> getProjectiles() {
+        return projectiles;
     }
 }
