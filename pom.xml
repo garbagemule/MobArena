@@ -83,7 +83,7 @@
       <url>http://nexus.hc.to/content/repositories/pub_releases</url>
     </repository>
 
-    <!-- bStats repo (updated) -->
+    <!-- bStats repo -->
     <repository>
       <id>CodeMC</id>
       <url>https://repo.codemc.org/repository/maven-public</url>
