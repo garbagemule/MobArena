@@ -85,7 +85,7 @@
 
     <repository>
       <id>bstats-repo</id>
-      <url>http://repo.bstats.org/content/repositories/releases/</url>
+      <url>http://repo.codemc.org/repository/maven-public/</url>
     </repository>
 
     <!-- JitPack for MagicSpells -->
