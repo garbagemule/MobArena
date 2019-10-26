@@ -67,6 +67,7 @@ import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
@@ -511,6 +512,12 @@ public class ArenaListener
         }
     }
 
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (event.getEntity().getShooter() instanceof Player) {
+            arena.getProjectileManager().addProjectile(event.getEntity());
+        }
+    }
+
     /******************************************************
      * 
      *                  DEATH LISTENERS
@@ -532,6 +539,9 @@ public class ArenaListener
         }
         else if (monsters.removeGolem(event.getEntity())) {
             arena.announce(Msg.GOLEM_DIED);
+        }
+        else if (event.getEntity() instanceof Projectile) {
+            arena.getProjectileManager().removeProjectile((Projectile) event.getEntity());
         }
     }
 

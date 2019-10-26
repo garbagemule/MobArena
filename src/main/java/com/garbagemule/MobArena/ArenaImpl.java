@@ -1,7 +1,12 @@
 package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
-import com.garbagemule.MobArena.events.*;
+import com.garbagemule.MobArena.events.ArenaEndEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerDeathEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerJoinEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerLeaveEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerReadyEvent;
+import com.garbagemule.MobArena.events.ArenaStartEvent;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
 import com.garbagemule.MobArena.region.ArenaRegion;
@@ -36,7 +41,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -135,6 +139,8 @@ public class ArenaImpl implements Arena
 
     private SpawnsPets spawnsPets;
 
+    private ProjectileManager projectileManager;
+
     /**
      * Primary constructor. Requires a name and a world.
      */
@@ -229,6 +235,8 @@ public class ArenaImpl implements Arena
         this.playerSpecArena = PlayerSpecArena.create(this);
 
         this.spawnsPets = plugin.getArenaMaster().getSpawnsPets();
+
+        this.projectileManager = new ProjectileManager();
     }
     
     
@@ -422,15 +430,11 @@ public class ArenaImpl implements Arena
     public ScoreboardManager getScoreboard() {
         return scoreboard;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+    @Override
+    public ProjectileManager getProjectileManager() {
+        return projectileManager;
+    }
 
     @Override
     public Messenger getMessenger() {
@@ -772,17 +776,7 @@ public class ArenaImpl implements Arena
         removePermissionAttachments(p);
         removePotionEffects(p);
 
-        ArenaPlayer arenaPlayer = arenaPlayerMap.get(p);
-
-        if(!arenaPlayer.getProjectiles().isEmpty()) {
-            for(final Projectile projectile : arenaPlayer.getProjectiles()) {
-                projectile.remove();
-            }
-            arenaPlayer.getProjectiles().clear();
-        }
-
-
-
+        projectileManager.removeProjectiles(p);
         
         boolean refund = inLobby(p);
 

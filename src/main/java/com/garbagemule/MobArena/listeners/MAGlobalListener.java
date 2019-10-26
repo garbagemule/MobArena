@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.listeners;
 
-import com.garbagemule.MobArena.ArenaPlayer;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -9,7 +8,6 @@ import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -247,19 +245,12 @@ public class MAGlobalListener implements Listener
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
-    public void projectileLaunch(final ProjectileLaunchEvent event) {
-        if(event.getEntity().getShooter() instanceof Player) {
-            final Player player = (Player) event.getEntity().getShooter();
-            if(am.getAllPlayers().contains(player)) {
-                final ArenaPlayer arenaPlayer = am.getArenaWithPlayer(player).getArenaPlayer(player);
-                arenaPlayer.getProjectiles().add(event.getEntity());
-
-            }
+    public void projectileLaunch(ProjectileLaunchEvent event) {
+        for (Arena arena : am.getArenas()) {
+            arena.getEventListener().onProjectileLaunch(event);
         }
     }
 
-    
-    
     
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
