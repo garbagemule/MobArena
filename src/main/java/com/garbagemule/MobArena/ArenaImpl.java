@@ -1,6 +1,12 @@
 package com.garbagemule.MobArena;
 
+import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
+
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
+import com.garbagemule.MobArena.steps.Step;
+import com.garbagemule.MobArena.steps.StepFactory;
+import com.garbagemule.MobArena.steps.PlayerJoinArena;
+import com.garbagemule.MobArena.steps.PlayerSpecArena;
 import com.garbagemule.MobArena.events.ArenaEndEvent;
 import com.garbagemule.MobArena.events.ArenaPlayerDeathEvent;
 import com.garbagemule.MobArena.events.ArenaPlayerJoinEvent;
@@ -13,10 +19,6 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
-import com.garbagemule.MobArena.steps.PlayerJoinArena;
-import com.garbagemule.MobArena.steps.PlayerSpecArena;
-import com.garbagemule.MobArena.steps.Step;
-import com.garbagemule.MobArena.steps.StepFactory;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
@@ -65,8 +67,6 @@ import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-
-import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 public class ArenaImpl implements Arena
 {
@@ -431,6 +431,13 @@ public class ArenaImpl implements Arena
         return scoreboard;
     }
 
+
+
+
+
+
+
+
     @Override
     public ProjectileManager getProjectileManager() {
         return projectileManager;
@@ -776,7 +783,7 @@ public class ArenaImpl implements Arena
         removePermissionAttachments(p);
         removePotionEffects(p);
 
-        projectileManager.removeProjectiles(p);
+        projectileManager.clearProjectiles(p);
         
         boolean refund = inLobby(p);
 

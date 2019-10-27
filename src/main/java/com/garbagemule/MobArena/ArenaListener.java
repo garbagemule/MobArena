@@ -514,7 +514,12 @@ public class ArenaListener
 
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         if (event.getEntity().getShooter() instanceof Player) {
-            arena.getProjectileManager().addProjectile(event.getEntity());
+            Player player = (Player) event.getEntity().getShooter();
+
+            if(!arena.isRunning()) return;
+            if(!arena.inArena(player) && !arena.inLobby(player)) return;
+
+            arena.getProjectileManager().addProjectile(player, event.getEntity());
         }
     }
 
@@ -541,7 +546,15 @@ public class ArenaListener
             arena.announce(Msg.GOLEM_DIED);
         }
         else if (event.getEntity() instanceof Projectile) {
-            arena.getProjectileManager().removeProjectile((Projectile) event.getEntity());
+            Projectile projectile = (Projectile) event.getEntity();
+            if(projectile.getShooter() instanceof Player) {
+                Player player = (Player) projectile.getShooter();
+
+                if(!arena.isRunning()) return;
+                if(!arena.inArena(player) && !arena.inLobby(player)) return;
+
+                arena.getProjectileManager().removeProjectile(projectile);
+            }
         }
     }
 
