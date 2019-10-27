@@ -69,7 +69,7 @@ public class MAGlobalListener implements Listener
         this.plugin = plugin;
         this.am = am;
     }
-
+	
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                            BLOCK EVENTS                               //
@@ -396,9 +396,9 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onVehicleExit(event);
         }
     }
-
-    
-    
+	
+	
+	
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
     //                            WORLD EVENTS                               //
