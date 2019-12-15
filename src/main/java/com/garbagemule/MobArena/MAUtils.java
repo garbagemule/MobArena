@@ -326,7 +326,7 @@ public class MAUtils
         // Place the hippie signs
         //Iterator<String> iterator = am.getClasses().iterator();
         Iterator<String> iterator = am.getClasses().keySet().iterator();
-        Rotatable signData = (Rotatable) Material.SIGN.createBlockData();
+        Rotatable signData = (Rotatable) Material.OAK_SIGN.createBlockData();
         signData.setRotation(BlockFace.NORTH);
         for (int i = lx1+2; i <= lx2-2; i++) // Signs
         {

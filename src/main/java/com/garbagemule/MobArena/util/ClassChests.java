@@ -17,6 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.EnumSet;
+
 public class ClassChests {
 
     public static boolean assignClassFromStoredClassChest(Arena arena, Player player, ArenaClass ac) {
@@ -59,7 +61,7 @@ public class ClassChests {
         Block blockBehind = blockBelow.getRelative(backwards);
 
         // If the block below this sign is a class sign, swap the order
-        if (blockBelow.getType() == Material.WALL_SIGN || blockBelow.getType() == Material.SIGN) {
+        if (signMats.contains(blockBelow.getType())) {
             String className = ChatColor.stripColor(((Sign) blockBelow.getState()).getLine(0)).toLowerCase();
             if (arena.getClasses().containsKey(className)) {
                 blockSign = blockBehind;  // Use blockSign as a temp while swapping
@@ -116,4 +118,17 @@ public class ClassChests {
         }
     }
 
+    private static EnumSet<Material> signMats = EnumSet.of(
+            Material.OAK_SIGN,
+            Material.OAK_WALL_SIGN,
+            Material.DARK_OAK_SIGN,
+            Material.DARK_OAK_WALL_SIGN,
+            Material.ACACIA_SIGN,
+            Material.ACACIA_WALL_SIGN,
+            Material.SPRUCE_SIGN,
+            Material.SPRUCE_WALL_SIGN,
+            Material.BIRCH_SIGN,
+            Material.BIRCH_WALL_SIGN,
+            Material.JUNGLE_SIGN,
+            Material.JUNGLE_WALL_SIGN);
 }
