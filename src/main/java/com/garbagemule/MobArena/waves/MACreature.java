@@ -6,6 +6,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Bee;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
@@ -49,6 +50,7 @@ public class MACreature
     public static final MACreature POWEREDCREEPER = new MACreature("poweredcreeper", EntityType.CREEPER);
     public static final MACreature ANGRYWOLF = new MACreature("angrywolf", "angrywolves", EntityType.WOLF);
     public static final MACreature ENDERMAN = new MACreature("enderman", "endermen", EntityType.ENDERMAN);
+    public static final MACreature ANGRYBEE = new MACreature("angrybee", "angrybees", EntityType.BEE);
 
     // 1.0 creatures
     public static final MACreature SNOWMAN = new MACreature("snowman", "snowmen", EntityType.SNOWMAN);
@@ -145,6 +147,9 @@ public class MACreature
                 break;
             case "angrywolf":
                 ((Wolf) e).setAngry(true);
+                break;
+            case "angrybee":
+                ((Bee) e).setAnger(Integer.MAX_VALUE);
                 break;
             case "slime":
             case "magmacube":

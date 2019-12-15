@@ -38,6 +38,7 @@ public class SpecialWave extends AbstractWave
             switch (entry.getValue().getName()) {
                 case "poweredcreeper":
                 case "zombiepigman":
+                case "angrybee":
                 case "angrywolf":     amount = playerCount * 2; break;
                 case "slime":         amount = playerCount * 4; break;
                 case "giant":
