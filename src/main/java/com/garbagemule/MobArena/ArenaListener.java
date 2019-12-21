@@ -825,31 +825,34 @@ public class ArenaListener
         if (!arena.isRunning() || event.isCancelled())
             return;
 
-        if (arena.hasPet(event.getEntity())) {
+        Entity entity = event.getEntity();
+        Entity target = event.getTarget();
+
+        if (arena.hasPet(entity)) {
             // Pets should never attack players
-            if (event.getTarget() instanceof Player) {
+            if (target instanceof Player) {
                 event.setCancelled(true);
             }
         }
 
-        else if (monsters.getMonsters().contains(event.getEntity())) {
+        else if (monsters.getMonsters().contains(entity)) {
             // If the target is null, we probably forgot or the target died
-            if (event.getTarget() == null) {
-                event.setTarget(MAUtils.getClosestPlayer(plugin, event.getEntity(), arena));
+            if (target == null) {
+                event.setTarget(MAUtils.getClosestPlayer(plugin, entity, arena));
             }
 
             // Pets are untargetable
-            else if (arena.hasPet(event.getTarget())) {
+            else if (arena.hasPet(target)) {
                 event.setCancelled(true);
             }
 
             // So are non-arena players
-            else if (event.getTarget() instanceof Player && !arena.inArena((Player) event.getTarget())) {
+            else if (target instanceof Player && !arena.inArena((Player) target)) {
                 event.setCancelled(true);
             }
 
             // And other mobs unless infighting is enabled
-            else if (monsters.getMonsters().contains(event.getTarget()) && !monsterInfight) {
+            else if (monsters.getMonsters().contains(target) && !monsterInfight) {
                 event.setCancelled(true);
             }
         }
