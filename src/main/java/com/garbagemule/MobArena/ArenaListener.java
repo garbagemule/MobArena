@@ -828,34 +828,72 @@ public class ArenaListener
         Entity entity = event.getEntity();
         Entity target = event.getTarget();
 
-        if (arena.hasPet(entity)) {
-            // Pets should never attack players
-            if (target instanceof Player) {
-                event.setCancelled(true);
-            }
+        if (isArenaPet(entity)) {
+            onPetTarget(event, target);
+        } else if (isArenaMonster(entity)) {
+            onMonsterTarget(event, entity, target);
+        } else {
+            onForeignTarget(event, target);
+        }
+    }
+
+    private void onPetTarget(EntityTargetEvent event, Entity target) {
+        // If the target is null, do nothing
+        if (target == null) {
+            return;
         }
 
-        else if (monsters.getMonsters().contains(entity)) {
-            // If the target is null, we probably forgot or the target died
-            if (target == null) {
-                event.setTarget(MAUtils.getClosestPlayer(plugin, entity, arena));
-            }
-
-            // Pets are untargetable
-            else if (arena.hasPet(target)) {
-                event.setCancelled(true);
-            }
-
-            // So are non-arena players
-            else if (target instanceof Player && !arena.inArena((Player) target)) {
-                event.setCancelled(true);
-            }
-
-            // And other mobs unless infighting is enabled
-            else if (monsters.getMonsters().contains(target) && !monsterInfight) {
-                event.setCancelled(true);
-            }
+        // Pets should only attack monsters in the arena, nothing else
+        if (!isArenaMonster(target)) {
+            event.setCancelled(true);
         }
+    }
+
+    private void onMonsterTarget(EntityTargetEvent event, Entity monster, Entity target) {
+        // Null means we lost our target or the target died, so find a new one
+        if (target == null) {
+            event.setTarget(MAUtils.getClosestPlayer(plugin, monster, arena));
+            return;
+        }
+
+        // If monster infighting is on and target is monster, let it happen
+        if (monsterInfight && isArenaMonster(target)) {
+            return;
+        }
+
+        // At this point, if the target is _not_ an arena player, we can just
+        // cancel, because this check also covers the target being a pet, an
+        // arena monster when infighting is off (due to the check above), or
+        // any foreign entity.
+        if (!isArenaPlayer(target)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private void onForeignTarget(EntityTargetEvent event, Entity target) {
+        // If null, just bail
+        if (target == null) {
+            return;
+        }
+
+        // Foreign entities can't target arena pets, -players, or -monsters.
+        if (isArenaPet(target) || isArenaPlayer(target) || isArenaMonster(target)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private boolean isArenaPlayer(Entity entity) {
+        return arena.getPlayersInArena().contains(entity);
+    }
+
+    @SuppressWarnings("SuspiciousMethodCalls")
+    private boolean isArenaMonster(Entity entity) {
+        return monsters.getMonsters().contains(entity);
+    }
+
+    private boolean isArenaPet(Entity entity) {
+        return arena.hasPet(entity);
     }
     
     public void onEntityTeleport(EntityTeleportEvent event) {

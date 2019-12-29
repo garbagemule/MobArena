@@ -12,6 +12,7 @@ These changes will (most likely) be included in the next version.
 
 ## [Unreleased]
 - It is no longer necessary to have recurrent waves for an arena to work. MobArena automatically creates a "catch all" recurrent wave in case the arena session reaches a wave number that isn't covered by any other wave definitions.
+- Entities outside of the arena can no longer target players, pets, or monsters inside of the arena.
 
 ## [0.104] - 2019-08-08
 - Extended and upgraded potions are now supported in the item syntax by prepending `long_` or `strong_` to the data portion of a potion item (e.g. `potion:strong_instant_heal:1` will yield a Potion of Healing II). Check the wiki for details.
