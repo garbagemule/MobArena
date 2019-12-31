@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.104.1] - 2019-12-31
 - It is no longer necessary to have recurrent waves for an arena to work. MobArena automatically creates a "catch all" recurrent wave in case the arena session reaches a wave number that isn't covered by any other wave definitions.
 - Entities outside of the arena can no longer target players, pets, or monsters inside of the arena.
 - Tab completion for `/ma kick` and `/ma restore` now uses actual player names instead of display names.
@@ -145,7 +147,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104.1...HEAD
+[0.104.1]: https://github.com/garbagemule/MobArena/compare/0.104...0.104.1
 [0.104]: https://github.com/garbagemule/MobArena/compare/0.103.2...0.104
 [0.103.2]: https://github.com/garbagemule/MobArena/compare/0.103.1...0.103.2
 [0.103.1]: https://github.com/garbagemule/MobArena/compare/0.103...0.103.1
