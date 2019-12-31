@@ -21,7 +21,7 @@ public class ShufflePositions implements Ability
     @Override
     public void execute(Arena arena, MABoss boss) {
         // Grab the players and add the boss
-        List<LivingEntity> entities = new ArrayList<LivingEntity>(arena.getPlayersInArena());
+        List<LivingEntity> entities = new ArrayList<>(arena.getPlayersInArena());
         entities.add(boss.getEntity());
         
         // Grab the locations

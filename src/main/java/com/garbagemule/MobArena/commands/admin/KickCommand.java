@@ -52,8 +52,8 @@ public class KickCommand implements Command
         List<Player> players = am.getAllPlayers();
 
         return players.stream()
-            .filter(p -> p.getDisplayName().toLowerCase().startsWith(prefix))
-            .map(Player::getDisplayName)
+            .filter(p -> p.getName().toLowerCase().startsWith(prefix))
+            .map(Player::getName)
             .collect(Collectors.toList());
     }
 }

@@ -18,7 +18,6 @@ import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
 import com.garbagemule.MobArena.things.ThingManager;
-import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
@@ -87,7 +86,6 @@ public class MobArena extends JavaPlugin
         }
         loadsConfigFile = null;
         ConfigurationSerialization.unregisterClass(ArenaSign.class);
-        VersionChecker.shutdown();
     }
 
     private void setup() {
@@ -253,7 +251,7 @@ public class MobArena extends JavaPlugin
 
     private void checkForUpdates() {
         if (getConfig().getBoolean("global-settings.update-notification", false)) {
-            VersionChecker.checkForUpdates(this, null);
+            PluginVersionCheck.check(this, getLogger()::info);
         }
     }
 

@@ -7,7 +7,7 @@
   <groupId>com.garbagemule</groupId>
   <artifactId>mobarena</artifactId>
   <name>MobArena</name>
-  <version>0.104</version>
+  <version>0.104.1</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -85,7 +85,7 @@
 
     <repository>
       <id>bstats-repo</id>
-      <url>http://repo.bstats.org/content/repositories/releases/</url>
+      <url>http://repo.codemc.org/repository/maven-public/</url>
     </repository>
 
     <!-- JitPack for MagicSpells -->
@@ -115,7 +115,7 @@
     <dependency>
       <groupId>org.bstats</groupId>
       <artifactId>bstats-bukkit</artifactId>
-      <version>1.2</version>
+      <version>1.5</version>
       <scope>compile</scope>
     </dependency>
 

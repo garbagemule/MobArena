@@ -182,7 +182,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getAllPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<Player>();
+        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<>();
     }
 
     public List<Player> getAllLivingPlayers() {
@@ -194,7 +194,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getLivingPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<Player>();
+        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<>();
     }
 
     public Arena getArenaWithPlayer(Player p) {
@@ -382,8 +382,12 @@ public class ArenaMasterImpl implements ArenaMaster
         loadClassLobbyPermissions(arenaClass, section);
 
         // Check for class chests
-        Location cc = parseLocation(section, "classchest", null);
-        arenaClass.setClassChest(cc);
+        try {
+            Location cc = parseLocation(section, "classchest", null);
+            arenaClass.setClassChest(cc);
+        } catch (IllegalArgumentException e) {
+            throw new ConfigError("Failed to parse classchest location for class " + classname + " because: " + e.getMessage());
+        }
 
         // Finally add the class to the classes map.
         classes.put(lowercase, arenaClass);
@@ -527,6 +531,8 @@ public class ArenaMasterImpl implements ArenaMaster
         if (arenaNames == null || arenaNames.isEmpty()) {
             return;
         }
+
+        List<Arena> arenas = new ArrayList<>();
         for (String arenaName : arenaNames) {
             Arena arena = getArenaWithName(arenaName);
             if (arena != null) continue;
@@ -534,7 +540,31 @@ public class ArenaMasterImpl implements ArenaMaster
             String arenaWorld = config.getString("arenas." + arenaName + ".settings.world", "");
             if (!arenaWorld.equals(worldName)) continue;
 
-            loadArena(arenaName);
+            Arena loaded = loadArena(arenaName);
+            if (loaded != null) {
+                arenas.add(loaded);
+            }
+        }
+
+        reportOverlappingRegions(arenas);
+    }
+
+    private void reportOverlappingRegions(List<Arena> arenas) {
+        // If we iterate the upper/lower triangular matrix of the cartesian
+        // product of the arena list, we avoid not only duplicate reports like
+        // "a vs. b and b vs. a", but also "self comparisons" (j = i + 1).
+        for (int i = 0; i < arenas.size(); i++) {
+            Arena a = arenas.get(i);
+            for (int j = i + 1; j < arenas.size(); j++) {
+                Arena b = arenas.get(j);
+                if (a.getRegion().intersects(b.getRegion())) {
+                    plugin.getLogger().warning(String.format(
+                        "Regions of arenas '%s' and '%s' overlap!",
+                        a.configName(),
+                        b.configName()
+                    ));
+                }
+            }
         }
     }
 

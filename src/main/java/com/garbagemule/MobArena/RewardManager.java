@@ -35,14 +35,14 @@ public class RewardManager
     
     public void addReward(Player p, Thing thing) {
         if (!players.containsKey(p)) {
-            players.put(p, new ArrayList<Thing>());
+            players.put(p, new ArrayList<>());
         }
         players.get(p).add(thing);
     }
     
     public List<Thing> getRewards(Player p) {
         List<Thing> rewards = players.get(p);
-        return (rewards == null ? new ArrayList<Thing>(1) : Collections.unmodifiableList(rewards));
+        return (rewards == null ? new ArrayList<>(1) : Collections.unmodifiableList(rewards));
     }
     
     public void grantRewards(Player p) {

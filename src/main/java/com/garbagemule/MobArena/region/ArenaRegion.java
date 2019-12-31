@@ -4,6 +4,7 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
 
+import com.garbagemule.MobArena.ConfigError;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
@@ -79,7 +80,12 @@ public class ArenaRegion
         arenaWarp = parseLocation(coords, "arena", world);
         lobbyWarp = parseLocation(coords, "lobby", world);
         specWarp  = parseLocation(coords, "spectator", world);
-        exitWarp  = parseLocation(coords, "exit", null);
+
+        try {
+            exitWarp = parseLocation(coords, "exit", null);
+        } catch (IllegalArgumentException e) {
+            throw new ConfigError("Failed to parse exit warp for arena " + arena.configName() + " because: " + e.getMessage());
+        }
     }
     
     public void reloadLeaderboards() {
@@ -87,7 +93,7 @@ public class ArenaRegion
         try {
             leaderboard = parseLocation(coords, "leaderboard", null);
         } catch (IllegalArgumentException e) {
-            leaderboard = parseLocation(coords, "leaderboard", world);
+            throw new ConfigError("Failed to parse leaderboard location for arena " + arena.configName() + " because: " + e.getMessage());
         }
         if (leaderboard != null && leaderboard.getWorld() == null) {
             leaderboard.setWorld(world);
@@ -233,7 +239,24 @@ public class ArenaRegion
                 (z + radius >= p1.getBlockZ() && z - radius <= p2.getBlockZ()) &&
                 (y + radius >= p1.getBlockY() && y - radius <= p2.getBlockY()));
     }
-    
+
+    public boolean intersects(ArenaRegion other) {
+        if (lobbySetup && other.lobbySetup) {
+            if (intersects(l1, l2, other.l1, other.l2)) {
+                return true;
+            }
+        }
+        return intersects(p1, p2, other.p1, other.p2);
+    }
+
+    private boolean intersects(Location a1, Location a2, Location b1, Location b2) {
+        return (
+            b1.getBlockX() <= a2.getBlockX() && a1.getBlockX() <= b2.getBlockX() &&
+            b1.getBlockZ() <= a2.getBlockZ() && a1.getBlockZ() <= b2.getBlockZ() &&
+            b1.getBlockY() <= a2.getBlockY() && a1.getBlockY() <= b2.getBlockY()
+        );
+    }
+
     // Region expand
     public void expandUp(int amount) {
         int x = p2.getBlockX();

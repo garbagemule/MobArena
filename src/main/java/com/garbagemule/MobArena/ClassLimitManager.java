@@ -45,7 +45,7 @@ public class ClassLimitManager
     private void initInUseMap() {
         // Initialize the in-use map with zeros.
         for (ArenaClass ac : classes.values()) {
-            classesInUse.put(ac, new HashSet<String>());
+            classesInUse.put(ac, new HashSet<>());
         }
     }
     
@@ -76,7 +76,7 @@ public class ClassLimitManager
         if (classLimits.get(ac) == null) {
             limits.set(ac.getConfigName(), -1);
             classLimits.put(ac, new MutableInt(-1));
-            classesInUse.put(ac, new HashSet<String>());
+            classesInUse.put(ac, new HashSet<>());
         }
         
         if (classLimits.get(ac).value() <= -1)

@@ -55,8 +55,8 @@ public class RestoreCommand implements Command
         Collection<? extends Player> players = am.getPlugin().getServer().getOnlinePlayers();
 
         return players.stream()
-            .filter(p -> p.getDisplayName().toLowerCase().startsWith(prefix))
-            .map(Player::getDisplayName)
+            .filter(p -> p.getName().toLowerCase().startsWith(prefix))
+            .map(Player::getName)
             .collect(Collectors.toList());
     }
 }
