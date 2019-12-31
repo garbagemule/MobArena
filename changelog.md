@@ -14,6 +14,7 @@ These changes will (most likely) be included in the next version.
 - It is no longer necessary to have recurrent waves for an arena to work. MobArena automatically creates a "catch all" recurrent wave in case the arena session reaches a wave number that isn't covered by any other wave definitions.
 - Entities outside of the arena can no longer target players, pets, or monsters inside of the arena.
 - Tab completion for `/ma kick` and `/ma restore` now uses actual player names instead of display names.
+- MobArena's internal version checker has been rewritten. It now uses the resource API of Spigot instead of DBO. It's also a lot more lightweight and caches results for up to one hour.
 
 ## [0.104] - 2019-08-08
 - Extended and upgraded potions are now supported in the item syntax by prepending `long_` or `strong_` to the data portion of a potion item (e.g. `potion:strong_instant_heal:1` will yield a Potion of Healing II). Check the wiki for details.
