@@ -382,8 +382,12 @@ public class ArenaMasterImpl implements ArenaMaster
         loadClassLobbyPermissions(arenaClass, section);
 
         // Check for class chests
-        Location cc = parseLocation(section, "classchest", null);
-        arenaClass.setClassChest(cc);
+        try {
+            Location cc = parseLocation(section, "classchest", null);
+            arenaClass.setClassChest(cc);
+        } catch (IllegalArgumentException e) {
+            throw new ConfigError("Failed to parse classchest location for class " + classname + " because: " + e.getMessage());
+        }
 
         // Finally add the class to the classes map.
         classes.put(lowercase, arenaClass);

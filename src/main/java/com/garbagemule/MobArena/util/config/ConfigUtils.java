@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.util.config;
 
+import com.garbagemule.MobArena.ConfigError;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -119,6 +120,9 @@ public class ConfigUtils
                 throw new IllegalArgumentException("Expected location of type (x,y,z,yaw,pitch,world)");
             }
             world = Bukkit.getWorld(parts[5]);
+            if (world == null) {
+                throw new IllegalArgumentException("World " + parts[5] + " not found");
+            }
         }
         return new Location(world, x, y, z, yaw, pit);
     }

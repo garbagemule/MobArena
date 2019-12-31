@@ -4,6 +4,7 @@ import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.parseLocation;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.setLocation;
 
+import com.garbagemule.MobArena.ConfigError;
 import com.garbagemule.MobArena.MAUtils;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
@@ -81,7 +82,12 @@ public class ArenaRegion
         arenaWarp = parseLocation(coords, "arena", world);
         lobbyWarp = parseLocation(coords, "lobby", world);
         specWarp  = parseLocation(coords, "spectator", world);
-        exitWarp  = parseLocation(coords, "exit", null);
+
+        try {
+            exitWarp = parseLocation(coords, "exit", null);
+        } catch (IllegalArgumentException e) {
+            throw new ConfigError("Failed to parse exit warp for arena " + arena.configName() + " because: " + e.getMessage());
+        }
     }
     
     public void reloadLeaderboards() {
@@ -89,7 +95,7 @@ public class ArenaRegion
         try {
             leaderboard = parseLocation(coords, "leaderboard", null);
         } catch (IllegalArgumentException e) {
-            leaderboard = parseLocation(coords, "leaderboard", world);
+            throw new ConfigError("Failed to parse leaderboard location for arena " + arena.configName() + " because: " + e.getMessage());
         }
         if (leaderboard != null && leaderboard.getWorld() == null) {
             leaderboard.setWorld(world);
@@ -235,7 +241,7 @@ public class ArenaRegion
                 (z + radius >= p1.getBlockZ() && z - radius <= p2.getBlockZ()) &&
                 (y + radius >= p1.getBlockY() && y - radius <= p2.getBlockY()));
     }
-    
+
     // Region expand
     public void expandUp(int amount) {
         int x = p2.getBlockX();
