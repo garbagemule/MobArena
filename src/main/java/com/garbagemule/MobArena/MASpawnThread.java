@@ -326,7 +326,7 @@ public class MASpawnThread implements Runnable
     }
 
     private void removeDeadMonsters() {
-        List<Entity> tmp = new ArrayList<Entity>(monsterManager.getMonsters());
+        List<Entity> tmp = new ArrayList<>(monsterManager.getMonsters());
         for (Entity e : tmp) {
             if (e == null) {
                 continue;

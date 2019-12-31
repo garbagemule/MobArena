@@ -35,7 +35,7 @@ public class ChainLightning implements Ability
         if (target == null || !(target instanceof Player))
             return;
         
-        strikeLightning(arena, (Player) target, new ArrayList<Player>());
+        strikeLightning(arena, (Player) target, new ArrayList<>());
     }
     
     private void strikeLightning(final Arena arena, final Player p, final List<Player> done) {

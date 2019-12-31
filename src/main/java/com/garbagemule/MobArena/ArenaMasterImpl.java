@@ -182,7 +182,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getAllPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<Player>();
+        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<>();
     }
 
     public List<Player> getAllLivingPlayers() {
@@ -194,7 +194,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getLivingPlayersInArena(String arenaName) {
         Arena arena = getArenaWithName(arenaName);
-        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<Player>();
+        return (arena != null) ? new ArrayList<>(arena.getPlayersInArena()) : new ArrayList<>();
     }
 
     public Arena getArenaWithPlayer(Player p) {
