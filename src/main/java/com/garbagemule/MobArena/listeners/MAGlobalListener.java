@@ -1,13 +1,14 @@
 package com.garbagemule.MobArena.listeners;
 
 import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.PluginVersionCheck;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.leaderboards.Stats;
-import com.garbagemule.MobArena.util.VersionChecker;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -51,6 +52,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The point of this class is to simply redirect all events to each arena's
@@ -310,7 +312,13 @@ public class MAGlobalListener implements Listener
         InventoryManager.restoreFromFile(plugin, event.getPlayer());
         if (!am.notifyOnUpdates() || !event.getPlayer().isOp()) return;
 
-        VersionChecker.checkForUpdates(plugin, event.getPlayer());
+        UUID id = event.getPlayer().getUniqueId();
+        PluginVersionCheck.check(plugin, (message) -> {
+            Player player = plugin.getServer().getPlayer(id);
+            if (player != null) {
+                plugin.getGlobalMessenger().tell(player, message);
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
