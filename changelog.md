@@ -15,6 +15,7 @@ These changes will (most likely) be included in the next version.
 - Entities outside of the arena can no longer target players, pets, or monsters inside of the arena.
 - Tab completion for `/ma kick` and `/ma restore` now uses actual player names instead of display names.
 - If the world of an exit warp, leaderboard, or linked class chest is not available on (re)load, MobArena now throws a config error instead of failing silently later down the road.
+- Overlapping arena regions are now reported as warnings in the server log during arena load, because overlapping regions can result in undefined, buggy behavior.
 - MobArena's internal version checker has been rewritten. It now uses the resource API of Spigot instead of DBO. It's also a lot more lightweight and caches results for up to one hour.
 
 ## [0.104] - 2019-08-08
