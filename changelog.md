@@ -11,6 +11,7 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- The region overlap check now works across both arena and lobby regions, i.e. all four combinations of intersections between two regions (arena-arena, arena-lobby, lobby-arena, and lobby-lobby) are evaluated.
 - Arenas with missing regions no longer cause errors in the region overlap check.
 
 ## [0.104.1] - 2019-12-31
