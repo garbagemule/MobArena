@@ -11,6 +11,7 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- Arenas with missing regions no longer cause errors in the region overlap check.
 
 ## [0.104.1] - 2019-12-31
 - It is no longer necessary to have recurrent waves for an arena to work. MobArena automatically creates a "catch all" recurrent wave in case the arena session reaches a wave number that isn't covered by any other wave definitions.

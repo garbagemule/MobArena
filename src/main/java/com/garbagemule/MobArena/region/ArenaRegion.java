@@ -248,7 +248,10 @@ public class ArenaRegion
                 return true;
             }
         }
-        return intersects(p1, p2, other.p1, other.p2);
+        if (setup && other.setup) {
+            return intersects(p1, p2, other.p1, other.p2);
+        }
+        return false;
     }
 
     private boolean intersects(Location a1, Location a2, Location b1, Location b2) {
