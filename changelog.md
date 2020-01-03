@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.104.2] - 2020-01-03
 - The region overlap check now works across both arena and lobby regions, i.e. all four combinations of intersections between two regions (arena-arena, arena-lobby, lobby-arena, and lobby-lobby) are evaluated.
 - Arenas with missing regions no longer cause errors in the region overlap check.
 
@@ -149,7 +151,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104.1...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104.2...HEAD
+[0.104.2]: https://github.com/garbagemule/MobArena/compare/0.104.1...0.104.2
 [0.104.1]: https://github.com/garbagemule/MobArena/compare/0.104...0.104.1
 [0.104]: https://github.com/garbagemule/MobArena/compare/0.103.2...0.104
 [0.103.2]: https://github.com/garbagemule/MobArena/compare/0.103.1...0.103.2
