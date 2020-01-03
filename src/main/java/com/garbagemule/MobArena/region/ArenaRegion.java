@@ -241,20 +241,17 @@ public class ArenaRegion
     }
 
     public boolean intersects(ArenaRegion other) {
-        if (lobbySetup && other.lobbySetup) {
-            if (intersects(l1, l2, other.l1, other.l2)) {
-                return true;
-            }
-        }
-        return intersects(p1, p2, other.p1, other.p2);
+        return intersects(p1, p2, other.p1, other.p2)
+            || intersects(p1, p2, other.l1, other.l2)
+            || intersects(l1, l2, other.p1, other.p2)
+            || intersects(l1, l2, other.l1, other.l2);
     }
 
     private boolean intersects(Location a1, Location a2, Location b1, Location b2) {
-        return (
-            b1.getBlockX() <= a2.getBlockX() && a1.getBlockX() <= b2.getBlockX() &&
-            b1.getBlockZ() <= a2.getBlockZ() && a1.getBlockZ() <= b2.getBlockZ() &&
-            b1.getBlockY() <= a2.getBlockY() && a1.getBlockY() <= b2.getBlockY()
-        );
+        return (a1 != null && a2 != null && b1 != null && b2 != null)
+            && b1.getBlockX() <= a2.getBlockX() && a1.getBlockX() <= b2.getBlockX()
+            && b1.getBlockZ() <= a2.getBlockZ() && a1.getBlockZ() <= b2.getBlockZ()
+            && b1.getBlockY() <= a2.getBlockY() && a1.getBlockY() <= b2.getBlockY();
     }
 
     // Region expand
