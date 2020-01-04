@@ -234,6 +234,8 @@ public interface Arena
     
     List<Player> getNonreadyPlayers();
     
+    List<Player> getReadyPlayers();
+    
     boolean canAfford(Player p);
     
     boolean takeFee(Player p);

@@ -57,6 +57,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1468,6 +1469,16 @@ public class ArenaImpl implements Arena
         List<Player> result = new LinkedList<>();
         result.addAll(lobbyPlayers);
         result.removeAll(readyPlayers);
+        result.sort(Comparator.comparing(Player:: getName));
+        return result;
+    }
+
+    @Override
+    public List<Player> getReadyPlayers()
+    {
+        List<Player> result = new LinkedList<>();
+        result.addAll(readyPlayers);
+        result.sort(Comparator.comparing(Player:: getName));
         return result;
     }
 

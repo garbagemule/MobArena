@@ -53,3 +53,14 @@ leave:
 - '&a<arena-name>'
 - '---------------'
 - 'Hit to leave'
+
+ready:
+- 'Ready:'
+- '<ready-1>'
+- '<ready-2>'
+- '<ready-3>'
+notready:
+- 'Not Ready:'
+- '<notready-1>'
+- '<notready-2>'
+- '<notready-3>'
