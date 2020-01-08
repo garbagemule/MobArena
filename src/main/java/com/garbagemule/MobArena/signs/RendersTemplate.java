@@ -2,7 +2,10 @@ package com.garbagemule.MobArena.signs;
 
 import static java.lang.String.valueOf;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,11 +16,9 @@ import org.bukkit.entity.Player;
 class RendersTemplate {
 
     // Regex Pattern for ready/notready variables
-    // find() is true if a variable was found
-    // group(0) is matched variable
     // group(1) is null for ready variable, !null for notready variable
     // group(2) is player index+1 as a String
-    final private Pattern readyPattern = Pattern.compile("<(not)?ready-(\\d+)>");
+    private final Pattern readyPattern = Pattern.compile("<(not)?ready-(\\d+)>");
 
     String[] render(Template template, Arena arena) {
         String[] lines = getTemplateByState(template, arena);
@@ -82,21 +83,38 @@ class RendersTemplate {
 
     private String replaceReady(String line, Arena arena) {
         Matcher matcher = readyPattern.matcher(line);
-        if (matcher.find()) {
-            int i = Integer.parseInt(matcher.group(2));
-            if (i > 0) {
-                if (matcher.group(1) == null) {
-                    // Variable is ready i
-                    List<Player> ready = arena.getReadyPlayers();
-                    return matcher.replaceFirst((ready.size()>=i) ? ready.get(i-1).getName() : "");
-                } else {
-                    // Variable is notready i
-                    List<Player> nonready = arena.getNonreadyPlayers();
-                    return matcher.replaceFirst((nonready.size()>=i) ? nonready.get(i-1).getName() : "");
-                }
+        if (!matcher.find()) {
+            return line;
+        }
+        int i;
+        try {
+            i = Integer.parseInt(matcher.group(2));
+        }
+        catch(NumberFormatException e) {
+            return line;
+        }
+        if (i <= 0) {
+            return line;
+        }
+        if (matcher.group(1) == null) {
+            // Variable is ready i
+            Set<Player> readyPlayersInLobby = arena.getReadyPlayersInLobby();
+            List<Player> ready = new ArrayList<>(readyPlayersInLobby);
+            ready.sort(Comparator.comparing(Player:: getName));
+            if (ready.size() >= i) {
+                String name = ready.get(i-1).getName();
+                return matcher.replaceFirst(name);
+            }
+        } else {
+            // Variable is notready i
+            List<Player> nonready = arena.getNonreadyPlayers();
+            nonready.sort(Comparator.comparing(Player:: getName));
+            if (nonready.size() >= i) {
+                String name = nonready.get(i-1).getName();
+                return matcher.replaceFirst(name);
             }
         }
-        return line;
+        return matcher.replaceFirst("");
     }
 
     private String truncate(String rendered) {
