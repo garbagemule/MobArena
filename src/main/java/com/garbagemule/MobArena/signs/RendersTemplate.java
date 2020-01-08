@@ -96,23 +96,20 @@ class RendersTemplate {
         if (i <= 0) {
             return line;
         }
+        List<Player> ready;
         if (matcher.group(1) == null) {
             // Variable is ready i
             Set<Player> readyPlayersInLobby = arena.getReadyPlayersInLobby();
-            List<Player> ready = new ArrayList<>(readyPlayersInLobby);
-            ready.sort(Comparator.comparing(Player:: getName));
-            if (ready.size() >= i) {
-                String name = ready.get(i-1).getName();
-                return matcher.replaceFirst(name);
-            }
+            ready = new ArrayList<>(readyPlayersInLobby);
+
         } else {
             // Variable is notready i
-            List<Player> nonready = arena.getNonreadyPlayers();
-            nonready.sort(Comparator.comparing(Player:: getName));
-            if (nonready.size() >= i) {
-                String name = nonready.get(i-1).getName();
-                return matcher.replaceFirst(name);
-            }
+            ready = arena.getNonreadyPlayers();
+        }
+        if (ready.size() >= i) {
+            ready.sort(Comparator.comparing(Player:: getName));
+            String name = ready.get(i-1).getName();
+            return matcher.replaceFirst(name);
         }
         return matcher.replaceFirst("");
     }
