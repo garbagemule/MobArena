@@ -2,12 +2,12 @@ package com.garbagemule.MobArena.signs;
 
 import static java.lang.String.valueOf;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.ChatColor;
@@ -15,10 +15,11 @@ import org.bukkit.entity.Player;
 
 class RendersTemplate {
 
-    // Regex Pattern for ready/notready variables
-    // group(1) is null for ready variable, !null for notready variable
-    // group(2) is player index+1 as a String
-    private final Pattern readyPattern = Pattern.compile("<(not)?ready-(\\d+)>");
+    // Regex Pattern for player list variables.
+    // Changes to the list types must also be made in getPlayerList.
+    // group(1) is the list type as a String.
+    // group(2) is player index+1 as a String.
+    private final Pattern playerListPattern = Pattern.compile("<(arena|lobby|ready|notready)-([1-9][0-9]?)>");
 
     String[] render(Template template, Arena arena) {
         String[] lines = getTemplateByState(template, arena);
@@ -59,7 +60,7 @@ class RendersTemplate {
     }
 
     private String running(String line, Arena arena) {
-        String result = replaceReady(line, arena);
+        String result = replacePlayerListEntry(line, arena);
         return result
             .replace("<initial-players>", valueOf(arena.getPlayerCount()))
             .replace("<live-players>", valueOf(arena.getPlayersInArena().size()))
@@ -71,7 +72,7 @@ class RendersTemplate {
     }
 
     private String joining(String line, Arena arena) {
-        String result = replaceReady(line, arena);
+        String result = replacePlayerListEntry(line, arena);
         return result
             .replace("<initial-players>", valueOf(arena.getPlayersInLobby().size()))
             .replace("<live-players>", valueOf(arena.getPlayersInLobby().size()))
@@ -81,37 +82,48 @@ class RendersTemplate {
             .replace("<ready-players>", valueOf(arena.getReadyPlayersInLobby().size()));
     }
 
-    private String replaceReady(String line, Arena arena) {
-        Matcher matcher = readyPattern.matcher(line);
+    private String replacePlayerListEntry(String line, Arena arena) {
+        Matcher matcher = playerListPattern.matcher(line);
         if (!matcher.find()) {
             return line;
         }
-        int i;
-        try {
-            i = Integer.parseInt(matcher.group(2));
-        }
-        catch(NumberFormatException e) {
-            return line;
-        }
-        if (i <= 0) {
-            return line;
-        }
-        List<Player> ready;
-        if (matcher.group(1) == null) {
-            // Variable is ready i
-            Set<Player> readyPlayersInLobby = arena.getReadyPlayersInLobby();
-            ready = new ArrayList<>(readyPlayersInLobby);
+        List<String> list = getNameList(matcher.group(1), arena);
+        int index = Integer.parseInt(matcher.group(2)) - 1;
 
+        if (index < list.size()) {
+            String value = list.get(index);
+            return matcher.replaceFirst(value);
         } else {
-            // Variable is notready i
-            ready = arena.getNonreadyPlayers();
+            return matcher.replaceFirst("");
         }
-        if (ready.size() >= i) {
-            ready.sort(Comparator.comparing(Player:: getName));
-            String name = ready.get(i-1).getName();
-            return matcher.replaceFirst(name);
+    }
+
+    private List<String> getNameList(String name, Arena arena) {
+        return getPlayerList(name, arena)
+            .stream()
+            .map(Player::getName)
+            .sorted()
+            .collect(Collectors.toList());
+    }
+
+    private Collection<Player> getPlayerList(String name, Arena arena) {
+        switch (name) {
+            case "arena": {
+                return arena.getPlayersInArena();
+            }
+            case "lobby": {
+                return arena.getPlayersInLobby();
+            }
+            case "ready": {
+                return arena.getReadyPlayersInLobby();
+            }
+            case "notready": {
+                return arena.getNonreadyPlayers();
+            }
+            default: {
+                return Collections.emptyList();
+            }
         }
-        return matcher.replaceFirst("");
     }
 
     private String truncate(String rendered) {
