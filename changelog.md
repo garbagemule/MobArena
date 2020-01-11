@@ -11,6 +11,7 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+- Arena signs now support dynamic list entry variables for 4 different player lists. As an example, `<notready-1>` results in the name of a player in the lobby who hasn't readied up yet. This is useful for visualizing who is holding up the lobby. Check the wiki for details.
 
 ## [0.104.2] - 2020-01-03
 - The region overlap check now works across both arena and lobby regions, i.e. all four combinations of intersections between two regions (arena-arena, arena-lobby, lobby-arena, and lobby-lobby) are evaluated.
