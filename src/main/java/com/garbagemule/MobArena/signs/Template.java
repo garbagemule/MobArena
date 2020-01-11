@@ -4,11 +4,13 @@ class Template {
 
     final String[] idle;
     final String[] joining;
+    final String[] ready;
     final String[] running;
 
-    private Template(String[] idle, String[] joining, String[] running) {
+    private Template(String[] idle, String[] joining, String[] ready, String[] running) {
         this.idle = idle;
         this.joining = joining;
+        this.ready = ready;
         this.running = running;
     }
 
@@ -18,6 +20,7 @@ class Template {
         private String[] base;
         private String[] idle;
         private String[] joining;
+        private String[] ready;
         private String[] running;
 
         Builder(String id) {
@@ -39,12 +42,21 @@ class Template {
             return this;
         }
 
+        Builder withReady(String[] lines) {
+            this.ready = lines;
+            return this;
+        }
+
         Builder withRunning(String[] lines) {
             this.running = lines;
             return this;
         }
 
         Template build() {
+            // If the base template has not been defined, there must be
+            // templates for the idle, joining, and running states.
+            // A template for the ready state is optional; If not defined,
+            // it will inherit from the joining template.
             if (base == null) {
                 if (idle == null) {
                     missing("idle");
@@ -62,10 +74,13 @@ class Template {
             if (joining == null) {
                 joining = base;
             }
+            if (ready == null) {
+                ready = joining;
+            }
             if (running == null) {
                 running = base;
             }
-            return new Template(idle, joining, running);
+            return new Template(idle, joining, ready, running);
         }
 
         private void missing(String state) {

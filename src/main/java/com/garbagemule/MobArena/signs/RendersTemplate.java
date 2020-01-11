@@ -37,6 +37,9 @@ class RendersTemplate {
             return template.running;
         }
         if (arena.getPlayersInLobby().size() > 0) {
+            if (arena.getNonreadyPlayers().size() == 0) {
+                return template.ready;
+            }
             return template.joining;
         }
         return template.idle;
