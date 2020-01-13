@@ -96,6 +96,47 @@ public class RendersTemplateTest {
     }
 
     @Test
+    public void readyOverridesLobbyIfPlayersReady() {
+        Player ready = mock(Player.class);
+        Arena arena = mock(Arena.class);
+        when(arena.configName()).thenReturn("castle");
+        when(arena.isRunning()).thenReturn(false);
+        when(arena.getPlayersInLobby()).thenReturn(Collections.singleton(ready));
+        when(arena.getNonreadyPlayers()).thenReturn(Collections.emptyList());
+        when(arena.getReadyPlayersInLobby()).thenReturn(Collections.singleton(ready));
+        String[] readyTemplate = {"we", "are", "all", "ready"};
+        Template template = new Template.Builder("template")
+            .withBase(new String[]{"this", "is", "the", "base"})
+            .withJoining(new String[]{"joining", "template", "is", "here"})
+            .withReady(readyTemplate)
+            .build();
+
+        String[] result = subject.render(template, arena);
+
+        assertThat(result, equalTo(readyTemplate));
+    }
+
+    @Test
+    public void readyPlayersReturnsJoiningIfNotDefined() {
+        Player ready = mock(Player.class);
+        Arena arena = mock(Arena.class);
+        when(arena.configName()).thenReturn("castle");
+        when(arena.isRunning()).thenReturn(false);
+        when(arena.getPlayersInLobby()).thenReturn(Collections.singleton(ready));
+        when(arena.getNonreadyPlayers()).thenReturn(Collections.emptyList());
+        when(arena.getReadyPlayersInLobby()).thenReturn(Collections.singleton(ready));
+        String[] joining = {"we", "in", "da", "lobby"};
+        Template template = new Template.Builder("template")
+            .withBase(new String[]{"this", "is", "the", "base"})
+            .withJoining(joining)
+            .build();
+
+        String[] result = subject.render(template, arena);
+
+        assertThat(result, equalTo(joining));
+    }
+
+    @Test
     public void rendersReadyListEntries() {
         Player ready = mock(Player.class);
         when(ready.getName()).thenReturn("Bobcat00");
