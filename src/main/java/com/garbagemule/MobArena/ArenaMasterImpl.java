@@ -280,6 +280,9 @@ public class ArenaMasterImpl implements ArenaMaster
         spawnsPets.clear();
 
         ConfigurationSection items = settings.getConfigurationSection("pet-items");
+        if(items == null) {
+            throw new ConfigError("Could not find pet-items in config.yml!");
+        }
 
         for (String key : items.getKeys(false)) {
             EntityType entity;
