@@ -281,7 +281,8 @@ public class ArenaMasterImpl implements ArenaMaster
 
         ConfigurationSection items = settings.getConfigurationSection("pet-items");
         if(items == null) {
-            throw new ConfigError("Could not find pet-items in config.yml!");
+            makeSection(settings, "pet-items");
+            items = settings.getConfigurationSection("pet-items");
         }
 
         for (String key : items.getKeys(false)) {
