@@ -83,6 +83,7 @@
       <url>http://nexus.hc.to/content/repositories/pub_releases</url>
     </repository>
 
+    <!-- bStats repo -->
     <repository>
       <id>bstats-repo</id>
       <url>http://repo.codemc.org/repository/maven-public/</url>
@@ -112,6 +113,7 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- bStats -->
     <dependency>
       <groupId>org.bstats</groupId>
       <artifactId>bstats-bukkit</artifactId>
