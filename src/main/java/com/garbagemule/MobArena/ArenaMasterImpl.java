@@ -280,6 +280,9 @@ public class ArenaMasterImpl implements ArenaMaster
         spawnsPets.clear();
 
         ConfigurationSection items = settings.getConfigurationSection("pet-items");
+        if (items == null) {
+            return;
+        }
 
         for (String key : items.getKeys(false)) {
             EntityType entity;
