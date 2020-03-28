@@ -89,7 +89,7 @@
       <url>http://repo.codemc.org/repository/maven-public/</url>
     </repository>
 
-    <!-- JitPack for MagicSpells -->
+    <!-- JitPack for Vault, MagicSpells -->
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
@@ -107,9 +107,9 @@
 
     <!-- Vault -->
     <dependency>
-      <groupId>net.milkbowl.vault</groupId>
+      <groupId>com.github.MilkBowl</groupId>
       <artifactId>VaultAPI</artifactId>
-      <version>1.5</version>
+      <version>1.7</version>
       <scope>provided</scope>
     </dependency>
 
