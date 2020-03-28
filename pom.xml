@@ -125,7 +125,7 @@
     <dependency>
       <groupId>com.github.TheComputerGeek2</groupId>
       <artifactId>MagicSpells</artifactId>
-      <version>0ad7c1f1a1</version>
+      <version>3.5-Release</version>
       <scope>provided</scope>
     </dependency>
 
