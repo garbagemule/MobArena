@@ -859,7 +859,6 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public void revivePlayer(Player p) {
         removePermissionAttachments(p);
         removePotionEffects(p);

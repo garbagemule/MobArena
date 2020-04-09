@@ -264,10 +264,6 @@ public class MobArena extends JavaPlugin
         return lastFailureCause;
     }
 
-    public File getPluginFile() {
-        return getFile();
-    }
-
     @Override
     public FileConfiguration getConfig() {
         if (config == null) {
