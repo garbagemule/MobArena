@@ -17,17 +17,17 @@ public class LivingBomb implements Ability
     /**
      * How many ticks before the bomb goes off.
      */
-    private final int FUSE = 60;
+    private static final int FUSE = 60;
     
     /**
      * How close players must be to be affected by the bomb.
      */
-    private final int RADIUS = 3;
+    private static final int RADIUS = 3;
     
     /**
      * How many ticks players affected by the bomb should burn.
      */
-    private final int AFTERBURN = 40;
+    private static final int AFTERBURN = 40;
     
     @Override
     public void execute(final Arena arena, MABoss boss) {

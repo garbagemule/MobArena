@@ -17,7 +17,7 @@ public class DisorientTarget implements Ability
     /**
      * If the boss has no target, should a random player be selected?
      */
-    private final boolean RANDOM = false;
+    private static final boolean RANDOM = false;
     
     @Override
     public void execute(Arena arena, MABoss boss) {

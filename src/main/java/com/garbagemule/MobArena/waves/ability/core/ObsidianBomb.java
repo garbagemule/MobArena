@@ -22,7 +22,7 @@ public class ObsidianBomb implements Ability
     /**
      * How many ticks before the bomb goes off.
      */
-    private final int FUSE = 80;
+    private static final int FUSE = 80;
     
     @Override
     public void execute(final Arena arena, MABoss boss) {

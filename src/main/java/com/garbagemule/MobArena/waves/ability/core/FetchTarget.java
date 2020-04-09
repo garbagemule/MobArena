@@ -16,7 +16,7 @@ public class FetchTarget implements Ability
     /**
      * If the boss has no target, should a random player be selected?
      */
-    private final boolean RANDOM = true;
+    private static final boolean RANDOM = true;
     
     @Override
     public void execute(Arena arena, MABoss boss) {

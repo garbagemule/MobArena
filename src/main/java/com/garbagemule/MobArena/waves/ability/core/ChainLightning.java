@@ -21,13 +21,13 @@ public class ChainLightning implements Ability
      * How many blocks the chain lightning can spread over. 
      * Must be greater than 0.
      */
-    private final int RADIUS = 4;
+    private static final int RADIUS = 4;
     
     /**
      * How many server ticks between each lightning strike.
      * Must be greater than 0.
      */
-    private final int TICKS = 10;
+    private static final int TICKS = 10;
     
     @Override
     public void execute(Arena arena, MABoss boss) {
