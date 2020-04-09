@@ -14,7 +14,6 @@ public class SheepBouncer implements Runnable
 {
     public static final int BOUNCE_INTERVAL = 20;
     private Arena arena;
-    private Set<LivingEntity> sheep;
 
     private BukkitTask task;
     
@@ -51,7 +50,7 @@ public class SheepBouncer implements Runnable
         }
         
         // Put all the sheep in a new collection for iteration purposes.
-        sheep = new HashSet<>(arena.getMonsterManager().getExplodingSheep());
+        Set<LivingEntity> sheep = new HashSet<>(arena.getMonsterManager().getExplodingSheep());
         
         // If there are no sheep, reschedule and return.
         if (sheep.isEmpty()) {
@@ -90,23 +89,4 @@ public class SheepBouncer implements Runnable
         // Reschedule for more bouncy madness!
         task = Bukkit.getScheduler().runTaskLater(arena.getPlugin(), this, BOUNCE_INTERVAL);
     }
-    
-    /*private boolean isTargetNearby(Creature c, LivingEntity t) {
-        // Null or dead, return false
-        if (t == null || c == null || c.isDead()) {
-            return false;
-        }
-        
-        // If the subjects are in different worlds, return false.
-        if (c.getWorld() != t.getWorld()) {
-            return false;
-        }
-        
-        // If distance is more than 3 blocks, not close enough.
-        if (c.getLocation().distanceSquared(t.getLocation()) > 8D) {
-            return false;
-        }
-        
-        return true;
-    }*/
 }
