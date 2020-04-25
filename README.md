@@ -1,4 +1,4 @@
-MobArena [![Build Status](https://travis-ci.org/garbagemule/MobArena.svg?branch=master)](https://travis-ci.org/garbagemule/MobArena) [![Documentation Status](https://readthedocs.org/projects/mobarena/badge/?version=latest)](http://mobarena.readthedocs.io/en/latest/?badge=latest)
+MobArena [![Build Status](https://travis-ci.org/garbagemule/MobArena.svg?branch=master)](https://travis-ci.org/garbagemule/MobArena)
 ========
 
 MobArena is an arena-style minigame for Spigot-based Minecraft servers
