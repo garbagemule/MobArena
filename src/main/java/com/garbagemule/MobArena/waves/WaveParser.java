@@ -21,6 +21,7 @@ import com.garbagemule.MobArena.waves.types.SpecialWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.SwarmWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
@@ -254,7 +255,7 @@ public class WaveParser
         // Check if there's a specific boss name
         String bossName = config.getString("name", null);
         if (bossName != null && !bossName.isEmpty()) {
-            result.setBossName(bossName);
+            result.setBossName(ChatColor.translateAlternateColorCodes('&', bossName));
         }
         
         // Grab the boss health
