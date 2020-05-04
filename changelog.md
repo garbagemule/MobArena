@@ -15,6 +15,7 @@ These changes will (most likely) be included in the next version.
 - Arena signs now support dynamic list entry variables for 4 different player lists. As an example, `<notready-1>` results in the name of a player in the lobby who hasn't readied up yet. This is useful for visualizing who is holding up the lobby. Check the wiki for details.
 - Elytra are now supported chest pieces in class chests.
 - Boss names now support color codes.
+- The Root Target ability now uses potion effects (slowness, slow falling, and negative jump boost) instead of repeated teleports. This should make for a smoother root experience.
 - Config-files with missing `pet-items` nodes no longer errors. A missing `pet-items` node in `global-settings` is treated as empty, i.e. no pet items will be registered.
 
 ## [0.104.2] - 2020-01-03

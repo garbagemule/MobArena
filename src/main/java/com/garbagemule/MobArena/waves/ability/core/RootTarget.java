@@ -1,16 +1,14 @@
 package com.garbagemule.MobArena.waves.ability.core;
 
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityInfo;
 import com.garbagemule.MobArena.waves.ability.AbilityUtils;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  * DISCLAIMER: The Ability source code is provided as-is, and the creator(s) of
@@ -36,16 +34,14 @@ import org.bukkit.entity.Player;
 public class RootTarget implements Ability
 {
     /**
-     * How many times the player will be warped back to his original position.
-     * Must be greater than 0.
+     * How long the the potions last (in ticks).
      */
-    private static final int ITERATIONS = 30;
+    private static final int DURATION = 30;
     
     /**
-     * How many server ticks between each iteration of
-     * Must be greater than 0.
+     * The amplifier for the potions.
      */
-    private static final int TICKS = 1;
+    private static final int AMPLIFIER = 100;
     
     @Override
     public void execute(Arena arena, MABoss boss) {
@@ -54,49 +50,8 @@ public class RootTarget implements Ability
             return;
 
         Player player = (Player) target;
-        ArenaRegion region = arena.getRegion();
-
-        Block block = player.getLocation().getBlock();
-        Block solid = findSolidBlockBelow(region, block);
-
-        Location location = player.getLocation();
-        location.setY(solid.getLocation().getY() + 1);
-
-        rootTarget(arena, player, location, ITERATIONS);
-    }
-
-    private Block findSolidBlockBelow(ArenaRegion region, Block block) {
-        Block below = block.getRelative(BlockFace.DOWN);
-
-        // If the block below is not in the region, return the block itself
-        if (!region.contains(below.getLocation())) {
-            return block;
-        }
-
-        // If the block below is solid, return it
-        if (below.getType().isSolid()) {
-            return below;
-        }
-
-        // Otherwise, recurse downwards
-        return findSolidBlockBelow(region, below);
-    }
-    
-    private void rootTarget(final Arena arena, final Player p, final Location loc, final int counter) {
-        // If the counter is 0, we're done.
-        if (counter <= 0) {
-            return;
-        }
-        
-        arena.scheduleTask(new Runnable() {
-            public void run() {
-                if (!arena.isRunning() || !arena.inArena(p)) {
-                    return;
-                }
-                
-                p.teleport(loc);
-                rootTarget(arena, p, loc, counter - 1);
-            }
-        }, TICKS);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, DURATION, AMPLIFIER));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, DURATION, AMPLIFIER));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, DURATION, -AMPLIFIER));
     }
 }
