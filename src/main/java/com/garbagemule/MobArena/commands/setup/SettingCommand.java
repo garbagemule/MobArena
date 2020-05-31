@@ -1,5 +1,6 @@
 package com.garbagemule.MobArena.commands.setup;
 
+import com.garbagemule.MobArena.ConfigError;
 import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.framework.Arena;
@@ -89,7 +90,13 @@ public class SettingCommand implements Command {
 
         // Save config-file and reload arena
         am.saveConfig();
-        am.reloadArena(args[0]);
+        try {
+            am.reloadArena(args[0]);
+        } catch (ConfigError e) {
+            am.getGlobalMessenger().tell(sender, "Failed to reload arena after changing setting, reason:\n" + ChatColor.RED + e.getMessage());
+            am.getGlobalMessenger().tell(sender, "Fix the error in your config-file, then run " + ChatColor.YELLOW + "/ma reload");
+            return true;
+        }
 
         // Notify the sender
         StringBuilder buffy = new StringBuilder();
