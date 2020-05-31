@@ -77,12 +77,6 @@
       <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
     </repository>
 
-    <!-- Vault repo -->
-    <repository>
-      <id>vault-repo</id>
-      <url>http://nexus.hc.to/content/repositories/pub_releases</url>
-    </repository>
-
     <!-- bStats repo -->
     <repository>
       <id>bstats-repo</id>
