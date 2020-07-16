@@ -19,6 +19,7 @@ These changes will (most likely) be included in the next version.
 - Config-files with missing `pet-items` nodes no longer errors. A missing `pet-items` node in `global-settings` is treated as empty, i.e. no pet items will be registered.
 - The `player-time-in-arena` setting has been fixed.
 - Config-file errors imposed by incorrect usage of `/ma setting` no longer cause "internal errors". Instead, the errors are properly communicated in the command output similar to how the `/ma reload` command works.
+- The MagicSpells integration has been removed. This means that the extra `magicspells.yml` config-file (if it exists) no longer does anything and can be removed.
 
 ## [0.104.2] - 2020-01-03
 - The region overlap check now works across both arena and lobby regions, i.e. all four combinations of intersections between two regions (arena-arena, arena-lobby, lobby-arena, and lobby-lobby) are evaluated.

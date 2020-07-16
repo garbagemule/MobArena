@@ -5,7 +5,6 @@ import com.garbagemule.MobArena.config.LoadsConfigFile;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
-import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.metrics.ArenaCountChart;
 import com.garbagemule.MobArena.metrics.ClassChestsChart;
 import com.garbagemule.MobArena.metrics.ClassCountChart;
@@ -96,7 +95,6 @@ public class MobArena extends JavaPlugin
 
             registerConfigurationSerializers();
             setupVault();
-            setupMagicSpells();
             setupBossAbilities();
             setupListeners();
             setupMetrics();
@@ -145,16 +143,6 @@ public class MobArena extends JavaPlugin
         } else {
             getLogger().warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
         }
-    }
-
-    private void setupMagicSpells() {
-        Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
-        if (spells == null) {
-            return;
-        }
-
-        getLogger().info("MagicSpells found, loading config-file.");
-        this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
     }
 
     private void setupBossAbilities() {
