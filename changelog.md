@@ -18,6 +18,7 @@ These changes will (most likely) be included in the next version.
 - The Root Target ability now uses potion effects (slowness, slow falling, and negative jump boost) instead of repeated teleports. This should make for a smoother root experience.
 - Config-files with missing `pet-items` nodes no longer errors. A missing `pet-items` node in `global-settings` is treated as empty, i.e. no pet items will be registered.
 - The `player-time-in-arena` setting has been fixed.
+- The `soft-restore` setting has been fixed for blocks broken by players. Note that the functionality is still unreliable for non-trivial blocks.
 - Config-file errors imposed by incorrect usage of `/ma setting` no longer cause "internal errors". Instead, the errors are properly communicated in the command output similar to how the `/ma reload` command works.
 - The MagicSpells integration has been removed. This means that the extra `magicspells.yml` config-file (if it exists) no longer does anything and can be removed.
 

@@ -230,9 +230,6 @@ public class ArenaListener
             return true;
         
         if (softRestore) {
-            if (arena.isProtected())
-                return false;
-            
             BlockState state = b.getState();
             Repairable r = null;
             
