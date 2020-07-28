@@ -95,6 +95,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -125,6 +126,8 @@ public class ArenaListener
 
     private Set<Player> banned;
 
+    private EnumSet<EntityType> excludeFromRetargeting;
+
     public ArenaListener(Arena arena, MobArena plugin) {
         this.plugin = plugin;
         this.arena = arena;
@@ -154,6 +157,11 @@ public class ArenaListener
         this.classLimits = arena.getClassLimitManager();
 
         this.banned = new HashSet<>();
+
+        this.excludeFromRetargeting = EnumSet.of(
+            EntityType.ELDER_GUARDIAN,
+            EntityType.GUARDIAN
+        );
     }
     
     void pvpActivate() {
@@ -849,6 +857,10 @@ public class ArenaListener
     private void onMonsterTarget(EntityTargetEvent event, Entity monster, Entity target) {
         // Null means we lost our target or the target died, so find a new one
         if (target == null) {
+            // ... unless the monster is excluded from retargeting
+            if (excludeFromRetargeting.contains(monster.getType())) {
+                return;
+            }
             event.setTarget(MAUtils.getClosestPlayer(plugin, monster, arena));
             return;
         }
