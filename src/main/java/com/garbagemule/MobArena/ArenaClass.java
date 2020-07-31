@@ -25,6 +25,7 @@ public class ArenaClass
     private boolean unbreakableWeapons, unbreakableArmor;
     private Thing price;
     private Location classchest;
+    private String petName;
 
     /**
      * Create a new, empty arena class with the given name.
@@ -132,6 +133,14 @@ public class ArenaClass
 
     public void setEffects(List<Thing> effects) {
         this.effects = effects;
+    }
+
+    public String getPetName() {
+        return this.petName;
+    }
+
+    public void setPetName(String petName) {
+        this.petName = petName;
     }
     
     public boolean hasPermission(Player p) {
