@@ -9,6 +9,7 @@ import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.MonsterManager;
 import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.ProjectileManager;
 import com.garbagemule.MobArena.RewardManager;
 import com.garbagemule.MobArena.ScoreboardManager;
 import com.garbagemule.MobArena.leaderboards.Leaderboard;
@@ -110,7 +111,8 @@ public interface Arena
     void revivePlayer(Player p);
     
     ScoreboardManager getScoreboard();
-    
+
+    ProjectileManager getProjectileManager();
     
     Messenger getMessenger();
 

@@ -139,6 +139,8 @@ public class ArenaImpl implements Arena
 
     private SpawnsPets spawnsPets;
 
+    private ProjectileManager projectileManager;
+
     /**
      * Primary constructor. Requires a name and a world.
      */
@@ -233,6 +235,8 @@ public class ArenaImpl implements Arena
         this.playerSpecArena = PlayerSpecArena.create(this);
 
         this.spawnsPets = plugin.getArenaMaster().getSpawnsPets();
+
+        this.projectileManager = new ProjectileManager();
     }
     
     
@@ -426,15 +430,19 @@ public class ArenaImpl implements Arena
     public ScoreboardManager getScoreboard() {
         return scoreboard;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+    @Override
+    public ProjectileManager getProjectileManager() {
+        return projectileManager;
+    }
 
     @Override
     public Messenger getMessenger() {
@@ -775,6 +783,8 @@ public class ArenaImpl implements Arena
         
         removePermissionAttachments(p);
         removePotionEffects(p);
+
+        projectileManager.clearProjectiles(p);
         
         boolean refund = inLobby(p);
 
