@@ -1147,7 +1147,7 @@ public class ArenaImpl implements Arena
     }
     
     @Override
-    public void assignClassGiveInv(Player p, String className, ItemStack[] contents) {
+    public void assignClassGiveInv(Player p, String className, ItemStack[] source) {
         ArenaPlayer arenaPlayer = arenaPlayerMap.get(p);
         ArenaClass arenaClass   = classes.get(className);
         
@@ -1162,6 +1162,14 @@ public class ArenaImpl implements Arena
         
         PlayerInventory inv = p.getInventory();
 
+        // Clone the source array to make sure we don't modify its contents
+        ItemStack[] contents = new ItemStack[source.length];
+        for (int i = 0; i < source.length; i++) {
+            if (source[i] != null) {
+                contents[i] = source[i].clone();
+            }
+        }
+
         // Collect armor items, because setContents() now overwrites everyhing
         ItemStack helmet = null;
         ItemStack chestplate = null;
@@ -1172,7 +1180,7 @@ public class ArenaImpl implements Arena
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
         if (contents[last] != null) {
-            helmet = contents[last].clone();
+            helmet = contents[last];
             if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(helmet);
             }
@@ -1187,7 +1195,7 @@ public class ArenaImpl implements Arena
             String type = parts[parts.length - 1];
             if (type.equals("HELMET")) continue;
 
-            ItemStack stack = contents[i].clone();
+            ItemStack stack = contents[i];
             if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(stack);
             }
@@ -1202,9 +1210,8 @@ public class ArenaImpl implements Arena
         }
         
         // Equip the fifth last slot as the off-hand
-        ItemStack fifth = contents[contents.length - 5];
-        if (fifth != null) {
-            offhand = fifth.clone();
+        offhand = contents[contents.length - 5];
+        if (offhand != null) {
             if (arenaClass.hasUnbreakableWeapons()) {
                 makeUnbreakable(offhand);
             }

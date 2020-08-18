@@ -24,6 +24,7 @@ These changes will (most likely) be included in the next version.
 - The `soft-restore` setting has been fixed for blocks broken by players. Note that the functionality is still unreliable for non-trivial blocks.
 - Config-file errors imposed by incorrect usage of `/ma setting` no longer cause "internal errors". Instead, the errors are properly communicated in the command output similar to how the `/ma reload` command works.
 - Guardians and elder guardians no longer instantly retarget players when they break line of sight. This should make their behavior work a bit closer to vanilla.
+- Items in class chests are now cloned before they are made unbreakable and given to players. This fixes an issue where setting `unbreakable-weapons: false` had no effect on the items. Note that any affected items in existing class chests will need to be replaced.
 - The MagicSpells integration has been removed. This means that the extra `magicspells.yml` config-file (if it exists) no longer does anything and can be removed.
 
 ## [0.104.2] - 2020-01-03
