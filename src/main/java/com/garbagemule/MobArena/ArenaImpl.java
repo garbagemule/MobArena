@@ -854,8 +854,7 @@ public class ArenaImpl implements Arena
     @Override
     public void playerRespawn(Player p) {
         deadPlayers.remove(p);
-        plugin.getServer().getScheduler()
-            .scheduleSyncDelayedTask(plugin, () -> revivePlayer(p));
+        revivePlayer(p);
     }
 
     @Override
@@ -863,9 +862,13 @@ public class ArenaImpl implements Arena
         removePermissionAttachments(p);
         removePotionEffects(p);
         
-        discardPlayer(p);
+        specPlayers.add(p);
+
         if (settings.getBoolean("spectate-on-death", true)) {
-            playerSpec(p, null);
+            messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
+        } else {
+            plugin.getServer().getScheduler()
+                .scheduleSyncDelayedTask(plugin, () -> discardPlayer(p));
         }
     }
 

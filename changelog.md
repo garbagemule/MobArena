@@ -17,6 +17,7 @@ These changes will (most likely) be included in the next version.
 - Elytra and Netherite armor pieces now correctly auto-equip if specified in the generic `armor` node in classes in the config-file.
 - Boss names now support color codes.
 - The Root Target ability now uses potion effects (slowness, slow falling, and negative jump boost) instead of repeated teleports. This should make for a smoother root experience.
+- Using `spectate-on-death: true` no longer forces players out to their join location/exit warp before moving them to the spectator area. This should prevent "jumpy" behavior in multi-world setups.
 - Config-files with missing `pet-items` nodes no longer errors. A missing `pet-items` node in `global-settings` is treated as empty, i.e. no pet items will be registered.
 - The `player-time-in-arena` setting has been fixed.
 - The `soft-restore` setting has been fixed for blocks broken by players. Note that the functionality is still unreliable for non-trivial blocks.
