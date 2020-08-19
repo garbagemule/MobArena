@@ -333,7 +333,7 @@ public class MAGlobalListener implements Listener
             arena.getEventListener().onPlayerQuit(event);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void playerRespawn(PlayerRespawnEvent event) {
         for (Arena arena : am.getArenas()) {
             if (arena.getEventListener().onPlayerRespawn(event)) {
