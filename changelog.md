@@ -16,6 +16,7 @@ These changes will (most likely) be included in the next version.
 - Elytra are now supported chest pieces in class chests.
 - Elytra and Netherite armor pieces now correctly auto-equip if specified in the generic `armor` node in classes in the config-file.
 - Boss names now support color codes.
+- New per-arena setting `arena-warp-offset` can be used to spread out players randomly by an offset from the arena warp. This should help prevent players taking suffocation damage.
 - The Root Target ability now uses potion effects (slowness, slow falling, and negative jump boost) instead of repeated teleports. This should make for a smoother root experience.
 - Using `spectate-on-death: true` no longer forces players out to their join location/exit warp before moving them to the spectator area. This should prevent "jumpy" behavior in multi-world setups.
 - Players should now properly respawn at the spectator area rather than at world spawn on servers with plugins that override respawn locations.

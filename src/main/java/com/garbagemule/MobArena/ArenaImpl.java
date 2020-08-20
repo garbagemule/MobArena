@@ -126,6 +126,9 @@ public class ArenaImpl implements Arena
     private StartDelayTimer startDelayTimer;
     private boolean isolatedChat;
     
+    // Warp offsets
+    private double arenaWarpOffset;
+
     // Scoreboards
     private ScoreboardManager scoreboard;
 
@@ -220,6 +223,8 @@ public class ArenaImpl implements Arena
 
         this.isolatedChat  = settings.getBoolean("isolated-chat", false);
         
+        this.arenaWarpOffset = settings.getDouble("arena-warp-offset", 0.0);
+
         // Scoreboards
         this.scoreboard = (settings.getBoolean("use-scoreboards", true) ? new ScoreboardManager(this) : new NullScoreboardManager(this));
 
@@ -518,7 +523,16 @@ public class ArenaImpl implements Arena
             }
             
             movingPlayers.add(p);
-            p.teleport(region.getArenaWarp());
+            if (arenaWarpOffset > 0.01) {
+                Location warp = region.getArenaWarp();
+                double x = warp.getX() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                double y = warp.getY();
+                double z = warp.getZ() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                Location offset = new Location(warp.getWorld(), x, y, z);
+                p.teleport(offset);
+            } else {
+                p.teleport(region.getArenaWarp());
+            }
             movingPlayers.remove(p);
 
             addClassPermissions(p);
