@@ -11,7 +11,7 @@ public @interface AbilityInfo
      * This value is printed when a boss executes the ability in the arena.
      */
     String name();
-    
+
     /**
      * The config aliases for the ability.
      * This is used by MobArena to parse ability names from the config-file.

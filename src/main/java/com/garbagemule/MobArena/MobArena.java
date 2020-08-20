@@ -114,7 +114,7 @@ public class MobArena extends JavaPlugin
             }
         }
     }
-    
+
     private void setupArenaMaster() {
         arenaMaster = new ArenaMasterImpl(this);
     }

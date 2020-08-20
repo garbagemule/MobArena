@@ -36,7 +36,7 @@ public class PickClassCommand implements Command
 
         // Require a class name
         if (args.length != 1) return false;
-        
+
         // Unwrap the sender
         Player p = Commands.unwrap(sender);
 

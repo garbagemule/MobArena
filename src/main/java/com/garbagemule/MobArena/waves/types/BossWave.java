@@ -24,22 +24,22 @@ import java.util.Set;
 public class BossWave extends AbstractWave
 {
     private String bossName;
-    
+
     private MACreature monster;
     private Set<MABoss> bosses;
-    
+
     private boolean useHealthMultiplier;
     private int healthMultiplier;
     private int flatHealth;
-    
+
     private List<Ability> abilities;
     private boolean activated, abilityAnnounce;
-    
+
     private int abilityInterval;
 
     private Thing reward;
     private List<ItemStack> drops;
-    
+
     public BossWave(MACreature monster) {
         this.monster   = monster;
         this.bosses    = new HashSet<>();
@@ -47,48 +47,48 @@ public class BossWave extends AbstractWave
         this.activated = false;
         this.abilityAnnounce = false;
         this.setType(WaveType.BOSS);
-        
+
         this.useHealthMultiplier = true;
         this.healthMultiplier = 0;
         this.flatHealth = 0;
     }
-    
+
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
         Map<MACreature,Integer> result = new HashMap<>();
         result.put(monster, 1);
         return result;
     }
-    
+
     public String getBossName() {
         return bossName;
     }
-    
+
     public void setBossName(String bossName) {
         this.bossName = bossName;
     }
-    
+
     public int getMaxHealth(int playerCount) {
         if (useHealthMultiplier) {
             return (playerCount + 1) * 20 * healthMultiplier;
         }
         return flatHealth;
     }
-    
+
     public void setHealth(BossHealth health) {
         this.healthMultiplier = health.getMultiplier();
         this.useHealthMultiplier = true;
     }
-    
+
     public void setFlatHealth(int flatHealth) {
         this.flatHealth = flatHealth;
         this.useHealthMultiplier = false;
     }
-    
+
     public void addMABoss(MABoss boss) {
         bosses.add(boss);
     }
-    
+
     public Set<MABoss> getMABosses() {
         Set<MABoss> result = new HashSet<>();
         for (MABoss b : bosses) {
@@ -98,27 +98,27 @@ public class BossWave extends AbstractWave
         }
         return result;
     }
-    
+
     public void addBossAbility(Ability ability) {
         abilities.add(ability);
     }
-    
+
     public int getAbilityInterval() {
         return abilityInterval;
     }
-    
+
     public void setAbilityInterval(int abilityInterval) {
         this.abilityInterval = abilityInterval;
     }
-    
+
     public boolean getAbilityAnnounce() {
         return abilityAnnounce;
     }
-    
+
     public void setAbilityAnnounce(boolean abilityAnnounce) {
         this.abilityAnnounce = abilityAnnounce;
     }
-    
+
     public Thing getReward() {
         return reward;
     }
@@ -134,17 +134,17 @@ public class BossWave extends AbstractWave
     public void setDrops(List<ItemStack> drops) {
         this.drops = drops;
     }
-    
+
     public void activateAbilities(Arena arena) {
         if (activated) {
             return;
         }
-        
+
         BossAbilityThread bat = new BossAbilityThread(this, abilities, arena);
         arena.scheduleTask(bat, 100);
         activated = true;
     }
-    
+
     public void announceAbility(Ability ability, MABoss boss, Arena arena) {
         if(getAbilityAnnounce()) {
             AbilityInfo info = ability.getClass().getAnnotation(AbilityInfo.class);

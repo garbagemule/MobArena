@@ -20,12 +20,12 @@ public class RootTarget implements Ability
      * How long the the potions last (in ticks).
      */
     private static final int DURATION = 30;
-    
+
     /**
      * The amplifier for the potions.
      */
     private static final int AMPLIFIER = 100;
-    
+
     @Override
     public void execute(Arena arena, MABoss boss) {
         final LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), true);

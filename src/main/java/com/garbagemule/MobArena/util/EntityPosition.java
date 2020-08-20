@@ -26,7 +26,7 @@ public class EntityPosition implements Serializable{
         this.yaw = yaw;
         this.pitch = pitch;
     }
-    
+
     public EntityPosition(Location location) {
         this.x = location.getX();
         this.y = location.getY();
@@ -35,7 +35,7 @@ public class EntityPosition implements Serializable{
         this.yaw = location.getYaw();
         this.pitch = location.getPitch();
     }
-    
+
     public Location getLocation(World world) {
         return new Location(world, x, y, z, yaw, pitch);
     }

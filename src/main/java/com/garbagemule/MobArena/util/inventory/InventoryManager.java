@@ -17,15 +17,15 @@ import java.util.logging.Level;
 public class InventoryManager
 {
     private Map<Player, ItemStack[]> inventories;
-    
+
     public InventoryManager() {
         this.inventories = new HashMap<>();
     }
-    
+
     public void put(Player p, ItemStack[] contents) {
         inventories.put(p, contents);
     }
-    
+
     public void equip(Player p) {
         ItemStack[] contents = inventories.get(p);
         if (contents == null) {
@@ -37,7 +37,7 @@ public class InventoryManager
     public void remove(Player p) {
         inventories.remove(p);
     }
-    
+
     /**
      * Clear a player's inventory completely.
      * @param p a player
@@ -59,11 +59,11 @@ public class InventoryManager
             }
         }
     }
-    
+
     public static boolean hasEmptyInventory(Player p) {
         ItemStack[] inventory = p.getInventory().getContents();
         ItemStack[] armor     = p.getInventory().getArmorContents();
-        
+
         // Check for null or id 0, or AIR
         for (ItemStack stack : inventory) {
             if (stack != null && stack.getType() != Material.AIR)
@@ -74,10 +74,10 @@ public class InventoryManager
             if (stack != null && stack.getType() != Material.AIR)
                 return false;
         }
-        
+
         return true;
     }
-    
+
     public static boolean restoreFromFile(MobArena plugin, Player p) {
         try {
             File inventories = new File(plugin.getDataFolder(), "inventories");
@@ -89,10 +89,10 @@ public class InventoryManager
 
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
-            
+
             ItemStack[] contents = config.getList("contents").toArray(new ItemStack[0]);
             p.getInventory().setContents(contents);
-            
+
             file.delete();
             return true;
         } catch (Exception e) {

@@ -25,29 +25,29 @@ public class PlayerListCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Grab the argument, if any.
         String arg1 = (args.length > 0 ? args[0] : "");
-        
+
         String list = null;
         if (!arg1.equals("")) {
             Arena arena = am.getArenaWithName(arg1);
-            
+
             if (arena == null) {
                 am.getGlobalMessenger().tell(sender, Msg.ARENA_DOES_NOT_EXIST);
                 return false;
             }
-            
+
             list = MAUtils.listToString(arena.getPlayersInArena(), am.getPlugin());
         } else {
             StringBuilder buffy = new StringBuilder();
             List<Player> players = new LinkedList<>();
-            
+
             for (Arena arena : am.getArenas()) {
                 players.addAll(arena.getPlayersInArena());
             }
-            
+
             buffy.append(MAUtils.listToString(players, am.getPlugin()));
             list = buffy.toString();
         }
-        
+
         am.getGlobalMessenger().tell(sender, Msg.MISC_LIST_PLAYERS.format(list));
         return true;
     }

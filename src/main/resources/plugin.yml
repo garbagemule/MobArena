@@ -36,7 +36,7 @@ permissions:
     mobarena.use.ready:
         description: Ready to start the battle
         default: true
-    
+
     mobarena.admin:
         description: Gives access to all admin commands
         default: op
@@ -61,7 +61,7 @@ permissions:
     mobarena.admin.teleport:
         description: Immune to teleport blocking rules.
         default: false
-    
+
     mobarena.setup:
         description: Gives access to all setup commands
         default: op

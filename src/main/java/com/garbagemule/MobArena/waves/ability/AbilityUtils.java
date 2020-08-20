@@ -14,7 +14,7 @@ import java.util.Random;
 public class AbilityUtils
 {
     public static Random random = new Random();
-    
+
     /**
      * Get the target player of the LivingEntity if possible.
      * @param the arena
@@ -25,18 +25,18 @@ public class AbilityUtils
     public static LivingEntity getTarget(Arena arena, LivingEntity entity, boolean random) {
         if (entity instanceof Creature) {
             LivingEntity target = ((Creature) entity).getTarget();
-            
+
             if (target instanceof Player && arena.inArena((Player) target)) {
                 return target;
             }
         }
-        
+
         if (random) {
             return getRandomPlayer(arena);
         }
         return null;
     }
-    
+
     /**
      * Get a random arena player.
      * @param arena the arena
@@ -45,10 +45,10 @@ public class AbilityUtils
     public static Player getRandomPlayer(Arena arena) {
         List<Player> list = new ArrayList<>(arena.getPlayersInArena());
         if (list.isEmpty()) return null;
-        
+
         return list.get(random.nextInt(list.size()));
     }
-    
+
     /**
      * Get a list of nearby players
      * @param arena the arena
@@ -65,12 +65,12 @@ public class AbilityUtils
         }
         return result;
     }
-    
+
     /**
      * Get a list of distant players
      * @param arena the arena
      * @param boss the boss
-     * @param x the 'radius' in which to exclude players 
+     * @param x the 'radius' in which to exclude players
      * @return a list of distant players
      */
     public static List<Player> getDistantPlayers(Arena arena, Entity boss, int x) {

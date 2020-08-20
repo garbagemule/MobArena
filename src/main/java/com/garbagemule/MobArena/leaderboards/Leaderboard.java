@@ -21,17 +21,17 @@ public class Leaderboard
 {
     private MobArena plugin;
     private Arena    arena;
-    
+
     private Location  topLeft;
     private Sign      topLeftSign;
     private BlockFace direction;
     private int rows, cols, trackingId;
-    
+
     private List<LeaderboardColumn> boards;
     private List<ArenaPlayerStatistics> stats;
-    
+
     private boolean isValid;
-    
+
     /**
      * Private constructor.
      * Creates a new leaderboard with no signs or locations or anything.
@@ -45,7 +45,7 @@ public class Leaderboard
         this.boards = new ArrayList<>();
         this.stats  = new ArrayList<>();
     }
-    
+
     /**
      * Location constructor.
      * Used to create a leaderboard on-the-fly from the location from the SignChangeEvent.
@@ -56,19 +56,19 @@ public class Leaderboard
     public Leaderboard(MobArena plugin, Arena arena, Location topLeft)
     {
         this(plugin, arena);
-        
+
         if (topLeft == null) {
             return;
         }
-        
+
         if (!(topLeft.getBlock().getState() instanceof Sign)) {
             plugin.getLogger().warning("The leaderboard-node for arena '" + arena.configName() + "' does not point to a sign!");
             return;
         }
-        
+
         this.topLeft = topLeft;
     }
-    
+
     /**
      * Grab all adjacent signs and register the individual columns.
      */
@@ -77,26 +77,26 @@ public class Leaderboard
         if (!isGridWellFormed()) {
             return;
         }
-        
+
         initializeBoards();
         initializeStats();
         clear();
     }
-    
+
     public void clear()
     {
         for (LeaderboardColumn column : boards)
             column.clear();
     }
-    
+
     public void update()
     {
         Collections.sort(stats, ArenaPlayerStatistics.waveComparator());
-        
+
         for (LeaderboardColumn column : boards)
             column.update(stats);
     }
-    
+
     public void startTracking()
     {
         trackingId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
@@ -108,12 +108,12 @@ public class Leaderboard
                 }
             }, 100, 100);
     }
-    
+
     public void stopTracking()
     {
         plugin.getServer().getScheduler().cancelTask(trackingId);
     }
-    
+
     /**
      * Check if the leaderboards grid is well-formed.
      * @return true, if the grid is well-formed, false otherwise.
@@ -123,19 +123,19 @@ public class Leaderboard
         if (topLeft == null) {
             return false;
         }
-        
+
         BlockState state = topLeft.getBlock().getState();
-        
+
         if (!(state instanceof Sign))
         {
             plugin.getLogger().severe("Leaderboards for '" + arena.configName() + "' could not be established!");
             return false;
         }
-        
+
         // Grab the top left sign and set up a copy for parsing.
         this.topLeftSign = (Sign) state;
         Sign current = this.topLeftSign;
-        
+
         // Calculate matrix dimensions.
         BlockFace direction = getRightDirection(current);
         if (direction == null) {
@@ -144,12 +144,12 @@ public class Leaderboard
         this.direction = direction;
         this.rows = getSignCount(current, BlockFace.DOWN);
         this.cols = getSignCount(current, direction);
-        
+
         // Require at least 2x2 to be valid
         if (rows <= 1 || cols <= 1) {
             return false;
         }
-        
+
         // Get the left-most sign in the current row.
         Sign first = getAdjacentSign(current, BlockFace.DOWN);
 
@@ -163,13 +163,13 @@ public class Leaderboard
                 current = getAdjacentSign(current, direction);
                 if (current == null) return false;
             }
-            
+
             // Hop down to the next row.
             first = getAdjacentSign(first, BlockFace.DOWN);
         }
         return true;
     }
-    
+
     /**
      * Build the leaderboards.
      * Requires: The grid MUST be valid!
@@ -179,16 +179,16 @@ public class Leaderboard
         boards.clear();
         Sign header = this.topLeftSign;
         Sign current;
-        
+
         do
         {
             // Strip the sign of any colors.
             String name = ChatColor.stripColor(header.getLine(2));
-            
+
             // Grab the stat to track.
             Stats stat = Stats.getByFullName(name);
             if (stat == null) continue;
-            
+
             // Create the list of signs
             List<Sign> signs = new ArrayList<>();
             current = header;
@@ -197,10 +197,10 @@ public class Leaderboard
                 current = getAdjacentSign(current, BlockFace.DOWN);
                 signs.add(current);
             }
-            
+
             // Create the column.
             LeaderboardColumn column = null;
-            
+
             // Switch on the type of stat
             switch (stat) {
                 case PLAYER_NAME:
@@ -213,19 +213,19 @@ public class Leaderboard
                     column = new IntLeaderboardColumn(stat.getShortName(), header, signs);
                     break;
             }
-            
+
             this.boards.add(column);
         }
         while ((header = getAdjacentSign(header, direction)) != null);
     }
-    
+
     private void initializeStats()
     {
         stats.clear();
         for (ArenaPlayer ap : arena.getArenaPlayerSet())
             stats.add(ap.getStats());
     }
-    
+
     private int getSignCount(Sign s, BlockFace direction)
     {
         int i = 1;
@@ -247,7 +247,7 @@ public class Leaderboard
 
         return i;
     }
-    
+
     private Sign getAdjacentSign(Sign s, BlockFace direction)
     {
         BlockState state = s.getBlock().getRelative(direction).getState();
@@ -255,7 +255,7 @@ public class Leaderboard
             return (Sign) state;
         return null;
     }
-    
+
     private BlockFace getRightDirection(Sign s)
     {
         BlockData data = s.getBlockData();
@@ -270,7 +270,7 @@ public class Leaderboard
         }
         return null;
     }
-    
+
     public boolean isValid()
     {
         return isValid;

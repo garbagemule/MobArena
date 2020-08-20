@@ -17,12 +17,12 @@ public class FetchTarget implements Ability
      * If the boss has no target, should a random player be selected?
      */
     private static final boolean RANDOM = true;
-    
+
     @Override
     public void execute(Arena arena, MABoss boss) {
         LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
         if (target == null) return;
-        
+
         target.teleport(boss.getEntity());
     }
 }

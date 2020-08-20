@@ -17,12 +17,12 @@ public class FireAura implements Ability
      * How close players must be to be affected by the ability.
      */
     private static final int RADIUS = 5;
-    
+
     /**
      * How many ticks the players should be on fire for.
      */
     private static final int TICKS = 20;
-    
+
     @Override
     public void execute(Arena arena, MABoss boss) {
         for (Player p : AbilityUtils.getNearbyPlayers(arena, boss.getEntity(), RADIUS))

@@ -26,14 +26,14 @@ public class DisableCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Grab the argument, if any.
         String arg1 = (args.length > 0 ? args[0] : "");
-        
+
         if (arg1.equals("all")) {
             for (Arena arena : am.getArenas()) {
                 disable(arena, sender);
             }
             return true;
         }
-        
+
         if (!arg1.equals("")) {
             Arena arena = am.getArenaWithName(arg1);
             if (arena == null) {
@@ -43,13 +43,13 @@ public class DisableCommand implements Command
             disable(arena, sender);
             return true;
         }
-        
+
         am.setEnabled(false);
         am.saveConfig();
         am.getGlobalMessenger().tell(sender, "MobArena " + ChatColor.RED + "disabled");
         return true;
     }
-    
+
     private void disable(Arena arena, CommandSender sender) {
         arena.setEnabled(false);
         arena.getPlugin().saveConfig();

@@ -18,11 +18,11 @@ public class ArenaPlayerReadyEvent extends Event implements Cancellable
         this.arena =  arena;
         this.cancelled = false;
     }
-    
+
     public Player getPlayer() {
         return player;
     }
-    
+
     public Arena getArena() {
         return arena;
     }
@@ -36,11 +36,11 @@ public class ArenaPlayerReadyEvent extends Event implements Cancellable
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
-    
+
     public HandlerList getHandlers() {
         return handlers;
     }
-     
+
     public static HandlerList getHandlerList() {
         return handlers;
     }

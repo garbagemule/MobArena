@@ -25,7 +25,7 @@ public class RestoreCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Require a player name
         if (args.length != 1) return false;
-        
+
         Player player = am.getPlugin().getServer().getPlayer(args[0]);
         if (player == null) {
             am.getGlobalMessenger().tell(sender, "Player not found.");
@@ -35,7 +35,7 @@ public class RestoreCommand implements Command
             am.getGlobalMessenger().tell(sender, "Player is currently in an arena.");
             return true;
         }
-        
+
         if (InventoryManager.restoreFromFile(am.getPlugin(), player)) {
             am.getGlobalMessenger().tell(sender, "Restored " + args[0] + "'s inventory!");
         } else {

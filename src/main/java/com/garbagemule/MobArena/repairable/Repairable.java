@@ -10,10 +10,10 @@ public interface Repairable
     void repair();
 
     BlockState getState();
-    
+
     Material getType();
     BlockData getData();
-    
+
     World getWorld();
     int getX();
     int getY();

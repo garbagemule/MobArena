@@ -34,7 +34,7 @@ public class Commands
     public static boolean isPlayer(CommandSender sender) {
         return (sender instanceof Player);
     }
-    
+
     public static Arena getArenaToJoinOrSpec(ArenaMaster am, Player p, String arg1) {
         // Check if MobArena is enabled first.
         if (!am.isEnabled()) {
@@ -48,17 +48,17 @@ public class Commands
             am.getGlobalMessenger().tell(p, Msg.JOIN_NO_PERMISSION);
             return null;
         }
-        
+
         // Then check if we have any enabled arenas.
         arenas = am.getEnabledArenas(arenas);
         if (arenas.isEmpty()) {
             am.getGlobalMessenger().tell(p, Msg.JOIN_NOT_ENABLED);
             return null;
         }
-        
+
         // The arena to join.
         Arena arena = null;
-        
+
         // Branch on whether there's an argument or not.
         if (arg1 != null) {
             arena = am.getArenaWithName(arg1);
@@ -66,7 +66,7 @@ public class Commands
                 am.getGlobalMessenger().tell(p, Msg.ARENA_DOES_NOT_EXIST);
                 return null;
             }
-            
+
             if (!arenas.contains(arena)) {
                 am.getGlobalMessenger().tell(p, Msg.JOIN_ARENA_NOT_ENABLED);
                 return null;
@@ -80,18 +80,18 @@ public class Commands
             }
             arena = arenas.get(0);
         }
-        
+
         // If player is in a boat/minecart, eject!
         if (p.isInsideVehicle()) {
             p.leaveVehicle();
         }
-        
+
         // If player is in a bed, unbed!
         if (p.isSleeping()) {
             p.kickPlayer("Banned for life... Nah, just don't join from a bed ;)");
             return null;
         }
-        
+
         return arena;
     }
 }

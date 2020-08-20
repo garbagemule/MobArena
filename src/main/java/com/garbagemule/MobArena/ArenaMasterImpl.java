@@ -137,7 +137,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
-            if (arena.isEnabled()) 
+            if (arena.isEnabled())
                 result.add(arena);
         return result;
     }

@@ -23,16 +23,16 @@ public class ShufflePositions implements Ability
         // Grab the players and add the boss
         List<LivingEntity> entities = new ArrayList<>(arena.getPlayersInArena());
         entities.add(boss.getEntity());
-        
+
         // Grab the locations
         List<Location> locations = new LinkedList<>();
         for (LivingEntity e : entities) {
             locations.add(e.getLocation());
         }
-        
+
         // Shuffle the entities list.
         Collections.shuffle(entities);
-        
+
         /* The entities are shuffled, but the locations are not, so if
          * we remove the first element of each list, chances are they
          * will not match, i.e. shuffle achieved! */

@@ -29,11 +29,11 @@ public class SpecCommand implements Command
             am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return false;
         }
-        
+
         // Unwrap the sender, grab the argument, if any.
         Player p    = Commands.unwrap(sender);
         String arg1 = (args.length > 0 ? args[0] : null);
-        
+
         // Run some rough sanity checks, and grab the arena to spec.
         Arena toArena = Commands.getArenaToJoinOrSpec(am, p, arg1);
         if (toArena == null || !canSpec(p, toArena)) {

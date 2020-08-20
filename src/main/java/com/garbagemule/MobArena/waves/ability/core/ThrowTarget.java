@@ -19,7 +19,7 @@ public class ThrowTarget implements Ability
      * If the boss has no target, should a random player be selected?
      */
     private static final boolean RANDOM = false;
-    
+
     @Override
     public void execute(Arena arena, MABoss boss) {
         LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
@@ -28,7 +28,7 @@ public class ThrowTarget implements Ability
         Location bLoc = boss.getEntity().getLocation();
         Location loc  = target.getLocation();
         Vector v      = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
-        
+
         target.setVelocity(v.normalize().setY(0.8));
     }
 }

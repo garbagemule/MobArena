@@ -27,10 +27,10 @@ public class AddArenaCommand implements Command
 
         // Require an arena name
         if (args.length != 1) return false;
-        
+
         // Unwrap the sender.
         Player p = Commands.unwrap(sender);
-        
+
         Arena arena = am.getArenaWithName(args[0]);
         if (arena != null) {
             am.getGlobalMessenger().tell(sender, "An arena with that name already exists.");

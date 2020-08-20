@@ -28,22 +28,22 @@ public class AutoGenerateCommand implements Command
 
         // Require an arena name
         if (args.length != 1) return false;
-        
+
         // Unwrap the sender.
         Player p = Commands.unwrap(sender);
-        
+
         // Check if arena already exists.
         Arena arena = am.getArenaWithName(args[0]);
         if (arena != null) {
             am.getGlobalMessenger().tell(sender, "An arena with that name already exists.");
             return true;
         }
-        
+
         if (!MAUtils.doooooItHippieMonster(p.getLocation(), 13, args[0], am.getPlugin())) {
             am.getGlobalMessenger().tell(sender, "Could not auto-generate arena.");
             return true;
         }
-        
+
         am.getGlobalMessenger().tell(sender, "Arena with name '" + args[0] + "' generated.");
         return true;
     }

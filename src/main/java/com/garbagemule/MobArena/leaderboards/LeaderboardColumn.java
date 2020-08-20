@@ -12,7 +12,7 @@ public interface LeaderboardColumn
      * of the player stat associated with this column.
      */
     void update(List<ArenaPlayerStatistics> stats);
-    
+
     /**
      * Get the String representation of the stat in question.
      * The line is calculated by simply calling the appropriate
@@ -21,19 +21,19 @@ public interface LeaderboardColumn
      * @return the String representation of the stat in question
      */
     String getLine(ArenaPlayerStatistics stats);
-    
+
     /**
      * Clear the text on all the signs in the column.
      */
     void clear();
-    
+
     /**
      * Get the top sign of the column.
      * The top sign displays the stat name.
      * @return the top sign of the column
      */
     Sign getHeader();
-    
+
     /**
      * Get all signs in the column (minus the header).
      * @return all signs in the column (minus the header)

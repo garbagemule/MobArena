@@ -18,29 +18,29 @@ public class LivingBomb implements Ability
      * How many ticks before the bomb goes off.
      */
     private static final int FUSE = 60;
-    
+
     /**
      * How close players must be to be affected by the bomb.
      */
     private static final int RADIUS = 3;
-    
+
     /**
      * How many ticks players affected by the bomb should burn.
      */
     private static final int AFTERBURN = 40;
-    
+
     @Override
     public void execute(final Arena arena, MABoss boss) {
         // Grab the target, or a random player.
         LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), true);
-        
+
         // We only want players.
         if (target == null || !(target instanceof Player))
             return;
 
         final Player p = (Player) target;
         p.setFireTicks(FUSE + 5);
-        
+
         // Create an explosion after 4 seconds
         arena.scheduleTask(new Runnable() {
             public void run() {
@@ -48,10 +48,10 @@ public class LivingBomb implements Ability
                 if (!arena.isRunning() || !arena.inArena(p) || p.getFireTicks() <= 0) {
                     return;
                 }
-                
+
                 // Explode!
                 arena.getWorld().createExplosion(p.getLocation(), 1F);
-                
+
                 // And set every nearby player on fire!
                 for (Player nearby : AbilityUtils.getNearbyPlayers(arena, p, RADIUS)) {
                     nearby.setFireTicks(AFTERBURN);

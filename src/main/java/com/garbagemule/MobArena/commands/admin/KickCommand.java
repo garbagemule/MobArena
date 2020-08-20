@@ -24,16 +24,16 @@ public class KickCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Require a player name
         if (args.length != 1) return false;
-        
+
         Arena arena = am.getArenaWithPlayer(args[0]);
         if (arena == null) {
             am.getGlobalMessenger().tell(sender, "That player is not in an arena.");
             return true;
         }
-        
+
         // Grab the Player object.
         Player bp = am.getPlugin().getServer().getPlayer(args[0]);
-        
+
         // Force leave.
         arena.playerLeave(bp);
         am.getGlobalMessenger().tell(sender, "Player '" + args[0] + "' was kicked from arena '" + arena.configName() + "'.");

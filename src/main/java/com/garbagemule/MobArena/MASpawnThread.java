@@ -184,9 +184,9 @@ public class MASpawnThread implements Runnable
         Wave w = waveManager.next();
 
         w.announce(arena, wave);
-        
+
         arena.getScoreboard().updateWave(wave);
-        
+
         // Set the players' level to the wave number
         if (wavesAsLevel) {
             for (Player p : arena.getPlayersInArena()) {
@@ -311,7 +311,7 @@ public class MASpawnThread implements Runnable
         if (waveClear && !monsterManager.getMonsters().isEmpty()) {
             return false;
         }
-        
+
         // Check for pre boss clear
         if (preBossClear && waveManager.getNext().getType() == WaveType.BOSS && !monsterManager.getMonsters().isEmpty()) {
             return false;
@@ -345,7 +345,7 @@ public class MASpawnThread implements Runnable
             if (region.contains(p.getLocation())) {
                 continue;
             }
-            
+
             arena.getMessenger().tell(p, "Leaving so soon?");
             p.getInventory().clear();
             arena.playerLeave(p);

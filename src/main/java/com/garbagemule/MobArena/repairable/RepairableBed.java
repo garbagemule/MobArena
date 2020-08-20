@@ -6,18 +6,18 @@ import org.bukkit.material.Bed;
 public class RepairableBed extends RepairableBlock
 {
     private BlockState other;
-    
+
     public RepairableBed(BlockState state)
     {
-        super(state);        
+        super(state);
         other = state.getBlock().getRelative(((Bed) state.getData()).getFacing()).getState();
     }
-    
+
     public void repair()
     {
         if (getWorld().getBlockAt(getX(), getY(), getZ()).getState().getData() instanceof Bed)
             return;
-        
+
         super.repair();
         other.getBlock().setBlockData(other.getBlockData());
     }

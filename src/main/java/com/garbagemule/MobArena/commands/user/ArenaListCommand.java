@@ -24,14 +24,14 @@ public class ArenaListCommand implements Command
     @Override
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         List<Arena> arenas;
-        
+
         if (Commands.isPlayer(sender)) {
             Player p = Commands.unwrap(sender);
-            arenas = am.getPermittedArenas(p); 
+            arenas = am.getPermittedArenas(p);
         } else {
             arenas = am.getArenas();
         }
-        
+
         String list = MAUtils.listToString(arenas, am.getPlugin());
         am.getGlobalMessenger().tell(sender, Msg.MISC_LIST_ARENAS.format(list));
         return true;

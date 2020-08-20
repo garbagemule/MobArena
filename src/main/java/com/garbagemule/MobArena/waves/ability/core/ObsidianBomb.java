@@ -23,12 +23,12 @@ public class ObsidianBomb implements Ability
      * How many ticks before the bomb goes off.
      */
     private static final int FUSE = 80;
-    
+
     @Override
     public void execute(final Arena arena, MABoss boss) {
         // Grab the target, or a random player.
         LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), true);
-        
+
         final World world = arena.getWorld();
         final Location loc;
 
@@ -53,7 +53,7 @@ public class ObsidianBomb implements Ability
             public void run() {
                 if (!arena.isRunning())
                     return;
-                
+
                 world.getBlockAt(loc).setType(Material.AIR);
                 world.createExplosion(loc, 3F);
             }
