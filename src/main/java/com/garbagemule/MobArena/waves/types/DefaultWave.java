@@ -54,8 +54,6 @@ public class DefaultWave extends AbstractWave
                 break;
             }
         }
-        //TODO: Remember amount-multiplier.
-        // Return the map.
         return monsters;
     }
 

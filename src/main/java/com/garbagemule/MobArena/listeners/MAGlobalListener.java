@@ -77,7 +77,6 @@ public class MAGlobalListener implements Listener
     //                                                                       //
     ///////////////////////////////////////////////////////////////////////////
     
-    //TODO watch block physics, piston extend, and piston retract events
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockBreak(BlockBreakEvent event) {
         for (Arena arena : am.getArenas())

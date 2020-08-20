@@ -423,10 +423,6 @@ public class WaveParser
     }
 
     private static List<PotionEffect> getPotionEffects(Arena arena, String name, ConfigurationSection config) {
-        /*
-         * TODO: Make this consistent with the rest somehow
-         * - Things only work for Players (currently)
-         */
         List<String> effects = config.getStringList("effects");
         if (effects == null || effects.isEmpty()) {
             String value = config.getString("effects", null);

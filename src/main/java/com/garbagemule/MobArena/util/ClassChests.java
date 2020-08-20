@@ -68,7 +68,6 @@ public class ClassChests {
             }
         }
 
-        // TODO: Make number of searches configurable
         // First check the pillar below the sign
         Block block = findChestBelow(blockBelow, 6);
 

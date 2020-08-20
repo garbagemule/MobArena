@@ -134,12 +134,6 @@ public class ArenaListener
         this.region = arena.getRegion();
         this.monsters = arena.getMonsterManager();
 
-        /*
-         * TODO: Figure out if this is really a good idea + It saves needing all
-         * those methods in Arena.java + It is relatively simple + It would be
-         * fairly easy to implement an observer pattern - More private fields -
-         * Uglier code
-         */
         ConfigurationSection s = arena.getSettings();
         this.softRestore      = s.getBoolean("soft-restore",         false);
         this.softRestoreDrops = s.getBoolean("soft-restore-drops",   false);

@@ -514,7 +514,6 @@ public class ArenaImpl implements Arena
         
         // Teleport players, give full health, initialize map
         for (Player p : arenaPlayers) {
-            // TODO figure out how people die in lobby and get sent to spectator area early
             // Remove player from spec list to avoid invincibility issues
             if (inSpec(p)) {
                 specPlayers.remove(p);
