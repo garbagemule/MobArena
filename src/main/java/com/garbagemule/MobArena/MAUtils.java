@@ -4,9 +4,6 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
-import com.garbagemule.MobArena.things.RandomThingPicker;
-import com.garbagemule.MobArena.things.SingleThingPicker;
-import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
@@ -64,17 +61,13 @@ public class MAUtils
             String path = typePath + "." + wave;
             String rewards = config.getString(path);
 
-            List<ThingPicker> pickers = new ArrayList<>();
-            for (String reward : rewards.split(",")) {
-                try {
-                    Thing thing = plugin.getThingManager().parse(reward.trim());
-                    ThingPicker picker = new SingleThingPicker(thing);
-                    pickers.add(picker);
-                } catch (InvalidThingInputString e) {
-                    throw new ConfigError("Failed to parse reward for wave " + wave + " in the '" + type + "' branch of arena " + arena + ": " + e.getInput());
-                }
+            try {
+                String wrapped = "random(" + rewards + ")";
+                ThingPicker picker = plugin.getThingPickerManager().parse(wrapped);
+                result.put(wave, picker);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse reward for wave " + wave + " in the '" + type + "' branch of arena " + arena + ": " + e.getInput());
             }
-            result.put(wave, new RandomThingPicker(pickers, MobArena.random));
         }
         return result;
     }
