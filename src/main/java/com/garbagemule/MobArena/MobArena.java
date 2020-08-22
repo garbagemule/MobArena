@@ -16,6 +16,7 @@ import com.garbagemule.MobArena.metrics.VaultChart;
 import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
+import com.garbagemule.MobArena.things.NothingPickerParser;
 import com.garbagemule.MobArena.things.RandomThingPickerParser;
 import com.garbagemule.MobArena.things.ThingGroupPickerParser;
 import com.garbagemule.MobArena.things.ThingManager;
@@ -71,6 +72,7 @@ public class MobArena extends JavaPlugin
         pickman = new ThingPickerManager(thingman);
         pickman.register(new ThingGroupPickerParser(pickman));
         pickman.register(new RandomThingPickerParser(pickman, random));
+        pickman.register(new NothingPickerParser());
     }
 
     public void onEnable() {

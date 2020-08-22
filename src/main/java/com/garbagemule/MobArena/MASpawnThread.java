@@ -392,13 +392,8 @@ public class MASpawnThread implements Runnable
     private void addReward(ThingPicker picker) {
         for (Player p : arena.getPlayersInArena()) {
             Thing reward = picker.pick();
-            rewardManager.addReward(p, reward);
-
-            if (reward == null) {
-                arena.getMessenger().tell(p, "ERROR! Problem with rewards. Notify server host!");
-                plugin.getLogger().warning("Could not add null reward. Please check the config-file!");
-            }
-            else {
+            if (reward != null) {
+                rewardManager.addReward(p, reward);
                 arena.getMessenger().tell(p, Msg.WAVE_REWARD, reward.toString());
             }
         }

@@ -19,6 +19,7 @@ These changes will (most likely) be included in the next version.
 - New per-arena setting `arena-warp-offset` can be used to spread out players randomly by an offset from the arena warp. This should help prevent players taking suffocation damage.
 - New per-arena setting `announcer-type` determines where to display per-arena announcements such as wave spawns, auto start timers, boss abilities, and death messages. Options are `title` (default) or `chat`.
 - It is now possible to group rewards. For example, `all(stick, bone)` results a stick and a bone, while `random(all(stick, bone), all(dirt, stone))` results in getting _either_ a stick and a bone _or_ a dirt block and a stone block.
+- The new `nothing` keyword can be used to _not_ grant a reward. This can be used in a crude way to create "loot table"-style reward systems where there is a _chance_ that something is reward, but it might also just be nothing.
 - The Root Target ability now uses potion effects (slowness, slow falling, and negative jump boost) instead of repeated teleports. This should make for a smoother root experience.
 - Using `spectate-on-death: true` no longer forces players out to their join location/exit warp before moving them to the spectator area. This should prevent "jumpy" behavior in multi-world setups.
 - Players should now properly respawn at the spectator area rather than at world spawn on servers with plugins that override respawn locations.
