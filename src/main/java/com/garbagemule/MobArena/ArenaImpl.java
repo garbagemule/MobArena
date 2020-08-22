@@ -3,6 +3,9 @@ package com.garbagemule.MobArena;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
+import com.garbagemule.MobArena.announce.Announcer;
+import com.garbagemule.MobArena.announce.MessengerAnnouncer;
+import com.garbagemule.MobArena.announce.TitleAnnouncer;
 import com.garbagemule.MobArena.steps.Step;
 import com.garbagemule.MobArena.steps.StepFactory;
 import com.garbagemule.MobArena.steps.PlayerJoinArena;
@@ -75,6 +78,7 @@ public class ArenaImpl implements Arena
     private String name;
     private World world;
     private Messenger messenger;
+    private Announcer announcer;
 
     // Settings section of the config-file for this arena.
     private ConfigurationSection settings;
@@ -231,6 +235,16 @@ public class ArenaImpl implements Arena
         // Messenger
         String prefix = settings.getString("prefix", "");
         this.messenger = !prefix.isEmpty() ? new Messenger(prefix) : plugin.getGlobalMessenger();
+
+        // Announcer
+        String announcerType = settings.getString("announcer-type", "chat");
+        if (announcerType.equals("chat")) {
+            announcer = new MessengerAnnouncer(this.messenger);
+        } else if (announcerType.equals("title")) {
+            announcer = new TitleAnnouncer(5, 60, 10);
+        } else {
+            throw new ConfigError("Unsupported announcer type: " + announcerType);
+        }
 
         // Actions
         this.histories = new HashMap<>();
@@ -454,7 +468,7 @@ public class ArenaImpl implements Arena
     @Override
     public void announce(String msg) {
         for (Player p : getAllPlayers()) {
-            messenger.tell(p, msg);
+            announcer.announce(p, msg);
         }
     }
 
