@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
@@ -353,13 +354,13 @@ public class MASpawnThread implements Runnable
     }
 
     private void grantRewards(int wave) {
-        for (Map.Entry<Integer, List<Thing>> entry : arena.getEveryWaveEntrySet()) {
+        for (Map.Entry<Integer, ThingPicker> entry : arena.getEveryWaveEntrySet()) {
             if (wave > 0 && wave % entry.getKey() == 0) {
                 addReward(entry.getValue());
             }
         }
 
-        List<Thing> after = arena.getAfterWaveReward(wave);
+        ThingPicker after = arena.getAfterWaveReward(wave);
         if (after != null) {
             addReward(after);
         }
@@ -388,9 +389,9 @@ public class MASpawnThread implements Runnable
     /**
      * Rewards all players with an item from the input String.
      */
-    private void addReward(List<Thing> rewards) {
+    private void addReward(ThingPicker picker) {
         for (Player p : arena.getPlayersInArena()) {
-            Thing reward = rewards.get(MobArena.random.nextInt(rewards.size()));
+            Thing reward = picker.pick();
             rewardManager.addReward(p, reward);
 
             if (reward == null) {

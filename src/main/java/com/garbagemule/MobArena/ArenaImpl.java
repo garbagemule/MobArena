@@ -24,6 +24,7 @@ import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
@@ -121,7 +122,7 @@ public class ArenaImpl implements Arena
     private WaveManager   waveManager;
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
-    private Map<Integer,List<Thing>> everyWaveMap, afterWaveMap;
+    private Map<Integer, ThingPicker> everyWaveMap, afterWaveMap;
 
     // Misc
     private ArenaListener eventListener;
@@ -337,12 +338,12 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    public Set<Map.Entry<Integer,List<Thing>>> getEveryWaveEntrySet() {
+    public Set<Map.Entry<Integer, ThingPicker>> getEveryWaveEntrySet() {
         return everyWaveMap.entrySet();
     }
 
     @Override
-    public List<Thing> getAfterWaveReward(int wave) {
+    public ThingPicker getAfterWaveReward(int wave) {
         return afterWaveMap.get(wave);
     }
 

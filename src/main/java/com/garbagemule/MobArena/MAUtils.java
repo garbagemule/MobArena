@@ -4,7 +4,10 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
+import com.garbagemule.MobArena.things.RandomThingPicker;
+import com.garbagemule.MobArena.things.SingleThingPicker;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.TextUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -40,10 +43,10 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */
-    public static Map<Integer,List<Thing>> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
+    public static Map<Integer, ThingPicker> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
     {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
-        Map<Integer,List<Thing>> result = new HashMap<>();
+        Map<Integer, ThingPicker> result = new HashMap<>();
 
         String typePath = "rewards.waves." + type;
         if (!config.contains(typePath)) return result;
@@ -61,16 +64,17 @@ public class MAUtils
             String path = typePath + "." + wave;
             String rewards = config.getString(path);
 
-            List<Thing> things = new ArrayList<>();
+            List<ThingPicker> pickers = new ArrayList<>();
             for (String reward : rewards.split(",")) {
                 try {
                     Thing thing = plugin.getThingManager().parse(reward.trim());
-                    things.add(thing);
+                    ThingPicker picker = new SingleThingPicker(thing);
+                    pickers.add(picker);
                 } catch (InvalidThingInputString e) {
                     throw new ConfigError("Failed to parse reward for wave " + wave + " in the '" + type + "' branch of arena " + arena + ": " + e.getInput());
                 }
             }
-            result.put(wave, things);
+            result.put(wave, new RandomThingPicker(pickers, MobArena.random));
         }
         return result;
     }
