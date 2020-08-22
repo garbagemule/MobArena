@@ -881,7 +881,7 @@ public class ArenaImpl implements Arena
             messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
         } else {
             plugin.getServer().getScheduler()
-                .scheduleSyncDelayedTask(plugin, () -> discardPlayer(p));
+                .scheduleSyncDelayedTask(plugin, () -> playerLeave(p));
         }
     }
 
