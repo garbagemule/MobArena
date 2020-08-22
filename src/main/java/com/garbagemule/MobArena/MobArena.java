@@ -16,7 +16,10 @@ import com.garbagemule.MobArena.metrics.VaultChart;
 import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
+import com.garbagemule.MobArena.things.RandomThingPickerParser;
+import com.garbagemule.MobArena.things.ThingGroupPickerParser;
 import com.garbagemule.MobArena.things.ThingManager;
+import com.garbagemule.MobArena.things.ThingPickerManager;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
@@ -57,12 +60,17 @@ public class MobArena extends JavaPlugin
 
     private Messenger messenger;
     private ThingManager thingman;
+    private ThingPickerManager pickman;
 
     private SignListeners signListeners;
 
     @Override
     public void onLoad() {
         thingman = new ThingManager(this);
+
+        pickman = new ThingPickerManager(thingman);
+        pickman.register(new ThingGroupPickerParser(pickman));
+        pickman.register(new RandomThingPickerParser(pickman, random));
     }
 
     public void onEnable() {
@@ -274,5 +282,9 @@ public class MobArena extends JavaPlugin
 
     public ThingManager getThingManager() {
         return thingman;
+    }
+
+    public ThingPickerManager getThingPickerManager() {
+        return pickman;
     }
 }
