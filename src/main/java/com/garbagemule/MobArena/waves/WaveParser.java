@@ -6,6 +6,7 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingManager;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.ability.Ability;
@@ -307,8 +308,8 @@ public class WaveParser
         String rew = config.getString("reward", null);
         if (rew != null && !rew.isEmpty()) {
             try {
-                Thing thing = arena.getPlugin().getThingManager().parse(rew.trim());
-                result.setReward(thing);
+                ThingPicker picker = arena.getPlugin().getThingPickerManager().parse(rew.trim());
+                result.setReward(picker);
             } catch (InvalidThingInputString e) {
                 throw new ConfigError("Failed to parse boss reward in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
             }

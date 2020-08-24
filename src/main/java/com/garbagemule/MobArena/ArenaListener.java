@@ -15,6 +15,7 @@ import com.garbagemule.MobArena.repairable.RepairableDoor;
 import com.garbagemule.MobArena.repairable.RepairableSign;
 import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ClassChests;
 import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.ChatColor;
@@ -610,10 +611,13 @@ public class ArenaListener
                     for (Player q : arena.getPlayersInArena()) {
                         arena.getMessenger().tell(q, Msg.WAVE_BOSS_KILLED, p.getName());
                     }
-                    Thing reward = boss.getReward();
-                    if (reward != null) {
-                        arena.getRewardManager().addReward(p, reward);
-                        arena.getMessenger().tell(damager, Msg.WAVE_BOSS_REWARD_EARNED, reward.toString());
+                    ThingPicker picker = boss.getReward();
+                    if (picker != null) {
+                        Thing reward = picker.pick();
+                        if (reward != null) {
+                            arena.getRewardManager().addReward(p, reward);
+                            arena.getMessenger().tell(damager, Msg.WAVE_BOSS_REWARD_EARNED, reward.toString());
+                        }
                     }
                 }
             }

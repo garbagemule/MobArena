@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.waves.types;
 import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.BossAbilityThread;
 import com.garbagemule.MobArena.waves.MABoss;
@@ -37,7 +38,7 @@ public class BossWave extends AbstractWave
 
     private int abilityInterval;
 
-    private Thing reward;
+    private ThingPicker reward;
     private List<ItemStack> drops;
 
     public BossWave(MACreature monster) {
@@ -119,11 +120,11 @@ public class BossWave extends AbstractWave
         this.abilityAnnounce = abilityAnnounce;
     }
 
-    public Thing getReward() {
+    public ThingPicker getReward() {
         return reward;
     }
 
-    public void setReward(Thing reward) {
+    public void setReward(ThingPicker reward) {
         this.reward = reward;
     }
 

@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
@@ -13,7 +14,7 @@ public class MABoss
 {
     private LivingEntity entity;
     private boolean dead;
-    private Thing reward;
+    private ThingPicker reward;
     private List<ItemStack> drops;
     private HealthBar healthbar;
 
@@ -79,11 +80,11 @@ public class MABoss
         healthbar.removeAll();
     }
 
-    public void setReward(Thing reward) {
+    public void setReward(ThingPicker reward) {
         this.reward = reward;
     }
 
-    public Thing getReward() {
+    public ThingPicker getReward() {
         return reward;
     }
 
