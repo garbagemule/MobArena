@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.ConfigError;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.admin.AddRewardCommand;
 import com.garbagemule.MobArena.commands.admin.DisableCommand;
 import com.garbagemule.MobArena.commands.admin.EnableCommand;
 import com.garbagemule.MobArena.commands.admin.ForceCommand;
@@ -319,6 +320,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
         register(ForceCommand.class);
         register(KickCommand.class);
         register(RestoreCommand.class);
+        register(AddRewardCommand.class);
 
         // mobarena.setup
         register(SetupCommand.class);
