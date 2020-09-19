@@ -64,7 +64,7 @@ public class AddRewardCommand implements Command {
         }
 
         arena.getRewardManager().addReward(player, thing);
-        arena.getMessenger().tell(player, Msg.WAVE_REWARD, thing.toString());
+        arena.getMessenger().tell(player, Msg.MISC_REWARD_ADDED, thing.toString());
 
         String msg = "Added " + ChatColor.YELLOW + thing + ChatColor.RESET + " to " + ChatColor.YELLOW + player.getName() + "'s" + ChatColor.RESET + " rewards.";
         am.getGlobalMessenger().tell(sender, msg);
