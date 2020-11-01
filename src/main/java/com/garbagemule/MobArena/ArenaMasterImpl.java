@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.JoinInterruptTimer;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -232,8 +233,9 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public Arena getArenaWithName(Collection<Arena> arenas, String configName) {
+        String slug = Slugs.create(configName);
         for (Arena arena : arenas)
-            if (arena.configName().equalsIgnoreCase(configName))
+            if (arena.getSlug().equalsIgnoreCase(slug))
                 return arena;
         return null;
     }

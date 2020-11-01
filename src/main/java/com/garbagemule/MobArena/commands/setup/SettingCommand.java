@@ -120,9 +120,9 @@ public class SettingCommand implements Command {
             String prefix = args[0].toLowerCase();
 
             return arenas.stream()
-                .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+                .filter(arena -> arena.getSlug().startsWith(prefix))
                 .filter(arena -> !arena.isRunning())
-                .map(Arena::configName)
+                .map(Arena::getSlug)
                 .collect(Collectors.toList());
         }
 

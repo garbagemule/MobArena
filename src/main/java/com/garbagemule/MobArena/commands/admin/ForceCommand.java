@@ -117,9 +117,9 @@ public class ForceCommand implements Command
         List<Arena> arenas = am.getArenas();
 
         return arenas.stream()
-            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+            .filter(arena -> arena.getSlug().startsWith(prefix))
             .filter(arena -> start != arena.isRunning())
-            .map(Arena::configName)
+            .map(Arena::getSlug)
             .collect(Collectors.toList());
     }
 }

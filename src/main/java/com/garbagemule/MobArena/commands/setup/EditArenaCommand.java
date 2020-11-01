@@ -69,8 +69,8 @@ public class EditArenaCommand implements Command
         List<Arena> arenas = am.getArenas();
 
         return arenas.stream()
-            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
-            .map(Arena::configName)
+            .filter(arena -> arena.getSlug().startsWith(prefix))
+            .map(Arena::getSlug)
             .collect(Collectors.toList());
     }
 }

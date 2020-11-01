@@ -88,9 +88,9 @@ public class SpecCommand implements Command
 
         return arenas.stream()
             .filter(Arena::isEnabled)
-            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+            .filter(arena -> arena.getSlug().startsWith(prefix))
             .filter(arena -> arena.getRegion().isSetup())
-            .map(Arena::configName)
+            .map(Arena::getSlug)
             .collect(Collectors.toList());
     }
 }
