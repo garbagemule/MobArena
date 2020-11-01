@@ -221,6 +221,10 @@ public interface Arena
 
     String configName();
 
+    /**
+     * @deprecated use {@link #configName()} instead
+     */
+    @Deprecated
     String arenaName();
 
     String getSlug();
