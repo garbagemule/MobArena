@@ -223,6 +223,8 @@ public interface Arena
 
     String arenaName();
 
+    String getSlug();
+
     MobArena getPlugin();
 
     Map<String,ArenaClass> getClasses();

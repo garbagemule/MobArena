@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.util.Slugs;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,6 +17,7 @@ import java.util.stream.IntStream;
 public class ArenaClass
 {
     private String configName, lowercaseName;
+    private String slug;
     private Thing helmet, chestplate, leggings, boots, offhand;
     private List<Thing> armor;
     private List<Thing> items;
@@ -32,6 +34,7 @@ public class ArenaClass
      */
     public ArenaClass(String name, Thing price, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
+        this.slug          = Slugs.create(name);
         this.lowercaseName = name.toLowerCase().replace(" ", "");
 
         this.items = new ArrayList<>();
@@ -52,6 +55,14 @@ public class ArenaClass
      */
     public String getConfigName() {
         return configName;
+    }
+
+    /**
+     * Get the slug version of the arena class name.
+     * @return the slugified class name
+     */
+    public String getSlug() {
+        return slug;
     }
 
     /**

@@ -26,6 +26,7 @@ import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ClassChests;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
 import com.garbagemule.MobArena.util.timer.StartDelayTimer;
@@ -77,6 +78,7 @@ public class ArenaImpl implements Arena
     // General stuff
     private MobArena plugin;
     private String name;
+    private String slug;
     private World world;
     private Messenger messenger;
     private Announcer announcer;
@@ -155,6 +157,7 @@ public class ArenaImpl implements Arena
             throw new NullPointerException("[MobArena] ERROR! World for arena '" + name + "' does not exist!");
 
         this.name     = name;
+        this.slug     = Slugs.create(name);
         this.world    = world;
         this.plugin   = plugin;
         this.settings = makeSection(section, "settings");
@@ -1446,6 +1449,11 @@ public class ArenaImpl implements Arena
     public String arenaName()
     {
         return MAUtils.nameConfigToArena(name);
+    }
+
+    @Override
+    public String getSlug() {
+        return slug;
     }
 
     @Override
