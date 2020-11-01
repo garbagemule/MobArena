@@ -24,6 +24,7 @@ These changes will (most likely) be included in the next version.
 - New command `/ma addreward <player> <thing>` can be used to add a reward to an arena player's reward list. This can be useful for hooking into the rewards system from scripts or other plugins.
 - The Root Target ability now uses potion effects (slowness, slow falling, and negative jump boost) instead of repeated teleports. This should make for a smoother root experience.
 - Permissions for arenas and classes are now based on "slugs". It is now possible to configure permissions for arenas and classes with multi-word names (including "My Items"). Check the Permissions page on the wiki for details.
+- Commands that resolve class names now consistently resolve and tab complete "slugs" instead of arbitrarily "squashed" names. This greatly improves support for multi-word names.
 - Using `spectate-on-death: true` no longer forces players out to their join location/exit warp before moving them to the spectator area. This should prevent "jumpy" behavior in multi-world setups.
 - Players should now properly respawn at the spectator area rather than at world spawn on servers with plugins that override respawn locations.
 - Config-files with missing `pet-items` nodes no longer errors. A missing `pet-items` node in `global-settings` is treated as empty, i.e. no pet items will be registered.

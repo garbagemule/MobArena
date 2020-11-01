@@ -757,7 +757,8 @@ public class ArenaImpl implements Arena
         if (defaultClass != null) {
             // Assign default class if applicable
             if (!ClassChests.assignClassFromStoredClassChest(this, p, defaultClass)) {
-                assignClass(p, defaultClass.getLowercaseName());
+                String slug = defaultClass.getSlug();
+                assignClass(p, slug);
                 messenger.tell(p, Msg.LOBBY_CLASS_PICKED, defaultClass.getConfigName());
             }
         }
@@ -1319,10 +1320,10 @@ public class ArenaImpl implements Arena
         }
 
         int index = MobArena.random.nextInt(classes.size());
-        String className = classes.get(index).getConfigName();
+        String slug = classes.get(index).getSlug();
 
-        assignClass(p, className);
-        messenger.tell(p, Msg.LOBBY_CLASS_PICKED, this.classes.get(className).getConfigName());
+        assignClass(p, slug);
+        messenger.tell(p, Msg.LOBBY_CLASS_PICKED, this.classes.get(slug).getConfigName());
     }
 
     private void addClassPermissions(Player player) {

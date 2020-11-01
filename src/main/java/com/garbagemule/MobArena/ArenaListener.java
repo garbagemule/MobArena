@@ -17,6 +17,7 @@ import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ClassChests;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.waves.MABoss;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -1114,15 +1115,16 @@ public class ArenaListener
 
     private void handleSign(Sign sign, Player p) {
         // Check if the first line is a class name.
-        String className = ChatColor.stripColor(sign.getLine(0)).toLowerCase().replace(" ", "");
+        String className = ChatColor.stripColor(sign.getLine(0));
+        String slug = Slugs.create(className);
 
-        if (!arena.getClasses().containsKey(className) && !className.equals("random"))
+        if (!arena.getClasses().containsKey(slug) && !slug.equals("random"))
             return;
 
-        ArenaClass newAC = arena.getClasses().get(className);
+        ArenaClass newAC = arena.getClasses().get(slug);
 
         // Check for permission.
-        if (!newAC.hasPermission(p) && !className.equals("random")) {
+        if (!newAC.hasPermission(p) && !slug.equals("random")) {
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return;
         }
@@ -1154,7 +1156,7 @@ public class ArenaListener
         classLimits.playerPickedClass(newAC, p);
 
         // Delay the inventory stuff to ensure that right-clicking works.
-        delayAssignClass(p, className, price, sign);
+        delayAssignClass(p, slug, price, sign);
     }
 
     /*private boolean cansPlayerJoinClass(ArenaClass ac, Player p) {
@@ -1169,12 +1171,12 @@ public class ArenaListener
         return true;
     }*/
 
-    private void delayAssignClass(final Player p, final String className, final Thing price, final Sign sign) {
+    private void delayAssignClass(final Player p, final String slug, final Thing price, final Sign sign) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin,new Runnable() {
             public void run() {
-                if (!className.equalsIgnoreCase("random")) {
+                if (!slug.equalsIgnoreCase("random")) {
                     if (useClassChests) {
-                        ArenaClass ac = plugin.getArenaMaster().getClasses().get(className.toLowerCase().replace(" ", ""));
+                        ArenaClass ac = plugin.getArenaMaster().getClasses().get(slug);
                         if (ClassChests.assignClassFromStoredClassChest(arena, p, ac)) {
                             return;
                         }
@@ -1183,8 +1185,8 @@ public class ArenaListener
                         }
                         // Otherwise just fall through and use the items from the config-file
                     }
-                    arena.assignClass(p, className);
-                    arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(className).getConfigName());
+                    arena.assignClass(p, slug);
+                    arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(slug).getConfigName());
                     if (price != null) {
                         arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE,  price.toString());
                     }

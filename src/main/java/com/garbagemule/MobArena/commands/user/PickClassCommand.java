@@ -10,6 +10,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.ClassChests;
+import com.garbagemule.MobArena.util.Slugs;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -51,15 +52,15 @@ public class PickClassCommand implements Command
         }
 
         // Grab the ArenaClass, if it exists
-        String lowercase = args[0].toLowerCase();
-        ArenaClass ac = am.getClasses().get(lowercase);
+        String slug = Slugs.create(args[0]);
+        ArenaClass ac = am.getClasses().get(slug);
         if (ac == null) {
-            arena.getMessenger().tell(p, Msg.LOBBY_NO_SUCH_CLASS, lowercase);
+            arena.getMessenger().tell(p, Msg.LOBBY_NO_SUCH_CLASS, slug);
             return true;
         }
 
         // Check for permission.
-        if (!ac.hasPermission(p) && !lowercase.equals("random")) {
+        if (!ac.hasPermission(p) && !slug.equals("random")) {
             arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PERMISSION);
             return true;
         }
@@ -88,15 +89,15 @@ public class PickClassCommand implements Command
         clm.playerLeftClass(oldAC, p);
         clm.playerPickedClass(ac, p);
 
-        if (!lowercase.equalsIgnoreCase("random")) {
+        if (!slug.equalsIgnoreCase("random")) {
             if (arena.getSettings().getBoolean("use-class-chests", false)) {
                 if (ClassChests.assignClassFromStoredClassChest(arena, p, ac)) {
                     return true;
                 }
                 // No linked chest? Fall through to config-file
             }
-            arena.assignClass(p, lowercase);
-            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(lowercase).getConfigName());
+            arena.assignClass(p, slug);
+            arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(slug).getConfigName());
             if (price != null) {
                 arena.getMessenger().tell(p, Msg.LOBBY_CLASS_PRICE, price.toString());
             }
@@ -118,9 +119,9 @@ public class PickClassCommand implements Command
         Collection<ArenaClass> classes = am.getClasses().values();
 
         return classes.stream()
-            .filter(cls -> cls.getConfigName().toLowerCase().startsWith(prefix))
+            .filter(cls -> cls.getSlug().startsWith(prefix))
             .filter(cls -> cls.hasPermission(player))
-            .map(ArenaClass::getConfigName)
+            .map(ArenaClass::getSlug)
             .collect(Collectors.toList());
     }
 }

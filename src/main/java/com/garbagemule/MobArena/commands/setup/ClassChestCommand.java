@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.commands.Command;
 import com.garbagemule.MobArena.commands.CommandInfo;
 import com.garbagemule.MobArena.commands.Commands;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.util.Slugs;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -37,7 +38,8 @@ public class ClassChestCommand implements Command {
         // Require a class name
         if (args.length != 1) return false;
 
-        ArenaClass ac = am.getClasses().get(args[0].toLowerCase());
+        String slug = Slugs.create(args[0]);
+        ArenaClass ac = am.getClasses().get(slug);
         if (ac == null) {
             am.getGlobalMessenger().tell(sender, "Class not found.");
             return true;
@@ -69,13 +71,13 @@ public class ClassChestCommand implements Command {
             return Collections.emptyList();
         }
 
-        String prefix = args[0].toLowerCase();
+        String prefix = Slugs.create(args[0]);
 
         Collection<ArenaClass> classes = am.getClasses().values();
 
         return classes.stream()
-            .filter(cls -> cls.getConfigName().toLowerCase().startsWith(prefix))
-            .map(ArenaClass::getConfigName)
+            .filter(cls -> cls.getSlug().startsWith(prefix))
+            .map(ArenaClass::getSlug)
             .collect(Collectors.toList());
     }
 }

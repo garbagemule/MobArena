@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 public class ArenaClass
 {
-    private String configName, lowercaseName;
+    private String configName;
     private String slug;
     private Thing helmet, chestplate, leggings, boots, offhand;
     private List<Thing> armor;
@@ -35,7 +35,6 @@ public class ArenaClass
     public ArenaClass(String name, Thing price, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
         this.slug          = Slugs.create(name);
-        this.lowercaseName = name.toLowerCase().replace(" ", "");
 
         this.items = new ArrayList<>();
         this.armor = new ArrayList<>(4);
@@ -72,7 +71,7 @@ public class ArenaClass
      */
     @Deprecated
     public String getLowercaseName() {
-        return lowercaseName;
+        return slug;
     }
 
     /**
@@ -238,12 +237,12 @@ public class ArenaClass
         if (!this.getClass().equals(o.getClass())) return false;
 
         ArenaClass other = (ArenaClass) o;
-        return other.lowercaseName.equals(this.lowercaseName);
+        return other.slug.equals(this.slug);
     }
 
     @Override
     public int hashCode() {
-        return lowercaseName.hashCode();
+        return slug.hashCode();
     }
 
     public static class MyItems extends ArenaClass {
