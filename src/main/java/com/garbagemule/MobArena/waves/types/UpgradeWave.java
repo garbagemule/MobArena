@@ -27,8 +27,8 @@ public class UpgradeWave extends AbstractWave
         return new HashMap<>();
     }
 
-    public void grantItems(Player p, String className) {
-        List<Thing> list = upgrades.get(className);
+    public void grantItems(Player p, String slug) {
+        List<Thing> list = upgrades.get(slug);
         if (list == null) return;
 
         list.forEach(thing -> thing.giveTo(p));

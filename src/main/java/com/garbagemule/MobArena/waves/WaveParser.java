@@ -9,6 +9,7 @@ import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import com.garbagemule.MobArena.waves.enums.BossHealth;
@@ -468,16 +469,18 @@ public class WaveParser
         String path = "upgrades.";
 
         for (String className : classes) {
+            String slug = Slugs.create(className);
+
             // Legacy support
             Object val = config.get(path + className, null);
             if (val instanceof String) {
                 List<Thing> things = loadUpgradesFromString(className, (String) val, name, arena, thingman);
-                upgrades.put(className.toLowerCase(), things);
+                upgrades.put(slug, things);
             }
             // New complex setup
             else if (val instanceof ConfigurationSection) {
                 List<Thing> list = loadUpgradesFromSection(className, (ConfigurationSection) val, name, arena, thingman);
-                upgrades.put(className.toLowerCase(), list);
+                upgrades.put(slug, list);
             }
         }
 
