@@ -136,7 +136,7 @@ public class MAGlobalListener implements Listener
 
         if ((arena = am.getArenaWithName(text)) != null) {
             arena.getEventListener().onSignChange(event);
-            setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.arenaName(), ChatColor.AQUA + "Players", "---------------");
+            setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.configName(), ChatColor.AQUA + "Players", "---------------");
         }
         else if ((stat = Stats.getByShortName(text)) != null) {
             setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
