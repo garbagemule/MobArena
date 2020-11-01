@@ -68,7 +68,9 @@ public class ArenaClass
     /**
      * Get the lowercase class name.
      * @return the lowercase class name
+     * @deprecated use {@link #getSlug()} instead
      */
+    @Deprecated
     public String getLowercaseName() {
         return lowercaseName;
     }
