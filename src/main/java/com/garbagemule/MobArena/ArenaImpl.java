@@ -680,8 +680,13 @@ public class ArenaImpl implements Arena
 
     @Override
     public boolean hasPermission(Player p) {
-        String perm = "mobarena.arenas." + name;
-        return !p.isPermissionSet(perm) || p.hasPermission(perm);
+        String key = "mobarena.arenas." + slug;
+        if (p.isPermissionSet(key)) {
+            return p.hasPermission(key);
+        }
+
+        // Permissive by default.
+        return true;
     }
 
     @Override

@@ -148,8 +148,13 @@ public class ArenaClass
     }
 
     public boolean hasPermission(Player p) {
-        String perm = "mobarena.classes." + configName;
-        return !p.isPermissionSet(perm) || p.hasPermission(perm);
+        String key = "mobarena.classes." + slug;
+        if (p.isPermissionSet(key)) {
+            return p.hasPermission(key);
+        }
+
+        // Permissive by default.
+        return true;
     }
 
     /**
