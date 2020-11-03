@@ -1267,6 +1267,9 @@ public class ArenaImpl implements Arena
         if (stack == null) {
             return;
         }
+        if (stack.getType() == Material.POTION) {
+            return;
+        }
         stack.setDurability(Short.MIN_VALUE);
     }
 
