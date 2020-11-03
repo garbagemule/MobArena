@@ -1454,7 +1454,7 @@ public class ArenaImpl implements Arena
     @Override
     public String arenaName()
     {
-        return MAUtils.nameConfigToArena(name);
+        return name;
     }
 
     @Override
