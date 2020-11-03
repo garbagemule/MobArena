@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,37 +118,6 @@ public class MAUtils
     }
 
     /**
-     * Convert a config-name to a proper spaced and capsed arena name.
-     * The input String is split around all underscores, and every part
-     * of the String array is properly capsed.
-     */
-    public static String nameConfigToArena(String name)
-    {
-        String[] parts = name.split("_");
-        if (parts.length == 1) {
-            return toCamelCase(parts[0]);
-        }
-
-        String separator = " ";
-        StringBuffer buffy = new StringBuffer(name.length());
-        for (String part : parts) {
-            buffy.append(toCamelCase(part));
-            buffy.append(separator);
-        }
-        buffy.replace(buffy.length()-1, buffy.length(), "");
-
-        return buffy.toString();
-    }
-
-    /**
-     * Returns the input String with a capital first letter, and all the
-     * other letters become lower case.
-     */
-    public static String toCamelCase(String name) {
-        return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-    }
-
-    /**
      * Turn a list into a space-separated string-representation of the list.
      */
     public static <E> String listToString(Collection<E> list, boolean none, MobArena plugin)
@@ -188,22 +156,6 @@ public class MAUtils
         return buffy.toString().substring(0, buffy.length() - trimLength);
     }
     public static <E> String listToString(Collection<E> list, JavaPlugin plugin) { return listToString(list, true, (MobArena) plugin); }
-
-    /**
-     * Returns a String-list version of a comma-separated list.
-     */
-    public static List<String> stringToList(String list)
-    {
-        List<String> result = new LinkedList<>();
-        if (list == null) return result;
-
-        String[] parts = list.trim().split(",");
-
-        for (String part : parts)
-            result.add(part.trim());
-
-        return result;
-    }
 
     /**
      * Stand back, I'm going to try science!
