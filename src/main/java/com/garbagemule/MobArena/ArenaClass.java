@@ -3,6 +3,7 @@ package com.garbagemule.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.util.Slugs;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,7 +16,8 @@ import java.util.stream.IntStream;
 
 public class ArenaClass
 {
-    private String configName, lowercaseName;
+    private String configName;
+    private String slug;
     private Thing helmet, chestplate, leggings, boots;
     private List<Thing> armor;
     private List<Thing> items;
@@ -32,8 +34,8 @@ public class ArenaClass
      */
     public ArenaClass(String name, Thing price, boolean unbreakableWeapons, boolean unbreakableArmor) {
         this.configName    = name;
-        this.lowercaseName = name.toLowerCase().replace(" ", "");
-        
+        this.slug          = Slugs.create(name);
+
         this.items = new ArrayList<>();
         this.armor = new ArrayList<>(4);
         this.effects = new ArrayList<>();
@@ -45,7 +47,7 @@ public class ArenaClass
 
         this.price = price;
     }
-    
+
     /**
      * Get the name of the arena class as it appears in the config-file.
      * @return the class name as it appears in the config-file
@@ -53,15 +55,25 @@ public class ArenaClass
     public String getConfigName() {
         return configName;
     }
-    
+
+    /**
+     * Get the slug version of the arena class name.
+     * @return the slugified class name
+     */
+    public String getSlug() {
+        return slug;
+    }
+
     /**
      * Get the lowercase class name.
      * @return the lowercase class name
+     * @deprecated use {@link #getSlug()} instead
      */
+    @Deprecated
     public String getLowercaseName() {
-        return lowercaseName;
+        return slug;
     }
-    
+
     /**
      * Set the helmet slot for the class.
      * @param helmet a Thing
@@ -69,7 +81,7 @@ public class ArenaClass
     public void setHelmet(Thing helmet) {
         this.helmet = helmet;
     }
-    
+
     /**
      * Set the chestplate slot for the class.
      * @param chestplate a Thing
@@ -77,7 +89,7 @@ public class ArenaClass
     public void setChestplate(Thing chestplate) {
         this.chestplate = chestplate;
     }
-    
+
     /**
      * Set the leggings slot for the class.
      * @param leggings a Thing
@@ -85,7 +97,7 @@ public class ArenaClass
     public void setLeggings(Thing leggings) {
         this.leggings = leggings;
     }
-    
+
     /**
      * Set the boots slot for the class.
      * @param boots a Thing
@@ -103,7 +115,7 @@ public class ArenaClass
             items.add(item);
         }
     }
-    
+
     /**
      * Replace the current items list with a new list of all the items in the given list.
      * This method uses the addItem() method for each item to ensure consistency.
@@ -113,7 +125,7 @@ public class ArenaClass
         this.items = new ArrayList<>(items.size());
         items.forEach(this::addItem);
     }
-    
+
     /**
      * Replace the current armor list with the given list.
      * @param armor a list of Things
@@ -125,10 +137,15 @@ public class ArenaClass
     public void setEffects(List<Thing> effects) {
         this.effects = effects;
     }
-    
+
     public boolean hasPermission(Player p) {
-        String perm = "mobarena.classes." + configName;
-        return !p.isPermissionSet(perm) || p.hasPermission(perm);
+        String key = "mobarena.classes." + slug;
+        if (p.isPermissionSet(key)) {
+            return p.hasPermission(key);
+        }
+
+        // Permissive by default.
+        return true;
     }
 
     /**
@@ -136,7 +153,7 @@ public class ArenaClass
      * The normal items will be added to the inventory normally, while the
      * armor items will be verified as armor items and placed in their
      * appropriate slots. If any specific armor slots are specified, they
-     * will overwrite any items in the armor list. 
+     * will overwrite any items in the armor list.
      * @param p a player
      */
     public void grantItems(Player p) {
@@ -144,7 +161,7 @@ public class ArenaClass
 
         // Fork over the items.
         items.forEach(item -> item.giveTo(p));
-        
+
         // Check for legacy armor-node items
         armor.forEach(thing -> thing.giveTo(p));
 
@@ -158,7 +175,7 @@ public class ArenaClass
     public void grantPotionEffects(Player p) {
         effects.forEach(thing -> thing.giveTo(p));
     }
-    
+
     /**
      * Add a permission value to the class.
      */
@@ -209,14 +226,14 @@ public class ArenaClass
         if (o == null) return false;
         if (this == o) return true;
         if (!this.getClass().equals(o.getClass())) return false;
-        
+
         ArenaClass other = (ArenaClass) o;
-        return other.lowercaseName.equals(this.lowercaseName);
+        return other.slug.equals(this.slug);
     }
-    
+
     @Override
     public int hashCode() {
-        return lowercaseName.hashCode();
+        return slug.hashCode();
     }
 
     public static class MyItems extends ArenaClass {

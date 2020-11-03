@@ -57,7 +57,6 @@ public class ClassChests {
             }
         }
 
-        // TODO: Make number of searches configurable
         // First check the pillar below the sign
         Block block = findChestBelow(blockBelow, 6);
 
@@ -86,7 +85,7 @@ public class ClassChests {
     }
 
     private static void assignClassAndGrantChestItems(Arena arena, Player player, ArenaClass ac, Block block) {
-        String classname = ac.getLowercaseName();
+        String slug = ac.getSlug();
         InventoryHolder holder = (InventoryHolder) block.getState();
         ItemStack[] contents = holder.getInventory().getContents();
 
@@ -96,8 +95,8 @@ public class ClassChests {
             System.arraycopy(contents, 0, newContents, 0, 36);
             contents = newContents;
         }
-        arena.assignClassGiveInv(player, classname, contents);
-        arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(classname).getConfigName());
+        arena.assignClassGiveInv(player, slug, contents);
+        arena.getMessenger().tell(player, Msg.LOBBY_CLASS_PICKED, arena.getClasses().get(slug).getConfigName());
 
         Thing price = ac.getPrice();
         if (price != null) {

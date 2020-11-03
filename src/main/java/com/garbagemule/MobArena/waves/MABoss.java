@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -12,10 +13,10 @@ public class MABoss
 {
     private LivingEntity entity;
     private boolean dead;
-    private Thing reward;
+    private ThingPicker reward;
     private List<ItemStack> drops;
     private HealthBar healthbar;
-    
+
     /**
      * Create an MABoss from the given entity with the given max health.
      * @param entity an entity
@@ -33,7 +34,7 @@ public class MABoss
         this.entity    = entity;
         this.dead      = false;
     }
-    
+
     /**
      * Get the LivingEntity associated with this MABoss
      * @return a LivingEntity
@@ -41,7 +42,7 @@ public class MABoss
     public LivingEntity getEntity() {
         return entity;
     }
-    
+
     /**
      * Get the current health of this MABoss
      * @return the current health of the boss
@@ -49,7 +50,7 @@ public class MABoss
     public double getHealth() {
         return entity.getHealth();
     }
-    
+
     /**
      * Get the maximum health of this MABoss
      * @return the maximum health of the boss
@@ -57,7 +58,7 @@ public class MABoss
     public double getMaxHealth() {
         return entity.getMaxHealth();
     }
-    
+
     /**
      * Check if the boss is dead.
      * A boss is dead if it has been damaged such that its health is below 0.
@@ -66,7 +67,7 @@ public class MABoss
     public boolean isDead() {
         return dead;
     }
-    
+
     /**
      * Set the death status of a boss.
      * This is used by the ArenaListener to force kill bosses that die due to
@@ -77,12 +78,12 @@ public class MABoss
         this.dead = dead;
         healthbar.removeAll();
     }
-    
-    public void setReward(Thing reward) {
+
+    public void setReward(ThingPicker reward) {
         this.reward = reward;
     }
 
-    public Thing getReward() {
+    public ThingPicker getReward() {
         return reward;
     }
 

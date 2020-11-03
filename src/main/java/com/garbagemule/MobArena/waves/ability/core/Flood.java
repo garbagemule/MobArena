@@ -19,7 +19,7 @@ public class Flood implements Ability
     public void execute(Arena arena, MABoss boss) {
         Player p = AbilityUtils.getRandomPlayer(arena);
         Block block = p.getLocation().getBlock();
-        
+
         if (block.getType() == Material.AIR) {
             block.setType(Material.WATER);
             arena.addBlock(block);

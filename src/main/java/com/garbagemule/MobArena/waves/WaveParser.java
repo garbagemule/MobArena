@@ -6,8 +6,10 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingManager;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import com.garbagemule.MobArena.waves.enums.BossHealth;
@@ -21,6 +23,7 @@ import com.garbagemule.MobArena.waves.types.SpecialWave;
 import com.garbagemule.MobArena.waves.types.SupplyWave;
 import com.garbagemule.MobArena.waves.types.SwarmWave;
 import com.garbagemule.MobArena.waves.types.UpgradeWave;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
@@ -43,40 +46,40 @@ public class WaveParser
     public static TreeSet<Wave> parseWaves(Arena arena, ConfigurationSection config, WaveBranch branch) {
         // Create a TreeSet with the Comparator for the specific branch.
         TreeSet<Wave> result = new TreeSet<>(WaveUtils.getComparator(branch));
-        
+
         // If the config is null, return the empty set.
         if (config == null) {
             return result;
         }
-        
+
         // If no waves were found, return the empty set.
         Set<String> waves = config.getKeys(false);
         if (waves == null) {
             return result;
         }
-        
+
         // Otherwise, parse each wave in the branch.
         for (String wave : waves) {
             ConfigurationSection waveSection = config.getConfigurationSection(wave);
             Wave w = parseWave(arena, wave, waveSection, branch);
             result.add(w);
         }
-        
+
         return result;
     }
-    
+
     public static Wave parseWave(Arena arena, String name, ConfigurationSection config, WaveBranch branch) {
         // Grab the WaveType and verify that it isn't null.
         String t = config.getString("type", null);
         WaveType type = WaveType.fromString(t);
-        
+
         if (type == null) {
             throw new ConfigError("Invalid wave type for wave " + name + " of arena " + arena.configName() + ": " + t);
         }
-        
+
         // Prepare the result
         Wave result = null;
-        
+
         // Switch on the type of wave.
         switch (type) {
             case DEFAULT:
@@ -98,26 +101,26 @@ public class WaveParser
                 result = parseBossWave(arena, name, config);
                 break;
         }
-        
+
         // Grab the branch-specific nodes.
         int priority  = config.getInt("priority", -1);
         int frequency = config.getInt("frequency", -1);
         int firstWave = config.getInt("wave", frequency);
-        
+
         // Get multipliers
         double healthMultiplier = config.getDouble("health-multiplier", -1D);
         if (healthMultiplier == -1D) {
             healthMultiplier = config.getInt("health-multiplier", 1);
         }
-        
+
         double amountMultiplier = config.getDouble("amount-multiplier", -1D);
         if (amountMultiplier == -1D) {
             amountMultiplier = config.getInt("amount-multiplier", 1);
         }
-        
+
         // Grab the specific spawnpoints if any
         List<Location> spawnpoints = getSpawnpoints(arena, name, config);
-        
+
         // Potion effects
         List<PotionEffect> effects = getPotionEffects(arena, name, config);
 
@@ -132,31 +135,31 @@ public class WaveParser
         } else if (branch == WaveBranch.SINGLE && firstWave <= 0) {
             throw new ConfigError("Missing or invalid 'wave' node for single wave " + name + " of arena " + arena.configName());
         }
-        
+
         // Set the important required values.
         result.setName(name);
         result.setBranch(branch);
         result.setFirstWave(firstWave);
         result.setPriority(priority);
         result.setFrequency(frequency);
-        
+
         // And the multipliers.
         result.setHealthMultiplier(healthMultiplier);
         result.setAmountMultiplier(amountMultiplier);
-        
+
         // Aaand the spawnpoints
         result.setSpawnpoints(spawnpoints);
 
         // Potions
         result.setEffects(effects);
-        
+
         return result;
     }
-    
+
     private static Wave parseDefaultWave(Arena arena, String name, ConfigurationSection config) {
         // Grab the monster map.
         SortedMap<Integer,MACreature> monsters = getMonsterMap(arena, name, config);
-        
+
         // Create the wave.
         DefaultWave result = new DefaultWave(monsters);
 
@@ -166,7 +169,7 @@ public class WaveParser
             result.setFixed(true);
             return result;
         }
-        
+
         // Grab the WaveGrowth
         String grw = config.getString("growth", null);
         if (grw != null && !grw.isEmpty()) {
@@ -179,21 +182,21 @@ public class WaveParser
         } else {
             result.setGrowth(WaveGrowth.MEDIUM);
         }
-        
+
         return result;
     }
-    
+
     private static Wave parseSpecialWave(Arena arena, String name, ConfigurationSection config) {
         SortedMap<Integer,MACreature> monsters = getMonsterMap(arena, name, config);
-        
+
         return new SpecialWave(monsters);
     }
-    
+
     private static Wave parseSwarmWave(Arena arena, String name, ConfigurationSection config) {
         MACreature monster = getSingleMonster(arena, name, config);
-        
+
         SwarmWave result = new SwarmWave(monster);
-        
+
         // Grab SwarmAmount
         String amnt = config.getString("amount", null);
         if (amnt != null && !amnt.isEmpty()) {
@@ -206,15 +209,15 @@ public class WaveParser
         } else {
             result.setAmount(SwarmAmount.LOW);
         }
-        
+
         return result;
     }
-    
+
     private static Wave parseSupplyWave(Arena arena, String name, ConfigurationSection config) {
         SortedMap<Integer,MACreature> monsters = getMonsterMap(arena, name, config);
-        
+
         SupplyWave result = new SupplyWave(monsters);
-        
+
         // Grab the loot.
         List<String> loot = config.getStringList("drops");
         if (loot == null || loot.isEmpty()) {
@@ -235,28 +238,28 @@ public class WaveParser
             })
             .collect(Collectors.toList());
         result.setDropList(stacks);
-        
+
         return result;
     }
-    
+
     private static Wave parseUpgradeWave(Arena arena, String name, ConfigurationSection config) {
         ThingManager thingman = arena.getPlugin().getThingManager();
         Map<String,List<Thing>> upgrades = getUpgradeMap(config, name, arena, thingman);
 
         return new UpgradeWave(upgrades);
     }
-    
+
     private static Wave parseBossWave(Arena arena, String name, ConfigurationSection config) {
         MACreature monster = getSingleMonster(arena, name, config);
-        
+
         BossWave result = new BossWave(monster);
-        
+
         // Check if there's a specific boss name
         String bossName = config.getString("name", null);
         if (bossName != null && !bossName.isEmpty()) {
-            result.setBossName(bossName);
+            result.setBossName(ChatColor.translateAlternateColorCodes('&', bossName));
         }
-        
+
         // Grab the boss health
         String healthString = config.getString("health", null);
         if (healthString != null && !healthString.isEmpty()) {
@@ -273,7 +276,7 @@ public class WaveParser
         } else {
             result.setHealth(BossHealth.MEDIUM);
         }
-        
+
         // And the abilities.
         List<String> abilities = config.getStringList("abilities");
         if (abilities == null || abilities.isEmpty()) {
@@ -297,17 +300,17 @@ public class WaveParser
                 return ability;
             })
             .forEach(result::addBossAbility);
-        
+
         // As well as the ability interval and ability announce.
         result.setAbilityInterval(config.getInt("ability-interval", 3) * 20);
         result.setAbilityAnnounce(config.getBoolean("ability-announce", true));
-        
+
         // Rewards!
         String rew = config.getString("reward", null);
         if (rew != null && !rew.isEmpty()) {
             try {
-                Thing thing = arena.getPlugin().getThingManager().parse(rew.trim());
-                result.setReward(thing);
+                ThingPicker picker = arena.getPlugin().getThingPickerManager().parse(rew.trim());
+                result.setReward(picker);
             } catch (InvalidThingInputString e) {
                 throw new ConfigError("Failed to parse boss reward in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
             }
@@ -334,10 +337,10 @@ public class WaveParser
             })
             .collect(Collectors.toList());
         result.setDrops(stacks);
-        
+
         return result;
     }
-    
+
     /**
      * Scan the ConfigSection for a "monster" (singular) node, which
      * must be exactly a single monster.
@@ -349,14 +352,14 @@ public class WaveParser
         if (monster == null || monster.isEmpty()) {
             throw new ConfigError("Missing 'monster' node for wave " + name + " of arena " + arena.configName());
         }
-        
+
         MACreature result = MACreature.fromString(monster);
         if (result == null) {
             throw new ConfigError("Failed to parse monster for wave " + name + " of arena " + arena.configName() + ": " + monster);
         }
         return result;
     }
-    
+
     /**
      * Scan the ConfigSection for a "monsters" (plural) node, which
      * must contain a list of at least one "monster: number" node.
@@ -373,31 +376,31 @@ public class WaveParser
         if (monsters == null || monsters.isEmpty()) {
             throw new ConfigError("Empty 'monsters' node for wave " + name + " of arena " + arena.configName());
         }
-        
+
         // Prepare the map.
         SortedMap<Integer,MACreature> monsterMap = new TreeMap<>();
         int sum = 0;
         String path = "monsters.";
-        
+
         // Check all the monsters.
         for (String monster : monsters) {
             MACreature creature = MACreature.fromString(monster);
             if (creature == null) {
                 throw new ConfigError("Failed to parse monster for wave " + name + " of arena " + arena.configName() + ": " + monster);
             }
-            
+
             int prob = config.getInt(path + monster, -1);
             if (prob < 0) {
                 throw new ConfigError("Failed to parse probability for monster " + monster + " in wave " + name + " of arena " + arena.configName());
             }
-            
+
             sum += prob;
             monsterMap.put(sum, creature);
         }
-        
+
         return monsterMap;
     }
-    
+
     private static List<Location> getSpawnpoints(Arena arena, String name, ConfigurationSection config) {
         List<String> spawnpoints = config.getStringList("spawnpoints");
         if (spawnpoints == null || spawnpoints.isEmpty()) {
@@ -407,7 +410,7 @@ public class WaveParser
             }
             spawnpoints = Arrays.asList(value.split(";"));
         }
-        
+
         ArenaRegion region = arena.getRegion();
         return spawnpoints.stream()
             .map(String::trim)
@@ -422,10 +425,6 @@ public class WaveParser
     }
 
     private static List<PotionEffect> getPotionEffects(Arena arena, String name, ConfigurationSection config) {
-        /*
-         * TODO: Make this consistent with the rest somehow
-         * - Things only work for Players (currently)
-         */
         List<String> effects = config.getStringList("effects");
         if (effects == null || effects.isEmpty()) {
             String value = config.getString("effects", null);
@@ -454,7 +453,7 @@ public class WaveParser
             })
             .collect(Collectors.toList());
     }
-    
+
     private static Map<String,List<Thing>> getUpgradeMap(ConfigurationSection config, String name, Arena arena, ThingManager thingman) {
         ConfigurationSection section = config.getConfigurationSection("upgrades");
         if (section == null) {
@@ -465,24 +464,26 @@ public class WaveParser
         if (classes == null || classes.isEmpty()) {
             throw new ConfigError("Empty 'upgrades' node for wave " + name + " of arena " + arena.configName());
         }
-        
+
         Map<String,List<Thing>> upgrades = new HashMap<>();
         String path = "upgrades.";
-        
+
         for (String className : classes) {
+            String slug = Slugs.create(className);
+
             // Legacy support
             Object val = config.get(path + className, null);
             if (val instanceof String) {
                 List<Thing> things = loadUpgradesFromString(className, (String) val, name, arena, thingman);
-                upgrades.put(className.toLowerCase(), things);
+                upgrades.put(slug, things);
             }
             // New complex setup
             else if (val instanceof ConfigurationSection) {
                 List<Thing> list = loadUpgradesFromSection(className, (ConfigurationSection) val, name, arena, thingman);
-                upgrades.put(className.toLowerCase(), list);
+                upgrades.put(slug, list);
             }
         }
-        
+
         return upgrades;
     }
 
@@ -573,14 +574,14 @@ public class WaveParser
 
         return list;
     }
-    
+
     public static Wave createDefaultWave() {
         SortedMap<Integer,MACreature> monsters = new TreeMap<>();
         monsters.put(10, MACreature.ZOMBIE);
         monsters.put(20, MACreature.SKELETON);
         monsters.put(30, MACreature.SPIDER);
         monsters.put(40, MACreature.SLIMESMALL);
-        
+
         DefaultWave result = new DefaultWave(monsters);
         result.setName("MA_DEFAULT_WAVE");
         result.setBranch(WaveBranch.RECURRENT);
@@ -590,7 +591,7 @@ public class WaveParser
         result.setGrowth(WaveGrowth.OLD);
         result.setHealthMultiplier(1D);
         result.setAmountMultiplier(1D);
-        
+
         return result;
     }
 }

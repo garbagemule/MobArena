@@ -44,7 +44,7 @@ public class TextUtils
     public static String padLeft(String s, int length) { return padLeft(s, length, ' '); }
     public static String padLeft(int s, int length) { return padLeft(Integer.toString(s), length, ' '); }
     public static String padLeft(double s, int length) { return padLeft(Double.toString(s), length, ' '); }
-    
+
     /**
      * Truncate the input string to be at most the input length
      * @param s The string to truncate
@@ -58,32 +58,32 @@ public class TextUtils
         return s.substring(0, length);
     }
     public static String truncate(String s) { return truncate(s, 15); }
-    
+
     public static String camelCase(String s) {
         if (s == null || s.length() < 2)
             return null;
-        
+
         String firstLetter = s.substring(0,1).toUpperCase();
         return firstLetter + s.substring(1).toLowerCase();
     }
-    
+
     public static String playerListToString(Collection<? extends Player> list) {
         if (list.isEmpty()) {
             return Msg.MISC_NONE.toString();
         }
-        
+
         StringBuffer buffy = new StringBuffer();
         for (Player p : list) {
             buffy.append(", " + p.getName());
         }
         return buffy.substring(2);
     }
-    
+
     public static String listToString(Collection<? extends Object> list) {
         if (list.isEmpty()) {
             return Msg.MISC_NONE.toString();
         }
-        
+
         StringBuffer buffy = new StringBuffer();
         for (Object o : list) {
             buffy.append(", " + o.toString());

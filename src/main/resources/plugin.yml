@@ -35,7 +35,7 @@ permissions:
     mobarena.use.ready:
         description: Ready to start the battle
         default: true
-    
+
     mobarena.admin:
         description: Gives access to all admin commands
         default: op
@@ -45,6 +45,7 @@ permissions:
             mobarena.admin.restore: true
             mobarena.admin.force: true
             mobarena.admin.teleport: true
+            mobarena.admin.addreward: true
     mobarena.admin.enable:
         description: Enable and disable MobArena and/or arenas.
         default: false
@@ -60,7 +61,10 @@ permissions:
     mobarena.admin.teleport:
         description: Immune to teleport blocking rules.
         default: false
-    
+    mobarena.admin.addreward:
+        description: Add rewards to an arena player's reward list.
+        default: false
+
     mobarena.setup:
         description: Gives access to all setup commands
         default: op

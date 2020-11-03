@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class MobArenaHandler
 {
     private MobArena plugin;
-    
+
     /**
      * Primary constructor.
      * The field 'plugin' is initalized, if the server is running MobArena.
@@ -18,15 +18,15 @@ public class MobArenaHandler
     public MobArenaHandler() {
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
     }
-    
-    
-    
+
+
+
     /*//////////////////////////////////////////////////////////////////
-    
+
                  REGION/LOCATION METHODS
-     
+
     //////////////////////////////////////////////////////////////////*/
-    
+
     /**
      * Check if a Location is inside of any arena region.
      * @param loc A location.
@@ -41,7 +41,7 @@ public class MobArenaHandler
 
         return false;
     }
-    
+
     /**
      * Check if a Location is inside of a specific arena region (by arena object).
      * @param arena An Arena object
@@ -51,7 +51,7 @@ public class MobArenaHandler
     public boolean inRegion(Arena arena, Location loc) {
         return (arena != null && arena.getRegion().contains(loc));
     }
-    
+
     /**
      * Check if a Location is inside of a specific arena region (by arena name).
      * @param arenaName The name of an arena
@@ -65,7 +65,7 @@ public class MobArenaHandler
 
         return arena.getRegion().contains(loc);
     }
-    
+
     /**
      * Check if a Location is inside of the region of an arena that is currently running.
      * @param loc A location.
@@ -74,7 +74,7 @@ public class MobArenaHandler
     public boolean inRunningRegion(Location loc) {
         return inRegion(loc, false, true);
     }
-    
+
     /**
      * Check if a Location is inside of the region of an arena that is currently enabled.
      * @param loc A location.
@@ -83,7 +83,7 @@ public class MobArenaHandler
     public boolean inEnabledRegion(Location loc) {
         return inRegion(loc, true, false);
     }
-    
+
     /**
      * Private helper method for inRunningRegion and inEnabledRegion
      * @param loc A location
@@ -106,15 +106,15 @@ public class MobArenaHandler
 
         return false;
     }
-    
-    
-    
+
+
+
     /*//////////////////////////////////////////////////////////////////
-    
+
                  PLAYER/MONSTER/PET METHODS
-     
+
     //////////////////////////////////////////////////////////////////*/
-    
+
     /**
      * Check if a player is in a MobArena arena (by Player).
      * @param player The player
@@ -123,7 +123,7 @@ public class MobArenaHandler
     public boolean isPlayerInArena(Player player) {
         return (plugin.getArenaMaster().getArenaWithPlayer(player) != null);
     }
-    
+
     /**
      * Check if a player is in a MobArena arena (by name).
      * @param playerName The name of the player
@@ -132,7 +132,7 @@ public class MobArenaHandler
     public boolean isPlayerInArena(String playerName) {
         return (plugin.getArenaMaster().getArenaWithPlayer(playerName) != null);
     }
-    
+
     /**
      * Get the MobArena class of a given player.
      * @param player The player
@@ -144,7 +144,7 @@ public class MobArenaHandler
 
         return getPlayerClass(arena, player);
     }
-    
+
     /**
      * Get the MobArena class of a given player in a given arena.
      * This method is faster than the above method, granted the Arena object is known.
@@ -155,13 +155,13 @@ public class MobArenaHandler
     public String getPlayerClass(Arena arena, Player player) {
         ArenaPlayer ap = arena.getArenaPlayer(player);
         if (ap == null) return null;
-        
+
         ArenaClass ac = ap.getArenaClass();
         if (ac == null) return null;
-        
-        return ac.getLowercaseName();
+
+        return ac.getSlug();
     }
-    
+
     /**
      * Check if a monster is in a MobArena arena.
      * @param entity The monster entity
@@ -170,7 +170,7 @@ public class MobArenaHandler
     public boolean isMonsterInArena(LivingEntity entity) {
         return plugin.getArenaMaster().getArenaWithMonster(entity) != null;
     }
-    
+
     /**
      * Check if a pet is in a MobArena arena.
      * @param wolf The pet wolf
@@ -179,15 +179,15 @@ public class MobArenaHandler
     public boolean isPetInArena(LivingEntity wolf) {
         return plugin.getArenaMaster().getArenaWithPet(wolf) != null;
     }
-    
-    
-    
+
+
+
     /*//////////////////////////////////////////////////////////////////
-    
+
                  ARENA GETTERS
-     
+
     //////////////////////////////////////////////////////////////////*/
-    
+
     /**
      * Get an Arena object at the given location.
      * @param loc A location
@@ -196,7 +196,7 @@ public class MobArenaHandler
     public Arena getArenaAtLocation(Location loc) {
         return plugin.getArenaMaster().getArenaAtLocation(loc);
     }
-    
+
     /**
      * Get the Arena object that the given player is currently in.
      * @param p A player
@@ -205,7 +205,7 @@ public class MobArenaHandler
     public Arena getArenaWithPlayer(Player p) {
         return plugin.getArenaMaster().getArenaWithPlayer(p);
     }
-    
+
     /**
      * Get the Arena object that the given pet is currently in.
      * @param wolf A pet wolf
@@ -214,7 +214,7 @@ public class MobArenaHandler
     public Arena getArenaWithPet(Entity wolf) {
         return plugin.getArenaMaster().getArenaWithPet(wolf);
     }
-    
+
     /**
      * Get the Arena object that the given monster is currently in.
      * @param monster A monster

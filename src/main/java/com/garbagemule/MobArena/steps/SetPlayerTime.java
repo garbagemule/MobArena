@@ -34,7 +34,7 @@ class SetPlayerTime extends PlayerStep {
     private static Time parseTime(ConfigurationSection settings) {
         String value = settings.getString("player-time-in-arena", "world");
         try {
-            return Time.valueOf(value.toLowerCase());
+            return Time.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
             return null;
         }

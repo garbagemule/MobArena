@@ -17,8 +17,8 @@ public class LightningAura implements Ability
     /**
      * How close players must be to be affected by the ability.
      */
-    private final int RADIUS = 5;
-    
+    private static final int RADIUS = 5;
+
     @Override
     public void execute(Arena arena, MABoss boss) {
         World world = arena.getWorld();

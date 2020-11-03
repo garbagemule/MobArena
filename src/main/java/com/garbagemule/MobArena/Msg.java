@@ -78,6 +78,7 @@ public enum Msg {
     WAVE_BOSS_KILLED("&a%&r killed the boss!"),
     WAVE_BOSS_REWARD_EARNED("You earned: &e%"),
     WAVE_REWARD("You just earned a reward: &e%&r"),
+    MISC_REWARD_ADDED("You were just given a reward: &e%&r"),
     MISC_LIST_PLAYERS("Live players: &a%&r"),
     MISC_LIST_ARENAS("Available arenas: %"),
     MISC_COMMAND_NOT_ALLOWED("You can't use that command in the arena!"),

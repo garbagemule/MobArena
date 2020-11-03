@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.healthbar.HealthBar;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
@@ -183,9 +184,9 @@ public class MASpawnThread implements Runnable
         Wave w = waveManager.next();
 
         w.announce(arena, wave);
-        
+
         arena.getScoreboard().updateWave(wave);
-        
+
         // Set the players' level to the wave number
         if (wavesAsLevel) {
             for (Player p : arena.getPlayersInArena()) {
@@ -282,8 +283,8 @@ public class MASpawnThread implements Runnable
         UpgradeWave uw = (UpgradeWave) w;
 
         for (Player p : arena.getPlayersInArena()) {
-            String className = arena.getArenaPlayer(p).getArenaClass().getLowercaseName();
-            uw.grantItems(p, className);
+            String slug = arena.getArenaPlayer(p).getArenaClass().getSlug();
+            uw.grantItems(p, slug);
             uw.grantItems(p, "all");
         }
 
@@ -311,7 +312,7 @@ public class MASpawnThread implements Runnable
         if (waveClear && !monsterManager.getMonsters().isEmpty()) {
             return false;
         }
-        
+
         // Check for pre boss clear
         if (preBossClear && waveManager.getNext().getType() == WaveType.BOSS && !monsterManager.getMonsters().isEmpty()) {
             return false;
@@ -345,7 +346,7 @@ public class MASpawnThread implements Runnable
             if (region.contains(p.getLocation())) {
                 continue;
             }
-            
+
             arena.getMessenger().tell(p, "Leaving so soon?");
             p.getInventory().clear();
             arena.playerLeave(p);
@@ -353,13 +354,13 @@ public class MASpawnThread implements Runnable
     }
 
     private void grantRewards(int wave) {
-        for (Map.Entry<Integer, List<Thing>> entry : arena.getEveryWaveEntrySet()) {
+        for (Map.Entry<Integer, ThingPicker> entry : arena.getEveryWaveEntrySet()) {
             if (wave > 0 && wave % entry.getKey() == 0) {
                 addReward(entry.getValue());
             }
         }
 
-        List<Thing> after = arena.getAfterWaveReward(wave);
+        ThingPicker after = arena.getAfterWaveReward(wave);
         if (after != null) {
             addReward(after);
         }
@@ -388,16 +389,11 @@ public class MASpawnThread implements Runnable
     /**
      * Rewards all players with an item from the input String.
      */
-    private void addReward(List<Thing> rewards) {
+    private void addReward(ThingPicker picker) {
         for (Player p : arena.getPlayersInArena()) {
-            Thing reward = rewards.get(MobArena.random.nextInt(rewards.size()));
-            rewardManager.addReward(p, reward);
-
-            if (reward == null) {
-                arena.getMessenger().tell(p, "ERROR! Problem with rewards. Notify server host!");
-                plugin.getLogger().warning("Could not add null reward. Please check the config-file!");
-            }
-            else {
+            Thing reward = picker.pick();
+            if (reward != null) {
+                rewardManager.addReward(p, reward);
                 arena.getMessenger().tell(p, Msg.WAVE_REWARD, reward.toString());
             }
         }

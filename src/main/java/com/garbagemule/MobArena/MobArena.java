@@ -5,7 +5,6 @@ import com.garbagemule.MobArena.config.LoadsConfigFile;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
-import com.garbagemule.MobArena.listeners.MagicSpellsListener;
 import com.garbagemule.MobArena.metrics.ArenaCountChart;
 import com.garbagemule.MobArena.metrics.ClassChestsChart;
 import com.garbagemule.MobArena.metrics.ClassCountChart;
@@ -17,7 +16,11 @@ import com.garbagemule.MobArena.metrics.VaultChart;
 import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
+import com.garbagemule.MobArena.things.NothingPickerParser;
+import com.garbagemule.MobArena.things.RandomThingPickerParser;
+import com.garbagemule.MobArena.things.ThingGroupPickerParser;
 import com.garbagemule.MobArena.things.ThingManager;
+import com.garbagemule.MobArena.things.ThingPickerManager;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
 import net.milkbowl.vault.economy.Economy;
@@ -58,12 +61,18 @@ public class MobArena extends JavaPlugin
 
     private Messenger messenger;
     private ThingManager thingman;
+    private ThingPickerManager pickman;
 
     private SignListeners signListeners;
 
     @Override
     public void onLoad() {
         thingman = new ThingManager(this);
+
+        pickman = new ThingPickerManager(thingman);
+        pickman.register(new ThingGroupPickerParser(pickman));
+        pickman.register(new RandomThingPickerParser(pickman, random));
+        pickman.register(new NothingPickerParser());
     }
 
     public void onEnable() {
@@ -96,7 +105,6 @@ public class MobArena extends JavaPlugin
 
             registerConfigurationSerializers();
             setupVault();
-            setupMagicSpells();
             setupBossAbilities();
             setupListeners();
             setupMetrics();
@@ -116,7 +124,7 @@ public class MobArena extends JavaPlugin
             }
         }
     }
-    
+
     private void setupArenaMaster() {
         arenaMaster = new ArenaMasterImpl(this);
     }
@@ -147,16 +155,6 @@ public class MobArena extends JavaPlugin
         }
     }
 
-    private void setupMagicSpells() {
-        Plugin spells = this.getServer().getPluginManager().getPlugin("MagicSpells");
-        if (spells == null) {
-            return;
-        }
-
-        getLogger().info("MagicSpells found, loading config-file.");
-        this.getServer().getPluginManager().registerEvents(new MagicSpellsListener(this), this);
-    }
-
     private void setupBossAbilities() {
         AbilityManager.loadCoreAbilities();
         AbilityManager.loadCustomAbilities(getDataFolder());
@@ -168,7 +166,7 @@ public class MobArena extends JavaPlugin
     }
 
     private void setupMetrics() {
-        Metrics metrics = new Metrics(this);
+        Metrics metrics = new Metrics(this, 2572);
         metrics.addCustomChart(new VaultChart(this));
         metrics.addCustomChart(new ArenaCountChart(this));
         metrics.addCustomChart(new ClassCountChart(this));
@@ -264,10 +262,6 @@ public class MobArena extends JavaPlugin
         return lastFailureCause;
     }
 
-    public File getPluginFile() {
-        return getFile();
-    }
-
     @Override
     public FileConfiguration getConfig() {
         if (config == null) {
@@ -290,5 +284,9 @@ public class MobArena extends JavaPlugin
 
     public ThingManager getThingManager() {
         return thingman;
+    }
+
+    public ThingPickerManager getThingPickerManager() {
+        return pickman;
     }
 }

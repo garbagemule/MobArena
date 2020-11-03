@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.util.JoinInterruptTimer;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -137,7 +138,7 @@ public class ArenaMasterImpl implements ArenaMaster
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
         List<Arena> result = new ArrayList<>(arenas.size());
         for (Arena arena : arenas)
-            if (arena.isEnabled()) 
+            if (arena.isEnabled())
                 result.add(arena);
         return result;
     }
@@ -232,8 +233,9 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public Arena getArenaWithName(Collection<Arena> arenas, String configName) {
+        String slug = Slugs.create(configName);
         for (Arena arena : arenas)
-            if (arena.configName().equalsIgnoreCase(configName))
+            if (arena.getSlug().equalsIgnoreCase(slug))
                 return arena;
         return null;
     }
@@ -280,6 +282,9 @@ public class ArenaMasterImpl implements ArenaMaster
         spawnsPets.clear();
 
         ConfigurationSection items = settings.getConfigurationSection("pet-items");
+        if (items == null) {
+            return;
+        }
 
         for (String key : items.getKeys(false)) {
             EntityType entity;
@@ -334,14 +339,13 @@ public class ArenaMasterImpl implements ArenaMaster
     private ArenaClass loadClass(String classname) {
         FileConfiguration config = plugin.getConfig();
         ConfigurationSection section = config.getConfigurationSection("classes." + classname);
-        String lowercase = classname.toLowerCase().replace(" ", "");
 
         // If the section doesn't exist, the class doesn't either.
         if (section == null) {
             // We may not have a class entry for My Items, but that's fine
             if (classname.equals("My Items")) {
                 ArenaClass myItems = new ArenaClass.MyItems(null, false, false, this);
-                classes.put(lowercase, myItems);
+                classes.put(myItems.getSlug(), myItems);
                 return myItems;
             }
             plugin.getLogger().severe("Failed to load class '" + classname + "'.");
@@ -390,7 +394,7 @@ public class ArenaMasterImpl implements ArenaMaster
         }
 
         // Finally add the class to the classes map.
-        classes.put(lowercase, arenaClass);
+        classes.put(arenaClass.getSlug(), arenaClass);
         return arenaClass;
     }
 

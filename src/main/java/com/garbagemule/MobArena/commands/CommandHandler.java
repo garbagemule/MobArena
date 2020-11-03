@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.ConfigError;
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.commands.admin.AddRewardCommand;
 import com.garbagemule.MobArena.commands.admin.DisableCommand;
 import com.garbagemule.MobArena.commands.admin.EnableCommand;
 import com.garbagemule.MobArena.commands.admin.ForceCommand;
@@ -53,7 +54,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
     private Messenger fallbackMessenger;
 
     private Map<String,Command> commands;
-    
+
     public CommandHandler(MobArena plugin) {
         this.plugin = plugin;
         this.fallbackMessenger = new Messenger("&a[MobArena] ");
@@ -98,7 +99,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
 
         // Get all commands that match the base.
         List<Command> matches = getMatchingCommands(base);
-        
+
         // If there's more than one match, display them.
         if (matches.size() > 1) {
             am.getGlobalMessenger().tell(sender, Msg.MISC_MULTIPLE_MATCHES);
@@ -107,29 +108,29 @@ public class CommandHandler implements CommandExecutor, TabCompleter
             }
             return true;
         }
-        
+
         // If there are no matches at all, notify.
         if (matches.size() == 0) {
             am.getGlobalMessenger().tell(sender, Msg.MISC_NO_MATCHES);
             return true;
         }
-        
+
         // Grab the only match.
         Command command  = matches.get(0);
         CommandInfo info = command.getClass().getAnnotation(CommandInfo.class);
-        
+
         // First check if the sender has permission.
         if (!sender.hasPermission(info.permission())) {
             am.getGlobalMessenger().tell(sender, Msg.MISC_NO_ACCESS);
             return true;
         }
-        
+
         // Check if the last argument is a ?, in which case, display usage and description
         if (last.equals("?") || last.equals("help")) {
             showUsage(command, sender, true);
             return true;
         }
-        
+
         // Otherwise, execute the command!
         String[] params = trimFirstArg(args);
         if (!command.execute(am, sender, params)) {
@@ -162,7 +163,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
         }
         return true;
     }
-    
+
     /**
      * Get all commands that match a given string.
      * @param arg the given string
@@ -170,17 +171,17 @@ public class CommandHandler implements CommandExecutor, TabCompleter
      */
     private List<Command> getMatchingCommands(String arg) {
         List<Command> result = new ArrayList<>();
-        
+
         // Grab the commands that match the argument.
         for (Entry<String,Command> entry : commands.entrySet()) {
             if (arg.matches(entry.getKey())) {
                 result.add(entry.getValue());
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * Show the usage and description messages of a command to a player.
      * The usage will only be shown, if the player has permission for the command.
@@ -193,7 +194,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
 
         sender.sendMessage((prefix ? "Usage: " : "") + info.usage() + " " + ChatColor.YELLOW + info.desc());
     }
-    
+
     /**
      * Remove the first argument of a string. This is because the very first
      * element of the arguments array will be the command itself.
@@ -203,7 +204,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
     private String[] trimFirstArg(String[] args) {
         return Arrays.copyOfRange(args, 1, args.length);
     }
-    
+
     /**
      * List all the available MobArena commands for the CommandSender.
      * @param sender a player or the console
@@ -240,7 +241,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
             if (setup.length() > 0) am.getGlobalMessenger().tell(sender, "Setup commands: " + setup.toString());
         }
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command bcmd, String alias, String[] args) {
         // Only players can tab complete
@@ -302,7 +303,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
      */
     private void registerCommands() {
         commands = new LinkedHashMap<>();
-        
+
         // mobarena.use
         register(JoinCommand.class);
         register(LeaveCommand.class);
@@ -319,7 +320,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter
         register(ForceCommand.class);
         register(KickCommand.class);
         register(RestoreCommand.class);
-        
+        register(AddRewardCommand.class);
+
         // mobarena.setup
         register(SetupCommand.class);
         register(SettingCommand.class);
@@ -339,7 +341,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
         register(RemoveLeaderboardCommand.class);
         register(AutoGenerateCommand.class);
     }
-    
+
     /**
      * Register a command.
      * The Command's CommandInfo annotation is queried to find its pattern
@@ -349,7 +351,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter
     public void register(Class<? extends Command> c) {
         CommandInfo info = c.getAnnotation(CommandInfo.class);
         if (info == null) return;
-        
+
         try {
             commands.put(info.pattern(), c.newInstance());
         }

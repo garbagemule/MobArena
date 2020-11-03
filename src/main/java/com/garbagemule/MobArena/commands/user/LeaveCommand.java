@@ -24,11 +24,11 @@ public class LeaveCommand implements Command
             am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
-        
+
         // Unwrap the sender.
         Player p = Commands.unwrap(sender);
 
-        Arena arena = am.getArenaWithPlayer(p);  
+        Arena arena = am.getArenaWithPlayer(p);
         if (arena == null) {
             arena = am.getArenaWithSpectator(p);
             if (arena == null) {
@@ -36,7 +36,7 @@ public class LeaveCommand implements Command
                 return true;
             }
         }
-        
+
         if (arena.playerLeave(p)) {
             arena.getMessenger().tell(p, Msg.LEAVE_PLAYER_LEFT);
         }

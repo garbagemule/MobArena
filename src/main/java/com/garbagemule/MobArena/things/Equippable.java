@@ -1,44 +1,12 @@
 package com.garbagemule.MobArena.things;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.EnumSet;
 
 class Equippable {
     @FunctionalInterface
     interface Wrapper {
         ItemStackThing wrap(ItemStack stack);
     }
-
-    private static EnumSet<Material> helmets = EnumSet.of(
-        Material.LEATHER_HELMET,
-        Material.IRON_HELMET,
-        Material.CHAINMAIL_HELMET,
-        Material.GOLD_HELMET,
-        Material.DIAMOND_HELMET
-    );
-    private static EnumSet<Material> chestplates = EnumSet.of(
-        Material.LEATHER_CHESTPLATE,
-        Material.IRON_CHESTPLATE,
-        Material.CHAINMAIL_CHESTPLATE,
-        Material.GOLD_CHESTPLATE,
-        Material.DIAMOND_CHESTPLATE
-    );
-    private static EnumSet<Material> leggings = EnumSet.of(
-        Material.LEATHER_LEGGINGS,
-        Material.IRON_LEGGINGS,
-        Material.CHAINMAIL_LEGGINGS,
-        Material.GOLD_LEGGINGS,
-        Material.DIAMOND_LEGGINGS
-    );
-    private static EnumSet<Material> boots = EnumSet.of(
-        Material.LEATHER_BOOTS,
-        Material.IRON_BOOTS,
-        Material.CHAINMAIL_BOOTS,
-        Material.GOLD_BOOTS,
-        Material.DIAMOND_BOOTS
-    );
 
     static Wrapper getWrapperByPrefix(String prefix) {
         if (prefix.equals("helmet")) {
@@ -57,17 +25,19 @@ class Equippable {
     }
 
     static Wrapper guessWrapperFromItemStack(ItemStack stack) {
-        Material type = stack.getType();
-        if (helmets.contains(type)) {
+        String name = stack.getType().name();
+        String[] parts = name.split("_");
+        String suffix = parts[parts.length - 1];
+        if (suffix.equals("HELMET")) {
             return HelmetThing::new;
         }
-        if (chestplates.contains(type)) {
+        if (suffix.equals("CHESTPLATE") || name.equals("ELYTRA")) {
             return ChestplateThing::new;
         }
-        if (leggings.contains(type)) {
+        if (suffix.equals("LEGGINGS")) {
             return LeggingsThing::new;
         }
-        if (boots.contains(type)) {
+        if (suffix.equals("BOOTS")) {
             return BootsThing::new;
         }
         return null;

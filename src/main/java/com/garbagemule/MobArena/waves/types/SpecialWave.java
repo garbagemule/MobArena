@@ -14,26 +14,26 @@ import java.util.SortedMap;
 public class SpecialWave extends AbstractWave
 {
     private SortedMap<Integer,MACreature> monsterMap;
-    
+
     public SpecialWave(SortedMap<Integer,MACreature> monsterMap) {
         this.monsterMap = monsterMap;
         this.setType(WaveType.SPECIAL);
     }
-    
+
     @Override
     public Map<MACreature,Integer> getMonstersToSpawn(int wave, int playerCount, Arena arena) {
         // Random number.
         Random random = new Random();
-        int value = random.nextInt(monsterMap.lastKey()); 
+        int value = random.nextInt(monsterMap.lastKey());
 
         // Prepare the monster map.
         Map<MACreature,Integer> result = new HashMap<>();
-        
+
         for (Map.Entry<Integer,MACreature> entry : monsterMap.entrySet()) {
             if (value > entry.getKey()) {
                 continue;
             }
-            
+
             int amount;
             switch (entry.getValue().getName()) {
                 case "poweredcreeper":
@@ -44,12 +44,12 @@ public class SpecialWave extends AbstractWave
                 case "ghast":         amount = 2;               break;
                 default:              amount = playerCount + 1; break;
             }
-            
+
             amount = (int) Math.max(1D, amount * super.getAmountMultiplier());
             result.put(entry.getValue(), amount);
             break;
         }
-        
+
         return result;
     }
 

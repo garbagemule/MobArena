@@ -12,17 +12,17 @@ public class ArenaPlayerJoinEvent extends Event implements Cancellable
     private Player player;
     private Arena arena;
     private boolean cancelled;
-    
+
     public ArenaPlayerJoinEvent(Player player, Arena arena) {
         this.player = player;
         this.arena =  arena;
         this.cancelled = false;
     }
-    
+
     public Player getPlayer() {
         return player;
     }
-    
+
     public Arena getArena() {
         return arena;
     }
@@ -36,11 +36,11 @@ public class ArenaPlayerJoinEvent extends Event implements Cancellable
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
-    
+
     public HandlerList getHandlers() {
         return handlers;
     }
-     
+
     public static HandlerList getHandlerList() {
         return handlers;
     }

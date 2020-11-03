@@ -7,7 +7,7 @@
   <groupId>com.garbagemule</groupId>
   <artifactId>mobarena</artifactId>
   <name>MobArena</name>
-  <version>0.104.2</version>
+  <version>0.104.3-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,7 +19,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.8.1</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -30,7 +30,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>3.2.0</version>
         <configuration>
           <finalName>MobArena</finalName>
         </configuration>
@@ -77,18 +77,13 @@
       <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
     </repository>
 
-    <!-- Vault repo -->
-    <repository>
-      <id>vault-repo</id>
-      <url>http://nexus.hc.to/content/repositories/pub_releases</url>
-    </repository>
-
+    <!-- bStats repo -->
     <repository>
       <id>bstats-repo</id>
       <url>http://repo.codemc.org/repository/maven-public/</url>
     </repository>
 
-    <!-- JitPack for MagicSpells -->
+    <!-- JitPack for Vault -->
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
@@ -106,32 +101,25 @@
 
     <!-- Vault -->
     <dependency>
-      <groupId>net.milkbowl.vault</groupId>
+      <groupId>com.github.MilkBowl</groupId>
       <artifactId>VaultAPI</artifactId>
-      <version>1.5</version>
+      <version>1.7</version>
       <scope>provided</scope>
     </dependency>
 
+    <!-- bStats -->
     <dependency>
       <groupId>org.bstats</groupId>
       <artifactId>bstats-bukkit</artifactId>
-      <version>1.5</version>
+      <version>1.7</version>
       <scope>compile</scope>
-    </dependency>
-
-    <!-- MagicSpells -->
-    <dependency>
-      <groupId>com.github.TheComputerGeek2</groupId>
-      <artifactId>MagicSpells</artifactId>
-      <version>0ad7c1f1a1</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- JUnit -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -147,7 +135,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>2.18.3</version>
+      <version>3.3.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -10,7 +10,7 @@ import org.bukkit.material.Redstone;
 import java.util.Comparator;
 
 public class RepairableComparator implements Comparator<Repairable>
-{    
+{
     public int compare(Repairable r1, Repairable r2)
     {
         if (restoreLast(r1))
@@ -21,10 +21,10 @@ public class RepairableComparator implements Comparator<Repairable>
         }
         else if (restoreLast(r2))
             return -1;
-        
+
         return 0;
     }
-    
+
     private boolean restoreLast(Repairable r)
     {
         Material t = r.getType();
