@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.util.config;
 
-import com.garbagemule.MobArena.ConfigError;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

@@ -23,10 +23,10 @@ public class NotReadyCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Grab the argument, if any
         String arg1 = (args.length > 0 ? args[0] : "");
-        
+
         // The arena to query.
         Arena arena = null;
-        
+
         if (!arg1.equals("")) {
             arena = am.getArenaWithName(arg1);
             if (arena == null) {
@@ -36,7 +36,7 @@ public class NotReadyCommand implements Command
         } else if (Commands.isPlayer(sender)) {
             Player p = Commands.unwrap(sender);
             arena = am.getArenaWithPlayer(p);
-            
+
             if (arena == null) {
                 am.getGlobalMessenger().tell(sender, Msg.LEAVE_NOT_PLAYING);
                 return true;
@@ -44,7 +44,7 @@ public class NotReadyCommand implements Command
         } else {
             return false;
         }
-        
+
         String list = MAUtils.listToString(arena.getNonreadyPlayers(), am.getPlugin());
         arena.getMessenger().tell(sender, Msg.MISC_LIST_PLAYERS.format(list));
         return true;

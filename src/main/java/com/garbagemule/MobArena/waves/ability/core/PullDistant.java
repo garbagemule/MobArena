@@ -18,20 +18,20 @@ public class PullDistant implements Ability
     /**
      * How far away players must be to be affected by the ability.
      */
-    private final int RADIUS = 8;
-    
+    private static final int RADIUS = 8;
+
     @Override
     public void execute(Arena arena, MABoss boss) {
         Location bLoc = boss.getEntity().getLocation();
-        
+
         for (Player p : AbilityUtils.getDistantPlayers(arena, boss.getEntity(), RADIUS)) {
             Location loc = p.getLocation();
             Vector v     = new Vector(bLoc.getX() - loc.getX(), 0, bLoc.getZ() - loc.getZ());
-            
+
             double a = Math.abs(bLoc.getX() - loc.getX());
             double b = Math.abs(bLoc.getZ() - loc.getZ());
             double c = Math.sqrt((a*a + b*b));
-            
+
             p.setVelocity(v.normalize().multiply(c*0.3).setY(0.8));
         }
     }

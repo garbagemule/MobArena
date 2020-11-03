@@ -26,14 +26,14 @@ public class EnableCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Grab the argument, if any.
         String arg1 = (args.length > 0 ? args[0] : "");
-        
+
         if (arg1.equals("all")) {
             for (Arena arena : am.getArenas()) {
                 enable(arena, sender);
             }
             return true;
         }
-        
+
         if (!arg1.equals("")) {
             Arena arena = am.getArenaWithName(arg1);
             if (arena == null) {
@@ -43,13 +43,13 @@ public class EnableCommand implements Command
             enable(arena, sender);
             return true;
         }
-        
+
         am.setEnabled(true);
         am.saveConfig();
         am.getGlobalMessenger().tell(sender, "MobArena " + ChatColor.GREEN + "enabled");
         return true;
     }
-    
+
     private void enable(Arena arena, CommandSender sender) {
         arena.setEnabled(true);
         arena.getPlugin().saveConfig();
@@ -67,8 +67,8 @@ public class EnableCommand implements Command
         List<Arena> arenas = am.getArenas();
 
         return arenas.stream()
-            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
-            .map(Arena::configName)
+            .filter(arena -> arena.getSlug().startsWith(prefix))
+            .map(Arena::getSlug)
             .collect(Collectors.toList());
     }
 }

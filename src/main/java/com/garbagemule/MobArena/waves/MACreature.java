@@ -101,7 +101,7 @@ public class MACreature
     public MACreature(String name, EntityType type) {
         this(name, name + "s", type);
     }
-    
+
     private MACreature(EntityType type) {
         this(
             type.name().toLowerCase().replaceAll("[-_\\.]", ""),
@@ -122,11 +122,11 @@ public class MACreature
     public EntityType getType() {
         return type;
     }
-    
+
     public static MACreature fromString(String string) {
         return map.get(string.toLowerCase().replaceAll("[-_\\.]", ""));
     }
-    
+
     public LivingEntity spawn(Arena arena, World world, Location loc) {
         LivingEntity e = (LivingEntity) world.spawnEntity(loc, type);
         e.getEquipment().clear();
@@ -191,12 +191,12 @@ public class MACreature
             default:
                 break;
         }
-        
+
         if (e instanceof Creature) {
             Creature c = (Creature) e;
             c.setTarget(WaveUtils.getClosestPlayer(arena, e));
         }
-        
+
         return e;
     }
 }

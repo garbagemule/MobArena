@@ -3,6 +3,9 @@ package com.garbagemule.MobArena;
 import static com.garbagemule.MobArena.util.config.ConfigUtils.makeSection;
 
 import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
+import com.garbagemule.MobArena.announce.Announcer;
+import com.garbagemule.MobArena.announce.MessengerAnnouncer;
+import com.garbagemule.MobArena.announce.TitleAnnouncer;
 import com.garbagemule.MobArena.steps.Step;
 import com.garbagemule.MobArena.steps.StepFactory;
 import com.garbagemule.MobArena.steps.PlayerJoinArena;
@@ -21,7 +24,9 @@ import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.ClassChests;
+import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import com.garbagemule.MobArena.util.timer.AutoStartTimer;
 import com.garbagemule.MobArena.util.timer.StartDelayTimer;
@@ -72,65 +77,70 @@ public class ArenaImpl implements Arena
     // General stuff
     private MobArena plugin;
     private String name;
+    private String slug;
     private World world;
     private Messenger messenger;
-    
+    private Announcer announcer;
+
     // Settings section of the config-file for this arena.
     private ConfigurationSection settings;
-    
+
     // Run-time settings and critical config settings
     private boolean enabled, protect, running, edit;
-    
+
     // World stuff
     private boolean allowMonsters, allowAnimals;
     //private Difficulty spawnMonsters;
-    
+
     // Warps, points and locations
     private ArenaRegion region;
     private Leaderboard leaderboard;
-    
+
     // Player stuff
     private InventoryManager  inventoryManager;
     private RewardManager     rewardManager;
     private ClassLimitManager limitManager;
     private Map<Player,ArenaPlayer> arenaPlayerMap;
-    
+
     private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
     private Set<Player> movingPlayers;
     private Set<Player> leavingPlayers;
     private Set<Player> randoms;
-    
+
     // Classes stuff
     private ArenaClass defaultClass;
     private Map<String,ArenaClass> classes;
-    
+
     // Blocks and pets
     private PriorityBlockingQueue<Repairable> repairQueue;
     private Set<Block>             blocks;
     private LinkedList<Repairable> repairables, containables;
-    
+
     // Monster stuff
     private MonsterManager monsterManager;
-    
+
     // Wave stuff
     private WaveManager   waveManager;
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
-    private Map<Integer,List<Thing>> everyWaveMap, afterWaveMap;
-    
+    private Map<Integer, ThingPicker> everyWaveMap, afterWaveMap;
+
     // Misc
     private ArenaListener eventListener;
     private List<Thing> entryFee;
     private AutoStartTimer autoStartTimer;
     private StartDelayTimer startDelayTimer;
     private boolean isolatedChat;
-    
+
+    // Warp offsets
+    private double arenaWarpOffset;
+
     // Scoreboards
     private ScoreboardManager scoreboard;
 
     // Last player standing
     private Player lastStanding;
-    
+
     // Actions
     private Map<Player, Step> histories;
     private StepFactory playerJoinArena;
@@ -144,13 +154,14 @@ public class ArenaImpl implements Arena
     public ArenaImpl(MobArena plugin, ConfigurationSection section, String name, World world) {
         if (world == null)
             throw new NullPointerException("[MobArena] ERROR! World for arena '" + name + "' does not exist!");
-        
+
         this.name     = name;
+        this.slug     = Slugs.create(name);
         this.world    = world;
         this.plugin   = plugin;
         this.settings = makeSection(section, "settings");
         this.region   = new ArenaRegion(section, this);
-        
+
         this.enabled = settings.getBoolean("enabled", false);
         this.protect = settings.getBoolean("protect", true);
         this.running = false;
@@ -181,21 +192,21 @@ public class ArenaImpl implements Arena
         if (defaultClassName != null) {
             this.defaultClass = classes.get(defaultClassName);
         }
-        
+
         // Blocks and pets
         this.repairQueue  = new PriorityBlockingQueue<>(100, new RepairableComparator());
         this.blocks       = new HashSet<>();
         this.repairables  = new LinkedList<>();
         this.containables = new LinkedList<>();
-        
+
         // Monster stuff
         this.monsterManager = new MonsterManager();
-        
+
         // Wave stuff
         this.waveManager  = new WaveManager(this, section.getConfigurationSection("waves"));
         this.everyWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "every");
         this.afterWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "after");
-        
+
         // Misc
         this.eventListener = new ArenaListener(this, plugin);
         this.allowMonsters = world.getAllowMonsters();
@@ -218,13 +229,25 @@ public class ArenaImpl implements Arena
         this.startDelayTimer = new StartDelayTimer(this, autoStartTimer);
 
         this.isolatedChat  = settings.getBoolean("isolated-chat", false);
-        
+
+        this.arenaWarpOffset = settings.getDouble("arena-warp-offset", 0.0);
+
         // Scoreboards
         this.scoreboard = (settings.getBoolean("use-scoreboards", true) ? new ScoreboardManager(this) : new NullScoreboardManager(this));
 
         // Messenger
         String prefix = settings.getString("prefix", "");
         this.messenger = !prefix.isEmpty() ? new Messenger(prefix) : plugin.getGlobalMessenger();
+
+        // Announcer
+        String announcerType = settings.getString("announcer-type", "chat");
+        if (announcerType.equals("chat")) {
+            announcer = new MessengerAnnouncer(this.messenger);
+        } else if (announcerType.equals("title")) {
+            announcer = new TitleAnnouncer(5, 60, 10);
+        } else {
+            throw new ConfigError("Unsupported announcer type: " + announcerType);
+        }
 
         // Actions
         this.histories = new HashMap<>();
@@ -233,15 +256,15 @@ public class ArenaImpl implements Arena
 
         this.spawnsPets = plugin.getArenaMaster().getSpawnsPets();
     }
-    
-    
-    
+
+
+
     /*/////////////////////////////////////////////////////////////////////////
     //
     //      NEW METHODS IN REFACTORING
     //
     /////////////////////////////////////////////////////////////////////////*/
-    
+
     @Override
     public ConfigurationSection getSettings() {
         return settings;
@@ -306,7 +329,7 @@ public class ArenaImpl implements Arena
     public int getMaxPlayers() {
         return settings.getInt("max-players");
     }
-    
+
     private int getJoinDistance() {
         return settings.getInt("max-join-distance");
     }
@@ -317,12 +340,12 @@ public class ArenaImpl implements Arena
     }
 
     @Override
-    public Set<Map.Entry<Integer,List<Thing>>> getEveryWaveEntrySet() {
+    public Set<Map.Entry<Integer, ThingPicker>> getEveryWaveEntrySet() {
         return everyWaveMap.entrySet();
     }
 
     @Override
-    public List<Thing> getAfterWaveReward(int wave) {
+    public ThingPicker getAfterWaveReward(int wave) {
         return afterWaveMap.get(wave);
     }
 
@@ -415,25 +438,25 @@ public class ArenaImpl implements Arena
     public MonsterManager getMonsterManager() {
         return monsterManager;
     }
-    
+
     @Override
     public ClassLimitManager getClassLimitManager() {
         return limitManager;
     }
-    
+
     @Override
     public ScoreboardManager getScoreboard() {
         return scoreboard;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
 
     @Override
     public Messenger getMessenger() {
@@ -448,7 +471,7 @@ public class ArenaImpl implements Arena
     @Override
     public void announce(String msg) {
         for (Player p : getAllPlayers()) {
-            messenger.tell(p, msg);
+            announcer.announce(p, msg);
         }
     }
 
@@ -486,38 +509,46 @@ public class ArenaImpl implements Arena
 
         // Store all chest contents.
         storeContainerContents();
-        
+
         // Populate arenaPlayers and clear the lobby.
         arenaPlayers.addAll(lobbyPlayers);
         lobbyPlayers.clear();
         readyPlayers.clear();
-        
+
         // Assign random classes.
         for (Player p : randoms) {
             assignRandomClass(p);
         }
         randoms.clear();
-        
+
         // Then check if there are still players left.
         if (arenaPlayers.isEmpty()) {
             return false;
         }
-        
+
         // Initialize scoreboards
         scoreboard.initialize();
-        
+
         // Teleport players, give full health, initialize map
         for (Player p : arenaPlayers) {
-            // TODO figure out how people die in lobby and get sent to spectator area early
             // Remove player from spec list to avoid invincibility issues
             if (inSpec(p)) {
                 specPlayers.remove(p);
                 System.out.println("[MobArena] Player " + p.getName() + " joined the arena from the spec area!");
                 System.out.println("[MobArena] Invincibility glitch attempt stopped!");
             }
-            
+
             movingPlayers.add(p);
-            p.teleport(region.getArenaWarp());
+            if (arenaWarpOffset > 0.01) {
+                Location warp = region.getArenaWarp();
+                double x = warp.getX() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                double y = warp.getY();
+                double z = warp.getZ() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                Location offset = new Location(warp.getWorld(), x, y, z);
+                p.teleport(offset);
+            } else {
+                p.teleport(region.getArenaWarp());
+            }
             movingPlayers.remove(p);
 
             addClassPermissions(p);
@@ -527,35 +558,35 @@ public class ArenaImpl implements Arena
             if (price != null) {
                 price.takeFrom(p);
             }
-            
+
             scoreboard.addPlayer(p);
         }
-        
+
         // Start spawning monsters (must happen before 'running = true;')
         startSpawner();
         startBouncingSheep();
-        
+
         // Set the boolean.
         running = true;
-        
+
         // Spawn pets (must happen after 'running = true;')
         spawnsPets.spawn(this);
-        
+
         // Spawn mounts
         spawnMounts();
-        
+
         // Clear the classes in use map, as they're no longer needed
         limitManager.clearClassesInUse();
-        
+
         // Reset rewards
         rewardManager.reset();
-        
+
         // Initialize leaderboards and start displaying info.
         leaderboard.initialize();
         leaderboard.startTracking();
-        
+
         announce(Msg.ARENA_START);
-        
+
         return true;
     }
 
@@ -575,16 +606,16 @@ public class ArenaImpl implements Arena
 
         // Reset last standing
         lastStanding = null;
-        
+
         // Set the running boolean and disable arena if not disabled.
         boolean en = enabled;
         enabled = false;
         running = false;
-        
+
         // Stop tracking leaderboards
         leaderboard.stopTracking();
         leaderboard.update();
-        
+
         // Stop spawning.
         stopSpawner();
         stopBouncingSheep();
@@ -598,18 +629,18 @@ public class ArenaImpl implements Arena
             announce(Msg.ARENA_END);
         }
         cleanup();
-        
+
         // Restore region.
         if (settings.getBoolean("soft-restore", false)) {
             restoreRegion();
         }
-        
+
         // Restore chests
         restoreContainerContents();
-        
+
         // Restore enabled status.
         enabled = en;
-        
+
         return true;
     }
 
@@ -618,12 +649,12 @@ public class ArenaImpl implements Arena
     {
         if (running)
             return;
-        
+
         // Set operations.
         Set<Player> tmp = new HashSet<>();
         tmp.addAll(lobbyPlayers);
         tmp.removeAll(readyPlayers);
-        
+
         // Force leave.
         for (Player p : tmp) {
             playerLeave(p);
@@ -641,15 +672,20 @@ public class ArenaImpl implements Arena
         if (players.isEmpty()) {
             return;
         }
-        
+
         players.forEach(this::playerLeave);
         cleanup();
     }
 
     @Override
     public boolean hasPermission(Player p) {
-        String perm = "mobarena.arenas." + name;
-        return !p.isPermissionSet(perm) || p.hasPermission(perm);
+        String key = "mobarena.arenas." + slug;
+        if (p.isPermissionSet(key)) {
+            return p.hasPermission(key);
+        }
+
+        // Permissive by default.
+        return true;
     }
 
     @Override
@@ -699,17 +735,17 @@ public class ArenaImpl implements Arena
 
         lobbyPlayers.add(p);
         plugin.getArenaMaster().addPlayer(p, this);
-        
+
         arenaPlayerMap.put(p, new ArenaPlayer(p, this, plugin));
 
         // Start the start-delay-timer if applicable
         if (!autoStartTimer.isRunning()) {
             startDelayTimer.start();
         }
-        
+
         // Notify player of joining
         messenger.tell(p, Msg.JOIN_PLAYER_JOINED);
-        
+
         // Notify player of time left
         if (startDelayTimer.isRunning()) {
             messenger.tell(p, Msg.ARENA_START_DELAY, "" + startDelayTimer.getRemaining() / 20l);
@@ -720,11 +756,12 @@ public class ArenaImpl implements Arena
         if (defaultClass != null) {
             // Assign default class if applicable
             if (!ClassChests.assignClassFromStoredClassChest(this, p, defaultClass)) {
-                assignClass(p, defaultClass.getLowercaseName());
+                String slug = defaultClass.getSlug();
+                assignClass(p, slug);
                 messenger.tell(p, Msg.LOBBY_CLASS_PICKED, defaultClass.getConfigName());
             }
         }
-        
+
         movingPlayers.remove(p);
         return true;
     }
@@ -739,14 +776,14 @@ public class ArenaImpl implements Arena
         }
 
         readyPlayers.add(p);
-        
+
         int minPlayers = getMinPlayers();
         if (minPlayers > 0 && lobbyPlayers.size() < minPlayers)
         {
             messenger.tell(p, Msg.LOBBY_NOT_ENOUGH_PLAYERS, "" + minPlayers);
             return;
         }
-        
+
         startArena();
     }
 
@@ -771,10 +808,10 @@ public class ArenaImpl implements Arena
             unmount(p);
             clearInv(p);
         }
-        
+
         removePermissionAttachments(p);
         removePotionEffects(p);
-        
+
         boolean refund = inLobby(p);
 
         if (inLobby(p)) {
@@ -788,13 +825,13 @@ public class ArenaImpl implements Arena
                 startDelayTimer.stop();
             }
         }
-        
+
         discardPlayer(p);
 
         if (refund) {
             refund(p);
         }
-        
+
         endArena();
 
         leavingPlayers.remove(p);
@@ -827,7 +864,7 @@ public class ArenaImpl implements Arena
             unmount(p);
             clearInv(p);
         }
-        
+
         deadPlayers.add(p);
         endArena();
     }
@@ -853,19 +890,21 @@ public class ArenaImpl implements Arena
     @Override
     public void playerRespawn(Player p) {
         deadPlayers.remove(p);
-        plugin.getServer().getScheduler()
-            .scheduleSyncDelayedTask(plugin, () -> revivePlayer(p));
+        revivePlayer(p);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public void revivePlayer(Player p) {
         removePermissionAttachments(p);
         removePotionEffects(p);
-        
-        discardPlayer(p);
+
+        specPlayers.add(p);
+
         if (settings.getBoolean("spectate-on-death", true)) {
-            playerSpec(p, null);
+            messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
+        } else {
+            plugin.getServer().getScheduler()
+                .scheduleSyncDelayedTask(plugin, () -> playerLeave(p));
         }
     }
 
@@ -881,7 +920,7 @@ public class ArenaImpl implements Arena
         }
         movingPlayers.add(p);
 
-        
+
         rollback(p);
 
         Step step = playerSpecArena.create(p);
@@ -895,7 +934,7 @@ public class ArenaImpl implements Arena
 
         specPlayers.add(p);
         plugin.getArenaMaster().addPlayer(p, this);
-        
+
         messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
         movingPlayers.remove(p);
     }
@@ -984,7 +1023,7 @@ public class ArenaImpl implements Arena
             default: return null;
         }
     }
-    
+
     private void startSpawner() {
         if (spawnThread != null) {
             spawnThread.stop();
@@ -996,7 +1035,7 @@ public class ArenaImpl implements Arena
         spawnThread = new MASpawnThread(plugin, this);
         spawnThread.start();
     }
-    
+
     /**
      * Schedule a Runnable to be executed after the given delay in
      * server ticks. The method is used by the MASpawnThread to
@@ -1007,7 +1046,7 @@ public class ArenaImpl implements Arena
     public void scheduleTask(Runnable r, int delay) {
         Bukkit.getScheduler().runTaskLater(plugin, r, delay);
     }
-    
+
     private void stopSpawner() {
         if (spawnThread == null) {
             plugin.getLogger().warning("Can't stop non-existent spawner in arena " + configName() + ". This should never happen.");
@@ -1019,7 +1058,7 @@ public class ArenaImpl implements Arena
 
         world.setSpawnFlags(allowMonsters, allowAnimals);
     }
-    
+
     private void startBouncingSheep() {
         if (sheepBouncer != null) {
             sheepBouncer.stop();
@@ -1066,7 +1105,7 @@ public class ArenaImpl implements Arena
         plugin.getArenaMaster().removePlayer(p);
         clearPlayer(p);
     }
-    
+
     private void clearPlayer(Player p)
     {
         // Remove from boss health bar
@@ -1076,20 +1115,20 @@ public class ArenaImpl implements Arena
                 boss.getHealthBar().removePlayer(p);
             }
         });
-        
+
         // Remove pets.
         monsterManager.removePets(p);
-        
+
         // readyPlayers before lobbyPlayers because of startArena sanity-checks
         readyPlayers.remove(p);
         specPlayers.remove(p);
         arenaPlayers.remove(p);
         lobbyPlayers.remove(p);
         arenaPlayerMap.remove(p);
-        
+
         scoreboard.removePlayer(p);
     }
-    
+
     @Override
     public void repairBlocks()
     {
@@ -1102,9 +1141,9 @@ public class ArenaImpl implements Arena
     {
         repairQueue.add(r);
     }
-    
-    
-    
+
+
+
     /*////////////////////////////////////////////////////////////////////
     //
     //      Items & Cleanup
@@ -1115,11 +1154,11 @@ public class ArenaImpl implements Arena
     public void assignClass(Player p, String className) {
         ArenaPlayer arenaPlayer = arenaPlayerMap.get(p);
         ArenaClass arenaClass   = classes.get(className);
-        
+
         if (arenaPlayer == null || arenaClass == null) {
             return;
         }
-        
+
         InventoryManager.clearInventory(p);
         removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
@@ -1142,22 +1181,30 @@ public class ArenaImpl implements Arena
 
         autoReady(p);
     }
-    
+
     @Override
-    public void assignClassGiveInv(Player p, String className, ItemStack[] contents) {
+    public void assignClassGiveInv(Player p, String className, ItemStack[] source) {
         ArenaPlayer arenaPlayer = arenaPlayerMap.get(p);
         ArenaClass arenaClass   = classes.get(className);
-        
+
         if (arenaPlayer == null || arenaClass == null) {
             return;
         }
-        
+
         InventoryManager.clearInventory(p);
         removePermissionAttachments(p);
         removePotionEffects(p);
         arenaPlayer.setArenaClass(arenaClass);
-        
+
         PlayerInventory inv = p.getInventory();
+
+        // Clone the source array to make sure we don't modify its contents
+        ItemStack[] contents = new ItemStack[source.length];
+        for (int i = 0; i < source.length; i++) {
+            if (source[i] != null) {
+                contents[i] = source[i].clone();
+            }
+        }
 
         // Collect armor items, because setContents() now overwrites everyhing
         ItemStack helmet = null;
@@ -1165,11 +1212,11 @@ public class ArenaImpl implements Arena
         ItemStack leggings = null;
         ItemStack boots = null;
         ItemStack offhand = null;
-        
+
         // Check the very last slot to see if it'll work as a helmet
         int last = contents.length-1;
         if (contents[last] != null) {
-            helmet = contents[last].clone();
+            helmet = contents[last];
             if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(helmet);
             }
@@ -1184,11 +1231,12 @@ public class ArenaImpl implements Arena
             String type = parts[parts.length - 1];
             if (type.equals("HELMET")) continue;
 
-            ItemStack stack = contents[i].clone();
+            ItemStack stack = contents[i];
             if (arenaClass.hasUnbreakableArmor()) {
                 makeUnbreakable(stack);
             }
             switch (type) {
+                case "ELYTRA":
                 case "CHESTPLATE": chestplate = stack; break;
                 case "LEGGINGS":   leggings   = stack; break;
                 case "BOOTS":      boots      = stack; break;
@@ -1196,11 +1244,10 @@ public class ArenaImpl implements Arena
             }
             contents[i] = null;
         }
-        
+
         // Equip the fifth last slot as the off-hand
-        ItemStack fifth = contents[contents.length - 5];
-        if (fifth != null) {
-            offhand = fifth.clone();
+        offhand = contents[contents.length - 5];
+        if (offhand != null) {
             if (arenaClass.hasUnbreakableWeapons()) {
                 makeUnbreakable(offhand);
             }
@@ -1249,7 +1296,7 @@ public class ArenaImpl implements Arena
             }
         }
     }
-    
+
     @Override
     public void addRandomPlayer(Player p) {
         randoms.add(p);
@@ -1267,12 +1314,12 @@ public class ArenaImpl implements Arena
             playerLeave(p);
             return;
         }
-        
-        int index = MobArena.random.nextInt(classes.size());
-        String className = classes.get(index).getConfigName();
 
-        assignClass(p, className);
-        messenger.tell(p, Msg.LOBBY_CLASS_PICKED, this.classes.get(className).getConfigName());
+        int index = MobArena.random.nextInt(classes.size());
+        String slug = classes.get(index).getSlug();
+
+        assignClass(p, slug);
+        messenger.tell(p, Msg.LOBBY_CLASS_PICKED, this.classes.get(slug).getConfigName());
     }
 
     private void addClassPermissions(Player player) {
@@ -1295,7 +1342,7 @@ public class ArenaImpl implements Arena
             .map(PermissionAttachmentInfo::getAttachment)
             .forEach(PermissionAttachment::remove);
     }
-    
+
     private void removePotionEffects(Player p) {
         p.getActivePotionEffects().stream()
             .map(PotionEffect::getType)
@@ -1308,21 +1355,21 @@ public class ArenaImpl implements Arena
         removeEntities();
         clearPlayers();
     }
-    
+
     private void removeMonsters() {
         monsterManager.clear();
     }
-    
+
     private void removeBlocks() {
         for (Block b : blocks) {
             b.setType(Material.AIR);
         }
         blocks.clear();
     }
-    
+
     private void removeEntities() {
         List<Chunk> chunks = region.getChunks();
-        
+
         for (Chunk c : chunks) {
             for (Entity e : c.getEntities()) {
                 if (e == null) {
@@ -1341,16 +1388,16 @@ public class ArenaImpl implements Arena
             }
         }
     }
-    
+
     private void clearPlayers() {
         arenaPlayers.clear();
         arenaPlayerMap.clear();
         lobbyPlayers.clear();
         readyPlayers.clear();
     }
-    
-    
-    
+
+
+
     /*////////////////////////////////////////////////////////////////////
     //
     //      Initialization & Checks
@@ -1361,13 +1408,13 @@ public class ArenaImpl implements Arena
     public void restoreRegion()
     {
         Collections.sort(repairables, new RepairableComparator());
-        
+
         for (Repairable r : repairables)
             r.repair();
     }
-    
-    
-    
+
+
+
     /*////////////////////////////////////////////////////////////////////
     //
     //      Getters & Misc
@@ -1403,7 +1450,12 @@ public class ArenaImpl implements Arena
     @Override
     public String arenaName()
     {
-        return MAUtils.nameConfigToArena(name);
+        return name;
+    }
+
+    @Override
+    public String getSlug() {
+        return slug;
     }
 
     @Override
@@ -1431,7 +1483,7 @@ public class ArenaImpl implements Arena
         result.addAll(arenaPlayers);
         result.addAll(lobbyPlayers);
         result.addAll(specPlayers);
-        
+
         return result;
     }
 
@@ -1450,10 +1502,10 @@ public class ArenaImpl implements Arena
     public List<ArenaPlayerStatistics> getArenaPlayerStatistics(Comparator<ArenaPlayerStatistics> comparator)
     {
         List<ArenaPlayerStatistics> list = new ArrayList<ArenaPlayerStatistics>();
-        
+
         for (ArenaPlayer ap : arenaPlayerMap.values())
             list.add(ap.getStats());
-        
+
         Collections.sort(list, comparator);
         return list;
     }*/
@@ -1492,7 +1544,7 @@ public class ArenaImpl implements Arena
         }
         return true;
     }
-    
+
     @Override
     public boolean refund(Player p) {
         entryFee.forEach(fee -> fee.giveTo(p));
@@ -1522,7 +1574,7 @@ public class ArenaImpl implements Arena
         else if (!canAfford(p))
             messenger.tell(p, Msg.JOIN_FEE_REQUIRED, MAUtils.listToString(entryFee, plugin));
         else return true;
-        
+
         return false;
     }
 
@@ -1541,7 +1593,7 @@ public class ArenaImpl implements Arena
         else if (getJoinDistance() > 0 && !region.contains(p.getLocation(), getJoinDistance()))
             messenger.tell(p, Msg.JOIN_TOO_FAR);
         else return true;
-        
+
         return false;
     }
 
@@ -1554,7 +1606,7 @@ public class ArenaImpl implements Arena
     public Player getLastPlayerStanding() {
         return lastStanding;
     }
-        
+
     /**
      * The "perfect equals method" cf. "Object-Oriented Design and Patterns"
      * by Cay S. Horstmann.
@@ -1564,11 +1616,11 @@ public class ArenaImpl implements Arena
         if (this == other) return true;
         if (other == null) return false;
         if (getClass() != other.getClass()) return false;
-        
+
         // Arenas must have different names.
         if (other instanceof ArenaImpl && ((ArenaImpl)other).name.equals(name))
             return true;
-        
+
         return false;
     }
 

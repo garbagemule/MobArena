@@ -9,7 +9,7 @@ public interface Repairable
     void repair();
 
     BlockState getState();
-    
+
     Material getType();
     int getId();
     byte getData();

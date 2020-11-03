@@ -24,7 +24,7 @@ public class ListClassesCommand implements Command
             am.getGlobalMessenger().tell(sender, "<none>");
             return true;
         }
-        
+
         for (String c : classes) {
             am.getGlobalMessenger().tell(sender, "- " + c);
         }

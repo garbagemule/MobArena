@@ -42,20 +42,20 @@ public class ItemParser
         if (s == null) {
             return new ArrayList<>(1);
         }
-        
+
         String[] items = s.split(",");
         List<ItemStack> result = new ArrayList<>(items.length);
-        
+
         for (String item : items) {
             ItemStack stack = parseItem(item.trim());
             if (stack != null) {
                 result.add(stack);
             }
         }
-        
+
         return result;
     }
-    
+
     public static ItemStack parseItem(String item) {
         return parseItem(item, true);
     }
@@ -63,13 +63,13 @@ public class ItemParser
     public static ItemStack parseItem(String item, boolean logFailure) {
         if (item == null || item.equals(""))
             return null;
-        
+
         // Check if the item has enchantments.
         String[] space = item.split(" ");
         String[] parts = (space.length == 2 ? space[0].split(":") : item.split(":"));
-        
+
         ItemStack result = null;
-        
+
         switch (parts.length) {
             case 1:
                 result = singleItem(parts[0]);
@@ -94,19 +94,19 @@ public class ItemParser
 
         return result;
     }
-    
+
     private static ItemStack singleItem(String item) {
         return getType(item)
             .map(ItemStack::new)
             .orElse(null);
     }
-    
+
     private static ItemStack withAmount(String item, String amount) {
         return getType(item)
             .map(type -> new ItemStack(type, getAmount(amount)))
             .orElse(null);
     }
-    
+
     private static ItemStack withDataAndAmount(String item, String data, String amount) {
         ItemStack stack = withAmount(item, amount);
         if (stack == null) {
@@ -125,7 +125,7 @@ public class ItemParser
 
         return md.toItemStack(stack.getAmount());
     }
-    
+
     private static ItemStack withPotionMeta(ItemStack stack, String data) {
         PotionType type = getPotionType(data);
         if (type == null) {
@@ -181,7 +181,7 @@ public class ItemParser
         }
         return Optional.ofNullable(Material.getMaterial(item.toUpperCase()));
     }
-    
+
     private static MaterialData getData(String data, Material type) {
         if (type == Material.INK_SACK) {
             return getDyeData(data);
@@ -232,18 +232,18 @@ public class ItemParser
         if (amount.matches("(-)?[1-9][0-9]*")) {
             return Integer.parseInt(amount);
         }
-        
+
         return 1;
     }
-    
+
     private static void addEnchantments(ItemStack stack, String list) {
         String[] parts = list.split(";");
-        
+
         for (String ench : parts) {
             addEnchantment(stack, ench.trim());
         }
     }
-    
+
     private static void addEnchantment(ItemStack stack, String ench) {
         String[] parts = ench.split(":");
         if (parts.length != 2 || !parts[1].matches("[0-9]*")) {

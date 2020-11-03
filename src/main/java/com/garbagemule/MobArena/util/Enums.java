@@ -14,7 +14,7 @@ public class Enums
         }
         return null;
     }
-    
+
     /**
      * Get the enum value of a string, null if it doesn't exist.
      */

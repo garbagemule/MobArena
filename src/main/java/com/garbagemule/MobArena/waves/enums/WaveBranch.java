@@ -10,7 +10,7 @@ public enum WaveBranch
             return (w.getFirstWave() == wave);
         }
     },
-    
+
     RECURRENT {
         @Override
         public boolean matches(int wave, Wave w) {
@@ -20,6 +20,6 @@ public enum WaveBranch
             return ((wave - w.getFirstWave()) % w.getFrequency() == 0);
         }
     };
-    
+
     public abstract boolean matches(int wave, Wave w);
 }

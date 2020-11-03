@@ -9,18 +9,18 @@ public class RepairableDoor extends RepairableAttachable//RepairableBlock
 {
     private BlockState other;
     private int x, y, z;
-    
+
     public RepairableDoor(BlockState state)
     {
-        super(state);        
+        super(state);
         other = state.getBlock().getRelative(BlockFace.UP).getState();
-        
+
         BlockState attached = state.getBlock().getRelative(BlockFace.DOWN).getState();
         x = attached.getX();
         y = attached.getY();
         z = attached.getZ();
     }
-    
+
     public void repair()
     {
         if (getWorld().getBlockAt(getX(), getY(), getZ()).getState().getData() instanceof Door)

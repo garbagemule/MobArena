@@ -21,12 +21,12 @@ public class WaveUtils
     public static List<Location> getValidSpawnpoints(Arena arena, List<Location> spawnpoints, Collection<Player> players) {
         MobArena plugin = arena.getPlugin();
         List<Location> result = new ArrayList<>();
-        
+
         // Ensure that we do have some spawnpoints.
         if (spawnpoints == null || spawnpoints.isEmpty()) {
             spawnpoints = arena.getRegion().getSpawnpointList();
         }
-        
+
         // Loop through each one and check if any players are in range.
         for (Location l : spawnpoints) {
             for (Player p : players) {
@@ -37,7 +37,7 @@ public class WaveUtils
                 break;
             }
         }
-        
+
         // If no spawnpoints in range, just return all of them.
         if (result.isEmpty()) {
             String locs = "";
@@ -50,14 +50,14 @@ public class WaveUtils
         }
         return result;
     }
-    
+
     public static Player getClosestPlayer(Arena arena, Entity e)
     {
         // Set up the comparison variable and the result.
         double dist    = 0;
         double current = Double.POSITIVE_INFINITY;
         Player result = null;
-        
+
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
         for (Player p : arena.getPlayersInArena())
@@ -68,7 +68,7 @@ public class WaveUtils
                 p.kickPlayer("[MobArena] Cheater! (Warped out of the arena world.)");
                 continue;
             }
-            
+
             dist = p.getLocation().distanceSquared(e.getLocation());
             if (dist < current && dist < MobArena.MIN_PLAYER_DISTANCE_SQUARED)
             {
@@ -84,7 +84,7 @@ public class WaveUtils
     //      Comparators
     //
     ////////////////////////////////////////////////////////////////////*/
-    
+
     /**
      * Get a comparator based on the WaveBranch parameter.
      */
@@ -97,7 +97,7 @@ public class WaveUtils
         else
             return null;
     }
-    
+
     /**
      * Get a Comparator that compares Wave objects by wave number.
      * If the wave numbers are equal, the waves are equal. This is to
@@ -118,12 +118,12 @@ public class WaveUtils
                 }
             };
     }
-    
+
     /**
      * Get a Comparator that compares Wave objects by priority.
      * If the priorities are equal, the names are compared. This is to
      * ALLOW "duplicates" in the RECURRENT WAVES collection.
-     * @return Comparator whose compare()-method compares wave priorities. 
+     * @return Comparator whose compare()-method compares wave priorities.
      */
     public static Comparator<Wave> getRecurrentComparator()
     {

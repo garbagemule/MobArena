@@ -13,17 +13,17 @@ import java.util.Map;
 public abstract class AbstractWave implements Wave
 {
     private String name;
-    
+
     private WaveBranch branch; // recurrent, single
     private WaveType   type;   // default, special, swarm, boss
-    
+
     private double healthMultiplier, amountMultiplier;
-    
+
     private int firstWave, frequency, priority;
-    
+
     private List<Location> spawnpoints;
     private List<PotionEffect> effects;
-    
+
     public AbstractWave() {
         this.effects = new ArrayList<>();
     }
@@ -39,12 +39,12 @@ public abstract class AbstractWave implements Wave
     protected List<Location> getSpawnpoints() {
         return spawnpoints;
     }
-    
+
     @Override
     public void setSpawnpoints(List<Location> spawnpoints) {
         this.spawnpoints = spawnpoints;
     }
-    
+
     @Override
     public List<PotionEffect> getEffects() {
         return effects;
@@ -64,7 +64,7 @@ public abstract class AbstractWave implements Wave
     public String getName() {
         return name;
     }
-    
+
     @Override
     public void setName(String name) {
         this.name = name;
@@ -84,7 +84,7 @@ public abstract class AbstractWave implements Wave
     public WaveType getType() {
         return type;
     }
-    
+
     @Override
     public void setType(WaveType type) {
         this.type = type;
@@ -124,7 +124,7 @@ public abstract class AbstractWave implements Wave
     public double getHealthMultiplier() {
         return healthMultiplier;
     }
-    
+
     @Override
     public void setHealthMultiplier(double healthMultiplier) {
         this.healthMultiplier = healthMultiplier;
@@ -134,7 +134,7 @@ public abstract class AbstractWave implements Wave
     public double getAmountMultiplier() {
         return amountMultiplier;
     }
-    
+
     @Override
     public void setAmountMultiplier(double amountMultiplier) {
         this.amountMultiplier = amountMultiplier;

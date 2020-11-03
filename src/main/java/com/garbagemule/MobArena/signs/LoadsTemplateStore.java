@@ -72,6 +72,7 @@ class LoadsTemplateStore {
     private boolean hasStateSuffix(String id) {
         return id.endsWith("-idle")
             || id.endsWith("-joining")
+            || id.endsWith("-ready")
             || id.endsWith("-running");
     }
 
@@ -79,12 +80,14 @@ class LoadsTemplateStore {
         String[] base = getLines(yaml, id);
         String[] idle = getLines(yaml, id + "-idle");
         String[] joining = getLines(yaml, id + "-joining");
+        String[] ready = getLines(yaml, id + "-ready");
         String[] running = getLines(yaml, id + "-running");
 
         return new Template.Builder(id)
             .withBase(base)
             .withIdle(idle)
             .withJoining(joining)
+            .withReady(ready)
             .withRunning(running)
             .build();
     }

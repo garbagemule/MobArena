@@ -29,7 +29,7 @@ public class JoinCommand implements Command
             am.getGlobalMessenger().tell(sender, Msg.MISC_NOT_FROM_CONSOLE);
             return true;
         }
-        
+
         // Unwrap the sender, grab the argument, if any.
         Player p    = Commands.unwrap(sender);
         String arg1 = (args.length > 0 ? args[0] : null);
@@ -39,7 +39,7 @@ public class JoinCommand implements Command
         if (toArena == null || !canJoin(p, toArena)) {
             return true;
         }
-        
+
         // Join the arena!
         int seconds = toArena.getSettings().getInt("join-interrupt-timer", 0);
         if (seconds > 0) {
@@ -94,9 +94,9 @@ public class JoinCommand implements Command
 
         return arenas.stream()
             .filter(Arena::isEnabled)
-            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
+            .filter(arena -> arena.getSlug().startsWith(prefix))
             .filter(arena -> arena.getRegion().isSetup())
-            .map(Arena::configName)
+            .map(Arena::getSlug)
             .collect(Collectors.toList());
     }
 }

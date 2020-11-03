@@ -20,7 +20,7 @@ public class ScoreboardManager {
     private Objective kills;
 
     private Map<Player, Scoreboard> scoreboards;
-    
+
     /**
      * Create a new scoreboard for the given arena.
      * @param arena an arena
@@ -30,7 +30,7 @@ public class ScoreboardManager {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         scoreboards = new HashMap<>();
     }
-    
+
     /**
      * Add a player to the scoreboard by setting the player's scoreboard
      * and giving him an initial to-be-reset non-zero score.
@@ -44,7 +44,7 @@ public class ScoreboardManager {
         player.setScoreboard(scoreboard);
         kills.getScore(player.getName()).setScore(8);
     }
-    
+
     /**
      * Remove a player from the scoreboard by setting the player's scoreboard
      * to the main server scoreboard.
@@ -108,7 +108,7 @@ public class ScoreboardManager {
             fake.setScore(value);
         }
     }
-    
+
     /**
      * Update the scoreboard to display the given wave number.
      * @param wave a wave number
@@ -116,7 +116,7 @@ public class ScoreboardManager {
     void updateWave(int wave) {
         kills.setDisplayName(DISPLAY_NAME + wave);
     }
-    
+
     /**
      * Initialize the scoreboard by resetting the kills objective and
      * setting all player scores to 0.
@@ -129,7 +129,7 @@ public class ScoreboardManager {
         resetKills();
         arena.scheduleTask(this::resetPlayerScores, 1);
     }
-    
+
     private void resetKills() {
         if (kills != null) {
             kills.unregister();

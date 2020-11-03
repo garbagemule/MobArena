@@ -24,12 +24,12 @@ public class RemoveArenaCommand implements Command
     public boolean execute(ArenaMaster am, CommandSender sender, String... args) {
         // Require an arena name
         if (args.length != 1) return false;
-        
+
         if (am.getArenas().size() == 1) {
             am.getGlobalMessenger().tell(sender, "At least one arena must exist.");
             return true;
         }
-        
+
         Arena arena = am.getArenaWithName(args[0]);
         if (arena == null) {
             am.getGlobalMessenger().tell(sender, "There is no arena with that name.");
@@ -51,8 +51,8 @@ public class RemoveArenaCommand implements Command
         List<Arena> arenas = am.getArenas();
 
         return arenas.stream()
-            .filter(arena -> arena.configName().toLowerCase().startsWith(prefix))
-            .map(Arena::configName)
+            .filter(arena -> arena.getSlug().startsWith(prefix))
+            .map(Arena::getSlug)
             .collect(Collectors.toList());
     }
 }

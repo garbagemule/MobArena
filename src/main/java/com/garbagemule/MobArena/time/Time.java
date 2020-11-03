@@ -14,13 +14,13 @@ public enum Time
     DUSK(13300),
     NIGHT(14000),
     MIDNIGHT(18000);
-    
+
     private int time;
-    
+
     Time(int time) {
         this.time = time;
     }
-    
+
     public int getTime() {
         return time;
     }

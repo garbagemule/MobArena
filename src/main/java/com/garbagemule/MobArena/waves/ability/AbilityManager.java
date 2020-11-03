@@ -43,7 +43,7 @@ public class AbilityManager
     private static final String ma = "plugins" + File.separator + "MobArena.jar";
     private static final String cb = System.getProperty("java.class.path");
     private static final String classpath = ma + System.getProperty("path.separator") + cb;
-    
+
     private static Map<String,Class<? extends Ability>> abilities;
 
     /**
@@ -90,7 +90,7 @@ public class AbilityManager
         register(ThrowTarget.class);
         register(WarpToPlayer.class);
     }
-    
+
     /**
      * Load the custom abilities from the specified directory.
      * @param dataDir main plugin data folder
@@ -105,7 +105,7 @@ public class AbilityManager
 
         // Grab the source directory.
         File javaDir = new File(classDir, "src");
-        
+
         /* If the source directory exists, we need to verify that the system
          * has a java compiler before attempting anything. If not, we need to
          * skip the compiling step and just go straight to loading in the
@@ -117,7 +117,7 @@ public class AbilityManager
                 Bukkit.getLogger().warning("[MobArena] Found plugins/MobArena/abilities/src/ folder, but no Java compiler. The source files will not be compiled!");
             }
         }
-        
+
         // Load all the custom abilities.
         loadClasses(classDir);
     }
@@ -142,38 +142,38 @@ public class AbilityManager
         // Announce custom abilities
         if (announce) Bukkit.getLogger().info("[MobArena] Loaded custom ability '" + info.name() + "'");
     }
-    
+
     private static void compileAbilities(File javaDir, File classDir) {
         if (!javaDir.exists()) return;
-        
+
         // Make ready a new list of files to compile.
         List<File> toCompile = getSourceFilesToCompile(javaDir, classDir);
-        
+
         // No files to compile?
         if (toCompile.isEmpty()) {
             return;
         }
-        
+
         // Notify the console.
         Bukkit.getLogger().info("[MobArena] Compiling abilities: " + fileListToString(toCompile));
-        
+
         // Get the compiler
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        
+
         // Generate some JavaFileObjects
         try {
             Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(toCompile);
-            
+
             // Include the MobArena.jar on the classpath, and set the destination folder.
             List<String> options = Arrays.asList("-classpath", classpath, "-d", classDir.getPath());
-            
+
             // Set up the compilation task.
             JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, options, null, compilationUnits);
-            
+
             // Call the task.
             task.call();
-            
+
             // And close the file manager.
             fileManager.close();
         }
@@ -182,17 +182,17 @@ public class AbilityManager
             e.printStackTrace();
         }
     }
-    
+
     private static List<File> getSourceFilesToCompile(File javaDir, File classDir) {
         List<File> result = new ArrayList<>();
-        
+
         if (javaDir == null || !javaDir.exists()) {
             return result;
         }
-        
+
         // Grab the array of compiled files.
         File[] classFiles = classDir.listFiles();
-        
+
         // Go through each source file.
         for (File javaFile : javaDir.listFiles()) {
             // Skip if it's not a .java file.
@@ -200,24 +200,24 @@ public class AbilityManager
                 Bukkit.getLogger().info("[MobArena] Found invalid ability file: " + javaFile.getName());
                 continue;
             }
-            
+
             // Find the associated .class file.
             File classFile = findClassFile(javaFile, classFiles);
-            
+
             // If the .class file is newer, we don't need to compile.
             if (isClassFileNewer(javaFile, classFile)) {
                 continue;
             }
             result.add(javaFile);
         }
-        
+
         return result;
     }
-    
+
     private static File findClassFile(File javaFile, File[] classFiles) {
         String javaFileName = javaFile.getName();
         String classFileName = javaFileName.substring(0, javaFileName.lastIndexOf(".")) + ".class";
-        
+
         for (File classFile : classFiles) {
             if (classFile.getName().equals(classFileName)) {
                 return classFile;
@@ -225,13 +225,13 @@ public class AbilityManager
         }
         return null;
     }
-    
+
     private static boolean isClassFileNewer(File javaFile, File classFile) {
         if (classFile == null) return false;
-        
+
         return (classFile.lastModified() > javaFile.lastModified());
     }
-    
+
     /**
      * (Compiles and) loads all custom abilities in the given directory.
      * @param classDir a directory
@@ -240,21 +240,21 @@ public class AbilityManager
         // Grab the class loader
         ClassLoader loader = getLoader(classDir);
         if (loader == null) return;
-        
+
         for (File file : classDir.listFiles()) {
             String filename = file.getName();
-            
+
             // Only load .class files.
             int dot = filename.lastIndexOf(".class");
             if (dot < 0) continue;
 
             // Trim off the .class extension
             String name = filename.substring(0, file.getName().lastIndexOf("."));
-            
+
             try {
                 // Load the class
                 Class<?> cls = loader.loadClass(name);
-                
+
                 // Verify that it's an Ability, then register it
                 if (Ability.class.isAssignableFrom(cls)) {
                     register(cls.asSubclass(Ability.class), true);
@@ -262,7 +262,7 @@ public class AbilityManager
             } catch (Exception e) {}
         }
     }
-    
+
     /**
      * Get a ClassLoader for the given directory.
      * @param dir a directory
@@ -274,30 +274,30 @@ public class AbilityManager
             return loader;
         }
         catch (Exception e) {}
-        
+
         return null;
     }
-    
+
     private static String fileListToString(List<File> list) {
         return fileListToString(list, null);
     }
-    
+
     private static String fileListToString(List<File> list, String exclude) {
         if (list.isEmpty()) return "";
-        
+
         StringBuffer buffy = new StringBuffer();
-        
+
         for (File file : list) {
             String name = file.getName();
             int dot = name.lastIndexOf(".");
-            
+
             if (exclude != null && name.contains(exclude)) {
                 continue;
             }
-            
+
             buffy.append(", " + name.substring(0, dot));
         }
-        
+
         // Trim off the first ", ".
         return buffy.substring(2);
     }
