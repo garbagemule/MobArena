@@ -42,6 +42,7 @@ These changes will (most likely) be included in the next version.
 - The `player-time-in-arena` setting has been fixed.
 - The `soft-restore` setting has been fixed for blocks broken by players. Note that the functionality is still unreliable for non-trivial blocks.
 - Items in class chests are now cloned before they are made unbreakable and given to players. This fixes an issue where setting `unbreakable-weapons: false` had no effect on the items. Note that any affected items in existing class chests will need to be replaced.
+- (1.8) Potions no longer turn into water bottles.
 
 ### Removed
 - The MagicSpells integration has been removed. This means that the extra `magicspells.yml` config-file (if it exists) no longer does anything and can be removed.
