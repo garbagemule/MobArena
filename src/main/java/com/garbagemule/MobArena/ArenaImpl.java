@@ -190,7 +190,8 @@ public class ArenaImpl implements Arena
 
         String defaultClassName = settings.getString("default-class", null);
         if (defaultClassName != null) {
-            this.defaultClass = classes.get(defaultClassName);
+            String slug = Slugs.create(defaultClassName);
+            this.defaultClass = classes.get(slug);
         }
 
         // Blocks and pets
