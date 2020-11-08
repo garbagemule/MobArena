@@ -12,7 +12,7 @@ These changes will (most likely) be included in the next version.
 
 ## [Unreleased]
 
-## [0.105] - 2020-10-08
+## [0.105] - 2020-11-08
 ### Minor breaking changes
 MobArena 0.105 includes a rework of how arenas and classes are referenced, both internally in the plugin, but also in permissions, commands, etc.
 Instead of the ambiguous and arbitrary "config names", MobArena now uses "slugs", which just means a `kebab-case` version of a name.
