@@ -11,6 +11,22 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.105] - 2020-10-08
+### Minor breaking changes
+MobArena 0.105 includes a rework of how arenas and classes are referenced, both internally in the plugin, but also in permissions, commands, etc.
+Instead of the ambiguous and arbitrary "config names", MobArena now uses "slugs", which just means a `kebab-case` version of a name.
+For example, the slug for an arena named "Castle of Doom" will be `castle-of-doom`, and the slug for the implicit "My Items" class is `my-items`.
+All commands that take arena or class names as arguments will tab complete slugs, so they should be fairly easy to figure out.
+
+The goal of this change is to make the plugin more consistent about arena and class references in commands, permissions, etc., as well as to allow for multi-word names.
+Backwards compatibility has taken a backseat for the sake of maintainability and clarity, so certain adjustments may be necessary in some setups:
+
+- **Permissions:** All permissions for arenas and classes must be changed to the new slug-based permission keys. For example, the permission for the "My Items" class is now `mobarena.classes.my-items`.
+- **Class signs:** It may be necessary to recreate the signs for classes with multi-word names. The name on the sign should match the name in the config-file (or the slug). For example, `My Items` (or `my-items`) instead of `Myitems`.
+- **Default classes:** The per-arena setting `default-class` may need to be adjusted. The class name should match the name in the config-file (or the slug). For example, if the default class is "My Items", the value should be `My Items` (or `my-items`).
+- **Custom integrations:** Custom commands or integrations may need to be adjusted accordingly. If you're running a setup like that, you probably already know what you're doing and what you need to do. If not, hop on Discord.
+
 ### Added
 - A new `ready` state is now available for arena sign templates. Signs are in this state when all players in the lobby have readied up, but the arena has not yet started due to a start delay timer. Check the wiki for details.
 - Arena signs now support dynamic list entry variables for 4 different player lists. As an example, `<notready-1>` results in the name of a player in the lobby who hasn't readied up yet. This is useful for visualizing who is holding up the lobby. Check the wiki for details.
@@ -186,7 +202,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.104.2...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.105...HEAD
+[0.105]: https://github.com/garbagemule/MobArena/compare/0.104.2...0.105
 [0.104.2]: https://github.com/garbagemule/MobArena/compare/0.104.1...0.104.2
 [0.104.1]: https://github.com/garbagemule/MobArena/compare/0.104...0.104.1
 [0.104]: https://github.com/garbagemule/MobArena/compare/0.103.2...0.104
