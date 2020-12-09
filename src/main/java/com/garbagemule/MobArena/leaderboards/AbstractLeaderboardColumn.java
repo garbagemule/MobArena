@@ -38,10 +38,9 @@ public abstract class AbstractLeaderboardColumn implements LeaderboardColumn
 
     public void clear() {
         for (Sign s : signs) {
-            s.setLine(0, "");
-            s.setLine(1, "");
-            s.setLine(2, "");
-            s.setLine(3, "");
+            for (int line = 0; line < 4; line++) {
+                s.setLine(line, "");
+            }
             s.update();
         }
     }
