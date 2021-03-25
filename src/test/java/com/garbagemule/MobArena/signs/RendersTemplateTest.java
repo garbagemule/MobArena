@@ -1,9 +1,5 @@
 package com.garbagemule.MobArena.signs;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.WaveManager;
 import org.bukkit.entity.Player;
@@ -13,6 +9,10 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("WeakerAccess")
 @RunWith(MockitoJUnitRunner.StrictStubs.class)

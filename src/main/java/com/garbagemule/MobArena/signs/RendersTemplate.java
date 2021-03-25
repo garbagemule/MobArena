@@ -1,7 +1,5 @@
 package com.garbagemule.MobArena.signs;
 
-import static java.lang.String.valueOf;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +10,8 @@ import java.util.stream.Collectors;
 import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+
+import static java.lang.String.valueOf;
 
 class RendersTemplate {
 

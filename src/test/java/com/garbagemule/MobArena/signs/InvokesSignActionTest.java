@@ -1,7 +1,5 @@
 package com.garbagemule.MobArena.signs;
 
-import static org.mockito.Mockito.*;
-
 import com.garbagemule.MobArena.Messenger;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
@@ -10,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("WeakerAccess")
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
@@ -36,7 +36,7 @@ public class InvokesSignActionTest {
 
         subject.invoke(sign, player);
 
-        verifyZeroInteractions(arenaMaster);
+        verifyNoInteractions(arenaMaster);
     }
 
     @Test

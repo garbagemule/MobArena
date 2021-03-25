@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Fixed
+- Arena signs in unloaded or missing worlds no longer break the startup procedure. Sign data is stored in a new format that MobArena will automatically migrate to on a per-world basis during startup.
 
 ## [0.105] - 2020-11-08
 ### Minor breaking changes

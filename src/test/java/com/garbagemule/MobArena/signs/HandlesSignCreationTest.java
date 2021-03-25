@@ -1,10 +1,8 @@
 package com.garbagemule.MobArena.signs;
 
-import static org.mockito.Mockito.*;
-
 import com.garbagemule.MobArena.Messenger;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.junit.Before;
@@ -12,135 +10,139 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-@SuppressWarnings("WeakerAccess")
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class HandlesSignCreationTest {
 
-    StoresNewSign storesNewSign;
-    RendersTemplateById rendersTemplate;
+    SignCreator creator;
+    SignWriter writer;
+    SignStore store;
+    SignRenderer renderer;
     Messenger messenger;
+    Logger log;
 
     HandlesSignCreation subject;
 
     @Before
     public void setup() {
-        storesNewSign = mock(StoresNewSign.class);
-
-        rendersTemplate = mock(RendersTemplateById.class);
-        when(rendersTemplate.render(any(), any()))
-            .thenReturn(new String[]{"", "", "", ""});
-
+        creator = mock(SignCreator.class);
+        writer = mock(SignWriter.class);
+        store = mock(SignStore.class);
+        renderer = mock(SignRenderer.class);
         messenger = mock(Messenger.class);
+        log = mock(Logger.class);
 
         subject = new HandlesSignCreation(
-            storesNewSign,
-            rendersTemplate,
-            messenger
+            creator,
+            writer,
+            store,
+            renderer,
+            messenger,
+            log
         );
     }
 
     @Test
-    public void noHeaderNoAction() {
-        String[] lines = {"why", "so", "serious", "?"};
-        SignChangeEvent event = event(lines, null);
+    public void noSignCreationNoAction() {
+        SignChangeEvent event = new SignChangeEvent(null, null, null);
+        when(creator.create(event)).thenReturn(null);
 
         subject.on(event);
 
-        verifyZeroInteractions(storesNewSign, rendersTemplate, messenger);
+        verifyNoInteractions(writer, store, messenger, log);
     }
 
     @Test
-    public void nullLinesHandledGracefully() {
-        String[] lines = {"[MA]", null, null, null};
-        SignChangeEvent event = event(lines, null);
-
-        subject.on(event);
-    }
-
-    @Test
-    public void useSignTypeIfTemplateNotAvailable() {
-        String arenaId = "castle";
-        String type = "join";
-        String[] lines = {"[MA]", arenaId, type, null};
-        Location location = mock(Location.class);
-        SignChangeEvent event = event(lines, location);
-
-        subject.on(event);
-
-        verify(storesNewSign).store(location, arenaId, type, type);
-    }
-
-    @Test
-    public void useTemplateIfAvailable() {
-        String arenaId = "castle";
-        String type = "join";
-        String templateId = "potato";
-        String[] lines = {"[MA]", arenaId, type, templateId};
-        Location location = mock(Location.class);
-        SignChangeEvent event = event(lines, location);
-
-        subject.on(event);
-
-        verify(storesNewSign).store(location, arenaId, templateId, type);
-    }
-
-    @Test
-    public void typeIsLowercased() {
-        String type = "JOIN";
-        String[] lines = {"[MA]", "", type, ""};
-        SignChangeEvent event = event(lines, null);
-
-        subject.on(event);
-
-        String lower = type.toLowerCase();
-        verify(storesNewSign).store(any(), any(), any(), eq(lower));
-    }
-
-    @Test
-    public void templateIdIsLowercased() {
-        String templateId = "BEST-TEMPLATE";
-        String[] lines = {"[MA]", "", "", templateId};
-        SignChangeEvent event = event(lines, null);
-
-        subject.on(event);
-
-        String lower = templateId.toLowerCase();
-        verify(storesNewSign).store(any(), any(), eq(lower), any());
-    }
-
-    @Test
-    public void rendersTemplateAfterStoring() {
-        String arenaId = "castle";
-        String type = "join";
-        String templateId = "potato";
-        String[] lines = {"[MA]", arenaId, type, templateId};
-        Location location = mock(Location.class);
-        SignChangeEvent event = event(lines, location);
-
-        subject.on(event);
-
-        verify(rendersTemplate).render(templateId, arenaId);
-    }
-
-    @Test
-    public void errorPassedToMessenger() {
-        String msg = "you messed up";
-        doThrow(new IllegalArgumentException(msg))
-            .when(storesNewSign).store(any(), any(), any(), any());
-        String[] lines = {"[MA]", "", "", ""};
-        SignChangeEvent event = event(lines, null);
-
-        subject.on(event);
-
-        verifyZeroInteractions(rendersTemplate);
-        verify(messenger).tell(event.getPlayer(), msg);
-    }
-
-    private SignChangeEvent event(String[] lines, Location location) {
-        Block block = mock(Block.class);
-        when(block.getLocation()).thenReturn(location);
+    public void passesSignFromCreator() throws Exception {
         Player player = mock(Player.class);
-        return new SignChangeEvent(block, player, lines);
+        SignChangeEvent event = new SignChangeEvent(null, player, null);
+        ArenaSign sign = new ArenaSign(location(), null, null, null);
+        when(creator.create(event)).thenReturn(sign);
+
+        subject.on(event);
+
+        verify(writer).write(sign);
+        verify(store).add(sign);
+        verify(renderer).render(sign, event);
+    }
+
+    @Test
+    public void successMessageOnCreation() {
+        Player player = mock(Player.class);
+        SignChangeEvent event = new SignChangeEvent(null, player, null);
+        ArenaSign sign = new ArenaSign(location(), null, "castle", "join");
+        when(creator.create(event)).thenReturn(sign);
+
+        subject.on(event);
+
+        verify(messenger).tell(eq(player), anyString());
+        verify(log).info(anyString());
+    }
+
+    @Test
+    public void noWriteIfCreatorThrows() {
+        SignChangeEvent event = new SignChangeEvent(null, null, null);
+        doThrow(IllegalArgumentException.class).when(creator).create(event);
+
+        subject.on(event);
+
+        verifyNoInteractions(writer, store, renderer, log);
+    }
+
+    @Test
+    public void errorMessageIfCreatorThrows() {
+        Player player = mock(Player.class);
+        SignChangeEvent event = new SignChangeEvent(null, player, null);
+        String message = "it's bad";
+        doThrow(new IllegalArgumentException(message)).when(creator).create(event);
+
+        subject.on(event);
+
+        verify(messenger).tell(player, message);
+    }
+
+    @Test
+    public void noStorageIfWriterThrows() throws Exception {
+        SignChangeEvent event = new SignChangeEvent(null, null, null);
+        ArenaSign sign = new ArenaSign(null, null, null, null);
+        when(creator.create(event)).thenReturn(sign);
+        doThrow(IOException.class).when(writer).write(sign);
+
+        subject.on(event);
+
+        verifyNoInteractions(store, renderer);
+    }
+
+    @Test
+    public void errorMessageIfWriterThrows() throws Exception {
+        Player player = mock(Player.class);
+        SignChangeEvent event = new SignChangeEvent(null, player, null);
+        ArenaSign sign = new ArenaSign(null, null, null, null);
+        when(creator.create(event)).thenReturn(sign);
+        IOException exception = new IOException("it's bad");
+        doThrow(exception).when(writer).write(sign);
+
+        subject.on(event);
+
+        verify(messenger).tell(eq(player), anyString());
+        verify(log).log(eq(Level.SEVERE), anyString(), eq(exception));
+    }
+
+    private Location location() {
+        World world = mock(World.class);
+        when(world.getName()).thenReturn("world");
+        Location location = mock(Location.class);
+        when(location.getBlockX()).thenReturn(1);
+        when(location.getBlockY()).thenReturn(2);
+        when(location.getBlockZ()).thenReturn(3);
+        when(location.getWorld()).thenReturn(world);
+        return location;
     }
 
 }

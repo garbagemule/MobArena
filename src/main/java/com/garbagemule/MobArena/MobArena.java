@@ -13,7 +13,6 @@ import com.garbagemule.MobArena.metrics.IsolatedChatChart;
 import com.garbagemule.MobArena.metrics.MonsterInfightChart;
 import com.garbagemule.MobArena.metrics.PvpEnabledChart;
 import com.garbagemule.MobArena.metrics.VaultChart;
-import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
 import com.garbagemule.MobArena.things.NothingPickerParser;
@@ -29,7 +28,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -94,7 +92,6 @@ public class MobArena extends JavaPlugin
             arenaMaster = null;
         }
         loadsConfigFile = null;
-        ConfigurationSerialization.unregisterClass(ArenaSign.class);
     }
 
     private void setup() {
@@ -103,7 +100,6 @@ public class MobArena extends JavaPlugin
             setupArenaMaster();
             setupCommandHandler();
 
-            registerConfigurationSerializers();
             setupVault();
             setupBossAbilities();
             setupListeners();
@@ -131,10 +127,6 @@ public class MobArena extends JavaPlugin
 
     private void setupCommandHandler() {
         getCommand("ma").setExecutor(new CommandHandler(this));
-    }
-
-    private void registerConfigurationSerializers() {
-        ConfigurationSerialization.registerClass(ArenaSign.class);
     }
 
     private void setupVault() {
