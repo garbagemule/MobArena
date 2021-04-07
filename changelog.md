@@ -11,6 +11,9 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Added
+- It is now possible to write custom formulas for wave growth in Default Wave, swarm amounts in Swarm Waves, and boss health in Boss Waves, allowing for much more control and fine-tuning. The formulas support various session-related variables as well as various mathematical operators and functions. Formulas can be predefined as macros in the new `formulas.yml` file. Check the wiki for details.
+
 ### Fixed
 - Arena signs in unloaded or missing worlds no longer break the startup procedure. Sign data is stored in a new format that MobArena will automatically migrate to on a per-world basis during startup.
 

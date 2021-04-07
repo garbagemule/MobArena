@@ -1,10 +1,11 @@
 package com.garbagemule.MobArena.waves.types;
 
+import com.garbagemule.MobArena.formula.Formula;
+import com.garbagemule.MobArena.formula.Formulas;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
-import com.garbagemule.MobArena.waves.enums.WaveGrowth;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 
 import java.util.HashMap;
@@ -15,12 +16,12 @@ import java.util.SortedMap;
 public class DefaultWave extends AbstractWave
 {
     private SortedMap<Integer,MACreature> monsterMap;
-    private WaveGrowth growth;
+    private Formula growth;
     private boolean fixed;
 
     public DefaultWave(SortedMap<Integer,MACreature> monsterMap) {
         this.monsterMap = monsterMap;
-        this.growth = WaveGrowth.OLD;
+        this.growth = Formulas.DEFAULT_WAVE_GROWTH;
         this.setType(WaveType.DEFAULT);
     }
 
@@ -29,7 +30,7 @@ public class DefaultWave extends AbstractWave
         if (fixed) return getFixed();
 
         // Get the amount of monsters to spawn.
-        int toSpawn = (int) Math.max(1D, growth.getAmount(wave, playerCount) * super.getAmountMultiplier());
+        int toSpawn = (int) Math.max(1D, (growth.evaluate(arena) * super.getAmountMultiplier()));
 
         // Grab the total probability sum.
         int total = monsterMap.lastKey();
@@ -71,11 +72,11 @@ public class DefaultWave extends AbstractWave
         return result;
     }
 
-    public WaveGrowth getGrowth() {
+    public Formula getGrowth() {
         return growth;
     }
 
-    public void setGrowth(WaveGrowth growth) {
+    public void setGrowth(Formula growth) {
         this.growth = growth;
         this.fixed = false;
     }

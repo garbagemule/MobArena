@@ -2,6 +2,8 @@ package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.config.LoadsConfigFile;
+import com.garbagemule.MobArena.formula.FormulaMacros;
+import com.garbagemule.MobArena.formula.FormulaManager;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
@@ -60,6 +62,8 @@ public class MobArena extends JavaPlugin
     private Messenger messenger;
     private ThingManager thingman;
     private ThingPickerManager pickman;
+    private FormulaManager formman;
+    private FormulaMacros macros;
 
     private SignListeners signListeners;
 
@@ -71,6 +75,8 @@ public class MobArena extends JavaPlugin
         pickman.register(new ThingGroupPickerParser(pickman));
         pickman.register(new RandomThingPickerParser(pickman, random));
         pickman.register(new NothingPickerParser());
+
+        formman = FormulaManager.createDefault();
     }
 
     public void onEnable() {
@@ -97,6 +103,7 @@ public class MobArena extends JavaPlugin
     private void setup() {
         try {
             createDataFolder();
+            setupFormulaMacros();
             setupArenaMaster();
             setupCommandHandler();
 
@@ -119,6 +126,10 @@ public class MobArena extends JavaPlugin
                 getLogger().warning("Failed to create data folder plugins/MobArena!");
             }
         }
+    }
+
+    private void setupFormulaMacros() {
+        macros = FormulaMacros.create(this);
     }
 
     private void setupArenaMaster() {
@@ -173,6 +184,7 @@ public class MobArena extends JavaPlugin
         try {
             reloadConfig();
             reloadGlobalMessenger();
+            reloadFormulaMacros();
             reloadArenaMaster();
             reloadAnnouncementsFile();
             reloadSigns();
@@ -196,6 +208,14 @@ public class MobArena extends JavaPlugin
             prefix = ChatColor.GREEN + "[MobArena] ";
         }
         messenger = new Messenger(prefix);
+    }
+
+    private void reloadFormulaMacros() {
+        try {
+            macros.reload();
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reloading the formulas-file:\n" + e.getMessage());
+        }
     }
 
     private void reloadArenaMaster() {
@@ -280,5 +300,13 @@ public class MobArena extends JavaPlugin
 
     public ThingPickerManager getThingPickerManager() {
         return pickman;
+    }
+
+    public FormulaManager getFormulaManager() {
+        return formman;
+    }
+
+    public FormulaMacros getFormulaMacros() {
+        return macros;
     }
 }

@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.ConfigError;
+import com.garbagemule.MobArena.formula.Formula;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
@@ -12,10 +13,7 @@ import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.util.Slugs;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
-import com.garbagemule.MobArena.waves.enums.BossHealth;
-import com.garbagemule.MobArena.waves.enums.SwarmAmount;
 import com.garbagemule.MobArena.waves.enums.WaveBranch;
-import com.garbagemule.MobArena.waves.enums.WaveGrowth;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import com.garbagemule.MobArena.waves.types.BossWave;
 import com.garbagemule.MobArena.waves.types.DefaultWave;
@@ -171,16 +169,21 @@ public class WaveParser
         }
 
         // Grab the WaveGrowth
-        String grw = config.getString("growth", null);
-        if (grw != null && !grw.isEmpty()) {
-            try {
-                WaveGrowth growth = WaveGrowth.valueOf(grw.toUpperCase());
-                result.setGrowth(growth);
-            } catch (IllegalArgumentException e) {
-                throw new ConfigError("Failed to parse wave growth for wave " + name + " of arena " + arena.configName() + ": " + grw);
-            }
+        String growth = config.getString("growth", null);
+        if (growth == null || growth.isEmpty()) {
+            growth = "<initial-players> + <current-wave>";
         } else {
-            result.setGrowth(WaveGrowth.MEDIUM);
+            String macro = arena.getPlugin().getFormulaMacros().get("wave-growth", growth);
+            if (macro != null) {
+                growth = macro;
+            }
+        }
+        try {
+            Formula formula = arena.getPlugin().getFormulaManager().parse(growth);
+            result.setGrowth(formula);
+        } catch (IllegalArgumentException e) {
+            String message = String.format("Failed to parse wave growth for wave %s of arena %s: %s\n%s", name, arena.configName(), growth, e.getMessage());
+            throw new ConfigError(message);
         }
 
         return result;
@@ -198,16 +201,21 @@ public class WaveParser
         SwarmWave result = new SwarmWave(monster);
 
         // Grab SwarmAmount
-        String amnt = config.getString("amount", null);
-        if (amnt != null && !amnt.isEmpty()) {
-            try {
-                SwarmAmount amount = SwarmAmount.valueOf(amnt.toUpperCase());
-                result.setAmount(amount);
-            } catch (IllegalArgumentException e) {
-                throw new ConfigError("Failed to parse wave amount for wave " + name + " of arena " + arena.configName() + ": " + amnt);
-            }
+        String amount = config.getString("amount", null);
+        if (amount == null || amount.isEmpty()) {
+            amount = "<initial-players> * 5";
         } else {
-            result.setAmount(SwarmAmount.LOW);
+            String macro = arena.getPlugin().getFormulaMacros().get("swarm-amount", amount);
+            if (macro != null) {
+                amount = macro;
+            }
+        }
+        try {
+            Formula formula = arena.getPlugin().getFormulaManager().parse(amount);
+            result.setAmount(formula);
+        } catch (IllegalArgumentException e) {
+            String message = String.format("Failed to parse wave amount for wave %s of arena %s: %s\n%s", name, arena.configName(), amount, e.getMessage());
+            throw new ConfigError(message);
         }
 
         return result;
@@ -261,20 +269,21 @@ public class WaveParser
         }
 
         // Grab the boss health
-        String healthString = config.getString("health", null);
-        if (healthString != null && !healthString.isEmpty()) {
-            try {
-                BossHealth health = BossHealth.valueOf(healthString.toUpperCase());
-                result.setHealth(health);
-            } catch (IllegalArgumentException e) {
-                int flatHealth = config.getInt("health", -1);
-                if (flatHealth < 0) {
-                    throw new ConfigError("Failed to parse boss health for wave " + name + " of arena " + arena.configName() + ": " + healthString);
-                }
-                result.setFlatHealth(flatHealth);
-            }
+        String health = config.getString("health", null);
+        if (health == null || health.isEmpty()) {
+            health = "(<initial-players> + 1) * 20 * 8";
         } else {
-            result.setHealth(BossHealth.MEDIUM);
+            String macro = arena.getPlugin().getFormulaMacros().get("boss-health", health);
+            if (macro != null) {
+                health = macro;
+            }
+        }
+        try {
+            Formula formula = arena.getPlugin().getFormulaManager().parse(health);
+            result.setHealth(formula);
+        } catch (IllegalArgumentException e) {
+            String message = String.format("Failed to parse boss health for wave %s of arena %s: %s\n%s", name, arena.configName(), health, e.getMessage());
+            throw new ConfigError(message);
         }
 
         // And the abilities.
@@ -588,7 +597,6 @@ public class WaveParser
         result.setFirstWave(1);
         result.setPriority(1);
         result.setFrequency(1);
-        result.setGrowth(WaveGrowth.OLD);
         result.setHealthMultiplier(1D);
         result.setAmountMultiplier(1D);
 
