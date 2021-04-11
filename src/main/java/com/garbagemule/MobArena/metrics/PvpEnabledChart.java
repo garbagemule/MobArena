@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.metrics;
 
 import com.garbagemule.MobArena.MobArena;
-import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 
-public class PvpEnabledChart extends Metrics.SimplePie {
+public class PvpEnabledChart extends SimplePie {
 
     public PvpEnabledChart(MobArena plugin) {
         super("pvp_enabled_pie", () -> hasPvpEnabled(plugin) ? "Yes" : "No");

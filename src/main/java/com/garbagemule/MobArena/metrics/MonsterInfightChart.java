@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.metrics;
 
 import com.garbagemule.MobArena.MobArena;
-import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 
-public class MonsterInfightChart extends Metrics.SimplePie {
+public class MonsterInfightChart extends SimplePie {
 
     public MonsterInfightChart(MobArena plugin) {
         super("monster_infight_pie", () -> usesMonsterInfight(plugin) ? "Yes" : "No");
