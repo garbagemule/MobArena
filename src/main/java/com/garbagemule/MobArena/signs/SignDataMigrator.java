@@ -65,7 +65,7 @@ class SignDataMigrator {
     @SuppressWarnings("unchecked")
     private List<Map<String, ?>> loadSignsInLegacyFile() throws IOException {
         byte[] bytes = Files.readAllBytes(legacyFile);
-        Map<String, ?> map = yaml.load(new String(bytes));
+        Map<String, ?> map = (Map<String, ?>) yaml.load(new String(bytes));
         if (map != null && map.containsKey("signs")) {
             List<Map<String, ?>> signs = (List<Map<String, ?>>) map.get("signs");
             if (signs != null) {
