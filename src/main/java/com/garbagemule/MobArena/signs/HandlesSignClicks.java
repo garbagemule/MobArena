@@ -20,7 +20,10 @@ class HandlesSignClicks implements Listener {
     private final InvokesSignAction invokesSignAction;
     private final Map<UUID, Long> cooldowns;
 
-    HandlesSignClicks(SignStore signStore, InvokesSignAction invokesSignAction) {
+    HandlesSignClicks(
+        SignStore signStore,
+        InvokesSignAction invokesSignAction
+    ) {
         this.signStore = signStore;
         this.invokesSignAction = invokesSignAction;
         this.cooldowns = new HashMap<>();
@@ -35,8 +38,11 @@ class HandlesSignClicks implements Listener {
         if (!(block.getState() instanceof Sign)) {
             return;
         }
-        signStore.findByLocation(block.getLocation())
-            .ifPresent(sign -> purgeAndInvoke(sign, event.getPlayer()));
+
+        ArenaSign sign = signStore.findByLocation(block.getLocation());
+        if (sign != null) {
+            purgeAndInvoke(sign, event.getPlayer());
+        }
     }
 
     private void purgeAndInvoke(ArenaSign sign, Player player) {

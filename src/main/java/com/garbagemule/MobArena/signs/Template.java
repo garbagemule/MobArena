@@ -16,7 +16,7 @@ class Template {
 
     static class Builder {
 
-        private String id;
+        private final String id;
         private String[] base;
         private String[] idle;
         private String[] joining;

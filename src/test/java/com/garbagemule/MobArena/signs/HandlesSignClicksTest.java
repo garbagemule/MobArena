@@ -1,7 +1,5 @@
 package com.garbagemule.MobArena.signs;
 
-import static org.mockito.Mockito.*;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -13,7 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Optional;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("WeakerAccess")
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
@@ -27,8 +25,6 @@ public class HandlesSignClicksTest {
     @Before
     public void setup() {
         signStore = mock(SignStore.class);
-        when(signStore.findByLocation(any()))
-            .thenReturn(Optional.empty());
         invokesSignAction = mock(InvokesSignAction.class);
 
         subject = new HandlesSignClicks(signStore, invokesSignAction);
@@ -40,7 +36,7 @@ public class HandlesSignClicksTest {
 
         subject.on(event);
 
-        verifyZeroInteractions(signStore);
+        verifyNoInteractions(signStore, invokesSignAction);
     }
 
     @Test
@@ -51,18 +47,19 @@ public class HandlesSignClicksTest {
 
         subject.on(event);
 
-        verifyZeroInteractions(signStore);
+        verifyNoInteractions(signStore, invokesSignAction);
     }
 
     @Test
     public void nonArenaSignNoFun() {
         Block block = mock(Block.class);
         when(block.getState()).thenReturn(mock(Sign.class));
+        when(signStore.findByLocation(any())).thenReturn(null);
         PlayerInteractEvent event = event(null, block);
 
         subject.on(event);
 
-        verifyZeroInteractions(signStore);
+        verifyNoInteractions(invokesSignAction);
     }
 
     @Test
@@ -72,8 +69,7 @@ public class HandlesSignClicksTest {
         when(block.getLocation()).thenReturn(location);
         when(block.getState()).thenReturn(mock(Sign.class));
         ArenaSign sign = new ArenaSign(location, "", "", "");
-        when(signStore.findByLocation(location))
-            .thenReturn(Optional.of(sign));
+        when(signStore.findByLocation(location)).thenReturn(sign);
         Player player = mock(Player.class);
         PlayerInteractEvent event = event(player, block);
 

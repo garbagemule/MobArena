@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.metrics;
 
 import com.garbagemule.MobArena.MobArena;
-import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 
-public class ArenaCountChart extends Metrics.SimplePie {
+public class ArenaCountChart extends SimplePie {
 
     public ArenaCountChart(MobArena plugin) {
         super("arena_count", () -> {

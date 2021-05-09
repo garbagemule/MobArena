@@ -1,65 +1,79 @@
 package com.garbagemule.MobArena.signs;
 
 import com.garbagemule.MobArena.Messenger;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
-import java.util.stream.IntStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class HandlesSignCreation implements Listener {
 
-    private final StoresNewSign storesNewSign;
-    private final RendersTemplateById rendersTemplate;
+    private final SignCreator creator;
+    private final SignWriter writer;
+    private final SignStore store;
+    private final SignRenderer renderer;
     private final Messenger messenger;
+    private final Logger log;
 
     HandlesSignCreation(
-        StoresNewSign storesNewSign,
-        RendersTemplateById rendersTemplate,
-        Messenger messenger
+        SignCreator creator,
+        SignWriter writer,
+        SignStore store,
+        SignRenderer renderer,
+        Messenger messenger,
+        Logger log
     ) {
-        this.storesNewSign = storesNewSign;
-        this.rendersTemplate = rendersTemplate;
+        this.creator = creator;
+        this.writer = writer;
+        this.store = store;
+        this.renderer = renderer;
         this.messenger = messenger;
+        this.log = log;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void on(SignChangeEvent event) {
-        if (!trim(event, 0).equalsIgnoreCase("[MA]")) {
+        ArenaSign sign;
+        try {
+            sign = creator.create(event);
+            if (sign == null) {
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            messenger.tell(event.getPlayer(), e.getMessage());
             return;
         }
 
-        Location location = event.getBlock().getLocation();
-        String arenaId = trim(event, 1);
-        String signType = trim(event, 2).toLowerCase();
-        String templateId = trim(event, 3).toLowerCase();
-
-        if (templateId.isEmpty()) {
-            templateId = signType;
-        }
-
-        Player player = event.getPlayer();
         try {
-            storesNewSign.store(location, arenaId, templateId, signType);
-            messenger.tell(player, "New " + signType + " sign created for arena " + arenaId);
-
-            String[] lines = rendersTemplate.render(templateId, arenaId);
-            IntStream.range(0, 4)
-                .forEach(i -> event.setLine(i, lines[i]));
-        } catch (IllegalArgumentException e) {
-            messenger.tell(player, e.getMessage());
+            writer.write(sign);
+        } catch (Exception e) {
+            messenger.tell(event.getPlayer(), "Sign creation failed:\n" + ChatColor.RED + e.getMessage());
+            log.log(Level.SEVERE, "Failed to write arena sign to data file", e);
+            return;
         }
-    }
 
-    private String trim(SignChangeEvent event, int index) {
-        String line = event.getLine(index);
-        if (line == null) {
-            return "";
-        }
-        return line.trim();
+        store.add(sign);
+        renderer.render(sign, event);
+
+        messenger.tell(event.getPlayer(), String.format(
+            "New %s sign created for arena %s.",
+            ChatColor.YELLOW + sign.type + ChatColor.RESET,
+            ChatColor.GREEN + sign.arenaId + ChatColor.RESET
+        ));
+        log.info(String.format(
+            "%s created %s sign for '%s' at (%d,%d,%d) in '%s'.",
+            event.getPlayer().getName(),
+            sign.type,
+            sign.arenaId,
+            sign.location.getBlockX(),
+            sign.location.getBlockY(),
+            sign.location.getBlockZ(),
+            sign.location.getWorld().getName()
+        ));
     }
 
 }

@@ -11,8 +11,13 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Added
+- It is now possible to write custom formulas for wave growth in Default Wave, swarm amounts in Swarm Waves, and boss health in Boss Waves, allowing for much more control and fine-tuning. The formulas support various session-related variables as well as various mathematical operators and functions. Formulas can be predefined as macros in the new `formulas.yml` file. Check the wiki for details.
 
-## [0.105] - 2020-10-08
+### Fixed
+- Arena signs in unloaded or missing worlds no longer break the startup procedure. Sign data is stored in a new format that MobArena will automatically migrate to on a per-world basis during startup.
+
+## [0.105] - 2020-11-08
 ### Minor breaking changes
 MobArena 0.105 includes a rework of how arenas and classes are referenced, both internally in the plugin, but also in permissions, commands, etc.
 Instead of the ambiguous and arbitrary "config names", MobArena now uses "slugs", which just means a `kebab-case` version of a name.

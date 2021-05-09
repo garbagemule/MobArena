@@ -13,13 +13,7 @@ import java.util.Map;
 
 class LoadsTemplateStore {
 
-    private final MobArena plugin;
-
-    LoadsTemplateStore(MobArena plugin) {
-        this.plugin = plugin;
-    }
-
-    TemplateStore read() {
+    static TemplateStore load(MobArena plugin) {
         YamlConfiguration yaml = new YamlConfiguration();
         try {
             File file = new File(plugin.getDataFolder(), TemplateStore.FILENAME);
@@ -48,7 +42,7 @@ class LoadsTemplateStore {
         return new TemplateStore(map);
     }
 
-    private void validateTemplateNode(String key, YamlConfiguration yaml) {
+    private static void validateTemplateNode(String key, YamlConfiguration yaml) {
         List<?> list = yaml.getList(key);
         if (list == null) {
             String msg = "Template " + key + " in " + TemplateStore.FILENAME + " is not a list!";
@@ -62,21 +56,21 @@ class LoadsTemplateStore {
         });
     }
 
-    private String stripStateSuffix(String id) {
+    private static String stripStateSuffix(String id) {
         if (hasStateSuffix(id)) {
             return id.split("-", -1)[0];
         }
         return id;
     }
 
-    private boolean hasStateSuffix(String id) {
+    private static boolean hasStateSuffix(String id) {
         return id.endsWith("-idle")
             || id.endsWith("-joining")
             || id.endsWith("-ready")
             || id.endsWith("-running");
     }
 
-    private Template loadTemplate(String id, YamlConfiguration yaml) {
+    private static Template loadTemplate(String id, YamlConfiguration yaml) {
         String[] base = getLines(yaml, id);
         String[] idle = getLines(yaml, id + "-idle");
         String[] joining = getLines(yaml, id + "-joining");
@@ -92,7 +86,7 @@ class LoadsTemplateStore {
             .build();
     }
 
-    private String[] getLines(YamlConfiguration config, String id) {
+    private static String[] getLines(YamlConfiguration config, String id) {
         List<String> list = config.getStringList(id);
         if (list.isEmpty()) {
             return null;

@@ -2,6 +2,8 @@ package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.config.LoadsConfigFile;
+import com.garbagemule.MobArena.formula.FormulaMacros;
+import com.garbagemule.MobArena.formula.FormulaManager;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
@@ -13,7 +15,6 @@ import com.garbagemule.MobArena.metrics.IsolatedChatChart;
 import com.garbagemule.MobArena.metrics.MonsterInfightChart;
 import com.garbagemule.MobArena.metrics.PvpEnabledChart;
 import com.garbagemule.MobArena.metrics.VaultChart;
-import com.garbagemule.MobArena.signs.ArenaSign;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
 import com.garbagemule.MobArena.things.NothingPickerParser;
@@ -29,7 +30,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -62,6 +62,8 @@ public class MobArena extends JavaPlugin
     private Messenger messenger;
     private ThingManager thingman;
     private ThingPickerManager pickman;
+    private FormulaManager formman;
+    private FormulaMacros macros;
 
     private SignListeners signListeners;
 
@@ -73,6 +75,8 @@ public class MobArena extends JavaPlugin
         pickman.register(new ThingGroupPickerParser(pickman));
         pickman.register(new RandomThingPickerParser(pickman, random));
         pickman.register(new NothingPickerParser());
+
+        formman = FormulaManager.createDefault();
     }
 
     public void onEnable() {
@@ -94,16 +98,15 @@ public class MobArena extends JavaPlugin
             arenaMaster = null;
         }
         loadsConfigFile = null;
-        ConfigurationSerialization.unregisterClass(ArenaSign.class);
     }
 
     private void setup() {
         try {
             createDataFolder();
+            setupFormulaMacros();
             setupArenaMaster();
             setupCommandHandler();
 
-            registerConfigurationSerializers();
             setupVault();
             setupBossAbilities();
             setupListeners();
@@ -125,16 +128,16 @@ public class MobArena extends JavaPlugin
         }
     }
 
+    private void setupFormulaMacros() {
+        macros = FormulaMacros.create(this);
+    }
+
     private void setupArenaMaster() {
         arenaMaster = new ArenaMasterImpl(this);
     }
 
     private void setupCommandHandler() {
         getCommand("ma").setExecutor(new CommandHandler(this));
-    }
-
-    private void registerConfigurationSerializers() {
-        ConfigurationSerialization.registerClass(ArenaSign.class);
     }
 
     private void setupVault() {
@@ -181,6 +184,7 @@ public class MobArena extends JavaPlugin
         try {
             reloadConfig();
             reloadGlobalMessenger();
+            reloadFormulaMacros();
             reloadArenaMaster();
             reloadAnnouncementsFile();
             reloadSigns();
@@ -204,6 +208,14 @@ public class MobArena extends JavaPlugin
             prefix = ChatColor.GREEN + "[MobArena] ";
         }
         messenger = new Messenger(prefix);
+    }
+
+    private void reloadFormulaMacros() {
+        try {
+            macros.reload();
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error reloading the formulas-file:\n" + e.getMessage());
+        }
     }
 
     private void reloadArenaMaster() {
@@ -288,5 +300,13 @@ public class MobArena extends JavaPlugin
 
     public ThingPickerManager getThingPickerManager() {
         return pickman;
+    }
+
+    public FormulaManager getFormulaManager() {
+        return formman;
+    }
+
+    public FormulaMacros getFormulaMacros() {
+        return macros;
     }
 }

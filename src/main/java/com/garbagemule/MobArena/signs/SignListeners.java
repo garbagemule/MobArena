@@ -16,12 +16,30 @@ public class SignListeners {
     }
 
     public void register(SignBootstrap bootstrap) {
+        listeners.add(load(bootstrap));
+        listeners.add(unload(bootstrap));
         listeners.add(clicks(bootstrap));
         listeners.add(creation(bootstrap));
         listeners.add(destruction(bootstrap));
-        listeners.add(redraw(bootstrap));
+        listeners.add(updates(bootstrap));
 
         listeners.forEach(listener -> register(listener, bootstrap));
+    }
+
+    private HandlesWorldLoad load(SignBootstrap bootstrap) {
+        return new HandlesWorldLoad(
+            bootstrap.getSignDataMigrator(),
+            bootstrap.getSignReader(),
+            bootstrap.getSignStore(),
+            bootstrap.getPlugin().getLogger()
+        );
+    }
+
+    private HandlesWorldUnload unload(SignBootstrap bootstrap) {
+        return new HandlesWorldUnload(
+            bootstrap.getSignStore(),
+            bootstrap.getPlugin().getLogger()
+        );
     }
 
     private HandlesSignClicks clicks(SignBootstrap bootstrap) {
@@ -33,22 +51,28 @@ public class SignListeners {
 
     private HandlesSignCreation creation(SignBootstrap bootstrap) {
         return new HandlesSignCreation(
-            bootstrap.getStoresNewSign(),
-            bootstrap.getRendersTemplateById(),
-            bootstrap.getPlugin().getGlobalMessenger()
+            bootstrap.getSignCreator(),
+            bootstrap.getSignWriter(),
+            bootstrap.getSignStore(),
+            bootstrap.getSignRenderer(),
+            bootstrap.getPlugin().getGlobalMessenger(),
+            bootstrap.getPlugin().getLogger()
         );
     }
 
     private HandlesSignDestruction destruction(SignBootstrap bootstrap) {
         return new HandlesSignDestruction(
-            bootstrap.getRemovesSignAtLocation(),
-            bootstrap.getPlugin().getGlobalMessenger()
+            bootstrap.getSignStore(),
+            bootstrap.getSignWriter(),
+            bootstrap.getPlugin().getGlobalMessenger(),
+            bootstrap.getPlugin().getLogger()
         );
     }
 
-    private RedrawsSignsOnUpdates redraw(SignBootstrap bootstrap) {
-        return new RedrawsSignsOnUpdates(
-            bootstrap.getRedrawsArenaSigns(),
+    private HandlesArenaUpdates updates(SignBootstrap bootstrap) {
+        return new HandlesArenaUpdates(
+            bootstrap.getSignStore(),
+            bootstrap.getSignRenderer(),
             bootstrap.getPlugin()
         );
     }

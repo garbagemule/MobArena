@@ -1,40 +1,14 @@
-# IDE files and folders
-.project
-.classpath
-*.iml
-.idea/
-.settings/
-
-# Compiled files
+# Java
 *.class
 
-# OS files.
-.DS_Store*
-Thumbs.db
-
-# Misc folders
-bin/
-build/
-misc/
+# Maven
 target/
 
-# Misc files
-MobArena.jar
-build.properties
+# Artifacts
+*.jar
+*.zip
 
-# Virtualenv (for docs)
-# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
-.Python
-[Bb]in
-[Ii]nclude
-[Ll]ib/python*/
-[Ll]ib64
-[Ll]ocal
-[Mm]an
-[Ss]cripts
-pyvenv.cfg
-.venv
-pip-selfcheck.json
-
-# ReadTheDocs generated documentation
-docs/_build
+# IntelliJ
+.idea/
+*.iml
+out/

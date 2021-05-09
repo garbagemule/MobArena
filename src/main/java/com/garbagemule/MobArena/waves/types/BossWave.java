@@ -1,6 +1,8 @@
 package com.garbagemule.MobArena.waves.types;
 
 import com.garbagemule.MobArena.Msg;
+import com.garbagemule.MobArena.formula.Formula;
+import com.garbagemule.MobArena.formula.Formulas;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
@@ -11,7 +13,6 @@ import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
 import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityInfo;
-import com.garbagemule.MobArena.waves.enums.BossHealth;
 import com.garbagemule.MobArena.waves.enums.WaveType;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,9 +30,7 @@ public class BossWave extends AbstractWave
     private MACreature monster;
     private Set<MABoss> bosses;
 
-    private boolean useHealthMultiplier;
-    private int healthMultiplier;
-    private int flatHealth;
+    private Formula health;
 
     private List<Ability> abilities;
     private boolean activated, abilityAnnounce;
@@ -47,11 +46,8 @@ public class BossWave extends AbstractWave
         this.abilities = new ArrayList<>();
         this.activated = false;
         this.abilityAnnounce = false;
+        this.health = Formulas.DEFAULT_BOSS_HEALTH;
         this.setType(WaveType.BOSS);
-
-        this.useHealthMultiplier = true;
-        this.healthMultiplier = 0;
-        this.flatHealth = 0;
     }
 
     @Override
@@ -69,21 +65,12 @@ public class BossWave extends AbstractWave
         this.bossName = bossName;
     }
 
-    public int getMaxHealth(int playerCount) {
-        if (useHealthMultiplier) {
-            return (playerCount + 1) * 20 * healthMultiplier;
-        }
-        return flatHealth;
+    public Formula getHealth() {
+        return health;
     }
 
-    public void setHealth(BossHealth health) {
-        this.healthMultiplier = health.getMultiplier();
-        this.useHealthMultiplier = true;
-    }
-
-    public void setFlatHealth(int flatHealth) {
-        this.flatHealth = flatHealth;
-        this.useHealthMultiplier = false;
+    public void setHealth(Formula health) {
+        this.health = health;
     }
 
     public void addMABoss(MABoss boss) {
@@ -160,9 +147,7 @@ public class BossWave extends AbstractWave
         }
         result.abilityInterval = this.abilityInterval;
         result.abilityAnnounce = this.abilityAnnounce;
-        result.useHealthMultiplier = this.useHealthMultiplier;
-        result.healthMultiplier = this.healthMultiplier;
-        result.flatHealth = this.flatHealth;
+        result.health = this.health;
         result.reward = this.reward;
         result.drops = this.drops;
         result.bossName = this.bossName;

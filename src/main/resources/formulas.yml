@@ -1,0 +1,34 @@
+# These formulas work for all properties. If a global formula has the
+# same name as a property-specific formula, it is the property-specific
+# formula that will be used when parsing the given property.
+global:
+  wave-squared:     <current-wave> ^ 2
+  wave-inverted:    max(1, <final-wave> - <current-wave>)
+  five-each:        <live-players> * 5
+  double-team:      <live-players> / 2
+  top-up:           max(1, 10 - <live-monsters>)
+  dead-man-walking: max(1, <dead-players>)
+
+# These formulas only work in the "growth" property of Default Waves.
+wave-growth:
+  old:    <current-wave> + <initial-players>
+  slow:   min(ceil(<initial-players> / 2) + 1, 13) * <current-wave> ^ 0.5
+  medium: min(ceil(<initial-players> / 2) + 1, 13) * <current-wave> ^ 0.65
+  fast:   min(ceil(<initial-players> / 2) + 1, 13) * <current-wave> ^ 0.8
+  psycho: min(ceil(<initial-players> / 2) + 1, 13) * <current-wave> ^ 1.2
+
+# These formulas only work in the "amount" property of Swarm Waves.
+swarm-amount:
+  low:    max(1, floor(<initial-players> / 2)) * 10
+  medium: max(1, floor(<initial-players> / 2)) * 20
+  high:   max(1, floor(<initial-players> / 2)) * 30
+  psycho: max(1, floor(<initial-players> / 2)) * 60
+
+# These formulas only work in the "health" property of Boss Waves.
+boss-health:
+  verylow:  (<initial-players> + 1) * 20 * 4
+  low:      (<initial-players> + 1) * 20 * 8
+  medium:   (<initial-players> + 1) * 20 * 15
+  high:     (<initial-players> + 1) * 20 * 25
+  veryhigh: (<initial-players> + 1) * 20 * 40
+  psycho:   (<initial-players> + 1) * 20 * 60
