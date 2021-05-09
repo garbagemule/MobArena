@@ -27,7 +27,7 @@ public class FormulaMacros {
         String content = new String(bytes);
 
         Yaml yaml = new Yaml();
-        Map<?, ?> raw = yaml.load(content);
+        Map<?, ?> raw = (Map<?, ?>) yaml.load(content);
         Map<String, Map<String, String>> converted = convert(raw);
 
         macros.clear();
