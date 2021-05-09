@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.106] - 2021-05-09
 ### Added
 - It is now possible to write custom formulas for wave growth in Default Wave, swarm amounts in Swarm Waves, and boss health in Boss Waves, allowing for much more control and fine-tuning. The formulas support various session-related variables as well as various mathematical operators and functions. Formulas can be predefined as macros in the new `formulas.yml` file. Check the wiki for details.
 
@@ -211,7 +213,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.105...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.106...HEAD
+[0.106]: https://github.com/garbagemule/MobArena/compare/0.105...0.106
 [0.105]: https://github.com/garbagemule/MobArena/compare/0.104.2...0.105
 [0.104.2]: https://github.com/garbagemule/MobArena/compare/0.104.1...0.104.2
 [0.104.1]: https://github.com/garbagemule/MobArena/compare/0.104...0.104.1
