@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.metrics;
 
 import com.garbagemule.MobArena.MobArena;
-import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 
-public class FoodRegenChart extends Metrics.SimplePie {
+public class FoodRegenChart extends SimplePie {
 
     public FoodRegenChart(MobArena plugin) {
         super("food_regen_pie", () -> usesFoodRegen(plugin) ? "Yes" : "No");

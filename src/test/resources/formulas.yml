@@ -1,0 +1,19 @@
+numbers:
+  one: 1
+  two: 2
+
+constants:
+  three-point-one-four: pi
+  eulers-number: e
+
+variables:
+  live: <live-players>
+  max: <max-players>
+
+operators:
+  two-plus-two: 2 + 2
+  one-times-two: 1 * 2
+
+functions:
+  square-root: sqrt(9)
+  maximum: max(1, 2)

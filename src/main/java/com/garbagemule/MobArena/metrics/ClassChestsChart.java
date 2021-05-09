@@ -1,9 +1,9 @@
 package com.garbagemule.MobArena.metrics;
 
 import com.garbagemule.MobArena.MobArena;
-import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 
-public class ClassChestsChart extends Metrics.SimplePie {
+public class ClassChestsChart extends SimplePie {
 
     public ClassChestsChart(MobArena plugin) {
         super("class_chests_pie", () -> usesClassChests(plugin) ? "Yes" : "No");

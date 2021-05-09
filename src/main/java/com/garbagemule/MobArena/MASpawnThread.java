@@ -248,7 +248,7 @@ public class MASpawnThread implements Runnable
                 switch (w.getType()){
                     case BOSS:
                         BossWave bw = (BossWave) w;
-                        double maxHealth = bw.getMaxHealth(playerCount);
+                        double maxHealth = bw.getHealth().evaluate(arena);
                         MABoss boss = monsterManager.addBoss(e, maxHealth);
                         HealthBar healthbar = createsHealthBar.create(e, bw.getBossName());
                         arena.getPlayersInArena().forEach(healthbar::addPlayer);
