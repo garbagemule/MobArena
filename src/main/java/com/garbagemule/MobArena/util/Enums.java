@@ -2,6 +2,14 @@ package com.garbagemule.MobArena.util;
 
 public class Enums
 {
+    public static <E extends Enum<E>> E valueOf(Class<E> type, String value) {
+        try {
+            return Enum.valueOf(type, value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     /**
      * Get the enum value of a string, null if it doesn't exist.
      */

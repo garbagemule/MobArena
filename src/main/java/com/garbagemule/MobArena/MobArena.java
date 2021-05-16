@@ -8,6 +8,8 @@ import com.garbagemule.MobArena.formula.FormulaMacros;
 import com.garbagemule.MobArena.formula.FormulaManager;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.labs.Labs;
+import com.garbagemule.MobArena.labs.LabsChart;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.metrics.ArenaCountChart;
 import com.garbagemule.MobArena.metrics.ClassChestsChart;
@@ -68,6 +70,8 @@ public class MobArena extends JavaPlugin
     private FormulaMacros macros;
 
     private SignListeners signListeners;
+
+    private Labs labs;
 
     @Override
     public void onLoad() {
@@ -180,6 +184,8 @@ public class MobArena extends JavaPlugin
         metrics.addCustomChart(new IsolatedChatChart(this));
         metrics.addCustomChart(new MonsterInfightChart(this));
         metrics.addCustomChart(new PvpEnabledChart(this));
+
+        metrics.addCustomChart(new LabsChart(this, "labs_housekeeper_pie", config -> config.housekeeper));
     }
 
     public void reload() {
@@ -188,6 +194,7 @@ public class MobArena extends JavaPlugin
 
         try {
             reloadConfig();
+            reloadLabs();
             reloadGlobalMessenger();
             reloadFormulaMacros();
             reloadArenaMaster();
@@ -208,6 +215,15 @@ public class MobArena extends JavaPlugin
             loadsConfigFile = new LoadsConfigFile(this);
         }
         config = loadsConfigFile.load();
+    }
+
+    private void reloadLabs() {
+        try {
+            labs = Labs.create(this);
+        } catch (IOException e) {
+            getLogger().log(Level.WARNING, "There was an error loading MobArena Labs!", e);
+            labs = Labs.createDefault();
+        }
     }
 
     private void reloadGlobalMessenger() {
@@ -316,5 +332,9 @@ public class MobArena extends JavaPlugin
 
     public FormulaMacros getFormulaMacros() {
         return macros;
+    }
+
+    public Labs getLabs() {
+        return labs;
     }
 }

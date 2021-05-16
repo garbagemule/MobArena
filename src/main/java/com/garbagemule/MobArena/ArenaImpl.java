@@ -6,6 +6,7 @@ import com.garbagemule.MobArena.ScoreboardManager.NullScoreboardManager;
 import com.garbagemule.MobArena.announce.Announcer;
 import com.garbagemule.MobArena.announce.MessengerAnnouncer;
 import com.garbagemule.MobArena.announce.TitleAnnouncer;
+import com.garbagemule.MobArena.housekeeper.Housekeeper;
 import com.garbagemule.MobArena.steps.Step;
 import com.garbagemule.MobArena.steps.StepFactory;
 import com.garbagemule.MobArena.steps.PlayerJoinArena;
@@ -35,7 +36,6 @@ import com.garbagemule.MobArena.waves.SheepBouncer;
 import com.garbagemule.MobArena.waves.WaveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -148,6 +148,7 @@ public class ArenaImpl implements Arena
     private StepFactory playerSpecArena;
 
     private SpawnsPets spawnsPets;
+    private Housekeeper housekeeper;
 
     /**
      * Primary constructor. Requires a name and a world.
@@ -257,6 +258,8 @@ public class ArenaImpl implements Arena
         this.playerSpecArena = PlayerSpecArena.create(this);
 
         this.spawnsPets = plugin.getArenaMaster().getSpawnsPets();
+
+        this.housekeeper = plugin.getLabs().housekeeper;
     }
 
 
@@ -1355,43 +1358,8 @@ public class ArenaImpl implements Arena
     }
 
     private void cleanup() {
-        removeMonsters();
-        removeBlocks();
-        removeEntities();
+        housekeeper.clean(this);
         clearPlayers();
-    }
-
-    private void removeMonsters() {
-        monsterManager.clear();
-    }
-
-    private void removeBlocks() {
-        for (Block b : blocks) {
-            b.setType(Material.AIR);
-        }
-        blocks.clear();
-    }
-
-    private void removeEntities() {
-        List<Chunk> chunks = region.getChunks();
-
-        for (Chunk c : chunks) {
-            for (Entity e : c.getEntities()) {
-                if (e == null) {
-                    continue;
-                }
-
-                switch (e.getType()) {
-                    case DROPPED_ITEM:
-                    case EXPERIENCE_ORB:
-                    case ARROW:
-                    case MINECART:
-                    case BOAT:
-                    case SHULKER_BULLET:
-                        e.remove();
-                }
-            }
-        }
     }
 
     private void clearPlayers() {
