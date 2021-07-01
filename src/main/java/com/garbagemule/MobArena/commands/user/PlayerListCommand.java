@@ -14,7 +14,7 @@ import java.util.List;
 
 @CommandInfo(
     name    = "playerlist",
-    pattern = "player.*|listp.*",
+    pattern = "players|playerlist|player-list",
     usage   = "/ma players (<arena>)",
     desc    = "lists players in an arena",
     permission = "mobarena.use.playerlist"

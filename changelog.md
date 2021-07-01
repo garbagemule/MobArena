@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Changed
+- The regex pattern for the player list command is now less greedy, so it will only match on `/ma players`, `/ma playerlist`, and `/ma player-list`. The previous pattern matched on anything that starts with `player`, which rendered the `/ma player-stats` command in MobArenaStats impossible to invoke.
 
 ## [0.106] - 2021-05-09
 ### Added
