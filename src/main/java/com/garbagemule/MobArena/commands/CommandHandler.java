@@ -349,14 +349,34 @@ public class CommandHandler implements CommandExecutor, TabCompleter
      * @param c a Command
      */
     public void register(Class<? extends Command> c) {
-        CommandInfo info = c.getAnnotation(CommandInfo.class);
-        if (info == null) return;
-
         try {
-            commands.put(info.pattern(), c.newInstance());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+            Command command = c.newInstance();
+            register(command);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalArgumentException("Failed to instantiate Command class: " + c.getName(), e);
         }
     }
+
+    /**
+     * Register a command instance.
+     * <p>
+     * Adds the given command to MobArena's internal command handler as a
+     * subcommand, overwriting any existing subcommand mappings. This means
+     * that the method is safe to call on reloads as long as a reload does
+     * not change the pattern of a registered command.
+     *
+     * @param command the Command instance to register
+     * @throws IllegalArgumentException if the CommandInfo annotation is
+     * missing from the class of the Command instance
+     */
+    public void register(Command command) {
+        Class<?> cls = command.getClass();
+        CommandInfo info = cls.getAnnotation(CommandInfo.class);
+        if (info == null) {
+            throw new IllegalArgumentException("Missing CommandInfo annotation on class " + cls.getName());
+        }
+
+        commands.put(info.pattern(), command);
+    }
+
 }
