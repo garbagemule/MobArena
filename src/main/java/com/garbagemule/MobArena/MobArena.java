@@ -2,6 +2,8 @@ package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.config.LoadsConfigFile;
+import com.garbagemule.MobArena.events.MobArenaPreReloadEvent;
+import com.garbagemule.MobArena.events.MobArenaReloadEvent;
 import com.garbagemule.MobArena.formula.FormulaMacros;
 import com.garbagemule.MobArena.formula.FormulaManager;
 import com.garbagemule.MobArena.framework.Arena;
@@ -181,6 +183,9 @@ public class MobArena extends JavaPlugin
     }
 
     public void reload() {
+        MobArenaPreReloadEvent pre = new MobArenaPreReloadEvent(this);
+        getServer().getPluginManager().callEvent(pre);
+
         try {
             reloadConfig();
             reloadGlobalMessenger();
@@ -192,6 +197,9 @@ public class MobArena extends JavaPlugin
             setLastFailureCauseAndRethrow(e);
         }
         lastFailureCause = null;
+
+        MobArenaReloadEvent post = new MobArenaReloadEvent(this);
+        getServer().getPluginManager().callEvent(post);
     }
 
     @Override
