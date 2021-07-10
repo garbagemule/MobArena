@@ -45,7 +45,7 @@ public class MACreature
     public static final MACreature WOLF = new MACreature("wolf", "wolves", EntityType.WOLF);
 
     // Special creatures
-    public static final MACreature ZOMBIEPIGMAN = new MACreature("zombiepigman", "zombiepigmen", EntityType.PIG_ZOMBIE);
+    public static final MACreature ZOMBIEPIGMAN = new MACreature("zombiepigman", "zombiepigmen", EntityType.ZOMBIFIED_PIGLIN);
     public static final MACreature POWEREDCREEPER = new MACreature("poweredcreeper", EntityType.CREEPER);
     public static final MACreature ANGRYWOLF = new MACreature("angrywolf", "angrywolves", EntityType.WOLF);
     public static final MACreature ENDERMAN = new MACreature("enderman", "endermen", EntityType.ENDERMAN);
@@ -76,7 +76,7 @@ public class MACreature
     // 1.4 creatures
     public static final MACreature WITCH = new MACreature("witch", "witches", EntityType.WITCH);
     public static final MACreature BABYZOMBIE = new MACreature("babyzombie", EntityType.ZOMBIE);
-    public static final MACreature BABYPIGMAN = new MACreature("babypigman", "babypigmen", EntityType.PIG_ZOMBIE);
+    public static final MACreature BABYPIGMAN = new MACreature("babypigman", "babypigmen", EntityType.ZOMBIFIED_PIGLIN);
     public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE_VILLAGER);
 
     // 1.6 creatures
@@ -175,11 +175,13 @@ public class MACreature
                 ((Zombie) e).setBaby(true);
                 break;
             case "babypigman":
+            case "babyzombifiedpiglin":
                 ((Zombie) e).setBaby(true);
                 ((PigZombie) e).setAngry(true);
                 break;
             case "pigzombie":
             case "zombiepigman":
+            case "zombifiedpiglin":
                 ((PigZombie) e).setAngry(true);
                 break;
             case "killerbunny":
