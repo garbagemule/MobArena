@@ -2,6 +2,7 @@ package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.framework.Arena;
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,6 +18,7 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,70 +27,25 @@ import java.util.Map;
 
 public class MACreature
 {
-    // This part must come before the constants!
     private static Map<String,MACreature> map;
     static {
         map = new HashMap<>();
-        for (EntityType type : EntityType.values()) {
-            if (type.isAlive()) {
-                // Instantiating a new creature registers it
-                new MACreature(type);
-            }
-        }
+        registerEntityTypeValues();
+        registerExtraAliases();
+        registerTypeVariants();
+        registerCustomTypes();
+        registerBrokenTypes();
     }
-
-    // Default creatures
-    public static final MACreature ZOMBIE = new MACreature("zombie", EntityType.ZOMBIE);
-    public static final MACreature SKELETON = new MACreature("skeleton", EntityType.SKELETON);
-    public static final MACreature SPIDER = new MACreature("spider", EntityType.SPIDER);
-    public static final MACreature CREEPER = new MACreature("creeper", EntityType.CREEPER);
-    public static final MACreature WOLF = new MACreature("wolf", "wolves", EntityType.WOLF);
-
-    // Special creatures
-    public static final MACreature ZOMBIEPIGMAN = new MACreature("zombiepigman", "zombiepigmen", EntityType.ZOMBIFIED_PIGLIN);
-    public static final MACreature POWEREDCREEPER = new MACreature("poweredcreeper", EntityType.CREEPER);
-    public static final MACreature ANGRYWOLF = new MACreature("angrywolf", "angrywolves", EntityType.WOLF);
-    public static final MACreature ENDERMAN = new MACreature("enderman", "endermen", EntityType.ENDERMAN);
-
-    // 1.0 creatures
-    public static final MACreature SNOWMAN = new MACreature("snowman", "snowmen", EntityType.SNOWMAN);
-    public static final MACreature SNOWGOLEM = new MACreature("snowgolem", EntityType.SNOWMAN);
-    public static final MACreature MOOSHROOM = new MACreature("mooshroom", EntityType.MUSHROOM_COW);
-
-    // Passive creatures
-    public static final MACreature SHEEP = new MACreature("sheep", null, EntityType.SHEEP);
-
-    // Extended creatures
-    public static final MACreature EXPLODINGSHEEP = new MACreature("explodingsheep", null, EntityType.SHEEP);
-
-    // Slimes
-    public static final MACreature SLIMETINY = new MACreature("slimetiny", "slimestiny", EntityType.SLIME);
-    public static final MACreature SLIMESMALL = new MACreature("slimesmall", "slimessmall", EntityType.SLIME);
-    public static final MACreature SLIMEBIG = new MACreature("slimebig", "slimesbig", EntityType.SLIME);
-    public static final MACreature SLIMEHUGE = new MACreature("slimehuge", "slimeshuge", EntityType.SLIME);
-
-    // Magma cubes
-    public static final MACreature MAGMACUBETINY = new MACreature("magmacubetiny", "magmacubestiny", EntityType.MAGMA_CUBE);
-    public static final MACreature MAGMACUBESMALL = new MACreature("magmacubesmall", "magmacubessmall", EntityType.MAGMA_CUBE);
-    public static final MACreature MAGMACUBEBIG = new MACreature("magmacubebig", "magmacubesbig", EntityType.MAGMA_CUBE);
-    public static final MACreature MAGMACUBEHUGE = new MACreature("magmacubehuge", "magmacubeshuge", EntityType.MAGMA_CUBE);
-
-    // 1.4 creatures
-    public static final MACreature WITCH = new MACreature("witch", "witches", EntityType.WITCH);
-    public static final MACreature BABYZOMBIE = new MACreature("babyzombie", EntityType.ZOMBIE);
-    public static final MACreature BABYPIGMAN = new MACreature("babypigman", "babypigmen", EntityType.ZOMBIFIED_PIGLIN);
-    public static final MACreature BABYZOMBIEVILLAGER = new MACreature("babyzombievillager", EntityType.ZOMBIE_VILLAGER);
-
-    // 1.6 creatures
-    public static final MACreature UNDEADHORSE = new MACreature("undeadhorse", EntityType.ZOMBIE_HORSE);
-
-    // 1.8 creatures
-    public static final MACreature KILLERBUNNY = new MACreature("killerbunny", "killerbunnies", EntityType.RABBIT);
 
     private List<DyeColor> colors = Arrays.asList(DyeColor.values());
     private String name;
     private String plural;
     private EntityType type;
+
+    public MACreature(EntityType type, String name) {
+        this.type = type;
+        this.name = name;
+    }
 
     public MACreature(String name, String plural, EntityType type) {
         this.name = name;
@@ -102,14 +59,6 @@ public class MACreature
         this(name, name + "s", type);
     }
 
-    private MACreature(EntityType type) {
-        this(
-            type.name().toLowerCase().replaceAll("[-_\\.]", ""),
-            type.name().toLowerCase().replaceAll("[-_\\.]", "") + "s",
-            type
-        );
-    }
-
     private void register() {
         map.put(name, this);
         map.put(plural, this);
@@ -121,10 +70,6 @@ public class MACreature
 
     public EntityType getType() {
         return type;
-    }
-
-    public static MACreature fromString(String string) {
-        return map.get(string.toLowerCase().replaceAll("[-_\\.]", ""));
     }
 
     public LivingEntity spawn(Arena arena, World world, Location loc) {
@@ -201,4 +146,168 @@ public class MACreature
 
         return e;
     }
+
+    /**
+     * Register an MACreature instance by the given key.
+     * <p>
+     * Adds the MACreature instance to the internal monster type registry such
+     * that it can be used in monster waves.
+     * <p>
+     * Any existing registration under the given key is silently overwritten.
+     *
+     * @param key a key to reference the creature by
+     * @param creature an MACreature instance
+     */
+    public static void register(String key, MACreature creature) {
+        map.put(key, creature);
+    }
+
+    public static MACreature fromString(String string) {
+        MACreature creature = map.get(string);
+        if (creature != null) {
+            return creature;
+        }
+        String squashed = squash(string);
+        return map.get(squashed);
+    }
+
+    private static String squash(String string) {
+        return string
+            .replaceAll("[-_.]", "")
+            .toLowerCase();
+    }
+
+    private static void registerEntityTypeValues() {
+        // Register all living entities in the EntityType enum.
+        //
+        // This ensures that all valid entities on the running server are
+        // made available by their enum value names. This is probably the
+        // closest we can get to being forwards compatible with an evolving
+        // enum without resorting to nasty hacks and JVM tricks.
+        //
+        for (EntityType type : EntityType.values()) {
+            if (type.isAlive()) {
+                String key = squash(type.name());
+                put(key, key + "s", type);
+            }
+        }
+
+        // Register "grammatically correct" plurals
+        copy("enderman", "endermen");
+        copy("snowman", "snowmen");
+        copy("witch", "witches");
+        copy("wolf", "wolves");
+    }
+
+    private static void registerExtraAliases() {
+        // Register extra aliases for certain types.
+        //
+        // These are names that either "fix" the API names to match in-game
+        // text or add extra aliases for no apparent reason. These are very
+        // much thorn-in-the-side names, and they should be removed at some
+        // point to remove unnecessary complexity.
+        //
+        put("mooshroom", "mooshrooms", "MUSHROOM_COW");
+        put("snowgolem", "snowgolems", "SNOWMAN");
+        put("undeadhorse", "undeadhorses", "ZOMBIE_HORSE");
+    }
+
+    private static void registerTypeVariants() {
+        // Register specialized variants of native types.
+        //
+        // Type variants are native types that are modified or configured at
+        // spawn time. For example, "angry-wolf" is just a normal wolf with
+        // its anger property is set to true.
+        //
+        put("angrywolf", "angrywolves", "WOLF");
+        put("babyzombie", "babyzombies", "ZOMBIE");
+        put("babyzombievillager", "babyzombievillagers", "ZOMBIE_VILLAGER");
+        put("killerbunny", "killerbunnies", "RABBIT");
+        put("magmacubebig", "magmacubesbig", "MAGMA_CUBE");
+        put("magmacubehuge", "magmacubeshuge", "MAGMA_CUBE");
+        put("magmacubesmall", "magmacubessmall", "MAGMA_CUBE");
+        put("magmacubetiny", "magmacubestiny", "MAGMA_CUBE");
+        put("poweredcreeper", "poweredcreepers", "CREEPER");
+        put("slimebig", "slimesbig", "SLIME");
+        put("slimehuge", "slimeshuge", "SLIME");
+        put("slimesmall", "slimessmall", "SLIME");
+        put("slimetiny", "slimestiny", "SLIME");
+    }
+
+    private static void registerCustomTypes() {
+        // Register custom MobArena monster types.
+        //
+        // These are MobArena's own first-class monster types that require a
+        // bit of special treatment in various parts of the plugin.
+        //
+        put("explodingsheep", "explodingsheep", "SHEEP");
+    }
+
+    private static void registerBrokenTypes() {
+        // Register backward-compatible keys (new MobArena, old API)
+        //
+        // These are keys from newer versions of the API that don't exist in
+        // older versions. Because MobArena might use these keys internally
+        // for default config-files, they should be valid on all versions so
+        // people on out-of-date servers can still enjoy up-to-date MobArena.
+        //
+        put("babyzombifiedpiglin", "babyzombifiedpiglins", "ZOMBIFIED_PIGLIN", "PIG_ZOMBIE");
+        put("zombifiedpiglin", "zombifiedpiglins", "ZOMBIFIED_PIGLIN", "PIG_ZOMBIE");
+
+        // Register forward-compatible keys (old MobArena, new API)
+        //
+        // Conversely, these are keys from older versions of the API that no
+        // longer exist in newer versions. Because these keys might be in use
+        // in existing setups, they should be valid on all versions so people
+        // on bleeding edge servers can still enjoy stable MobArena.
+        //
+        put("babypigman", "babypigmen", "ZOMBIFIED_PIGLIN", "PIG_ZOMBIE");
+        put("pigzombie", "pigzombies", "ZOMBIFIED_PIGLIN", "PIG_ZOMBIE");
+        put("zombiepigman", "zombiepigmen", "ZOMBIFIED_PIGLIN", "PIG_ZOMBIE");
+    }
+
+    private static void put(String key, String plural, EntityType type) {
+        MACreature creature = new MACreature(type, key);
+        register(key, creature);
+        register(plural, creature);
+    }
+
+    private static void put(String key, String plural, String... names) {
+        for (String name : names) {
+            // If we hit null, abandon the key(s) entirely. This allows for
+            // graceful degradation for types that don't exist on certain
+            // server versions and have no valid counterparts. For instance,
+            // bees don't exist prior to 1.15, so no attempt should be made
+            // at registering them on 1.14 or below, but we also don't want
+            // to log a warning about them.
+            if (name == null) {
+                return;
+            }
+
+            try {
+                EntityType type = EntityType.valueOf(name);
+                put(key, plural, type);
+                return;
+            } catch (IllegalArgumentException e) {
+                // Swallow and try again
+            }
+        }
+
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("MobArena");
+        if (plugin != null) {
+            if (names.length == 1) {
+                plugin.getLogger().warning("Failed to register monster type '" + key + "', because its type was not found: " + names[0]);
+            } else {
+                plugin.getLogger().warning("Failed to register monster type '" + key + "', because none of its possible types were found: " + Arrays.toString(names));
+            }
+        }
+    }
+
+    private static void copy(String source, String target) {
+        MACreature creature = map.get(source);
+        if (creature != null) {
+            map.put(target, creature);
+        }
+    }
+
 }

@@ -586,10 +586,10 @@ public class WaveParser
 
     public static Wave createDefaultWave() {
         SortedMap<Integer,MACreature> monsters = new TreeMap<>();
-        monsters.put(10, MACreature.ZOMBIE);
-        monsters.put(20, MACreature.SKELETON);
-        monsters.put(30, MACreature.SPIDER);
-        monsters.put(40, MACreature.SLIMESMALL);
+        monsters.put(10, MACreature.fromString("zombie"));
+        monsters.put(20, MACreature.fromString("skeleton"));
+        monsters.put(30, MACreature.fromString("spider"));
+        monsters.put(40, MACreature.fromString("slime-small"));
 
         DefaultWave result = new DefaultWave(monsters);
         result.setName("MA_DEFAULT_WAVE");
