@@ -5,6 +5,7 @@ import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.ThingPicker;
+import com.garbagemule.MobArena.util.Materials;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -274,7 +275,7 @@ public class MAUtils
         // Place the hippie signs
         //Iterator<String> iterator = am.getClasses().iterator();
         Iterator<ArenaClass> iterator = am.getClasses().values().iterator();
-        Rotatable signData = (Rotatable) Material.OAK_SIGN.createBlockData();
+        Rotatable signData = (Rotatable) Materials.SIGN.createBlockData();
         signData.setRotation(BlockFace.NORTH);
         for (int i = lx1+2; i <= lx2-2; i++) // Signs
         {
