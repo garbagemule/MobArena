@@ -589,7 +589,8 @@ public class WaveParser
         monsters.put(10, MACreature.fromString("zombie"));
         monsters.put(20, MACreature.fromString("skeleton"));
         monsters.put(30, MACreature.fromString("spider"));
-        monsters.put(40, MACreature.fromString("slime-small"));
+        monsters.put(40, MACreature.fromString("creeper"));
+        monsters.put(50, MACreature.fromString("wolf"));
 
         DefaultWave result = new DefaultWave(monsters);
         result.setName("MA_DEFAULT_WAVE");
