@@ -15,7 +15,7 @@ recurrent:
         frequency: 4
         monsters:
             powered-creepers: 10
-            zombie-pigmen: 10
+            slimes-big: 10
             angry-wolves: 10
             blazes: 10
 single:
