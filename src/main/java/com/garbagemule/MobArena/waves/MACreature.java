@@ -188,6 +188,9 @@ public class MACreature
             case "witherskeleton":
                 e.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_SWORD, 1));
                 break;
+            case "vindicator":
+                e.getEquipment().setItemInMainHand(new ItemStack(Material.IRON_AXE, 1));
+                break;
             default:
                 break;
         }
