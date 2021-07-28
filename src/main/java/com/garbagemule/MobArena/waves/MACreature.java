@@ -47,6 +47,12 @@ public class MACreature
         this.name = name;
     }
 
+    /**
+     * @deprecated This constructor will be removed in a future update.
+     * Use {@link #MACreature(EntityType, String)} instead, and register
+     * with {@link #register(String, MACreature)}.
+     */
+    @Deprecated
     public MACreature(String name, String plural, EntityType type) {
         this.name = name;
         this.plural = (plural != null) ? plural : name;
@@ -55,6 +61,12 @@ public class MACreature
         register();
     }
 
+    /**
+     * @deprecated This constructor will be removed in a future update.
+     * Use {@link #MACreature(EntityType, String)} instead, and register
+     * with {@link #register(String, MACreature)}.
+     */
+    @Deprecated
     public MACreature(String name, EntityType type) {
         this(name, name + "s", type);
     }
