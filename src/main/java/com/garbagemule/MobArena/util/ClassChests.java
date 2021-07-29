@@ -59,7 +59,7 @@ public class ClassChests {
         Block blockBehind = blockBelow.getRelative(backwards);
 
         // If the block below this sign is a class sign, swap the order
-        if (blockBelow.getType() == Material.OAK_WALL_SIGN || blockBelow.getType() == Material.OAK_SIGN) {
+        if (isSign(blockBelow)) {
             String className = ChatColor.stripColor(((Sign) blockBelow.getState()).getLine(0)).toLowerCase();
             if (arena.getClasses().containsKey(className)) {
                 blockSign = blockBehind;  // Use blockSign as a temp while swapping
@@ -83,6 +83,16 @@ public class ClassChests {
 
         assignClassAndGrantChestItems(arena, player, ac, block);
         return true;
+    }
+
+    private static boolean isSign(Block block) {
+        // Because we're using org.bukkit.block.Sign for the block state stuff
+        // already, we can't import the block data type, so instead of having
+        // an awkard if-statement, we tuck the expression away in this sort of
+        // elegant helper method.
+        BlockData data = block.getBlockData();
+        return data instanceof org.bukkit.block.data.type.Sign
+            || data instanceof org.bukkit.block.data.type.WallSign;
     }
 
     private static Block findChestBelow(Block b, int left) {
