@@ -25,11 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MACreature
-{
-    private static Map<String,MACreature> map;
+public class MACreature {
+
+    private static final Map<String,MACreature> map = new HashMap<>();
+    private static final List<DyeColor> colors = Arrays.asList(DyeColor.values());
+
     static {
-        map = new HashMap<>();
         registerEntityTypeValues();
         registerExtraAliases();
         registerTypeVariants();
@@ -37,14 +38,14 @@ public class MACreature
         registerBrokenTypes();
     }
 
-    private List<DyeColor> colors = Arrays.asList(DyeColor.values());
-    private String name;
-    private String plural;
-    private EntityType type;
+    private final String name;
+    private final String plural;
+    private final EntityType type;
 
     public MACreature(EntityType type, String name) {
         this.type = type;
         this.name = name;
+        this.plural = null;
     }
 
     /**
