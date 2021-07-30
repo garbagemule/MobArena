@@ -7,6 +7,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Bee;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
@@ -100,6 +101,9 @@ public class MACreature {
                 break;
             case "poweredcreeper":
                 ((Creeper) e).setPowered(true);
+                break;
+            case "angrybee":
+                ((Bee) e).setAnger(Integer.MAX_VALUE);
                 break;
             case "angrywolf":
                 ((Wolf) e).setAngry(true);
@@ -232,6 +236,7 @@ public class MACreature {
         // spawn time. For example, "angry-wolf" is just a normal wolf with
         // its anger property is set to true.
         //
+        put("angrybee", "angrybees", "BEE", null);
         put("angrywolf", "angrywolves", "WOLF");
         put("babyzombie", "babyzombies", "ZOMBIE");
         put("babyzombievillager", "babyzombievillagers", "ZOMBIE_VILLAGER");

@@ -12,6 +12,7 @@ These changes will (most likely) be included in the next version.
 
 ## [Unreleased]
 ### Added
+- New monster variant `angry-bees` can be used to spawn angry bees.
 - (API) MobArena's internal command handler now supports registering pre-instantiated subcommand instances. This should make it easier for extensions to avoid the Singleton anti-pattern for command dependencies.
 - (API) MobArena now fires MobArenaPreReloadEvent and MobArenaReloadEvent before and after, respectively, reloading its config-file. This should allow extensions and other plugins to better respond to configuration changes.
 
