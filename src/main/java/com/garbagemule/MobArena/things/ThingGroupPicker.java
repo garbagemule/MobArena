@@ -19,6 +19,14 @@ public class ThingGroupPicker implements ThingPicker {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
+        if (things.isEmpty()) {
+            return null;
+        }
+
+        if (things.size() == 1) {
+            return things.get(0);
+        }
+
         return new ThingGroup(things);
     }
 
