@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.things;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ThingGroupPicker implements ThingPicker {
@@ -15,6 +16,7 @@ public class ThingGroupPicker implements ThingPicker {
     public Thing pick() {
         List<Thing> things = pickers.stream()
             .map(ThingPicker::pick)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
         return new ThingGroup(things);

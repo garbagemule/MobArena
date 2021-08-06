@@ -20,6 +20,9 @@ These changes will (most likely) be included in the next version.
 - MobArena now targets the Minecraft 1.17 version of the Spigot API (but still works on 1.13-1.16). This should make it easier to tackle feature requests and bug reports related to modern Minecraft.
 - The regex pattern for the player list command is now less greedy, so it will only match on `/ma players`, `/ma playerlist`, and `/ma player-list`. The previous pattern matched on anything that starts with `player`, which rendered the `/ma player-stats` command in MobArenaStats impossible to invoke.
 
+### Fixed
+- Reward groups with `nothing` in them no longer cause errors when earned/granted.
+
 ## [0.106] - 2021-05-09
 ### Added
 - It is now possible to write custom formulas for wave growth in Default Wave, swarm amounts in Swarm Waves, and boss health in Boss Waves, allowing for much more control and fine-tuning. The formulas support various session-related variables as well as various mathematical operators and functions. Formulas can be predefined as macros in the new `formulas.yml` file. Check the wiki for details.
