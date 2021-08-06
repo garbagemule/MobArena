@@ -25,8 +25,7 @@ public class ThingPickerManager implements ThingPickerParser {
                 return picker;
             }
         }
-        Thing thing = things.parse(s);
-        return new SingleThingPicker(thing);
+        return things.parse(s);
     }
 
 }

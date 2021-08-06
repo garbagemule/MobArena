@@ -12,8 +12,12 @@ import org.bukkit.entity.Player;
  * The interface exposes three methods that are all optional operations. An
  * operation returns false if it fails or if it isn't applicable to the given
  * thing (which is the same as failing).
+ * <p>
+ * A thing is automatically a {@link ThingPicker} for itself, which means it
+ * can be used in any place that a thing picker is expected, avoiding the need
+ * to wrap things in a "dummy picker".
  */
-public interface Thing {
+public interface Thing extends ThingPicker {
 
     /**
      * Give this thing to the given player.
@@ -38,5 +42,10 @@ public interface Thing {
      * @return true, if the player has this thing, false otherwise
      */
     boolean heldBy(Player player);
+
+    @Override
+    default Thing pick() {
+        return this;
+    }
 
 }
