@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class OffHandThing extends ItemStackThing {
+
     public OffHandThing(ItemStack stack) {
         super(stack);
     }
@@ -24,4 +25,5 @@ public class OffHandThing extends ItemStackThing {
     public boolean heldBy(Player player) {
         return super.getItemStack().equals(player.getInventory().getItemInOffHand());
     }
+
 }

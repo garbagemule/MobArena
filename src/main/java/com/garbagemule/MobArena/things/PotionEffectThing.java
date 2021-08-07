@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
 class PotionEffectThing implements Thing {
+
     private final PotionEffect effect;
 
     PotionEffectThing(PotionEffect effect) {
@@ -25,4 +26,5 @@ class PotionEffectThing implements Thing {
     public boolean heldBy(Player player) {
         return player.hasPotionEffect(effect.getType());
     }
+
 }

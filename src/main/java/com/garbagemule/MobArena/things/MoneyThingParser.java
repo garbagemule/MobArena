@@ -4,10 +4,11 @@ import com.garbagemule.MobArena.MobArena;
 import net.milkbowl.vault.economy.Economy;
 
 class MoneyThingParser implements ThingParser {
+
     private static final String PREFIX_LONG = "money:";
     private static final String PREFIX_SHORT = "$";
 
-    private MobArena plugin;
+    private final MobArena plugin;
 
     MoneyThingParser(MobArena plugin) {
         this.plugin = plugin;
@@ -35,4 +36,5 @@ class MoneyThingParser implements ThingParser {
         }
         return null;
     }
+
 }

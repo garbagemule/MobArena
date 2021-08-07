@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
  * thing (which is the same as failing).
  */
 public interface Thing {
+
     /**
      * Give this thing to the given player.
      *
@@ -37,4 +38,5 @@ public interface Thing {
      * @return true, if the player has this thing, false otherwise
      */
     boolean heldBy(Player player);
+
 }
