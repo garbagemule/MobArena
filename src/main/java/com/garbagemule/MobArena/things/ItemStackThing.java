@@ -5,7 +5,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemStackThing implements Thing {
-    private ItemStack stack;
+
+    private final ItemStack stack;
 
     public ItemStackThing(ItemStack stack) {
         this.stack = stack;
@@ -50,4 +51,5 @@ public class ItemStackThing implements Thing {
             .replace("_", " ")
             .toLowerCase();
     }
+
 }

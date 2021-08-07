@@ -6,8 +6,9 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.entity.Player;
 
 public class MoneyThing implements Thing {
-    private Economy economy;
-    private double amount;
+
+    private final Economy economy;
+    private final double amount;
 
     public MoneyThing(Economy economy, double amount) {
         this.economy = economy;
@@ -47,4 +48,5 @@ public class MoneyThing implements Thing {
         }
         return economy.format(amount);
     }
+
 }

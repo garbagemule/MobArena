@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ThingManager implements ThingParser {
-    private List<ThingParser> parsers;
-    private ItemStackThingParser items;
+
+    private final List<ThingParser> parsers;
+    private final ItemStackThingParser items;
 
     public ThingManager(MobArena plugin, ItemStackThingParser parser) {
         parsers = new ArrayList<>();
@@ -88,4 +89,5 @@ public class ThingManager implements ThingParser {
         }
         return items.parse(s);
     }
+
 }

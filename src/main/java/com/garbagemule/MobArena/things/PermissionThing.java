@@ -6,6 +6,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class PermissionThing implements Thing {
+
     private final String perm;
     private final boolean value;
     private final MobArena plugin;
@@ -60,4 +61,5 @@ public class PermissionThing implements Thing {
         }
         return "-" + perm;
     }
+
 }

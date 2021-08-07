@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.things;
 import org.bukkit.entity.Player;
 
 public class ExperienceThing implements Thing {
+
     private final int experience;
 
     public ExperienceThing(int experience) {
@@ -44,4 +45,5 @@ public class ExperienceThing implements Thing {
     public boolean heldBy(Player player) {
         return player.getTotalExperience() > experience;
     }
+
 }

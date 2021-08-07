@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Objects;
 
 class ItemStackThingParser implements ThingParser {
-    private List<ItemStackParser> parsers;
+
+    private final List<ItemStackParser> parsers;
 
     ItemStackThingParser() {
         this.parsers = new ArrayList<>();
@@ -75,4 +76,5 @@ class ItemStackThingParser implements ThingParser {
             .findFirst()
             .orElseGet(() -> ItemParser.parseItem(s, false));
     }
+
 }

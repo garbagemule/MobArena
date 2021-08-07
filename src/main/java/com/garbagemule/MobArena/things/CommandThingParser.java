@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.things;
 
 class CommandThingParser implements ThingParser {
+
     private static final String PREFIX_LONG = "command";
     private static final String PREFIX_SHORT = "cmd";
 
@@ -54,8 +55,14 @@ class CommandThingParser implements ThingParser {
         int stack = 1;
         for (int i = 1; i < trimmed.length() - 1; i++) {
             switch (trimmed.charAt(i)) {
-                case '(': stack++; break;
-                case ')': stack--; break;
+                case '(': {
+                    stack++;
+                    break;
+                }
+                case ')': {
+                    stack--;
+                    break;
+                }
             }
             if (stack == 0) {
                 return i;
@@ -63,4 +70,5 @@ class CommandThingParser implements ThingParser {
         }
         return -1;
     }
+
 }
