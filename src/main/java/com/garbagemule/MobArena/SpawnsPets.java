@@ -59,10 +59,11 @@ public class SpawnsPets {
         for (int i = 0; i < amount; i++) {
             Entity pet = arena.getWorld().spawn(player.getLocation(), entity.getEntityClass());
             if (!petName.isEmpty()) {
-                String formattedName = ChatColor.translateAlternateColorCodes('&',
-                                       petName.replace("<player-name>", player.getName())
-                                              .replace("<display-name>", player.getDisplayName()));
-                pet.setCustomName(formattedName);
+                String resolved = petName
+                    .replace("<player-name>", player.getName())
+                    .replace("<display-name>", player.getDisplayName());
+                String colorized = ChatColor.translateAlternateColorCodes('&', resolved);
+                pet.setCustomName(colorized);
                 pet.setCustomNameVisible(true);
             }
             if (pet instanceof Tameable) {
