@@ -151,6 +151,7 @@ public class MACreature {
             case "piglin":
             case "piglinbrute":
                 ((PiglinAbstract) e).setImmuneToZombification(true);
+                break;
             case "hoglin":
                 ((Hoglin) e).setImmuneToZombification(true);
             default:
