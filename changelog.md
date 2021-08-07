@@ -24,6 +24,7 @@ These changes will (most likely) be included in the next version.
 
 ### Fixed
 - Pillagers and vindicators no longer spawn without their much-needed weapons.
+- Piglins, piglin brutes, and hoglins no longer zombify. This fixes a bug where the mobs would despawn due to the zombification process.
 - Reward groups with `nothing` in them no longer cause errors when earned/granted.
 
 ## [0.106] - 2021-05-09
