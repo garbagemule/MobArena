@@ -12,6 +12,8 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Hoglin;
+import org.bukkit.entity.PiglinAbstract;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
@@ -145,6 +147,13 @@ public class MACreature {
                 break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
+                break;
+            case "piglin":
+            case "piglinbrute":
+                ((PiglinAbstract) e).setImmuneToZombification(true);
+                break;
+            case "hoglin":
+                ((Hoglin) e).setImmuneToZombification(true);
                 break;
             default:
                 break;
