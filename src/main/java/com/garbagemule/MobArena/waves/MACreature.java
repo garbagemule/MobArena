@@ -12,14 +12,14 @@ import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Hoglin;
+import org.bukkit.entity.PiglinAbstract;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
-import org.bukkit.entity.Hoglin;
-import org.bukkit.entity.PiglinAbstract;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
