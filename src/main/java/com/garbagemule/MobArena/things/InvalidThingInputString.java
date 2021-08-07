@@ -1,7 +1,8 @@
 package com.garbagemule.MobArena.things;
 
 public class InvalidThingInputString extends RuntimeException {
-    private String input;
+
+    private final String input;
 
     InvalidThingInputString(String input) {
         super("Invalid input: " + input);
@@ -11,4 +12,5 @@ public class InvalidThingInputString extends RuntimeException {
     public String getInput() {
         return input;
     }
+
 }

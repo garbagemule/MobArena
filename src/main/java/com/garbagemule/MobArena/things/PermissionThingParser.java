@@ -3,9 +3,10 @@ package com.garbagemule.MobArena.things;
 import com.garbagemule.MobArena.MobArena;
 
 class PermissionThingParser implements ThingParser {
+
     private static final String PREFIX = "perm:";
 
-    private MobArena plugin;
+    private final MobArena plugin;
 
     PermissionThingParser(MobArena plugin) {
         this.plugin = plugin;
@@ -30,4 +31,5 @@ class PermissionThingParser implements ThingParser {
         }
         return null;
     }
+
 }

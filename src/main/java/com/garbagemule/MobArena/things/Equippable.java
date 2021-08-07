@@ -3,9 +3,12 @@ package com.garbagemule.MobArena.things;
 import org.bukkit.inventory.ItemStack;
 
 class Equippable {
+
     @FunctionalInterface
     interface Wrapper {
+
         ItemStackThing wrap(ItemStack stack);
+
     }
 
     static Wrapper getWrapperByPrefix(String prefix) {
@@ -45,4 +48,5 @@ class Equippable {
         }
         return null;
     }
+
 }

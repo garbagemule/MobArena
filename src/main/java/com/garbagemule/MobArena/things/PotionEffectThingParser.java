@@ -4,6 +4,7 @@ import com.garbagemule.MobArena.util.PotionEffectParser;
 import org.bukkit.potion.PotionEffect;
 
 class PotionEffectThingParser implements ThingParser {
+
     private static final String PREFIX = "effect:";
 
     @Override
@@ -25,4 +26,5 @@ class PotionEffectThingParser implements ThingParser {
         }
         return null;
     }
+
 }

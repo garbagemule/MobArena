@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
  */
 @FunctionalInterface
 public interface ItemStackParser {
+
     /**
      * Parse the given string, returning an {@link ItemStack} instance on
      * success, otherwise null.
@@ -16,4 +17,5 @@ public interface ItemStackParser {
      * @return an instance of {@link ItemStack}, or null
      */
     ItemStack parse(String s);
+
 }

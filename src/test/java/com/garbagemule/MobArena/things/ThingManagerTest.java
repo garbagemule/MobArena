@@ -1,18 +1,14 @@
 package com.garbagemule.MobArena.things;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
 import com.garbagemule.MobArena.MobArena;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InOrder;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class ThingManagerTest {
 

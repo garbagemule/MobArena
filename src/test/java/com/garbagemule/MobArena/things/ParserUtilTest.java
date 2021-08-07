@@ -1,6 +1,5 @@
 package com.garbagemule.MobArena.things;
 
-import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -9,8 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 
 public class ParserUtilTest {

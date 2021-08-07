@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import java.util.Objects;
 
 public class CommandThing implements Thing {
+
     private final String command;
     private final String title;
 
@@ -65,4 +66,5 @@ public class CommandThing implements Thing {
         }
         return command;
     }
+
 }
