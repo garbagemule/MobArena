@@ -154,6 +154,7 @@ public class MACreature {
                 break;
             case "hoglin":
                 ((Hoglin) e).setImmuneToZombification(true);
+                break;
             default:
                 break;
         }
