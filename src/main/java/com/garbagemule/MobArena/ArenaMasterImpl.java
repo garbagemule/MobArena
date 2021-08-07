@@ -393,6 +393,10 @@ public class ArenaMasterImpl implements ArenaMaster
             throw new ConfigError("Failed to parse classchest location for class " + classname + " because: " + e.getMessage());
         }
 
+        // Load pet name
+        String petName = section.getString("pet-name", "<display-name>'s pet");
+        arenaClass.setPetName(petName);
+
         // Finally add the class to the classes map.
         classes.put(arenaClass.getSlug(), arenaClass);
         return arenaClass;
