@@ -14,6 +14,7 @@ These changes will (most likely) be included in the next version.
 ### Added
 - New monster variant `angry-bees` can be used to spawn angry bees.
 - Pet names are now per-class configurable via the optional `pet-name` property, which defaults to `<display-name>'s pet` (the `<player-name>` variable is also supported).
+- New per-arena setting `auto-leave-on-end` can be used to automatically "kick" spectators when the current session ends.
 - (API) MobArena's internal command handler now supports registering pre-instantiated subcommand instances. This should make it easier for extensions to avoid the Singleton anti-pattern for command dependencies.
 - (API) MobArena now fires MobArenaPreReloadEvent and MobArenaReloadEvent before and after, respectively, reloading its config-file. This should allow extensions and other plugins to better respond to configuration changes.
 

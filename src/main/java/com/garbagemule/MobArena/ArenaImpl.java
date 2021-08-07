@@ -643,6 +643,11 @@ public class ArenaImpl implements Arena
         // Restore enabled status.
         enabled = en;
 
+        // Auto-leave
+        if (settings.getBoolean("auto-leave-on-end", false)) {
+            specPlayers.forEach(this::playerLeave);
+        }
+
         return true;
     }
 
@@ -903,11 +908,19 @@ public class ArenaImpl implements Arena
         specPlayers.add(p);
 
         if (settings.getBoolean("spectate-on-death", true)) {
-            messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
-        } else {
-            plugin.getServer().getScheduler()
-                .scheduleSyncDelayedTask(plugin, () -> playerLeave(p));
+            // At this point, we know that we want players to become
+            // spectators when they respawn, but if we also want them
+            // to auto-leave on arena end, we first need to make sure
+            // the arena is running. If not, the session has probably
+            // ended, so we fall through to schedule an auto-leave.
+            if (!settings.getBoolean("auto-leave-on-end", false) || running) {
+                messenger.tell(p, Msg.SPEC_PLAYER_SPECTATE);
+                return;
+            }
         }
+
+        plugin.getServer().getScheduler()
+            .scheduleSyncDelayedTask(plugin, () -> playerLeave(p));
     }
 
     @Override
