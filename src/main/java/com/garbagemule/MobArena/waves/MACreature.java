@@ -32,6 +32,7 @@ public class MACreature {
 
     private static final Map<String,MACreature> map = new HashMap<>();
     private static final List<DyeColor> colors = Arrays.asList(DyeColor.values());
+    private static final ItemStack[] NO_ARMOR = new ItemStack[0];
 
     static {
         registerEntityTypeValues();
@@ -90,8 +91,8 @@ public class MACreature {
 
     public LivingEntity spawn(Arena arena, World world, Location loc) {
         LivingEntity e = (LivingEntity) world.spawnEntity(loc, type);
-        e.getEquipment().clear();
         e.setCanPickupItems(false);
+        e.getEquipment().setArmorContents(NO_ARMOR);
 
         switch (this.name) {
             case "sheep":
@@ -130,10 +131,6 @@ public class MACreature {
             case "magmacubehuge":
                 ((Slime) e).setSize(4);
                 break;
-            case "skeleton":
-            case "stray":
-                e.getEquipment().setItemInMainHand(new ItemStack(Material.BOW, 1));
-                break;
             case "babyzombievillager":
             case "babyzombie":
                 ((Zombie) e).setBaby(true);
@@ -150,9 +147,6 @@ public class MACreature {
                 break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
-                break;
-            case "witherskeleton":
-                e.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_SWORD, 1));
                 break;
             case "piglin":
             case "piglinbrute":

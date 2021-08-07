@@ -13,14 +13,17 @@ These changes will (most likely) be included in the next version.
 ## [Unreleased]
 ### Added
 - New monster variant `angry-bees` can be used to spawn angry bees.
+- Pet names are now per-class configurable via the optional `pet-name` property, which defaults to `<display-name>'s pet` (the `<player-name>` variable is also supported).
 - (API) MobArena's internal command handler now supports registering pre-instantiated subcommand instances. This should make it easier for extensions to avoid the Singleton anti-pattern for command dependencies.
 - (API) MobArena now fires MobArenaPreReloadEvent and MobArenaReloadEvent before and after, respectively, reloading its config-file. This should allow extensions and other plugins to better respond to configuration changes.
 
 ### Changed
 - MobArena now targets the Minecraft 1.17 version of the Spigot API (but still works on 1.13-1.16). This should make it easier to tackle feature requests and bug reports related to modern Minecraft.
+- Monsters are no longer stripped of the _weapons_ they spawn with naturally, only their _armor_. This should improve forwards compatibility with new weapon-reliant monsters.
 - The regex pattern for the player list command is now less greedy, so it will only match on `/ma players`, `/ma playerlist`, and `/ma player-list`. The previous pattern matched on anything that starts with `player`, which rendered the `/ma player-stats` command in MobArenaStats impossible to invoke.
 
 ### Fixed
+- Pillagers and vindicators no longer spawn without their much-needed weapons.
 - Reward groups with `nothing` in them no longer cause errors when earned/granted.
 
 ## [0.106] - 2021-05-09
