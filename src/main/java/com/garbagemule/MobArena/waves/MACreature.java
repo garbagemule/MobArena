@@ -7,17 +7,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.Bee;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.PigZombie;
-import org.bukkit.entity.Rabbit;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -152,6 +142,12 @@ public class MACreature {
             case "witherskeleton":
                 e.getEquipment().setItemInMainHand(new ItemStack(Material.STONE_SWORD, 1));
                 break;
+            case "piglin":
+                ((Piglin) e).setImmuneToZombification(true);
+            case "piglinbrute":
+                ((PiglinBrute) e).setImmuneToZombification(true);
+            case "hoglin":
+                ((Hoglin) e).setImmuneToZombification(true);
             default:
                 break;
         }
