@@ -27,7 +27,7 @@ class TitleHealthBar implements HealthBar {
         String message = title.isEmpty() ? health : title + " " + health;
 
         players.forEach(player -> player.sendTitle(
-            "",
+            " ",
             message,
             FADE_IN_TICKS,
             STAY_TICKS,

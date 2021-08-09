@@ -16,7 +16,7 @@ public class TitleAnnouncer implements Announcer {
 
     @Override
     public void announce(Player player, String message) {
-        player.sendTitle("", message, fadeIn, stay, fadeOut);
+        player.sendTitle(" ", message, fadeIn, stay, fadeOut);
     }
 
 }

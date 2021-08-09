@@ -27,6 +27,7 @@ These changes will (most likely) be included in the next version.
 - Pillagers and vindicators no longer spawn without their much-needed weapons.
 - Piglins, piglin brutes, and hoglins no longer zombify. This fixes a bug where the mobs would despawn due to the zombification process.
 - Reward groups with `nothing` in them no longer cause errors when earned/granted.
+- The title-based announcer and the title-based boss health bar have been fixed to work with the breaking change to the Title API in Spigot 1.17.
 
 ## [0.106] - 2021-05-09
 ### Added
