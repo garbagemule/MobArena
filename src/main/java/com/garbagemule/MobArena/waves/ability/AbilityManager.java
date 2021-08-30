@@ -1,9 +1,11 @@
 package com.garbagemule.MobArena.waves.ability;
 
 import com.garbagemule.MobArena.waves.ability.core.ChainLightning;
+import com.garbagemule.MobArena.waves.ability.core.DisorientAll;
 import com.garbagemule.MobArena.waves.ability.core.DisorientDistant;
 import com.garbagemule.MobArena.waves.ability.core.DisorientNearby;
 import com.garbagemule.MobArena.waves.ability.core.DisorientTarget;
+import com.garbagemule.MobArena.waves.ability.core.FetchAll;
 import com.garbagemule.MobArena.waves.ability.core.FetchDistant;
 import com.garbagemule.MobArena.waves.ability.core.FetchNearby;
 import com.garbagemule.MobArena.waves.ability.core.FetchTarget;
@@ -12,6 +14,7 @@ import com.garbagemule.MobArena.waves.ability.core.Flood;
 import com.garbagemule.MobArena.waves.ability.core.LightningAura;
 import com.garbagemule.MobArena.waves.ability.core.LivingBomb;
 import com.garbagemule.MobArena.waves.ability.core.ObsidianBomb;
+import com.garbagemule.MobArena.waves.ability.core.PullAll;
 import com.garbagemule.MobArena.waves.ability.core.PullDistant;
 import com.garbagemule.MobArena.waves.ability.core.PullNearby;
 import com.garbagemule.MobArena.waves.ability.core.PullTarget;
@@ -19,6 +22,7 @@ import com.garbagemule.MobArena.waves.ability.core.RootTarget;
 import com.garbagemule.MobArena.waves.ability.core.ShootArrow;
 import com.garbagemule.MobArena.waves.ability.core.ShootFireball;
 import com.garbagemule.MobArena.waves.ability.core.ShufflePositions;
+import com.garbagemule.MobArena.waves.ability.core.ThrowAll;
 import com.garbagemule.MobArena.waves.ability.core.ThrowDistant;
 import com.garbagemule.MobArena.waves.ability.core.ThrowNearby;
 import com.garbagemule.MobArena.waves.ability.core.ThrowTarget;
@@ -67,9 +71,11 @@ public class AbilityManager
         if (abilities == null) abilities = new HashMap<>();
 
         register(ChainLightning.class);
+        register(DisorientAll.class);
         register(DisorientDistant.class);
         register(DisorientNearby.class);
         register(DisorientTarget.class);
+        register(FetchAll.class);
         register(FetchDistant.class);
         register(FetchNearby.class);
         register(FetchTarget.class);
@@ -78,6 +84,7 @@ public class AbilityManager
         register(LightningAura.class);
         register(LivingBomb.class);
         register(ObsidianBomb.class);
+        register(PullAll.class);
         register(PullDistant.class);
         register(PullNearby.class);
         register(PullTarget.class);
@@ -85,6 +92,7 @@ public class AbilityManager
         register(ShootArrow.class);
         register(ShootFireball.class);
         register(ShufflePositions.class);
+        register(ThrowAll.class);
         register(ThrowDistant.class);
         register(ThrowNearby.class);
         register(ThrowTarget.class);
