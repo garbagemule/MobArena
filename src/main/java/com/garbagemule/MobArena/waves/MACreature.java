@@ -5,20 +5,20 @@ import com.garbagemule.MobArena.framework.Arena;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Hoglin;
-import org.bukkit.entity.PiglinAbstract;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
+import org.bukkit.entity.PiglinAbstract;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Zoglin;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -131,29 +131,50 @@ public class MACreature {
             case "magmacubehuge":
                 ((Slime) e).setSize(4);
                 break;
+            case "babydrowned":
+            case "babyhusk":
             case "babyzombievillager":
             case "babyzombie":
                 ((Zombie) e).setBaby(true);
+                break;
+            case "babyhoglin":
+                ((Hoglin) e).setImmuneToZombification(true);
+                ((Hoglin) e).setBaby();
+                break;
+            case "babypiglin":
+                ((PiglinAbstract)e).setBaby();
+                ((PiglinAbstract) e).setImmuneToZombification(true);
                 break;
             case "babypigman":
             case "babyzombifiedpiglin":
                 ((Zombie) e).setBaby(true);
                 ((PigZombie) e).setAngry(true);
                 break;
+            case "babyzoglin":
+                ((Zoglin) e).setBaby();
+                break;
             case "pigzombie":
             case "zombiepigman":
             case "zombifiedpiglin":
                 ((PigZombie) e).setAngry(true);
+                ((PigZombie) e).setBaby(false);
                 break;
+            case "husk":
+            case "drowned":
+            case "zombievillager":
+            case "zombie":
+                ((Zombie) e).setBaby(false);
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
                 break;
             case "piglin":
             case "piglinbrute":
                 ((PiglinAbstract) e).setImmuneToZombification(true);
+                ((PiglinAbstract) e).setAdult();
                 break;
             case "hoglin":
                 ((Hoglin) e).setImmuneToZombification(true);
+                ((Hoglin) e).setAdult();
                 break;
             default:
                 break;
@@ -241,6 +262,12 @@ public class MACreature {
         //
         put("angrybee", "angrybees", "BEE", null);
         put("angrywolf", "angrywolves", "WOLF");
+        put("babypiglin", "babypiglins", "PIGLIN");
+        put("babyzombifiedpiglin", "babyzombifiedpiglins", "ZOMBIFIED_PIGLIN");
+        put("babyhoglin", "babyhoglins", "HOGLIN");
+        put("babyzoglin", "babyzoglins", "ZOGLIN");
+        put("babyhusk", "babyhusks", "HUSK");
+        put("babydrowned", "babydrowneds", "DROWNED");
         put("babyzombie", "babyzombies", "ZOMBIE");
         put("babyzombievillager", "babyzombievillagers", "ZOMBIE_VILLAGER");
         put("killerbunny", "killerbunnies", "RABBIT");
