@@ -164,6 +164,7 @@ public class MACreature {
             case "zombievillager":
             case "zombie":
                 ((Zombie) e).setBaby(false);
+                break;
             case "killerbunny":
                 ((Rabbit) e).setRabbitType(Rabbit.Type.THE_KILLER_BUNNY);
                 break;
