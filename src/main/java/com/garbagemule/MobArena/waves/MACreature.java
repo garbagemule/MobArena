@@ -142,7 +142,7 @@ public class MACreature {
                 ((Hoglin) e).setBaby();
                 break;
             case "babypiglin":
-                ((PiglinAbstract)e).setBaby();
+                ((PiglinAbstract) e).setBaby();
                 ((PiglinAbstract) e).setImmuneToZombification(true);
                 break;
             case "babypigman":
@@ -263,12 +263,11 @@ public class MACreature {
         //
         put("angrybee", "angrybees", "BEE", null);
         put("angrywolf", "angrywolves", "WOLF");
-        put("babypiglin", "babypiglins", "PIGLIN");
-        put("babyzombifiedpiglin", "babyzombifiedpiglins", "ZOMBIFIED_PIGLIN");
-        put("babyhoglin", "babyhoglins", "HOGLIN");
-        put("babyzoglin", "babyzoglins", "ZOGLIN");
+        put("babydrowned", "babydrowned", "DROWNED");
+        put("babyhoglin", "babyhoglins", "HOGLIN", null);
         put("babyhusk", "babyhusks", "HUSK");
-        put("babydrowned", "babydrowneds", "DROWNED");
+        put("babypiglin", "babypiglins", "PIGLIN", null);
+        put("babyzoglin", "babyzoglins", "ZOGLIN", null);
         put("babyzombie", "babyzombies", "ZOMBIE");
         put("babyzombievillager", "babyzombievillagers", "ZOMBIE_VILLAGER");
         put("killerbunny", "killerbunnies", "RABBIT");
