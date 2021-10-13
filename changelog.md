@@ -31,6 +31,7 @@ These changes will (most likely) be included in the next version.
 - Zombies, husks, drowned, zombie villagers, piglins, hoglins, and zoglins without the `baby` prefix are now forced into adulthood to prevent them from occasionally spawning as babies.
 - Reward groups with `nothing` in them no longer cause errors when earned/granted.
 - The title-based announcer and the title-based boss health bar have been fixed to work with the breaking change to the Title API in Spigot 1.17.
+- Arena Signs now correctly update for arenas that don't have `kebab-case` names in the config-file. 
 
 ## [0.106] - 2021-05-09
 ### Added

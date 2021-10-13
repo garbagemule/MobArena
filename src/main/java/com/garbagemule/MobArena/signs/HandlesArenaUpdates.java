@@ -71,7 +71,7 @@ class HandlesArenaUpdates implements Listener {
 
     private void handle(Arena arena) {
         scheduler.runTask(plugin, () -> {
-            List<ArenaSign> signs = signStore.findByArenaId(arena.configName());
+            List<ArenaSign> signs = signStore.findByArenaId(arena.getSlug());
             signs.forEach(signRenderer::render);
         });
     }
