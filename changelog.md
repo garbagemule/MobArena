@@ -13,6 +13,7 @@ These changes will (most likely) be included in the next version.
 ## [Unreleased]
 ### Added
 - New monster variant `angry-bees` can be used to spawn angry bees.
+- Husks, drowned, piglins, hoglins, and zoglins can now be spawned in their baby versions using the `baby` prefix seen on other monster types (e.g. `baby-zombie`).
 - Pet names are now per-class configurable via the optional `pet-name` property, which defaults to `<display-name>'s pet` (the `<player-name>` variable is also supported).
 - New per-arena setting `auto-leave-on-end` can be used to automatically "kick" spectators when the current session ends.
 - Added boss abilities `disorient-all`, `fetch-all`, `pull-all`, and `throw-all`. These abilities work like their target-specific and distance-based counterparts, but affect all players in the arena.
@@ -27,6 +28,7 @@ These changes will (most likely) be included in the next version.
 ### Fixed
 - Pillagers and vindicators no longer spawn without their much-needed weapons.
 - Piglins, piglin brutes, and hoglins no longer zombify. This fixes a bug where the mobs would despawn due to the zombification process.
+- Zombies, husks, drowned, zombie villagers, piglins, hoglins, and zoglins without the `baby` prefix are now forced into adulthood to prevent them from occasionally spawning as babies.
 - Reward groups with `nothing` in them no longer cause errors when earned/granted.
 - The title-based announcer and the title-based boss health bar have been fixed to work with the breaking change to the Title API in Spigot 1.17.
 
