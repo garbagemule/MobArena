@@ -40,7 +40,7 @@ public class MASpawnThread implements Runnable
     private MonsterManager monsterManager;
     private CreatesHealthBar createsHealthBar;
 
-    private int playerCount, monsterLimit;
+    private int playerCount, monsterLimit, waveThreshold;
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
     private int waveInterval;
     private int nextWaveDelay;
@@ -308,8 +308,8 @@ public class MASpawnThread implements Runnable
             return false;
         }
 
-        // Check for wave and pre boss clear
-        if (waveClear && !monsterManager.getMonsters().isEmpty()) {
+        // Check for wave clear and if monsters alive is less than or equal to the defined option
+        if (waveClear && monsterManager.getMonsters().size() > waveThreshold) {
             return false;
         }
 
