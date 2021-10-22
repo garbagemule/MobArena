@@ -40,8 +40,8 @@ public class MASpawnThread implements Runnable
     private MonsterManager monsterManager;
     private CreatesHealthBar createsHealthBar;
 
-    private int playerCount, monsterLimit, waveThreshold;
-    private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
+    private int playerCount, monsterLimit, waveLeeway;
+    private boolean waveClear, bossClear, preBossClear, wavesAsLevel, endAfterBossKill;
     private int waveInterval;
     private int nextWaveDelay;
 
@@ -73,9 +73,11 @@ public class MASpawnThread implements Runnable
         waveManager.reset();
         playerCount = arena.getPlayersInArena().size();
         monsterLimit = arena.getSettings().getInt("monster-limit", 100);
+        waveLeeway = arena.getSettings().getInt("clear-wave-leeway", 0);
         waveClear = arena.getSettings().getBoolean("clear-wave-before-next", false);
         bossClear = arena.getSettings().getBoolean("clear-boss-before-next", false);
         preBossClear = arena.getSettings().getBoolean("clear-wave-before-boss", false);
+        endAfterBossKill = arena.getSettings().getBoolean("end-after-final-boss-kill", false);
         wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
         waveInterval = arena.getSettings().getInt("wave-interval", 3);
         nextWaveDelay = arena.getSettings().getInt("next-wave-delay", 0);
@@ -308,18 +310,23 @@ public class MASpawnThread implements Runnable
             return false;
         }
 
-        // Check for wave clear and if monsters alive is less than or equal to the defined option
-        if (waveClear && monsterManager.getMonsters().size() > waveThreshold) {
+        // Check for wave clear
+        if (waveClear && monsterManager.getMonsters().size() > waveLeeway) {
             return false;
         }
 
         // Check for pre boss clear
-        if (preBossClear && waveManager.getNext().getType() == WaveType.BOSS && !monsterManager.getMonsters().isEmpty()) {
+        if (preBossClear && waveManager.getNext().getType() == WaveType.BOSS && monsterManager.getMonsters().size() > waveLeeway) {
             return false;
         }
 
         // Check for final wave
-        if (!monsterManager.getMonsters().isEmpty() && waveManager.getWaveNumber() == waveManager.getFinalWave()) {
+        if (!endAfterBossKill && !monsterManager.getMonsters().isEmpty() && waveManager.getWaveNumber() == waveManager.getFinalWave()) {
+            return false;
+        }
+
+        // Check for boss clear final wave
+        if (endAfterBossKill && !monsterManager.getBossMonsters().isEmpty() && waveManager.getWaveNumber() == waveManager.getFinalWave()) {
             return false;
         }
 
