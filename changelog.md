@@ -34,6 +34,7 @@ These changes will (most likely) be included in the next version.
 - Arena Signs now correctly update for arenas that don't have `kebab-case` names in the config-file. 
 - Block explosion events cancelled by other plugins now remain cancelled unless MobArena specifically uncancels them for an arena.
 - Flaming arrows now ignite TNT blocks in the arena.
+- Players no longer take fall damage when they leave (or get removed from) an arena while falling.
 
 ## [0.106] - 2021-05-09
 ### Added
