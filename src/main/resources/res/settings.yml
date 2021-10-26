@@ -7,7 +7,6 @@ default-class: ''
 clear-wave-before-next: false
 clear-boss-before-next: false
 clear-wave-before-boss: false
-end-after-final-boss-kill: false
 soft-restore: false
 soft-restore-drops: false
 require-empty-inv-join: false
