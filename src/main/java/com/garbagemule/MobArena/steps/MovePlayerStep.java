@@ -7,8 +7,6 @@ import org.bukkit.util.Vector;
 import java.util.function.Supplier;
 
 abstract class MovePlayerStep extends PlayerStep {
-    private static final Vector NULL_VECTOR = new Vector(0, 0, 0);
-
     private final Supplier<Location> destination;
 
     private Location location;
@@ -22,13 +20,13 @@ abstract class MovePlayerStep extends PlayerStep {
     public void run() {
         location = player.getLocation();
 
-        player.setVelocity(NULL_VECTOR);
+        player.setFallDistance(0.0F);
         player.teleport(destination.get());
     }
 
     @Override
     public void undo() {
-        player.setVelocity(NULL_VECTOR);
+        player.setFallDistance(0.0F);
         player.teleport(location);
     }
 }
