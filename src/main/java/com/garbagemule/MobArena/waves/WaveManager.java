@@ -4,13 +4,14 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.waves.enums.WaveBranch;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class WaveManager
 {
-    private Arena arena;
-    private ConfigurationSection section;
+    private final Arena arena;
+    private final ConfigurationSection section;
 
     private Wave defaultWave, currentWave;
     private TreeSet<Wave> recurrentWaves, singleWaves, singleWavesInstance;
@@ -70,7 +71,7 @@ public class WaveManager
         wave++;
 
         if (!singleWavesInstance.isEmpty() && singleWavesInstance.first().matches(wave)) {
-            currentWave = singleWavesInstance.pollFirst().copy();
+            currentWave = Objects.requireNonNull(singleWavesInstance.pollFirst()).copy();
         }
         else {
             SortedSet<Wave> matches = getMatchingRecurrentWaves(wave);

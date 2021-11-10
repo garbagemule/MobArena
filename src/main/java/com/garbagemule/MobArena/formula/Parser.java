@@ -1,9 +1,12 @@
 package com.garbagemule.MobArena.formula;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 
+@RequiredArgsConstructor
 class Parser {
 
     private final Environment env;
@@ -14,9 +17,6 @@ class Parser {
     private String source;
     private List<Lexeme> input;
 
-    Parser(Environment env) {
-        this.env = env;
-    }
 
     Formula parse(String source, List<Lexeme> input) {
         this.output = new ArrayDeque<>();

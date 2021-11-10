@@ -6,6 +6,7 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.leaderboards.Stats;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -52,6 +53,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -61,15 +63,10 @@ import java.util.UUID;
  * less overhead. Of course, this requires a little bit of "hackery" here
  * and there.
  */
-public class MAGlobalListener implements Listener
-{
-    private MobArena plugin;
-    private ArenaMaster am;
-
-    public MAGlobalListener(MobArena plugin, ArenaMaster am) {
-        this.plugin = plugin;
-        this.am = am;
-    }
+@RequiredArgsConstructor
+public class MAGlobalListener implements Listener {
+    private final MobArena plugin;
+    private final ArenaMaster am;
 
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
@@ -79,45 +76,37 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockBreak(BlockBreakEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onBlockBreak(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onBlockBreak(event));
     }
 
     @EventHandler
     public void hangingBreak(HangingBreakEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onHangingBreak(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onHangingBreak(event));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockBurn(BlockBurnEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onBlockBurn(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onBlockBurn(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void blockForm(BlockFormEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onBlockForm(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onBlockForm(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void blockFade(BlockFadeEvent event) {
-        for (Arena arena : am.getArenas()) {
-            arena.getEventListener().onBlockFade(event);
-        }
+        am.getArenas().forEach(arena -> arena.getEventListener().onBlockFade(event));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void blockIgnite(BlockIgniteEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onBlockIgnite(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onBlockIgnite(event));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockPlace(BlockPlaceEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onBlockPlace(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onBlockPlace(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -126,19 +115,27 @@ public class MAGlobalListener implements Listener
             return;
         }
 
-        if (!event.getLine(0).startsWith("[MA]")) {
+        /**
+         * I made this Optional because {@link SignChangeEvent#getLine(int)} can be null.
+         */
+        Optional<String> line1 = Optional.ofNullable(event.getLine(0));
+        if (!line1.isPresent())
+            return;
+
+        String line = line1.get();
+
+        if (!line.startsWith("[MA]")) {
             return;
         }
 
-        String text = event.getLine(0).substring((4));
+        String text = line.substring((4));
         Arena arena;
         Stats stat;
 
         if ((arena = am.getArenaWithName(text)) != null) {
             arena.getEventListener().onSignChange(event);
             setSignLines(event, ChatColor.GREEN + "MobArena", ChatColor.YELLOW + arena.configName(), ChatColor.AQUA + "Players", "---------------");
-        }
-        else if ((stat = Stats.getByShortName(text)) != null) {
+        } else if ((stat = Stats.getByShortName(text)) != null) {
             setSignLines(event, ChatColor.GREEN + "", "", ChatColor.AQUA + stat.getFullName(), "---------------");
             am.getGlobalMessenger().tell(event.getPlayer(), "Stat sign created.");
         }
@@ -162,44 +159,38 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void creatureSpawn(CreatureSpawnEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onCreatureSpawn(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onCreatureSpawn(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityChangeBlock(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityChangeBlock(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void entityCombust(EntityCombustEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityCombust(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityCombust(event));
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void entityDamage(EntityDamageEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityDamage(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityDamage(event));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void entityDeath(EntityDeathEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityDeath(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityDeath(event));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void entityExplode(EntityExplodeEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityExplode(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityExplode(event));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockExplode(BlockExplodeEvent event) {
-        // Create a copy of the block list so we can clear and re-add
-        List<Block> blocks = new ArrayList<>(event.blockList());
+        // Create a copy of the block list, so we can clear and re-add
+        List<Block> blocks = event.blockList();
 
         // Account for Spigot's messy extra event
         EntityExplodeEvent fake = new EntityExplodeEvent(null, event.getBlock().getLocation(), blocks, event.getYield());
@@ -214,34 +205,27 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void entityRegainHealth(EntityRegainHealthEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityRegainHealth(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityRegainHealth(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void entityFoodLevelChange(FoodLevelChangeEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onFoodLevelChange(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onFoodLevelChange(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void entityTarget(EntityTargetEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onEntityTarget(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityTarget(event));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void entityTeleport(EntityTeleportEvent event) {
-        for (Arena arena : am.getArenas()) {
-            arena.getEventListener().onEntityTeleport(event);
-        }
+        am.getArenas().forEach(arena -> arena.getEventListener().onEntityTeleport(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void potionSplash(PotionSplashEvent event) {
-        for (Arena arena : am.getArenas()) {
-            arena.getEventListener().onPotionSplash(event);
-        }
+        am.getArenas().forEach(arena -> arena.getEventListener().onPotionSplash(event));
     }
 
 
@@ -256,15 +240,15 @@ public class MAGlobalListener implements Listener
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerAnimation(PlayerAnimationEvent event) {
         if (!am.isEnabled()) return;
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerAnimation(event);
+
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerAnimation(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerBucketEmpty(PlayerBucketEmptyEvent event) {
         if (!am.isEnabled()) return;
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerBucketEmpty(event);
+
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerBucketEmpty(event));
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -280,30 +264,30 @@ public class MAGlobalListener implements Listener
     @EventHandler(priority = EventPriority.LOWEST)
     public void playerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if (!am.isEnabled()) return;
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerCommandPreprocess(event);
+
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerCommandPreprocess(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void playerDropItem(PlayerDropItemEvent event) {
         if (!am.isEnabled()) return;
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerDropItem(event);
+
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerDropItem(event));
     }
 
     // HIGHEST => after SignShop
     @EventHandler(priority = EventPriority.HIGHEST)
     public void playerInteract(PlayerInteractEvent event) {
         if (!am.isEnabled()) return;
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerInteract(event);
+
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerInteract(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
         if (!am.isEnabled()) return;
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerArmorStandManipulate(event);
+
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerArmorStandManipulate(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -312,24 +296,18 @@ public class MAGlobalListener implements Listener
         if (!am.notifyOnUpdates() || !event.getPlayer().isOp()) return;
 
         UUID id = event.getPlayer().getUniqueId();
-        PluginVersionCheck.check(plugin, (message) -> {
-            Player player = plugin.getServer().getPlayer(id);
-            if (player != null) {
-                plugin.getGlobalMessenger().tell(player, message);
-            }
-        });
+        PluginVersionCheck.check(plugin, (message) -> Optional.ofNullable(plugin.getServer().getPlayer(id))
+                .ifPresent(player -> plugin.getGlobalMessenger().tell(player, message)));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerKick(PlayerKickEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerKick(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerKick(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerQuit(PlayerQuitEvent event) {
-        for (Arena arena : am.getArenas())
-            arena.getEventListener().onPlayerQuit(event);
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerQuit(event));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -378,23 +356,17 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerPreLogin(PlayerLoginEvent event) {
-        for (Arena arena : am.getArenas()) {
-            arena.getEventListener().onPlayerPreLogin(event);
-        }
+        am.getArenas().forEach(arena -> arena.getEventListener().onPlayerPreLogin(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void vehicleEnter(VehicleEnterEvent event) {
-        for (Arena arena : am.getArenas()) {
-            arena.getEventListener().onVehicleEnter(event);
-        }
+        am.getArenas().forEach(arena -> arena.getEventListener().onVehicleEnter(event));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void vehicleExit(VehicleExitEvent event) {
-        for (Arena arena : am.getArenas()) {
-            arena.getEventListener().onVehicleExit(event);
-        }
+        am.getArenas().forEach(arena -> arena.getEventListener().onVehicleExit(event));
     }
 
 

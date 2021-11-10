@@ -18,10 +18,10 @@ public class ThrowAll implements Ability
     public void execute(Arena arena, MABoss boss) {
         Location bLoc = boss.getEntity().getLocation();
 
-        for (Player p : arena.getPlayersInArena()) {
-            Location loc = p.getLocation();
+        arena.getPlayersInArena().forEach(player -> {
+            Location loc = player.getLocation();
             Vector v     = new Vector(loc.getX() - bLoc.getX(), 0, loc.getZ() - bLoc.getZ());
-            p.setVelocity(v.normalize().setY(0.8));
-        }
+            player.setVelocity(v.normalize().setY(0.8));
+        });
     }
 }

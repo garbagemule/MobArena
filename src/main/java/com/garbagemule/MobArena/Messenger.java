@@ -3,8 +3,7 @@ package com.garbagemule.MobArena;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-public class Messenger
-{
+public class Messenger {
     private final String prefix;
 
     public Messenger(String prefix) {

@@ -1,16 +1,20 @@
 package com.garbagemule.MobArena.events;
 
+import com.garbagemule.MobArena.events.api.MobArenaEvent;
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class ArenaPlayerLeaveEvent extends Event implements Cancellable
-{
-    private static final HandlerList handlers = new HandlerList();
+@RequiredArgsConstructor
+public class ArenaPlayerLeaveEvent extends MobArenaEvent {
     private Player player;
     private Arena arena;
+    @Getter @Setter
     private boolean cancelled;
 
     public ArenaPlayerLeaveEvent(Player player, Arena arena) {
@@ -25,23 +29,5 @@ public class ArenaPlayerLeaveEvent extends Event implements Cancellable
 
     public Arena getArena() {
         return arena;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 }

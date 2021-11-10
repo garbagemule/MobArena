@@ -15,11 +15,11 @@ import java.util.Map;
 public class ScoreboardManager {
     private static final String DISPLAY_NAME = ChatColor.GREEN + "Kills       " + ChatColor.AQUA + "Wave ";
 
-    private Arena arena;
-    private Scoreboard scoreboard;
+    private final Arena arena;
+    private final Scoreboard scoreboard;
     private Objective kills;
 
-    private Map<Player, Scoreboard> scoreboards;
+    private final Map<Player, Scoreboard> scoreboards;
 
     /**
      * Create a new scoreboard for the given arena.

@@ -58,17 +58,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -76,78 +66,85 @@ import java.util.stream.Collectors;
 public class ArenaImpl implements Arena
 {
     // General stuff
-    private MobArena plugin;
-    private String name;
-    private String slug;
+    private final MobArena plugin;
+    private final String name;
+    private final String slug;
     private World world;
-    private Messenger messenger;
-    private Announcer announcer;
+    private final Messenger messenger;
+    private final Announcer announcer;
 
     // Settings section of the config-file for this arena.
-    private ConfigurationSection settings;
+    private final ConfigurationSection settings;
 
     // Run-time settings and critical config settings
     private boolean enabled, protect, running, edit;
 
     // World stuff
-    private boolean allowMonsters, allowAnimals;
+    private final boolean allowMonsters;
+    private final boolean allowAnimals;
     //private Difficulty spawnMonsters;
 
     // Warps, points and locations
-    private ArenaRegion region;
+    private final ArenaRegion region;
     private Leaderboard leaderboard;
 
     // Player stuff
-    private InventoryManager  inventoryManager;
-    private RewardManager     rewardManager;
-    private ClassLimitManager limitManager;
-    private Map<Player,ArenaPlayer> arenaPlayerMap;
+    private final InventoryManager  inventoryManager;
+    private final RewardManager     rewardManager;
+    private final ClassLimitManager limitManager;
+    private final Map<Player,ArenaPlayer> arenaPlayerMap;
 
-    private Set<Player> arenaPlayers, lobbyPlayers, readyPlayers, specPlayers, deadPlayers;
-    private Set<Player> movingPlayers;
-    private Set<Player> leavingPlayers;
-    private Set<Player> randoms;
+    private final Set<Player> arenaPlayers;
+    private final Set<Player> lobbyPlayers;
+    private final Set<Player> readyPlayers;
+    private final Set<Player> specPlayers;
+    private final Set<Player> deadPlayers;
+    private final Set<Player> movingPlayers;
+    private final Set<Player> leavingPlayers;
+    private final Set<Player> randoms;
 
     // Classes stuff
     private ArenaClass defaultClass;
-    private Map<String,ArenaClass> classes;
+    private final Map<String,ArenaClass> classes;
 
     // Blocks and pets
-    private PriorityBlockingQueue<Repairable> repairQueue;
-    private Set<Block>             blocks;
-    private LinkedList<Repairable> repairables, containables;
+    private final PriorityBlockingQueue<Repairable> repairQueue;
+    private final Set<Block>             blocks;
+    private final LinkedList<Repairable> repairables;
+    private final LinkedList<Repairable> containables;
 
     // Monster stuff
-    private MonsterManager monsterManager;
+    private final MonsterManager monsterManager;
 
     // Wave stuff
-    private WaveManager   waveManager;
+    private final WaveManager   waveManager;
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
-    private Map<Integer, ThingPicker> everyWaveMap, afterWaveMap;
+    private final Map<Integer, ThingPicker> everyWaveMap;
+    private final Map<Integer, ThingPicker> afterWaveMap;
 
     // Misc
-    private ArenaListener eventListener;
-    private List<Thing> entryFee;
-    private AutoStartTimer autoStartTimer;
-    private StartDelayTimer startDelayTimer;
-    private boolean isolatedChat;
+    private final ArenaListener eventListener;
+    private final List<Thing> entryFee;
+    private final AutoStartTimer autoStartTimer;
+    private final StartDelayTimer startDelayTimer;
+    private final boolean isolatedChat;
 
     // Warp offsets
-    private double arenaWarpOffset;
+    private final double arenaWarpOffset;
 
     // Scoreboards
-    private ScoreboardManager scoreboard;
+    private final ScoreboardManager scoreboard;
 
     // Last player standing
     private Player lastStanding;
 
     // Actions
-    private Map<Player, Step> histories;
-    private StepFactory playerJoinArena;
-    private StepFactory playerSpecArena;
+    private final Map<Player, Step> histories;
+    private final StepFactory playerJoinArena;
+    private final StepFactory playerSpecArena;
 
-    private SpawnsPets spawnsPets;
+    private final SpawnsPets spawnsPets;
 
     /**
      * Primary constructor. Requires a name and a world.
@@ -658,8 +655,7 @@ public class ArenaImpl implements Arena
             return;
 
         // Set operations.
-        Set<Player> tmp = new HashSet<>();
-        tmp.addAll(lobbyPlayers);
+        Set<Player> tmp = new HashSet<>(lobbyPlayers);
         tmp.removeAll(readyPlayers);
 
         // Force leave.
@@ -1355,9 +1351,9 @@ public class ArenaImpl implements Arena
 
     private void removePermissionAttachments(Player player) {
         player.getEffectivePermissions().stream()
-            .filter(info -> info.getAttachment() != null)
-            .filter(info -> info.getAttachment().getPlugin().equals(plugin))
             .map(PermissionAttachmentInfo::getAttachment)
+            .filter(Objects::nonNull)
+            .filter(attachment -> attachment.getPlugin().equals(plugin))
             .forEach(PermissionAttachment::remove);
     }
 
@@ -1425,7 +1421,7 @@ public class ArenaImpl implements Arena
     @Override
     public void restoreRegion()
     {
-        Collections.sort(repairables, new RepairableComparator());
+        repairables.sort(new RepairableComparator());
 
         for (Repairable r : repairables)
             r.repair();
@@ -1531,20 +1527,14 @@ public class ArenaImpl implements Arena
     @Override
     public List<Player> getNonreadyPlayers()
     {
-        List<Player> result = new LinkedList<>();
-        result.addAll(lobbyPlayers);
+        List<Player> result = new LinkedList<>(lobbyPlayers);
         result.removeAll(readyPlayers);
         return result;
     }
 
     @Override
     public boolean canAfford(Player p) {
-        for (Thing fee : entryFee) {
-            if (!fee.heldBy(p)) {
-                return false;
-            }
-        }
-        return true;
+        return entryFee.stream().anyMatch(thing -> !thing.heldBy(p));
     }
 
     @Override

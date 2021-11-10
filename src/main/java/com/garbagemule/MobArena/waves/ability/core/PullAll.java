@@ -18,15 +18,15 @@ public class PullAll implements Ability
     public void execute(Arena arena, MABoss boss) {
         Location bLoc = boss.getEntity().getLocation();
 
-        for (Player p : arena.getPlayersInArena()) {
-            Location loc = p.getLocation();
+        arena.getPlayersInArena().forEach(player -> {
+            Location loc = player.getLocation();
             Vector v     = new Vector(bLoc.getX() - loc.getX(), 0, bLoc.getZ() - loc.getZ());
 
             double a = Math.abs(bLoc.getX() - loc.getX());
             double b = Math.abs(bLoc.getZ() - loc.getZ());
             double c = Math.sqrt((a*a + b*b));
 
-            p.setVelocity(v.normalize().multiply(c*0.3).setY(0.8));
-        }
+            player.setVelocity(v.normalize().multiply(c*0.3).setY(0.8));
+        });
     }
 }

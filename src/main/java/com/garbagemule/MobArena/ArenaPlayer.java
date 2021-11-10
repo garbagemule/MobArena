@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 
 public class ArenaPlayer
 {
-    private Player player;
+    private final Player player;
 
     private ArenaClass arenaClass;
     private ArenaPlayerStatistics stats;

@@ -8,10 +8,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ArenaPlayerStatistics
-{
-    private ArenaPlayer player;
-    private String playerName, className;
+public class ArenaPlayerStatistics {
+    private final ArenaPlayer player;
+    private final String playerName;
+    private final String className;
     private Map<String, MutableInt> ints;
 
     public ArenaPlayerStatistics(ArenaPlayer player) {
@@ -22,9 +22,8 @@ public class ArenaPlayerStatistics
     }
 
     public void reset() {
-        if (ints == null) {
+        if (ints == null)
             ints = new HashMap<>();
-        }
 
         ints.clear();
 
@@ -65,42 +64,36 @@ public class ArenaPlayerStatistics
     }
 
     public static Comparator<ArenaPlayerStatistics> killComparator() {
-        return new Comparator<ArenaPlayerStatistics>() {
-            public int compare(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2) {
-                int s1kills = s1.getInt("kills");
-                int s2kills = s2.getInt("kills");
+        return (s1, s2) -> {
+            int s1kills = s1.getInt("kills");
+            int s2kills = s2.getInt("kills");
 
-                if (s1kills == s2kills)
-                    return 0;
+            if (s1kills == s2kills)
+                return 0;
 
-                return (s1kills > s2kills ? -1 : 1);
-            }
+            return (s1kills > s2kills ? -1 : 1);
         };
     }
 
     public static Comparator<ArenaPlayerStatistics> waveComparator() {
-        return new Comparator<ArenaPlayerStatistics>() {
-            public int compare(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2) {
-                int result = compareWaves(s1, s2);
-                if (result != 0)
-                    return result;
+        return (s1, s2) -> {
+            int result = compareWaves(s1, s2);
+            if (result != 0)
+                return result;
 
-                return compareKills(s1, s2);
-            }
+            return compareKills(s1, s2);
         };
     }
 
     public static Comparator<ArenaPlayerStatistics> dmgDoneComparator() {
-        return new Comparator<ArenaPlayerStatistics>() {
-            public int compare(ArenaPlayerStatistics s1, ArenaPlayerStatistics s2) {
-                int s1dmgDone = s1.getInt("dmgDone");
-                int s2dmgDone = s2.getInt("dmgDone");
+        return (s1, s2) -> {
+            int s1dmgDone = s1.getInt("dmgDone");
+            int s2dmgDone = s2.getInt("dmgDone");
 
-                if (s1dmgDone == s2dmgDone)
-                    return 0;
+            if (s1dmgDone == s2dmgDone)
+                return 0;
 
-                return (s1dmgDone > s2dmgDone ? -1 : 1);
-            }
+            return (s1dmgDone > s2dmgDone ? -1 : 1);
         };
     }
 

@@ -13,15 +13,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class ConfigUtils
 {
-    private static Map<String, YamlConfiguration> resourceCache = new HashMap<>();
+    private static final Map<String, YamlConfiguration> resourceCache = new HashMap<>();
 
     public static void addIfEmpty(Plugin plugin, String resource, ConfigurationSection section) {
         process(plugin, resource, section, true, false);
@@ -103,17 +99,17 @@ public class ConfigUtils
         if (parts.length < 3) {
             throw new IllegalArgumentException("A location must be at least (x,y,z)");
         }
-        Double x = Double.parseDouble(parts[0]);
-        Double y = Double.parseDouble(parts[1]);
-        Double z = Double.parseDouble(parts[2]);
+        double x = Double.parseDouble(parts[0]);
+        double y = Double.parseDouble(parts[1]);
+        double z = Double.parseDouble(parts[2]);
         if (parts.length == 3) {
             return new Location(world, x, y, z);
         }
         if (parts.length < 5) {
             throw new IllegalArgumentException("Expected location of type (x,y,z,yaw,pitch)");
         }
-        Float yaw = Float.parseFloat(parts[3]);
-        Float pit = Float.parseFloat(parts[4]);
+        float yaw = Float.parseFloat(parts[3]);
+        float pit = Float.parseFloat(parts[4]);
         if (world == null) {
             if (parts.length != 6) {
                 throw new IllegalArgumentException("Expected location of type (x,y,z,yaw,pitch,world)");
@@ -138,7 +134,7 @@ public class ConfigUtils
         String yaw = twoPlaces(location.getYaw(),   true);
         String pit = twoPlaces(location.getPitch(), true);
 
-        String world = location.getWorld().getName();
+        String world = Objects.requireNonNull(location.getWorld()).getName();
 
         String value = x + "," + y + "," + z + "," + yaw + "," + pit + "," + world;
         config.set(path, value);

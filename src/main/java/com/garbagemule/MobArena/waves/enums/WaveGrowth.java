@@ -1,13 +1,12 @@
 package com.garbagemule.MobArena.waves.enums;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public enum WaveGrowth
 {
     OLD(0), SLOW(0.5), MEDIUM(0.65), FAST(0.8), PSYCHO(1.2);
-    private double exp;
-
-    WaveGrowth(double exp) {
-        this.exp = exp;
-    }
+    private final double exp;
 
     public int getAmount(int wave, int playerCount) {
         if (this == OLD) return wave + playerCount;

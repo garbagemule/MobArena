@@ -1,5 +1,7 @@
 package com.garbagemule.MobArena.steps;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * This wrapper allows a delegate {@link Step}'s {@link Step#run() run()}
  * operation to be deferred until this wrapper's {@link Step#undo() undo()}
@@ -8,12 +10,9 @@ package com.garbagemule.MobArena.steps;
  *
  * @see GrantRewards
  */
+@RequiredArgsConstructor
 class Defer implements Step {
-    private Step step;
-
-    private Defer(Step step) {
-        this.step = step;
-    }
+    private final Step step;
 
     @Override
     public void run() {

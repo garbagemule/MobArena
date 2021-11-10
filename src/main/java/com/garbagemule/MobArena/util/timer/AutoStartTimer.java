@@ -20,8 +20,8 @@ import com.garbagemule.MobArena.framework.Arena;
  * the timer's methods does nothing.
  */
 public class AutoStartTimer extends CountdownTimer implements TimerCallback {
-    private Arena arena;
-    private TimerCallback internalCallback;
+    private final Arena arena;
+    private final TimerCallback internalCallback;
 
     /**
      * Create an AutoStartTimer for the given arena.
@@ -40,7 +40,7 @@ public class AutoStartTimer extends CountdownTimer implements TimerCallback {
         this.arena = arena;
 
         // Set the duration
-        long duration = arena.getSettings().getInt("auto-start-timer", 0) * 20l;
+        long duration = arena.getSettings().getInt("auto-start-timer", 0) * 20L;
         setDuration(Math.max(0l, duration));
 
         // Choose level- or chat-callback

@@ -1,6 +1,8 @@
 package com.garbagemule.MobArena.events;
 
 import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.events.api.MobArenaEvent;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -21,15 +23,10 @@ import org.bukkit.event.HandlerList;
  *
  * @see MobArenaPreReloadEvent
  */
-public class MobArenaReloadEvent extends Event {
-
-    private static final HandlerList handlers = new HandlerList();
+@RequiredArgsConstructor
+public class MobArenaReloadEvent extends MobArenaEvent {
 
     private final MobArena plugin;
-
-    public MobArenaReloadEvent(MobArena plugin) {
-        this.plugin = plugin;
-    }
 
     /**
      * Get the current MobArena plugin instance.
@@ -40,13 +37,5 @@ public class MobArenaReloadEvent extends Event {
         return plugin;
     }
 
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
 
 }

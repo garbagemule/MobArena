@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -10,16 +11,13 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.HashSet;
 import java.util.Set;
 
+@RequiredArgsConstructor
 public class SheepBouncer implements Runnable
 {
     public static final int BOUNCE_INTERVAL = 20;
-    private Arena arena;
+    private final Arena arena;
 
     private BukkitTask task;
-
-    public SheepBouncer(Arena arena) {
-        this.arena = arena;
-    }
 
     public void start() {
         if (task != null) {

@@ -1,16 +1,13 @@
 package com.garbagemule.MobArena.formula;
 
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 class UnaryFormula implements Formula {
 
     private final UnaryOperation operation;
     private final Formula argument;
-
-    UnaryFormula(UnaryOperation operation, Formula argument) {
-        this.operation = operation;
-        this.argument = argument;
-    }
 
     @Override
     public double evaluate(Arena arena) {

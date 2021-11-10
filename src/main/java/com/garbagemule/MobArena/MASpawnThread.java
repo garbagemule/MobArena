@@ -29,16 +29,17 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class MASpawnThread implements Runnable
 {
-    private MobArena plugin;
-    private Arena arena;
-    private ArenaRegion region;
-    private RewardManager rewardManager;
-    private WaveManager waveManager;
-    private MonsterManager monsterManager;
-    private CreatesHealthBar createsHealthBar;
+    private final MobArena plugin;
+    private final Arena arena;
+    private final ArenaRegion region;
+    private final RewardManager rewardManager;
+    private final WaveManager waveManager;
+    private final MonsterManager monsterManager;
+    private final CreatesHealthBar createsHealthBar;
 
     private int playerCount, monsterLimit;
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
@@ -141,7 +142,7 @@ public class MASpawnThread implements Runnable
 
         // Delay the next wave
         if (nextWaveDelay > 0) {
-            task = Bukkit.getScheduler().runTaskLater(plugin, this::spawnNextWave, nextWaveDelay * 20);
+            task = Bukkit.getScheduler().runTaskLater(plugin, this::spawnNextWave, nextWaveDelay * 20L);
         } else {
             spawnNextWave();
         }
@@ -178,7 +179,7 @@ public class MASpawnThread implements Runnable
         updateStats(nextWave);
 
         // Reschedule the spawner for the next wave.
-        task = Bukkit.getScheduler().runTaskLater(plugin, this, waveInterval * 20);
+        task = Bukkit.getScheduler().runTaskLater(plugin, this, waveInterval * 20L);
     }
 
     private void spawnWave(int wave) {
@@ -328,50 +329,36 @@ public class MASpawnThread implements Runnable
 
     private void removeDeadMonsters() {
         List<Entity> tmp = new ArrayList<>(monsterManager.getMonsters());
-        for (Entity e : tmp) {
-            if (e == null) {
-                continue;
-            }
-
-            if (e.isDead() || !region.contains(e.getLocation())) {
-                monsterManager.remove(e);
-                e.remove();
-            }
-        }
+        tmp.stream().filter(entity -> entity != null && (entity.isDead() || !region.contains(entity.getLocation())))
+                .forEach(entity -> {
+                    monsterManager.remove(entity);
+                    entity.remove();
+                });
     }
 
     private void removeCheatingPlayers() {
         List<Player> players = new ArrayList<>(arena.getPlayersInArena());
-        for (Player p : players) {
-            if (region.contains(p.getLocation())) {
-                continue;
-            }
-
-            arena.getMessenger().tell(p, "Leaving so soon?");
-            p.getInventory().clear();
-            arena.playerLeave(p);
-        }
+        players.stream().filter(player -> !region.contains(player.getLocation()))
+                .forEach(player -> {
+                    arena.getMessenger().tell(player, "Leaving so soon?");
+                    player.getInventory().clear();
+                    arena.playerLeave(player);
+                });
     }
 
     private void grantRewards(int wave) {
-        for (Map.Entry<Integer, ThingPicker> entry : arena.getEveryWaveEntrySet()) {
-            if (wave > 0 && wave % entry.getKey() == 0) {
-                addReward(entry.getValue());
-            }
-        }
+        arena.getEveryWaveEntrySet().stream()
+                .filter(entry -> wave > 0 && wave % entry.getKey() == 0)
+                .forEach(entry -> addReward(entry.getValue()));
 
-        ThingPicker after = arena.getAfterWaveReward(wave);
-        if (after != null) {
-            addReward(after);
-        }
+        Optional.ofNullable(arena.getAfterWaveReward(wave))
+                .ifPresent(this::addReward);
     }
 
     private void updateStats(int wave) {
-        for (ArenaPlayer ap : arena.getArenaPlayerSet()) {
-            if (arena.getPlayersInArena().contains(ap.getPlayer())) {
-                ap.getStats().inc("lastWave");
-            }
-        }
+        arena.getArenaPlayerSet().stream()
+                .filter(arenaPlayer -> arena.getPlayersInArena().contains(arenaPlayer.getPlayer()))
+                .forEach(arenaPlayer -> arenaPlayer.getStats().inc("lastWave"));
     }
 
     /*
@@ -390,12 +377,10 @@ public class MASpawnThread implements Runnable
      * Rewards all players with an item from the input String.
      */
     private void addReward(ThingPicker picker) {
-        for (Player p : arena.getPlayersInArena()) {
-            Thing reward = picker.pick();
-            if (reward != null) {
-                rewardManager.addReward(p, reward);
-                arena.getMessenger().tell(p, Msg.WAVE_REWARD, reward.toString());
-            }
-        }
+        Optional<Thing> pick = Optional.ofNullable(picker.pick());
+        arena.getPlayersInArena().forEach(player -> pick.ifPresent(reward -> {
+            rewardManager.addReward(player, reward);
+            arena.getMessenger().tell(player, Msg.WAVE_REWARD, reward.toString());
+        }));
     }
 }

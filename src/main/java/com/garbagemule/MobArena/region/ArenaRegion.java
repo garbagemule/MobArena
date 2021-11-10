@@ -28,9 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ArenaRegion
-{
-    private Arena arena;
+public class ArenaRegion {
+    private final Arena arena;
     private World world;
 
     private Location lastP1, lastP2, lastL1, lastL2;
@@ -39,9 +38,9 @@ public class ArenaRegion
 
     private boolean setup, lobbySetup;
 
-    private ConfigurationSection coords;
-    private ConfigurationSection spawns;
-    private ConfigurationSection chests;
+    private final ConfigurationSection coords;
+    private final ConfigurationSection spawns;
+    private final ConfigurationSection chests;
 
     public ArenaRegion(ConfigurationSection section, Arena arena) {
         this.arena  = arena;

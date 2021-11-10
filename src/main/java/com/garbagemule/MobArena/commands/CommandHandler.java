@@ -50,8 +50,8 @@ import java.util.stream.Collectors;
 
 public class CommandHandler implements CommandExecutor, TabCompleter
 {
-    private MobArena plugin;
-    private Messenger fallbackMessenger;
+    private final MobArena plugin;
+    private final Messenger fallbackMessenger;
 
     private Map<String,Command> commands;
 

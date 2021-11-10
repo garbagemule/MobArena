@@ -1,8 +1,11 @@
 package com.garbagemule.MobArena.formula;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 class Lexer {
 
     private final Environment env;
@@ -10,10 +13,6 @@ class Lexer {
     private List<Lexeme> result;
     private String input;
     private int pos;
-
-    Lexer(Environment env) {
-        this.env = env;
-    }
 
     List<Lexeme> tokenize(String input) {
         this.result = new ArrayList<>();

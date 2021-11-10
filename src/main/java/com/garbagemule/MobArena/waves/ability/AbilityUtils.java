@@ -17,7 +17,7 @@ public class AbilityUtils
 
     /**
      * Get the target player of the LivingEntity if possible.
-     * @param the arena
+     * @param arena the arena
      * @param entity The entity whose target to get
      * @param random Grab a random player if no target was found
      * @return The target player, or null

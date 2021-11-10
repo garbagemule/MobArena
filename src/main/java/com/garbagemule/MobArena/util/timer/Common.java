@@ -8,7 +8,7 @@ public class Common {
      * @return the value converted to ticks
      */
     public static long toTicks(int seconds) {
-        return seconds * 20l;
+        return seconds * 20L;
     }
 
     /**
@@ -18,6 +18,6 @@ public class Common {
      * @return the value converted to seconds
      */
     public static int toSeconds(long ticks) {
-        return (int) (ticks / 20l);
+        return (int) (ticks / 20L);
     }
 }

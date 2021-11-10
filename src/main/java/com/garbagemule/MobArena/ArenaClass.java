@@ -12,20 +12,22 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class ArenaClass
 {
-    private String configName;
-    private String slug;
+    private final String configName;
+    private final String slug;
     private Thing helmet, chestplate, leggings, boots, offhand;
     private List<Thing> armor;
     private List<Thing> items;
     private List<Thing> effects;
-    private List<Thing> perms;
-    private List<Thing> lobbyperms;
-    private boolean unbreakableWeapons, unbreakableArmor;
-    private Thing price;
+    private final List<Thing> perms;
+    private final List<Thing> lobbyperms;
+    private final boolean unbreakableWeapons;
+    private final boolean unbreakableArmor;
+    private final Thing price;
     private Location classchest;
     private String petName;
 
@@ -166,7 +168,7 @@ public class ArenaClass
     }
 
     /**
-     * Grants all of the class items and armor to the given player.
+     * Grants all the class items and armor to the given player.
      * The normal items will be added to the inventory normally, while the
      * armor items will be verified as armor items and placed in their
      * appropriate slots. If any specific armor slots are specified, they
@@ -174,7 +176,6 @@ public class ArenaClass
      * @param p a player
      */
     public void grantItems(Player p) {
-        PlayerInventory inv = p.getInventory();
 
         // Fork over the items.
         items.forEach(item -> item.giveTo(p));
@@ -183,11 +184,11 @@ public class ArenaClass
         armor.forEach(thing -> thing.giveTo(p));
 
         // Check type specifics.
-        if (helmet     != null) helmet.giveTo(p);
-        if (chestplate != null) chestplate.giveTo(p);
-        if (leggings   != null) leggings.giveTo(p);
-        if (boots      != null) boots.giveTo(p);
-        if (offhand    != null) offhand.giveTo(p);
+        Optional.ofNullable(helmet).ifPresent(thing -> thing.giveTo(p));
+        Optional.ofNullable(chestplate).ifPresent(thing -> thing.giveTo(p));
+        Optional.ofNullable(leggings).ifPresent(thing -> thing.giveTo(p));
+        Optional.ofNullable(boots).ifPresent(thing -> thing.giveTo(p));
+        Optional.ofNullable(offhand).ifPresent(thing -> thing.giveTo(p));
     }
 
     public void grantPotionEffects(Player p) {
@@ -255,7 +256,7 @@ public class ArenaClass
     }
 
     public static class MyItems extends ArenaClass {
-        private ArenaMaster am;
+        private final ArenaMaster am;
 
         public MyItems(Thing price, boolean unbreakableWeapons, boolean unbreakableArmor, ArenaMaster am) {
             super("My Items", price, unbreakableWeapons, unbreakableArmor);

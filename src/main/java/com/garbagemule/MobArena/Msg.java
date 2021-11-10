@@ -4,6 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.util.Arrays;
+
 public enum Msg {
     ARENA_START("Let the slaughter begin!"),
     ARENA_END("Arena finished."),
@@ -109,20 +111,20 @@ public enum Msg {
     }
 
     static void load(ConfigurationSection config) {
-        for (Msg msg : values()) {
+        Arrays.stream(values()).forEach(msg -> {
             // ARENA_END_GLOBAL => arena-end-global
             String key = msg.name().toLowerCase().replace("_","-");
             msg.set(config.getString(key, ""));
-        }
+        });
     }
 
     static YamlConfiguration toYaml() {
         YamlConfiguration yaml = new YamlConfiguration();
-        for (Msg msg : values()) {
+        Arrays.stream(values()).forEach(msg -> {
             // ARENA_END_GLOBAL => arena-end-global
             String key = msg.name().replace("_","-").toLowerCase();
             yaml.set(key, msg.value);
-        }
+        });
         return yaml;
     }
 }

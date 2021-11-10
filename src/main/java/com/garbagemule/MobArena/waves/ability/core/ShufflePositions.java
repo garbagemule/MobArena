@@ -26,9 +26,7 @@ public class ShufflePositions implements Ability
 
         // Grab the locations
         List<Location> locations = new LinkedList<>();
-        for (LivingEntity e : entities) {
-            locations.add(e.getLocation());
-        }
+        entities.forEach(livingEntity -> locations.add(livingEntity.getLocation()));
 
         // Shuffle the entities list.
         Collections.shuffle(entities);

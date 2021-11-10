@@ -21,9 +21,9 @@ import com.garbagemule.MobArena.framework.Arena;
  * {@link #start()} method only starts the auto-start-timer.
  */
 public class StartDelayTimer extends CountdownTimer implements TimerCallback {
-    private Arena arena;
-    private CountdownTimer autoStartTimer;
-    private TimerCallback internalCallback;
+    private final Arena arena;
+    private final CountdownTimer autoStartTimer;
+    private final TimerCallback internalCallback;
 
     /**
      * Create a StartDelayTimer for the given arena.
@@ -45,8 +45,8 @@ public class StartDelayTimer extends CountdownTimer implements TimerCallback {
         this.autoStartTimer = autoStartTimer;
 
         // Set the duration
-        long duration = arena.getSettings().getInt("start-delay-timer", 0) * 20l;
-        setDuration(Math.max(0l, duration));
+        long duration = arena.getSettings().getInt("start-delay-timer", 0) * 20L;
+        setDuration(Math.max(0L, duration));
 
         // Choose level- or chat-callback
         boolean level = arena.getSettings().getBoolean("display-timer-as-level", false);
@@ -105,7 +105,7 @@ public class StartDelayTimer extends CountdownTimer implements TimerCallback {
 
             // Notify players of auto-start-timer duration
             if (autoStartTimer.isRunning()) {
-                arena.announce(Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20l);
+                arena.announce(Msg.ARENA_AUTO_START, "" + autoStartTimer.getRemaining() / 20L);
             }
         }
     }

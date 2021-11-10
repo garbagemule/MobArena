@@ -16,7 +16,7 @@ import java.util.logging.Level;
 
 public class InventoryManager
 {
-    private Map<Player, ItemStack[]> inventories;
+    private final Map<Player, ItemStack[]> inventories;
 
     public InventoryManager() {
         this.inventories = new HashMap<>();

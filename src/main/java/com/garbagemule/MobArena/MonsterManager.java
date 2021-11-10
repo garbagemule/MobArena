@@ -7,23 +7,18 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class MonsterManager
 {
-    private Set<LivingEntity> monsters, sheep, golems;
-    private Map<LivingEntity,MABoss> bosses;
-    private Map<LivingEntity,List<ItemStack>> suppliers;
-    private Set<LivingEntity> mounts;
-    private Map<Entity, Player> petToPlayer;
-    private Map<Player, Set<Entity>> playerToPets;
+    private final Set<LivingEntity> monsters;
+    private final Set<LivingEntity> sheep;
+    private final Set<LivingEntity> golems;
+    private final Map<LivingEntity,MABoss> bosses;
+    private final Map<LivingEntity,List<ItemStack>> suppliers;
+    private final Set<LivingEntity> mounts;
+    private final Map<Entity, Player> petToPlayer;
+    private final Map<Player, Set<Entity>> playerToPets;
 
     public MonsterManager() {
         this.monsters   = new HashSet<>();
@@ -65,11 +60,7 @@ public class MonsterManager
     }
 
     private void removeAll(Collection<? extends Entity> collection) {
-        for (Entity e : collection) {
-            if (e != null) {
-                e.remove();
-            }
-        }
+        collection.stream().filter(Objects::nonNull).forEach(Entity::remove);
     }
 
     public void remove(Entity e) {
@@ -134,13 +125,9 @@ public class MonsterManager
     public void removePet(Entity pet) {
         pet.remove();
 
-        Player owner = petToPlayer.remove(pet);
-        if (owner != null) {
-            Set<Entity> pets = playerToPets.get(owner);
-            if (pets != null) {
-                pets.remove(pet);
-            }
-        }
+        Optional.ofNullable(petToPlayer.remove(pet))
+                .flatMap(player -> Optional.ofNullable(playerToPets.get(player)))
+                .ifPresent(entities -> playerToPets.remove(pet));
     }
 
     public Player getOwner(Entity pet) {
@@ -148,19 +135,15 @@ public class MonsterManager
     }
 
     public Collection<Entity> getPets(Player owner) {
-        Set<Entity> pets = playerToPets.get(owner);
-        if (pets != null) {
-            return pets;
-        }
-        return Collections.emptySet();
+        Optional<Set<Entity>> pets = Optional.ofNullable(playerToPets.get(owner));
+        return (pets.isPresent() ? pets.get() : Collections.emptyList());
     }
 
     public void removePets(Player p) {
-        Set<Entity> pets = playerToPets.remove(p);
-        if (pets != null) {
+        Optional.ofNullable(playerToPets.remove(p)).ifPresent(pets -> {
             pets.forEach(Entity::remove);
             pets.clear();
-        }
+        });
     }
 
     public void addMount(LivingEntity e) {
@@ -176,9 +159,7 @@ public class MonsterManager
     }
 
     public void removeMounts() {
-        for (LivingEntity e : mounts) {
-            e.remove();
-        }
+        mounts.forEach(Entity::remove);
     }
 
     public void addSupplier(LivingEntity e, List<ItemStack> drops) {

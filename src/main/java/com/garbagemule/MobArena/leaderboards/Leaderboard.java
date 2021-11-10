@@ -19,16 +19,16 @@ import java.util.List;
 
 public class Leaderboard
 {
-    private MobArena plugin;
-    private Arena    arena;
+    private final MobArena plugin;
+    private final Arena    arena;
 
     private Location  topLeft;
     private Sign      topLeftSign;
     private BlockFace direction;
     private int rows, cols, trackingId;
 
-    private List<LeaderboardColumn> boards;
-    private List<ArenaPlayerStatistics> stats;
+    private final List<LeaderboardColumn> boards;
+    private final List<ArenaPlayerStatistics> stats;
 
     private boolean isValid;
 
@@ -91,22 +91,15 @@ public class Leaderboard
 
     public void update()
     {
-        Collections.sort(stats, ArenaPlayerStatistics.waveComparator());
+        stats.sort(ArenaPlayerStatistics.waveComparator());
 
-        for (LeaderboardColumn column : boards)
-            column.update(stats);
+        boards.forEach(leaderboardColumn -> leaderboardColumn.update(stats));
     }
 
     public void startTracking()
     {
         trackingId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,
-            new Runnable()
-            {
-                public void run()
-                {
-                    update();
-                }
-            }, 100, 100);
+                this::update, 100, 100);
     }
 
     public void stopTracking()

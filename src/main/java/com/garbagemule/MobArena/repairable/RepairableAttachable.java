@@ -6,12 +6,12 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.material.Attachable;
 
-public class RepairableAttachable extends RepairableBlock
-{
-    private int x, y, z;
+public class RepairableAttachable extends RepairableBlock {
+    private final int x;
+    private final int y;
+    private final int z;
 
-    public RepairableAttachable(BlockState state)
-    {
+    public RepairableAttachable(BlockState state) {
         super(state);
 
         BlockState attached;
@@ -27,8 +27,7 @@ public class RepairableAttachable extends RepairableBlock
         state.getBlock().setType(Material.STONE);
     }
 
-    public void repair()
-    {
+    public void repair() {
         Block b = getWorld().getBlockAt(x,y,z);
         if (b.getType() == Material.AIR)
             b.setType(Material.STONE);

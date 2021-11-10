@@ -17,8 +17,6 @@ public class FetchAll implements Ability
     public void execute(Arena arena, MABoss boss) {
         Location bLoc = boss.getEntity().getLocation();
 
-        for (Player p : arena.getPlayersInArena()) {
-            p.teleport(bLoc);
-        }
+        arena.getPlayersInArena().forEach(player -> player.teleport(bLoc));
     }
 }

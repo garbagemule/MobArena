@@ -7,8 +7,8 @@ import java.util.List;
 
 public class ClassLeaderboardColumn extends AbstractLeaderboardColumn
 {
-    public ClassLeaderboardColumn(String statname, Sign header, List<Sign> signs) {
-        super(statname, header, signs);
+    public ClassLeaderboardColumn(String statName, Sign header, List<Sign> signs) {
+        super(statName, header, signs);
     }
 
     @Override

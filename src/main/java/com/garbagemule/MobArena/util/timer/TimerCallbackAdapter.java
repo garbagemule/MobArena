@@ -2,7 +2,7 @@ package com.garbagemule.MobArena.util.timer;
 
 /**
  * An empty implementation of the {@link TimerCallback} interface á la the
- * {@link java.awt.event.MouseAdapter} class in the Swing event framwork.
+ * {@link java.awt.event.MouseAdapter} class in the Swing event framework.
  */
 public class TimerCallbackAdapter implements TimerCallback {
     @Override

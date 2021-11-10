@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.config;
 
 import com.garbagemule.MobArena.MobArena;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -8,13 +9,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 
+@RequiredArgsConstructor
 public class LoadsConfigFile {
 
     private final MobArena plugin;
-
-    public LoadsConfigFile(MobArena plugin) {
-        this.plugin = plugin;
-    }
 
     public FileConfiguration load() {
         try {

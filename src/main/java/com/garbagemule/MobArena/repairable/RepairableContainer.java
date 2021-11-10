@@ -5,9 +5,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-public class RepairableContainer extends RepairableBlock
-{
-    private ItemStack[] contents;
+public class RepairableContainer extends RepairableBlock {
+    private final ItemStack[] contents;
 
     public RepairableContainer(BlockState state, boolean clear) {
         super(state);

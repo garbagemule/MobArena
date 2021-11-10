@@ -27,12 +27,12 @@ public class BossWave extends AbstractWave
 {
     private String bossName;
 
-    private MACreature monster;
-    private Set<MABoss> bosses;
+    private final MACreature monster;
+    private final Set<MABoss> bosses;
 
     private Formula health;
 
-    private List<Ability> abilities;
+    private final List<Ability> abilities;
     private boolean activated, abilityAnnounce;
 
     private int abilityInterval;
@@ -142,9 +142,7 @@ public class BossWave extends AbstractWave
 
     public Wave copy() {
         BossWave result = new BossWave(this.monster);
-        for (Ability ability : this.abilities) {
-            result.addBossAbility(ability);
-        }
+        this.abilities.forEach(result::addBossAbility);
         result.abilityInterval = this.abilityInterval;
         result.abilityAnnounce = this.abilityAnnounce;
         result.health = this.health;

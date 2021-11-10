@@ -46,7 +46,7 @@ public class CountdownTimer extends AbstractTimer {
         super(plugin, interval, callback);
 
         setDuration(duration);
-        this.remaining = 0l;
+        this.remaining = 0L;
         this.timer = null;
     }
 
@@ -148,7 +148,7 @@ public class CountdownTimer extends AbstractTimer {
         }
         timer.stop();
         timer = null;
-        remaining = 0l;
+        remaining = 0L;
         callback.onStop();
     }
 
@@ -213,7 +213,7 @@ public class CountdownTimer extends AbstractTimer {
                 remaining -= interval;
 
                 // If we're done, null timer, call onFinish(), and bail
-                if (remaining <= 0l) {
+                if (remaining <= 0L) {
                     timer = null;
                     callback.onFinish();
                     return;
@@ -236,7 +236,7 @@ public class CountdownTimer extends AbstractTimer {
 
         private synchronized void reschedule() {
             // Make sure the timer stops on time
-            long nextInterval = (remaining < interval) ? remaining : interval;
+            long nextInterval = Math.min(remaining, interval);
             task = Bukkit.getScheduler().runTaskLater(plugin, this, nextInterval);
         }
     }

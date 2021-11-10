@@ -1,22 +1,17 @@
 package com.garbagemule.MobArena.events;
 
+import com.garbagemule.MobArena.events.api.MobArenaEvent;
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class ArenaPlayerDeathEvent extends Event
-{
-    private static final HandlerList handlers = new HandlerList();
-    private Player player;
-    private Arena arena;
-    private boolean last;
-
-    public ArenaPlayerDeathEvent(Player player, Arena arena, boolean last) {
-        this.player = player;
-        this.arena  = arena;
-        this.last   = last;
-    }
+@RequiredArgsConstructor
+public class ArenaPlayerDeathEvent extends MobArenaEvent {
+    private final Player player;
+    private final Arena arena;
+    private final boolean last;
 
     public Player getPlayer() {
         return player;
@@ -30,11 +25,4 @@ public class ArenaPlayerDeathEvent extends Event
         return last;
     }
 
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
 }

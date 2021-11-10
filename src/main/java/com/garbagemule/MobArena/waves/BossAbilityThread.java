@@ -9,9 +9,9 @@ import java.util.Set;
 
 public class BossAbilityThread implements Runnable
 {
-    private BossWave wave;
-    private List<Ability> abilities;
-    private Arena arena;
+    private final BossWave wave;
+    private final List<Ability> abilities;
+    private final Arena arena;
     private int counter;
 
     public BossAbilityThread(BossWave wave, List<Ability> abilities, Arena arena) {

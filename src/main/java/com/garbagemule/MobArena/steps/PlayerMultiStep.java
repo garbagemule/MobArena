@@ -24,7 +24,7 @@ class PlayerMultiStep extends PlayerStep {
     private final List<StepFactory> factories;
     private final Logger logger;
 
-    private Deque<Step> history;
+    private final Deque<Step> history;
 
     private PlayerMultiStep(Player player, List<StepFactory> factories, Logger logger) {
         super(player);

@@ -1,18 +1,14 @@
 package com.garbagemule.MobArena.formula;
 
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 class BinaryFormula implements Formula {
 
     private final BinaryOperation operation;
     private final Formula left;
     private final Formula right;
-
-    BinaryFormula(BinaryOperation operation, Formula left, Formula right) {
-        this.operation = operation;
-        this.left = left;
-        this.right = right;
-    }
 
     @Override
     public double evaluate(Arena arena) {

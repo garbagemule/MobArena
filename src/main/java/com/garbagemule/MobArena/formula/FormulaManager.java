@@ -1,24 +1,16 @@
 package com.garbagemule.MobArena.formula;
 
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 public class FormulaManager {
 
     private final Environment env;
     private final Lexer lexer;
     private final Parser parser;
-
-    FormulaManager(
-        Environment env,
-        Lexer lexer,
-        Parser parser
-    ) {
-        this.env = env;
-        this.lexer = lexer;
-        this.parser = parser;
-    }
 
     @SuppressWarnings("unused")
     public void registerConstant(String name, double value) {

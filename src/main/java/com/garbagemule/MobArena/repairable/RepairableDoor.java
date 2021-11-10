@@ -8,11 +8,12 @@ import org.bukkit.material.Door;
 
 public class RepairableDoor extends RepairableAttachable//RepairableBlock
 {
-    private BlockState other;
-    private int x, y, z;
+    private final BlockState other;
+    private final int x;
+    private final int y;
+    private final int z;
 
-    public RepairableDoor(BlockState state)
-    {
+    public RepairableDoor(BlockState state) {
         super(state);
         other = state.getBlock().getRelative(BlockFace.UP).getState();
 
@@ -22,8 +23,7 @@ public class RepairableDoor extends RepairableAttachable//RepairableBlock
         z = attached.getZ();
     }
 
-    public void repair()
-    {
+    public void repair() {
         if (getWorld().getBlockAt(getX(), getY(), getZ()).getState().getData() instanceof Door)
             return;
 

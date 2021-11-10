@@ -3,6 +3,7 @@ package com.garbagemule.MobArena.util.timer;
 import static com.garbagemule.MobArena.util.timer.Common.toSeconds;
 
 import com.garbagemule.MobArena.framework.Arena;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 
 /**
@@ -12,14 +13,10 @@ import org.bukkit.entity.Player;
  * The primary purpose of the class is to encapsulate the logic needed by e.g.
  * the {@link AutoStartTimer}, when {@code display-timer-as-level: true}.
  */
+@RequiredArgsConstructor
 public class LevelCallback extends TimerCallbackAdapter {
-    private Arena arena;
-    private CountdownTimer timer;
-
-    public LevelCallback(Arena arena, CountdownTimer timer) {
-        this.arena = arena;
-        this.timer = timer;
-    }
+    private final Arena arena;
+    private final CountdownTimer timer;
 
     public void onStart() {
         timer.setInterval(20);
@@ -28,8 +25,6 @@ public class LevelCallback extends TimerCallbackAdapter {
     public void onTick() {
         int remaining = toSeconds(timer.getRemaining());
 
-        for (Player p : arena.getPlayersInLobby()) {
-            p.setLevel(remaining);
-        }
+        arena.getPlayersInLobby().forEach(player -> player.setLevel(remaining));
     }
 }

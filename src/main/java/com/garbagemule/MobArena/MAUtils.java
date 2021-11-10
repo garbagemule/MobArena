@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MAUtils
-{
+public class MAUtils {
     /* ///////////////////////////////////////////////////////////////////// //
 
             INITIALIZATION METHODS
@@ -39,8 +38,7 @@ public class MAUtils
      * type of wave ("after" or "every") and the config-file. If
      * no keys exist in the config-file, an empty map is returned.
      */
-    public static Map<Integer, ThingPicker> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type)
-    {
+    public static Map<Integer, ThingPicker> getArenaRewardMap(MobArena plugin, ConfigurationSection config, String arena, String type) {
         //String arenaPath = "arenas." + arena + ".rewards.waves.";
         Map<Integer, ThingPicker> result = new HashMap<>();
 
@@ -127,7 +125,7 @@ public class MAUtils
             return (none ? Msg.MISC_NONE.toString() : "");
         }
 
-        StringBuffer buffy = new StringBuffer();
+        StringBuilder buffy = new StringBuilder();
         int trimLength = 0;
 
         E type = list.iterator().next();

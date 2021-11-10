@@ -1,5 +1,10 @@
 package com.garbagemule.MobArena.time;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum Time
 {
     DAWN(23000),
@@ -15,13 +20,6 @@ public enum Time
     NIGHT(14000),
     MIDNIGHT(18000);
 
-    private int time;
+    private final int time;
 
-    Time(int time) {
-        this.time = time;
-    }
-
-    public int getTime() {
-        return time;
-    }
 }

@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.formula;
 
 import com.garbagemule.MobArena.MobArena;
+import lombok.RequiredArgsConstructor;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -10,17 +11,13 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class FormulaMacros {
 
     private static final String FILENAME = "formulas.yml";
 
     private final Path file;
-    private final Map<String, Map<String, String>> macros;
-
-    private FormulaMacros(Path file) {
-        this.file = file;
-        this.macros = new HashMap<>();
-    }
+    private final Map<String, Map<String, String>> macros = new HashMap<>();
 
     public void reload() throws IOException {
         byte[] bytes = Files.readAllBytes(file);

@@ -9,13 +9,14 @@ import org.bukkit.plugin.Plugin;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 
 public class ClassLimitManager
 {
-    private HashMap<ArenaClass,MutableInt> classLimits;
-    private HashMap<ArenaClass, HashSet<String>> classesInUse;
-    private ConfigurationSection limits;
-    private Map<String,ArenaClass> classes;
+    private final HashMap<ArenaClass,MutableInt> classLimits;
+    private final HashMap<ArenaClass, HashSet<String>> classesInUse;
+    private final ConfigurationSection limits;
+    private final Map<String,ArenaClass> classes;
 
     public ClassLimitManager(Arena arena, Map<String,ArenaClass> classes, ConfigurationSection limits) {
         this.limits       = limits;
@@ -30,23 +31,18 @@ public class ClassLimitManager
     private void loadLimitMap(Plugin plugin) {
         // If the config-section is empty, create and populate it.
         if (limits.getKeys(false).isEmpty()) {
-            for (ArenaClass ac : classes.values()) {
-                limits.set(ac.getConfigName(), -1);
-            }
+            classes.values().forEach(arenaClass -> limits.set(arenaClass.getConfigName(), -1));
             plugin.saveConfig();
         }
 
         // Populate the limits map using the values in the config-file.
-        for (ArenaClass ac : classes.values()) {
-            classLimits.put(ac, new MutableInt(limits.getInt(ac.getConfigName(), -1)));
-        }
+        classes.values().forEach(arenaClass -> classLimits.put(arenaClass,
+                new MutableInt(limits.getInt(arenaClass.getConfigName(), -1))));
     }
 
     private void initInUseMap() {
         // Initialize the in-use map with zeros.
-        for (ArenaClass ac : classes.values()) {
-            classesInUse.put(ac, new HashSet<>());
-        }
+        classes.values().forEach(arenaClass -> classesInUse.put(arenaClass, new HashSet<>()));
     }
 
     /**
@@ -62,9 +58,8 @@ public class ClassLimitManager
      * @param ac the current/old ArenaClass
      */
     public void playerLeftClass(ArenaClass ac, Player p) {
-        if (ac != null) {
-            classesInUse.get(ac).remove(p.getName());
-        }
+        Optional.ofNullable(ac).ifPresent(arenaClass ->
+                classesInUse.get(arenaClass).remove(p.getName()));
     }
 
     /**

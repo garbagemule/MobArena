@@ -5,16 +5,16 @@ import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 
-public class RepairableBlock implements Repairable
-{
-    private BlockState state;
-    private World world;
-    private BlockData data;
-    private int x, y, z;
-    private Material type;
+public class RepairableBlock implements Repairable {
+    private final BlockState state;
+    private final World world;
+    private final BlockData data;
+    private final int x;
+    private final int y;
+    private final int z;
+    private final Material type;
 
-    public RepairableBlock(BlockState state)
-    {
+    public RepairableBlock(BlockState state) {
         this.state = state;
 
         world = state.getWorld();

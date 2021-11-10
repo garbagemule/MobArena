@@ -40,10 +40,10 @@ public class WaveUtils
 
         // If no spawnpoints in range, just return all of them.
         if (result.isEmpty()) {
-            String locs = "";
+            StringBuilder locs = new StringBuilder();
             for (Player p : players) {
                 Location l = p.getLocation();
-                locs += "(" + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ") ";
+                locs.append("(").append(l.getBlockX()).append(",").append(l.getBlockY()).append(",").append(l.getBlockZ()).append(") ");
             }
             plugin.getLogger().warning("The following locations in arena '" + arena.configName() + "' are not covered by any spawnpoints:" + locs);
             return spawnpoints;
@@ -106,17 +106,7 @@ public class WaveUtils
      */
     public static Comparator<Wave> getSingleComparator()
     {
-        return new Comparator<Wave>()
-            {
-                public int compare(Wave w1, Wave w2)
-                {
-                    if (w1.getFirstWave() < w2.getFirstWave())
-                        return -1;
-                    else if (w1.getFirstWave() > w2.getFirstWave())
-                        return 1;
-                    else return 0;
-                }
-            };
+        return Comparator.comparingInt(Wave::getFirstWave);
     }
 
     /**
@@ -127,16 +117,12 @@ public class WaveUtils
      */
     public static Comparator<Wave> getRecurrentComparator()
     {
-        return new Comparator<Wave>()
-            {
-                public int compare(Wave w1, Wave w2)
-                {
-                    if (w1.getPriority() < w2.getPriority())
-                        return -1;
-                    else if (w1.getPriority() > w2.getPriority())
-                        return 1;
-                    else return w1.getName().compareTo(w2.getName());
-                }
-            };
+        return (w1, w2) -> {
+            if (w1.getPriority() < w2.getPriority())
+                return -1;
+            else if (w1.getPriority() > w2.getPriority())
+                return 1;
+            else return w1.getName().compareTo(w2.getName());
+        };
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MABoss
 {
-    private LivingEntity entity;
+    private final LivingEntity entity;
     private boolean dead;
     private ThingPicker reward;
     private List<ItemStack> drops;

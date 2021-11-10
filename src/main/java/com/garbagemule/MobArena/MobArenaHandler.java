@@ -7,13 +7,15 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.util.Optional;
+
 public class MobArenaHandler
 {
-    private MobArena plugin;
+    private final MobArena plugin;
 
     /**
      * Primary constructor.
-     * The field 'plugin' is initalized, if the server is running MobArena.
+     * The field 'plugin' is initialized, if the server is running MobArena.
      */
     public MobArenaHandler() {
         plugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
@@ -28,35 +30,30 @@ public class MobArenaHandler
     //////////////////////////////////////////////////////////////////*/
 
     /**
-     * Check if a Location is inside of any arena region.
+     * Check if a Location is inside any arena region.
      * @param loc A location.
-     * @return true, if the Location is inside of any arena region.
+     * @return true, if the Location is inside any arena region.
      */
     public boolean inRegion(Location loc) {
-        for (Arena arena : plugin.getArenaMaster().getArenas()) {
-            if (arena.getRegion().contains(loc)) {
-                return true;
-            }
-        }
-
-        return false;
+        return plugin.getArenaMaster().getArenas().stream()
+                .anyMatch(arena -> arena.getRegion().contains(loc));
     }
 
     /**
-     * Check if a Location is inside of a specific arena region (by arena object).
+     * Check if a Location is inside a specific arena region (by arena object).
      * @param arena An Arena object
      * @param loc A location
-     * @return true, if the Location is inside of the arena region.
+     * @return true, if the Location is inside the arena region.
      */
     public boolean inRegion(Arena arena, Location loc) {
         return (arena != null && arena.getRegion().contains(loc));
     }
 
     /**
-     * Check if a Location is inside of a specific arena region (by arena name).
+     * Check if a Location is inside a specific arena region (by arena name).
      * @param arenaName The name of an arena
      * @param loc A location
-     * @return true, if the Location is inside of the arena region.
+     * @return true, if the Location is inside the arena region.
      */
     public boolean inRegion(String arenaName, Location loc) {
         Arena arena = plugin.getArenaMaster().getArenaWithName(arenaName);
@@ -67,18 +64,18 @@ public class MobArenaHandler
     }
 
     /**
-     * Check if a Location is inside of the region of an arena that is currently running.
+     * Check if a Location is inside the region of an arena that is currently running.
      * @param loc A location.
-     * @return true, if the Location is inside of the region of an arena that is currently running.
+     * @return true, if the Location is inside the region of an arena that is currently running.
      */
     public boolean inRunningRegion(Location loc) {
         return inRegion(loc, false, true);
     }
 
     /**
-     * Check if a Location is inside of the region of an arena that is currently enabled.
+     * Check if a Location is inside the region of an arena that is currently enabled.
      * @param loc A location.
-     * @return true, if the Location is inside of the region of an arena that is currently enabled.
+     * @return true, if the Location is inside the region of an arena that is currently enabled.
      */
     public boolean inEnabledRegion(Location loc) {
         return inRegion(loc, true, false);
@@ -89,22 +86,17 @@ public class MobArenaHandler
      * @param loc A location
      * @param enabled if true, the method will check if the arena is enabled
      * @param running if true, the method will check if the arena is running, overrides enabled
-     * @return true, if the location is inside of the region of an arena that is currently enabled/running, depending on the parameters.
+     * @return true, if the location is inside the region of an arena that is currently enabled/running, depending on the parameters.
      */
     private boolean inRegion(Location loc, boolean enabled, boolean running) {
         // If the plugin doesn't exist, always return false.
         if (plugin.getArenaMaster() == null) return false;
 
         // Return true if location is within just one arena's region.
-        for (Arena arena : plugin.getArenaMaster().getArenas()) {
-            if (arena.getRegion().contains(loc)) {
-                if ((running && arena.isRunning()) || (enabled && arena.isEnabled())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return plugin.getArenaMaster().getArenas()
+                .stream()
+                .anyMatch(arena -> (arena.getRegion().contains(loc) &&
+                        ((running && arena.isRunning()) || (enabled && arena.isEnabled()))));
     }
 
 
@@ -139,10 +131,8 @@ public class MobArenaHandler
      * @return The class name of the player if the player is in the arena, null otherwise
      */
     public String getPlayerClass(Player player) {
-        Arena arena = plugin.getArenaMaster().getArenaWithPlayer(player);
-        if (arena == null) return null;
-
-        return getPlayerClass(arena, player);
+        Optional<Arena> arena = Optional.ofNullable(plugin.getArenaMaster().getArenaWithPlayer(player));
+        return (arena.map(value -> getPlayerClass(value, player)).orElse(null));
     }
 
     /**

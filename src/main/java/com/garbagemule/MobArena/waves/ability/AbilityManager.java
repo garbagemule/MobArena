@@ -267,7 +267,7 @@ public class AbilityManager
                 if (Ability.class.isAssignableFrom(cls)) {
                     register(cls.asSubclass(Ability.class), true);
                 }
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
         }
     }
 
@@ -278,10 +278,9 @@ public class AbilityManager
      */
     private static ClassLoader getLoader(File dir) {
         try {
-            ClassLoader loader = new URLClassLoader(new URL[] { dir.toURI().toURL() }, Ability.class.getClassLoader());
-            return loader;
+            return new URLClassLoader(new URL[] { dir.toURI().toURL() }, Ability.class.getClassLoader());
         }
-        catch (Exception e) {}
+        catch (Exception ignored) {}
 
         return null;
     }
@@ -293,7 +292,7 @@ public class AbilityManager
     private static String fileListToString(List<File> list, String exclude) {
         if (list.isEmpty()) return "";
 
-        StringBuffer buffy = new StringBuffer();
+        StringBuilder buffy = new StringBuilder();
 
         for (File file : list) {
             String name = file.getName();
@@ -303,7 +302,7 @@ public class AbilityManager
                 continue;
             }
 
-            buffy.append(", " + name.substring(0, dot));
+            buffy.append(", ").append(name, 0, dot);
         }
 
         // Trim off the first ", ".

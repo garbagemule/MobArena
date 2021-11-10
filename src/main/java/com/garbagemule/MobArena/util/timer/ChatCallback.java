@@ -14,11 +14,11 @@ import com.garbagemule.MobArena.framework.Arena;
  * the {@link AutoStartTimer}, when {@code display-timer-as-level: false}.
  */
 public class ChatCallback extends TimerCallbackAdapter {
-    private Arena arena;
-    private Msg msg;
-    private CountdownTimer timer;
+    private final Arena arena;
+    private final Msg msg;
+    private final CountdownTimer timer;
 
-    private int[] triggers;
+    private final int[] triggers;
     private int index;
 
     public ChatCallback(Arena arena, Msg msg, CountdownTimer timer, int[] triggers) {

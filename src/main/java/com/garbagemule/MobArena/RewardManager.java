@@ -4,17 +4,12 @@ import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.things.Thing;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class RewardManager
 {
-    private Map<Player,List<Thing>> players;
-    private Set<Player> rewarded;
+    private final Map<Player,List<Thing>> players;
+    private final Set<Player> rewarded;
 
     public RewardManager(Arena arena) {
         this.players  = new HashMap<>();
@@ -39,12 +34,7 @@ public class RewardManager
         List<Thing> rewards = players.get(p);
         if (rewards == null) return;
 
-        for (Thing reward : rewards) {
-            if (reward == null) {
-                continue;
-            }
-            reward.giveTo(p);
-        }
+        rewards.stream().filter(Objects::nonNull).forEach(thing -> thing.giveTo(p));
         rewarded.add(p);
     }
 }

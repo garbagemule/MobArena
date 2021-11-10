@@ -40,6 +40,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -47,8 +48,7 @@ import java.util.logging.Level;
  * MobArena
  * @author garbagemule
  */
-public class MobArena extends JavaPlugin
-{
+public class MobArena extends JavaPlugin {
     private ArenaMaster arenaMaster;
 
     // Vault
@@ -139,7 +139,7 @@ public class MobArena extends JavaPlugin
     }
 
     private void setupCommandHandler() {
-        getCommand("ma").setExecutor(new CommandHandler(this));
+        Objects.requireNonNull(getCommand("ma")).setExecutor(new CommandHandler(this));
     }
 
     private void setupVault() {

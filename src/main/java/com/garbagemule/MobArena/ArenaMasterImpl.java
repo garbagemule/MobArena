@@ -20,32 +20,25 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ArenaMasterImpl implements ArenaMaster
 {
-    private MobArena plugin;
+    private final MobArena plugin;
 
     private List<Arena> arenas;
-    private Map<Player, Arena> arenaMap;
+    private final Map<Player, Arena> arenaMap;
 
     private Map<String, ArenaClass> classes;
 
-    private Set<String> allowedCommands;
-    private SpawnsPets spawnsPets;
+    private final Set<String> allowedCommands;
+    private final SpawnsPets spawnsPets;
 
     private boolean enabled;
 
-    private JoinInterruptTimer joinInterruptTimer;
+    private final JoinInterruptTimer joinInterruptTimer;
 
     /**
      * Default constructor.
@@ -86,15 +79,15 @@ public class ArenaMasterImpl implements ArenaMaster
     public void setEnabled(boolean value) {
         enabled = value;
         FileConfiguration config = plugin.getConfig();
-        if (config != null) {
-            config.set("global-settings.enabled", enabled);
+        Optional.of(config).ifPresent(configuration -> {
+            configuration.set("global-settings.enabled", enabled);
             plugin.saveConfig();
-        }
+        });
     }
 
     public boolean notifyOnUpdates() {
-        FileConfiguration config = plugin.getConfig();
-        return config != null && config.getBoolean("global-settings.update-notification", false);
+        Optional<FileConfiguration> config = Optional.of(plugin.getConfig());
+        return config.get().getBoolean("global-settings.update-notification", false);
     }
 
     public List<Arena> getArenas() {
@@ -137,47 +130,40 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Arena> getEnabledArenas(List<Arena> arenas) {
         List<Arena> result = new ArrayList<>(arenas.size());
-        for (Arena arena : arenas)
-            if (arena.isEnabled())
-                result.add(arena);
+        arenas.stream().filter(Arena::isEnabled)
+                .forEach(result::add);
         return result;
     }
 
     public List<Arena> getPermittedArenas(Player p) {
         List<Arena> result = new ArrayList<>(arenas.size());
-        for (Arena arena : arenas)
-            if (arena.hasPermission(p))
-                result.add(arena);
+        arenas.stream().filter(arena -> arena.hasPermission(p))
+                .forEach(result::add);
         return result;
     }
 
     public List<Arena> getEnabledAndPermittedArenas(Player p) {
         List<Arena> result = new ArrayList<>(arenas.size());
-        for (Arena arena : arenas)
-            if (arena.isEnabled() && arena.hasPermission(p))
-                result.add(arena);
+        arenas.stream().filter(arena -> arena.isEnabled() && arena.hasPermission(p))
+                .forEach(result::add);
         return result;
     }
 
     public Arena getArenaAtLocation(Location loc) {
-        for (Arena arena : arenas)
-            if (arena.getRegion().contains(loc))
-                return arena;
-        return null;
+        return arenas.stream().filter(arena -> arena.getRegion().contains(loc))
+                .findFirst().orElse(null);
     }
 
     public List<Arena> getArenasInWorld(World world) {
         List<Arena> result = new ArrayList<>(arenas.size());
-        for (Arena arena : arenas)
-            if (arena.getWorld().equals(world))
-                result.add(arena);
+        arenas.stream().filter(arena -> arena.getWorld().equals(world))
+                .forEach(result::add);
         return result;
     }
 
     public List<Player> getAllPlayers() {
         List<Player> result = new ArrayList<>(arenas.size());
-        for (Arena arena : arenas)
-            result.addAll(arena.getAllPlayers());
+        arenas.forEach(arena -> result.addAll(arena.getAllPlayers()));
         return result;
     }
 
@@ -188,8 +174,7 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public List<Player> getAllLivingPlayers() {
         List<Player> result = new ArrayList<>();
-        for (Arena arena : arenas)
-            result.addAll(arena.getPlayersInArena());
+        arenas.forEach(arena -> result.addAll(arena.getPlayersInArena()));
         return result;
     }
 
@@ -207,25 +192,18 @@ public class ArenaMasterImpl implements ArenaMaster
     }
 
     public Arena getArenaWithSpectator(Player p) {
-        for (Arena arena : arenas) {
-            if (arena.getSpectators().contains(p))
-                return arena;
-        }
-        return null;
+        return arenas.stream().filter(arena -> arena.getSpectators().contains(p))
+                .findFirst().orElse(null);
     }
 
     public Arena getArenaWithMonster(Entity e) {
-        for (Arena arena : arenas)
-            if (arena.getMonsterManager().getMonsters().contains(e))
-                return arena;
-        return null;
+        return arenas.stream().filter(arena -> arena.getMonsterManager().getMonsters().contains(e))
+                .findFirst().orElse(null);
     }
 
     public Arena getArenaWithPet(Entity e) {
-        for (Arena arena : arenas)
-            if (arena.hasPet(e))
-                return arena;
-        return null;
+        return arenas.stream().filter(arena -> arena.hasPet(e))
+                .findFirst().orElse(null);
     }
 
     public Arena getArenaWithName(String configName) {
@@ -234,10 +212,8 @@ public class ArenaMasterImpl implements ArenaMaster
 
     public Arena getArenaWithName(Collection<Arena> arenas, String configName) {
         String slug = Slugs.create(configName);
-        for (Arena arena : arenas)
-            if (arena.getSlug().equalsIgnoreCase(slug))
-                return arena;
-        return null;
+        return arenas.stream().filter(arena -> arena.getSlug().equalsIgnoreCase(slug))
+                .findFirst().orElse(null);
     }
 
     /*
@@ -397,7 +373,7 @@ public class ArenaMasterImpl implements ArenaMaster
         String petName = section.getString("pet-name", "<display-name>'s pet");
         arenaClass.setPetName(petName);
 
-        // Finally add the class to the classes map.
+        // Finally, add the class to the classes map.
         classes.put(arenaClass.getSlug(), arenaClass);
         return arenaClass;
     }

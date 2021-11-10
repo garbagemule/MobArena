@@ -57,11 +57,13 @@ public class WaveParser
         }
 
         // Otherwise, parse each wave in the branch.
-        for (String wave : waves) {
-            ConfigurationSection waveSection = config.getConfigurationSection(wave);
-            Wave w = parseWave(arena, wave, waveSection, branch);
-            result.add(w);
-        }
+        waves.stream().filter(wave -> config.getConfigurationSection(wave) != null)
+                .forEach(wave -> {
+                    ConfigurationSection waveSection = config.getConfigurationSection(wave);
+                    assert waveSection != null;
+                    Wave w = parseWave(arena, wave, waveSection, branch);
+                    result.add(w);
+                });
 
         return result;
     }

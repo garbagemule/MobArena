@@ -7,12 +7,12 @@ import java.util.List;
 
 public abstract class AbstractLeaderboardColumn implements LeaderboardColumn
 {
-    protected String statname;
-    private Sign header;
-    private List<Sign> signs;
+    protected String statName;
+    private final Sign header;
+    private final List<Sign> signs;
 
-    public AbstractLeaderboardColumn(String statname, Sign header, List<Sign> signs) {
-        this.statname     = statname;
+    public AbstractLeaderboardColumn(String statName, Sign header, List<Sign> signs) {
+        this.statName     = statName;
         this.header       = header;
         this.signs        = signs;
     }

@@ -16,10 +16,10 @@ public class DisorientAll implements Ability
 {
     @Override
     public void execute(Arena arena, MABoss boss) {
-        for (Player p : arena.getPlayersInArena()) {
-            Location loc = p.getLocation();
+        arena.getPlayersInArena().forEach(player -> {
+            Location loc = player.getLocation();
             loc.setYaw(loc.getYaw() + 45 + AbilityUtils.random.nextInt(270));
-            p.teleport(loc);
-        }
+            player.teleport(loc);
+        });
     }
 }
