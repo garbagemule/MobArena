@@ -203,6 +203,7 @@ public class MAGlobalListener implements Listener
 
         // Account for Spigot's messy extra event
         EntityExplodeEvent fake = new EntityExplodeEvent(null, event.getBlock().getLocation(), blocks, event.getYield());
+        fake.setCancelled(event.isCancelled());
         entityExplode(fake);
 
         // Copy the values over
