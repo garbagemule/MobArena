@@ -30,6 +30,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
@@ -952,8 +953,32 @@ public class ArenaListener
     }
 
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (arena.getRegion().contains(event.getBlock().getLocation()))
-            event.setCancelled(true);
+        if (!protect) {
+            return;
+        }
+
+        Block block = event.getBlock();
+        if (!arena.getRegion().contains(block.getLocation())) {
+            return;
+        }
+
+        if (arena.isRunning()) {
+            if (block.getType() == Material.TNT) {
+                Entity entity = event.getEntity();
+                if (entity instanceof Arrow) {
+                    Arrow arrow = (Arrow) entity;
+                    ProjectileSource shooter = arrow.getShooter();
+                    if (shooter instanceof Player) {
+                        Player player = (Player) shooter;
+                        if (arena.inArena(player)) {
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        event.setCancelled(true);
     }
 
     public void onEntityRegainHealth(EntityRegainHealthEvent event) {
