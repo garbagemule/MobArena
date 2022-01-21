@@ -13,6 +13,7 @@ require-empty-inv-join: false
 require-empty-inv-spec: false
 pvp-enabled: false
 monster-infight: false
+monster-tracks-player: false
 allow-teleporting: false
 spectate-on-death: true
 auto-leave-on-end: false

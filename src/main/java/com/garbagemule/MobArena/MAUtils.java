@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class MAUtils
@@ -101,6 +102,26 @@ public class MAUtils
                 current = dist;
                 result = p;
             }
+        }
+        return result;
+    }
+
+    public static Player getClosestPlayer(MobArena plugin, Entity e, Arena arena, Player target) {
+        // Try getting closest player to monster by running original method
+        Player result = getClosestPlayer(plugin, e, arena);
+        Player fallBack = null;
+
+        if (result == null) {
+            // If closest player returns null, return last known player target
+            if (target != null && arena.getPlayersInArena().contains(target)) {
+                return target;
+            }
+            // Use a random arena player as a fallback if lastKnownPlayer dies or leaves
+            List<Player> players = new ArrayList<>(arena.getPlayersInArena());
+            Random rand = new Random();
+            int randomPlayer = rand.nextInt(players.size());
+            fallBack = players.get(randomPlayer);
+            return fallBack;
         }
         return result;
     }
