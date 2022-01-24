@@ -9,6 +9,7 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.things.ExperienceThing;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
+import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.waves.MABoss;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
@@ -24,11 +25,14 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MASpawnThread implements Runnable
 {
@@ -44,6 +48,7 @@ public class MASpawnThread implements Runnable
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
     private int waveInterval;
     private int nextWaveDelay;
+    private long monsterGlowDelay;
 
     private BukkitTask task;
 
@@ -79,6 +84,7 @@ public class MASpawnThread implements Runnable
         wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
         waveInterval = arena.getSettings().getInt("wave-interval", 3);
         nextWaveDelay = arena.getSettings().getInt("next-wave-delay", 0);
+        monsterGlowDelay = arena.getSettings().getLong("monster-glow-delay", 0L);
     }
 
     public void start() {
@@ -207,6 +213,7 @@ public class MASpawnThread implements Runnable
         World world = arena.getWorld();
         int totalSpawnpoints = spawnpoints.size();
         int index = 0;
+        int waveNumber = waveManager.getWaveNumber();
         double mul = w.getHealthMultiplier();
 
         for (Map.Entry<MACreature, Integer> entry : monsters.entrySet()) {
@@ -227,6 +234,9 @@ public class MASpawnThread implements Runnable
 
                 // Add it to the arena.
                 monsterManager.addMonster(e);
+
+                // Add it to the current wave.
+                monsterManager.addWaveMonster(e, waveNumber);
 
                 // Set the health.
                 int health = (int) Math.max(1D, e.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() * mul);
@@ -277,6 +287,12 @@ public class MASpawnThread implements Runnable
                 }
             }
         }
+        // Apply a highlighting effect to monsters after monster-glow-delay defined seconds
+        if (Math.round(monsterGlowDelay) > 0) {
+            PotionEffect effect = PotionEffectParser.parsePotionEffect("glowing", true);
+            BukkitRunnable runnable = addGlowMonsters(effect, monsterManager.getWaveMonsters(waveManager.getWaveNumber()));
+            runnable.runTaskLater(plugin, Math.round(monsterGlowDelay) * 20L);
+        }
     }
 
     private void handleUpgradeWave(Wave w) {
@@ -324,6 +340,20 @@ public class MASpawnThread implements Runnable
         }
 
         return true;
+    }
+
+    private BukkitRunnable addGlowMonsters(PotionEffect potionEffect, Set<LivingEntity> entities){
+        BukkitRunnable runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+                entities.forEach(entity ->{
+                    if(!entity.isDead()){
+                        entity.addPotionEffect(potionEffect);
+                    }
+                });
+            }
+        };
+        return runnable;
     }
 
     private void removeDeadMonsters() {
