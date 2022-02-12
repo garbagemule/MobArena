@@ -17,6 +17,7 @@ These changes will (most likely) be included in the next version.
 - Pet names are now per-class configurable via the optional `pet-name` property, which defaults to `<display-name>'s pet` (the `<player-name>` variable is also supported).
 - New per-arena setting `auto-leave-on-end` can be used to automatically "kick" spectators when the current session ends.
 - New per-arena setting `clear-wave-leeway` allows for tweaking the number of mobs allowed to be alive before the next wave spawns. The setting affects `clear-wave-before-next`, `clear-wave-before-boss`, and the final wave check, and it defaults to 0.
+- New per-arena setting `auto-ignite-fuse` makes the fuse time for auto-ignited TNT configurable. The unit is ticks and defaults to 80.
 - Added boss abilities `disorient-all`, `fetch-all`, `pull-all`, and `throw-all`. These abilities work like their target-specific and distance-based counterparts, but affect all players in the arena.
 - (API) MobArena's internal command handler now supports registering pre-instantiated subcommand instances. This should make it easier for extensions to avoid the Singleton anti-pattern for command dependencies.
 - (API) MobArena now fires MobArenaPreReloadEvent and MobArenaReloadEvent before and after, respectively, reloading its config-file. This should allow extensions and other plugins to better respond to configuration changes.

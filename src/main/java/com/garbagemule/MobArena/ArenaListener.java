@@ -123,6 +123,7 @@ public class ArenaListener
     private boolean allowTeleport,
             canShare,
             autoIgniteTNT;
+    private int autoIgniteFuse;
 
     private Set<Player> banned;
 
@@ -146,6 +147,7 @@ public class ArenaListener
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
         this.canShare         = s.getBoolean("share-items-in-arena", true);
         this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
+        this.autoIgniteFuse   = s.getInt("auto-ignite-fuse",         80);
         this.useClassChests   = s.getBoolean("use-class-chests",     false);
 
         this.classLimits = arena.getClassLimitManager();
@@ -284,6 +286,7 @@ public class ArenaListener
                 stack.setAmount(stack.getAmount() - 1);
                 TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
                 tnt.setSource(event.getPlayer());
+                tnt.setFuseTicks(Math.max(0, autoIgniteFuse));
                 return;
             }
         }
