@@ -360,17 +360,7 @@ public class ArenaListener
             case FLINT_AND_STEEL:
                 if (arena.inEditMode()) return;
                 if (arena.isRunning()) {
-                    if (b.getType() == Material.TNT) {
-                        Player planter = getPlanter(b);
-                        if (planter != null) {
-                            b.setType(Material.AIR);
-                            TNTPrimed tnt = b.getWorld().spawn(b.getLocation(), TNTPrimed.class);
-                            tnt.setSource(planter);
-                            setPlanter(tnt, planter);
-                        }
-                    } else {
-                        arena.addBlock(event.getBlock().getRelative(BlockFace.UP));
-                    }
+                    arena.addBlock(b.getRelative(BlockFace.UP));
                     break;
                 }
             case LIGHTNING:
