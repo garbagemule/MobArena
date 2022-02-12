@@ -91,9 +91,6 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
@@ -287,10 +284,8 @@ public class ArenaListener
                 stack.setAmount(stack.getAmount() - 1);
                 TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
                 tnt.setSource(event.getPlayer());
-                setPlanter(tnt, event.getPlayer());
                 return;
             }
-            setPlanter(b, event.getPlayer());
         }
 
         // Any other block we don't care about if we're not protecting
@@ -305,20 +300,6 @@ public class ArenaListener
             // For doors, add the block just above (so we get both halves)
             arena.addBlock(b.getRelative(0, 1, 0));
         }
-    }
-
-    private void setPlanter(Metadatable tnt, Player planter) {
-        tnt.setMetadata("mobarena-planter", new FixedMetadataValue(plugin, planter));
-    }
-
-    private Player getPlanter(Metadatable tnt) {
-        List<MetadataValue> values = tnt.getMetadata("mobarena-planter");
-        for (MetadataValue value : values) {
-            if (value.getOwningPlugin().equals(plugin)) {
-                return (Player) value.value();
-            }
-        }
-        return null;
     }
 
     public void onBlockForm(BlockFormEvent event) {
@@ -672,7 +653,7 @@ public class ArenaListener
             }
 
             if (damager instanceof TNTPrimed) {
-                damager = getPlanter(damager);
+                damager = ((TNTPrimed) damager).getSource();
             }
         }
 
