@@ -40,8 +40,9 @@ public class MASpawnThread implements Runnable
     private MonsterManager monsterManager;
     private CreatesHealthBar createsHealthBar;
 
-    private int playerCount, monsterLimit, waveLeeway;
+    private int playerCount, monsterLimit;
     private boolean waveClear, bossClear, preBossClear, wavesAsLevel;
+    private int waveLeeway;
     private int waveInterval;
     private int nextWaveDelay;
 
@@ -73,10 +74,10 @@ public class MASpawnThread implements Runnable
         waveManager.reset();
         playerCount = arena.getPlayersInArena().size();
         monsterLimit = arena.getSettings().getInt("monster-limit", 100);
-        waveLeeway = arena.getSettings().getInt("clear-wave-leeway", 0);
         waveClear = arena.getSettings().getBoolean("clear-wave-before-next", false);
         bossClear = arena.getSettings().getBoolean("clear-boss-before-next", false);
         preBossClear = arena.getSettings().getBoolean("clear-wave-before-boss", false);
+        waveLeeway = arena.getSettings().getInt("clear-wave-leeway", 0);
         wavesAsLevel = arena.getSettings().getBoolean("display-waves-as-level", false);
         waveInterval = arena.getSettings().getInt("wave-interval", 3);
         nextWaveDelay = arena.getSettings().getInt("next-wave-delay", 0);
