@@ -286,6 +286,7 @@ public class ArenaListener
                 }
                 stack.setAmount(stack.getAmount() - 1);
                 TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
+                tnt.setSource(event.getPlayer());
                 setPlanter(tnt, event.getPlayer());
                 return;
             }
@@ -364,6 +365,7 @@ public class ArenaListener
                         if (planter != null) {
                             b.setType(Material.AIR);
                             TNTPrimed tnt = b.getWorld().spawn(b.getLocation(), TNTPrimed.class);
+                            tnt.setSource(planter);
                             setPlanter(tnt, planter);
                         }
                     } else {
