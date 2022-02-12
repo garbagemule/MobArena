@@ -37,6 +37,7 @@ These changes will (most likely) be included in the next version.
 - Flaming arrows now ignite TNT blocks in the arena.
 - Players no longer take fall damage when they leave (or get removed from) an arena while falling.
 - Players no longer take damage from projectiles shot by pets of other players.
+- MobArena no longer nags players with the `mobarena.admin.teleport` permission when they engage in a teleport that would have otherwise been blocked.
 
 ## [0.106] - 2021-05-09
 ### Added

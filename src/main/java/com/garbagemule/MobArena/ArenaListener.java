@@ -1291,28 +1291,34 @@ public class ArenaListener
             if (region.contains(to)) {
                 // Inside -> inside
                 if (!(arena.inArena(p) || arena.inLobby(p))) {
-                    arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
-                    return TeleportResponse.REJECT;
+                    return reject(p, Msg.WARP_TO_ARENA);
                 }
                 return TeleportResponse.ALLOW;
             } else {
                 // Inside -> outside
                 if (arena.getAllPlayers().contains(p)) {
-                    arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
-                    return TeleportResponse.REJECT;
+                    return reject(p, Msg.WARP_FROM_ARENA);
                 }
                 return TeleportResponse.IDGAF;
             }
         } else {
             if (region.contains(to)) {
                 // Outside -> inside
-                arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
-                return TeleportResponse.REJECT;
+                return reject(p, Msg.WARP_TO_ARENA);
             } else {
                 // Outside -> outside
                 return TeleportResponse.IDGAF;
             }
         }
+    }
+
+    private TeleportResponse reject(Player p, Msg message) {
+        if (p.hasPermission("mobarena.admin.teleport")) {
+            return TeleportResponse.IDGAF;
+        }
+
+        arena.getMessenger().tell(p, message);
+        return TeleportResponse.REJECT;
     }
 
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
