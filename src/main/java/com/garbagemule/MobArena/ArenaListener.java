@@ -731,6 +731,12 @@ public class ArenaListener
         }
 
         if (arena.inArena(player)) {
+            // Cancel damage from pets (and their projectiles)
+            if (monsters.hasPet(damager)) {
+                event.setCancelled(true);
+                return;
+            }
+
             // Cancel PvP damage if disabled
             if (!pvpEnabled && damager instanceof Player && !damager.equals(player)) {
                 event.setCancelled(true);
