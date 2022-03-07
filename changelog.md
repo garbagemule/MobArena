@@ -38,6 +38,7 @@ These changes will (most likely) be included in the next version.
 - Flaming arrows now ignite TNT blocks in the arena.
 - Players no longer take fall damage when they leave (or get removed from) an arena while falling.
 - Players no longer take damage from projectiles shot by pets of other players.
+- Normal shulker boxes are now properly removed from inventories of players using the My Items class.
 - MobArena no longer nags players with the `mobarena.admin.teleport` permission when they engage in a teleport that would have otherwise been blocked.
 - MobArena now correctly sets the source property on auto-ignited TNT.
 
