@@ -295,7 +295,7 @@ public class ArenaClass
                 case SHULKER_SHELL:
                     return true;
             }
-            return type.name().endsWith("_SHULKER_BOX");
+            return type.name().contains("SHULKER_BOX");
         }
     }
 }
