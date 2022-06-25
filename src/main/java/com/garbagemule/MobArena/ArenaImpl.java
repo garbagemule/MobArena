@@ -810,6 +810,9 @@ public class ArenaImpl implements Arena
         }
         leavingPlayers.add(p);
 
+        // Remove pets.
+        monsterManager.removePets(p);
+
         // Clear inventory if player is an arena player, and unmount
         if (arenaPlayers.contains(p)) {
             unmount(p);
@@ -865,6 +868,9 @@ public class ArenaImpl implements Arena
         // Fire the event
         ArenaPlayerDeathEvent event = new ArenaPlayerDeathEvent(p, this, last);
         plugin.getServer().getPluginManager().callEvent(event);
+
+        // Remove pets.
+        monsterManager.removePets(p);
 
         // Clear the player's inventory, and unmount
         if (arenaPlayers.remove(p)) {
@@ -1130,9 +1136,6 @@ public class ArenaImpl implements Arena
                 boss.getHealthBar().removePlayer(p);
             }
         });
-
-        // Remove pets.
-        monsterManager.removePets(p);
 
         // readyPlayers before lobbyPlayers because of startArena sanity-checks
         readyPlayers.remove(p);
