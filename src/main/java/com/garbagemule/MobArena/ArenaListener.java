@@ -393,15 +393,23 @@ public class ArenaListener
          * reason means MobArena didn't trigger the event. However, we
          * make an exception for certain mobs that spawn as results of
          * other entities spawning them, e.g. when Evokers summon Vexes.
+         * Note that the "spell" reason was introduced somewhere between
+         * 1.18 and 1.18.1, so "default" is kept only for compatibility
+         * with older server versions. Also note the use of `switch` as
+         * a workaround for the NoSuchFieldError that would occur if we
+         * used a simple equality check.
          */
-        if (reason == SpawnReason.DEFAULT) {
-            if (event.getEntityType() == EntityType.VEX) {
-                event.setCancelled(false);
-                monsters.addMonster(event.getEntity());
-            } else {
-                event.setCancelled(true);
+        switch (reason) {
+            case DEFAULT:
+            case SPELL: {
+                if (event.getEntityType() == EntityType.VEX) {
+                    event.setCancelled(false);
+                    monsters.addMonster(event.getEntity());
+                } else {
+                    event.setCancelled(true);
+                }
+                return;
             }
-            return;
         }
 
         // If not custom, we probably don't want it, so get rid of it
