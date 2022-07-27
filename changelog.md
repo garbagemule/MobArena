@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.107] - 2022-07-30
 ### Added
 - New monster variant `angry-bees` can be used to spawn angry bees.
 - Husks, drowned, piglins, hoglins, and zoglins can now be spawned in their baby versions using the `baby` prefix seen on other monster types (e.g. `baby-zombie`).
@@ -245,7 +247,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.106...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.107...HEAD
+[0.107]: https://github.com/garbagemule/MobArena/compare/0.106...0.107
 [0.106]: https://github.com/garbagemule/MobArena/compare/0.105...0.106
 [0.105]: https://github.com/garbagemule/MobArena/compare/0.104.2...0.105
 [0.104.2]: https://github.com/garbagemule/MobArena/compare/0.104.1...0.104.2
