@@ -17,12 +17,14 @@ These changes will (most likely) be included in the next version.
 - Pet names are now per-class configurable via the optional `pet-name` property, which defaults to `<display-name>'s pet` (the `<player-name>` variable is also supported).
 - New per-arena setting `auto-leave-on-end` can be used to automatically "kick" spectators when the current session ends.
 - New per-arena setting `monster-glow-delay` can be used to apply a glowing effect per-wave after a specified time making it easier to find monsters in the arena.
+- New per-arena setting `clear-wave-leeway` allows for tweaking the number of mobs allowed to be alive before the next wave spawns. The setting affects `clear-wave-before-next`, `clear-wave-before-boss`, and the final wave check, and it defaults to 0.
+- New per-arena setting `auto-ignite-fuse` makes the fuse time for auto-ignited TNT configurable. The unit is ticks and defaults to 80.
 - Added boss abilities `disorient-all`, `fetch-all`, `pull-all`, and `throw-all`. These abilities work like their target-specific and distance-based counterparts, but affect all players in the arena.
 - (API) MobArena's internal command handler now supports registering pre-instantiated subcommand instances. This should make it easier for extensions to avoid the Singleton anti-pattern for command dependencies.
 - (API) MobArena now fires MobArenaPreReloadEvent and MobArenaReloadEvent before and after, respectively, reloading its config-file. This should allow extensions and other plugins to better respond to configuration changes.
 
 ### Changed
-- MobArena now targets the Minecraft 1.17 version of the Spigot API (but still works on 1.13-1.16). This should make it easier to tackle feature requests and bug reports related to modern Minecraft.
+- MobArena now targets the Minecraft 1.19 version of the Spigot API (but still works on 1.13-1.18). This should make it easier to tackle feature requests and bug reports related to modern Minecraft.
 - Monsters are no longer stripped of the _weapons_ they spawn with naturally, only their _armor_. This should improve forwards compatibility with new weapon-reliant monsters.
 - The regex pattern for the player list command is now less greedy, so it will only match on `/ma players`, `/ma playerlist`, and `/ma player-list`. The previous pattern matched on anything that starts with `player`, which rendered the `/ma player-stats` command in MobArenaStats impossible to invoke.
 
@@ -30,11 +32,18 @@ These changes will (most likely) be included in the next version.
 - Pillagers and vindicators no longer spawn without their much-needed weapons.
 - Piglins, piglin brutes, and hoglins no longer zombify. This fixes a bug where the mobs would despawn due to the zombification process.
 - Zombies, husks, drowned, zombie villagers, piglins, hoglins, and zoglins without the `baby` prefix are now forced into adulthood to prevent them from occasionally spawning as babies.
+- Evokers are once again capable of spawning vexes on 1.18.1+.
 - Reward groups with `nothing` in them no longer cause errors when earned/granted.
 - The title-based announcer and the title-based boss health bar have been fixed to work with the breaking change to the Title API in Spigot 1.17.
 - Arena Signs now correctly update for arenas that don't have `kebab-case` names in the config-file. 
 - Block explosion events cancelled by other plugins now remain cancelled unless MobArena specifically uncancels them for an arena.
 - Flaming arrows now ignite TNT blocks in the arena.
+- Players no longer take fall damage when they leave (or get removed from) an arena while falling.
+- Players no longer take damage from projectiles shot by pets of other players.
+- Normal shulker boxes are now properly removed from inventories of players using the My Items class.
+- Class pets are now correctly removed from the arena when their owner dies, rather than when they leave.
+- MobArena no longer nags players with the `mobarena.admin.teleport` permission when they engage in a teleport that would have otherwise been blocked.
+- MobArena now correctly sets the source property on auto-ignited TNT.
 
 ## [0.106] - 2021-05-09
 ### Added

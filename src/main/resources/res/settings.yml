@@ -7,6 +7,7 @@ default-class: ''
 clear-wave-before-next: false
 clear-boss-before-next: false
 clear-wave-before-boss: false
+clear-wave-leeway: 0
 soft-restore: false
 soft-restore-drops: false
 require-empty-inv-join: false
@@ -33,6 +34,7 @@ food-regen: false
 lock-food-level: true
 player-time-in-arena: world
 auto-ignite-tnt: false
+auto-ignite-fuse: 80
 auto-start-timer: 0
 start-delay-timer: 0
 auto-ready: false

@@ -369,10 +369,9 @@ public class MAGlobalListener implements Listener
         /*
          * If we reach this point, no arena has specifically allowed the
          * teleport, but one or more arenas may have rejected it, so we
-         * may have to cancel the event. If the player has the teleport
-         * override permission, however, we don't cancel.
+         * may have to cancel the event.
          */
-        if (!allow && !event.getPlayer().hasPermission("mobarena.admin.teleport")) {
+        if (!allow) {
             event.setCancelled(true);
         }
     }

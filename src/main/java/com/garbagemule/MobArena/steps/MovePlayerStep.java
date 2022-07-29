@@ -19,11 +19,13 @@ abstract class MovePlayerStep extends PlayerStep {
     public void run() {
         location = player.getLocation();
 
+        player.setFallDistance(0);
         player.teleport(destination.get());
     }
 
     @Override
     public void undo() {
+        player.setFallDistance(0);
         player.teleport(location);
     }
 }

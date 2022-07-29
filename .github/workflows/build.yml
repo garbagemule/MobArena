@@ -1,26 +1,33 @@
-name: Build MobArena
+name: build
 
-on: push
+on: 
+  workflow_dispatch:
+  push:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: 'Checkout source code'
         uses: actions/checkout@v2
+
       - name: 'Set up JDK'
         uses: actions/setup-java@v2
         with:
           java-version: '11'
           distribution: 'adopt'
+
       - name: 'Cache dependencies'
         uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
       - name: 'Build, test, and package'
         run: mvn -B package --file pom.xml
+
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v2
         with:
