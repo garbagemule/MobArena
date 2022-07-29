@@ -91,9 +91,6 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.Metadatable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
@@ -128,6 +125,7 @@ public class ArenaListener
     private boolean allowTeleport,
             canShare,
             autoIgniteTNT;
+    private int autoIgniteFuse;
 
     private Set<Player> banned;
 
@@ -154,6 +152,7 @@ public class ArenaListener
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
         this.canShare         = s.getBoolean("share-items-in-arena", true);
         this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
+        this.autoIgniteFuse   = s.getInt("auto-ignite-fuse",         80);
         this.useClassChests   = s.getBoolean("use-class-chests",     false);
 
         this.classLimits = arena.getClassLimitManager();
@@ -293,10 +292,10 @@ public class ArenaListener
                 }
                 stack.setAmount(stack.getAmount() - 1);
                 TNTPrimed tnt = b.getWorld().spawn(b.getRelative(BlockFace.UP).getLocation(), TNTPrimed.class);
-                setPlanter(tnt, event.getPlayer());
+                tnt.setSource(event.getPlayer());
+                tnt.setFuseTicks(Math.max(0, autoIgniteFuse));
                 return;
             }
-            setPlanter(b, event.getPlayer());
         }
 
         // Any other block we don't care about if we're not protecting
@@ -311,20 +310,6 @@ public class ArenaListener
             // For doors, add the block just above (so we get both halves)
             arena.addBlock(b.getRelative(0, 1, 0));
         }
-    }
-
-    private void setPlanter(Metadatable tnt, Player planter) {
-        tnt.setMetadata("mobarena-planter", new FixedMetadataValue(plugin, planter));
-    }
-
-    private Player getPlanter(Metadatable tnt) {
-        List<MetadataValue> values = tnt.getMetadata("mobarena-planter");
-        for (MetadataValue value : values) {
-            if (value.getOwningPlugin().equals(plugin)) {
-                return (Player) value.value();
-            }
-        }
-        return null;
     }
 
     public void onBlockForm(BlockFormEvent event) {
@@ -366,16 +351,7 @@ public class ArenaListener
             case FLINT_AND_STEEL:
                 if (arena.inEditMode()) return;
                 if (arena.isRunning()) {
-                    if (b.getType() == Material.TNT) {
-                        Player planter = getPlanter(b);
-                        if (planter != null) {
-                            b.setType(Material.AIR);
-                            TNTPrimed tnt = b.getWorld().spawn(b.getLocation(), TNTPrimed.class);
-                            setPlanter(tnt, planter);
-                        }
-                    } else {
-                        arena.addBlock(event.getBlock().getRelative(BlockFace.UP));
-                    }
+                    arena.addBlock(b.getRelative(BlockFace.UP));
                     break;
                 }
             case LIGHTNING:
@@ -424,15 +400,23 @@ public class ArenaListener
          * reason means MobArena didn't trigger the event. However, we
          * make an exception for certain mobs that spawn as results of
          * other entities spawning them, e.g. when Evokers summon Vexes.
+         * Note that the "spell" reason was introduced somewhere between
+         * 1.18 and 1.18.1, so "default" is kept only for compatibility
+         * with older server versions. Also note the use of `switch` as
+         * a workaround for the NoSuchFieldError that would occur if we
+         * used a simple equality check.
          */
-        if (reason == SpawnReason.DEFAULT) {
-            if (event.getEntityType() == EntityType.VEX) {
-                event.setCancelled(false);
-                monsters.addMonster(event.getEntity());
-            } else {
-                event.setCancelled(true);
+        switch (reason) {
+            case DEFAULT:
+            case SPELL: {
+                if (event.getEntityType() == EntityType.VEX) {
+                    event.setCancelled(false);
+                    monsters.addMonster(event.getEntity());
+                } else {
+                    event.setCancelled(true);
+                }
+                return;
             }
-            return;
         }
 
         // If not custom, we probably don't want it, so get rid of it
@@ -687,7 +671,7 @@ public class ArenaListener
             }
 
             if (damager instanceof TNTPrimed) {
-                damager = getPlanter(damager);
+                damager = ((TNTPrimed) damager).getSource();
             }
         }
 
@@ -738,6 +722,12 @@ public class ArenaListener
         }
 
         if (arena.inArena(player)) {
+            // Cancel damage from pets (and their projectiles)
+            if (monsters.hasPet(damager)) {
+                event.setCancelled(true);
+                return;
+            }
+
             // Cancel PvP damage if disabled
             if (!pvpEnabled && damager instanceof Player && !damager.equals(player)) {
                 event.setCancelled(true);
@@ -1307,28 +1297,34 @@ public class ArenaListener
             if (region.contains(to)) {
                 // Inside -> inside
                 if (!(arena.inArena(p) || arena.inLobby(p))) {
-                    arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
-                    return TeleportResponse.REJECT;
+                    return reject(p, Msg.WARP_TO_ARENA);
                 }
                 return TeleportResponse.ALLOW;
             } else {
                 // Inside -> outside
                 if (arena.getAllPlayers().contains(p)) {
-                    arena.getMessenger().tell(p, Msg.WARP_FROM_ARENA);
-                    return TeleportResponse.REJECT;
+                    return reject(p, Msg.WARP_FROM_ARENA);
                 }
                 return TeleportResponse.IDGAF;
             }
         } else {
             if (region.contains(to)) {
                 // Outside -> inside
-                arena.getMessenger().tell(p, Msg.WARP_TO_ARENA);
-                return TeleportResponse.REJECT;
+                return reject(p, Msg.WARP_TO_ARENA);
             } else {
                 // Outside -> outside
                 return TeleportResponse.IDGAF;
             }
         }
+    }
+
+    private TeleportResponse reject(Player p, Msg message) {
+        if (p.hasPermission("mobarena.admin.teleport")) {
+            return TeleportResponse.IDGAF;
+        }
+
+        arena.getMessenger().tell(p, message);
+        return TeleportResponse.REJECT;
     }
 
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
