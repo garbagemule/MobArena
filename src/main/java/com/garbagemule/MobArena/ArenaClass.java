@@ -268,6 +268,9 @@ public class ArenaClass
             if (arena != null) {
                 try {
                     arena.getInventoryManager().equip(p);
+                    if (arena.isKeepDrops()) {
+                        arena.getInventoryManager().setOriginalItemsPDC(arena.getPlugin(), p);
+                    }
                     removeBannedItems(p.getInventory());
                 } catch (Exception e) {
                     am.getPlugin().getLogger().severe("Failed to give " + p.getName() + " their own items: " + e.getMessage());

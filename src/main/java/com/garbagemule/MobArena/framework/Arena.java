@@ -64,6 +64,8 @@ public interface Arena
 
     int getMaxPlayers();
 
+    boolean isKeepDrops();
+
     List<Thing> getEntryFee();
 
     Set<Map.Entry<Integer, ThingPicker>> getEveryWaveEntrySet();
