@@ -16,6 +16,8 @@ import com.garbagemule.MobArena.region.ArenaRegion;
 import com.garbagemule.MobArena.repairable.Repairable;
 import com.garbagemule.MobArena.repairable.RepairableComparator;
 import com.garbagemule.MobArena.repairable.RepairableContainer;
+import com.garbagemule.MobArena.steps.CompositeStep;
+import com.garbagemule.MobArena.steps.KeepDropsStep;
 import com.garbagemule.MobArena.steps.PlayerJoinArena;
 import com.garbagemule.MobArena.steps.PlayerSpecArena;
 import com.garbagemule.MobArena.steps.Step;
@@ -867,6 +869,19 @@ public class ArenaImpl implements Arena {
         // Clear the player's inventory, and unmount
         if (arenaPlayers.remove(p)) {
             unmount(p);
+            if (this.keepDrops) {
+                this.inventoryManager.removeOriginalItems(plugin, p);
+                final Step step = histories.get(p);
+                if (step != null) {
+                    final Step keepDropsStep = KeepDropsStep.create(this).create(p);
+                    keepDropsStep.run();
+                    final Step composite = CompositeStep.create(
+                            step,
+                            keepDropsStep
+                    ).create(p);
+                    histories.put(p, composite);
+                }
+            }
             clearInv(p);
         }
 
@@ -960,16 +975,9 @@ public class ArenaImpl implements Arena {
         }
         try {
             this.inventoryManager.removeOriginalItems(this.plugin, p);
-            final ItemStack[] itemStacks = p.getInventory().getContents().clone();
             step.undo();
-            if (this.keepDrops) {
-                for (ItemStack itemStack : itemStacks) {
-                    if (itemStack == null) continue;
-                    p.getInventory().addItem(itemStack);
-                }
-            }
-
         } catch (Exception e) {
+            e.printStackTrace();
             plugin.getLogger().log(Level.SEVERE, () -> "Failed to revert player " + p.getName());
         }
     }

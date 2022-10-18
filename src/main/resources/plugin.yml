@@ -3,7 +3,8 @@ author: garbagemule
 main: com.garbagemule.MobArena.MobArena
 version: '${project.version}'
 api-version: 1.13
-softdepend: [Multiverse-Core,Towny,Heroes,MagicSpells,Vault]
+softdepend: [Multiverse-Core,Towny,Heroes,MagicSpells,Vault,AdvancedEnchantments]
+loadbefore: [AdvancedEnchantments]
 commands:
     ma:
         description: Base command for MobArena

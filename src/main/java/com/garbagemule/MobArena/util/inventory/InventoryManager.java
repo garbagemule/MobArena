@@ -13,9 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -24,13 +22,23 @@ public class InventoryManager
     private static final String ORIGINAL_ITEM_KEY = "original-item";
 
     private Map<Player, ItemStack[]> inventories;
+    private Map<Player, ItemStack[]> keepDrops;
 
     public InventoryManager() {
         this.inventories = new HashMap<>();
+        this.keepDrops = new HashMap<>();
     }
 
     public void put(Player p, ItemStack[] contents) {
         inventories.put(p, contents);
+    }
+
+    public void putKeepDrops(Player p, ItemStack[] contents) {
+        keepDrops.put(p, contents);
+    }
+
+    public ItemStack[] getKeepDrops(Player p) {
+        return keepDrops.get(p);
     }
 
     public void equip(Player p) {
@@ -73,6 +81,10 @@ public class InventoryManager
 
     public void remove(Player p) {
         inventories.remove(p);
+    }
+
+    public void removeKeepDrops(Player p) {
+        keepDrops.remove(p);
     }
 
     /**
@@ -120,6 +132,8 @@ public class InventoryManager
             File inventories = new File(plugin.getDataFolder(), "inventories");
             File file = new File(inventories, p.getUniqueId().toString());
 
+            restoreKeepDrops(plugin, p);
+
             if (!file.exists()) {
                 return false;
             }
@@ -135,6 +149,27 @@ public class InventoryManager
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to restore inventory for " + p.getName(), e);
             return false;
+        }
+    }
+
+    private static void restoreKeepDrops(MobArena plugin, Player p) {
+        try {
+            File inventories = new File(plugin.getDataFolder(), "keep-drops");
+            File file = new File(inventories, p.getUniqueId().toString());
+
+            if (!file.exists()) {
+                return;
+            }
+
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(file);
+
+            ItemStack[] contents = config.getList("extra-drops").toArray(new ItemStack[0]);
+            p.getInventory().addItem(contents);
+
+            file.delete();
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to restore extra drops for " + p.getName(), e);
         }
     }
 }
