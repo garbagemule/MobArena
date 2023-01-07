@@ -415,7 +415,7 @@ public class MAGlobalListener implements Listener
 
     @EventHandler
     public void kill(ArenaKillEvent event){
-        if (!plugin.getConfig().getBoolean("custom-reward-per-kill")) return;
+        if (!plugin.getConfig().getBoolean( "arenas." + event.getArena().configName() + ".settings." + "custom-reward-per-kill")) return;
         Player player = event.getPlayer();
         Arena arena = event.getArena();
         int wave = arena.getWaveManager().getWaveNumber();
@@ -428,7 +428,7 @@ public class MAGlobalListener implements Listener
             rewardPath = "custom-reward-per-kill-10+";
         }
         try {
-            ThingPicker picker = am.getPlugin().getThingPickerManager().parse(plugin.getConfig().getString(rewardPath));
+            ThingPicker picker = am.getPlugin().getThingPickerManager().parse(plugin.getConfig().getString("arenas." + event.getArena().configName() + ".settings." + rewardPath));
             Thing thing = picker.pick();
             arena.getRewardManager().addReward(player, thing);
             event.getVictim().setCustomName(ChatColor.YELLOW + "+" + ChatColor.GREEN + thing.toString());
