@@ -448,7 +448,7 @@ public class MAGlobalListener implements Listener
         if (event.getWaveNumber() > 1){
             for (Player player : event.getArena().getPlayersInArena()) {
                 ArenaPlayerStatistics aps = event.getArena().getArenaPlayer(player).getStats();
-                player.sendMessage(event.getArena().getSettings().getString("prefix") + ChatColor.RED + "Total Kills: " + ChatColor.YELLOW + aps.getInt("kills"));
+                player.sendMessage("Total Kills: " + ChatColor.YELLOW + aps.getInt("kills"));
             }
         }
     }
@@ -457,7 +457,7 @@ public class MAGlobalListener implements Listener
     public void ArenaDeath(ArenaPlayerDeathEvent event) {
         Arena arena = event.getArena();
         ArenaPlayerStatistics aps = arena.getArenaPlayer(event.getPlayer()).getStats();
-        event.getPlayer().sendMessage(arena.getSettings().getString("prefix") + ChatColor.RED + "Total Kills on death: " + ChatColor.YELLOW + aps.getInt("kills"));
+        event.getPlayer().sendMessage("Total Kills on death: " + ChatColor.YELLOW + aps.getInt("kills"));
     }
 
     ///////////////////////////////////////////////////////////////////////////
