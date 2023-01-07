@@ -48,3 +48,7 @@ announcer-type: title
 global-join-announce: false
 global-end-announce: false
 show-death-messages: true
+custom-reward-per-kill: false
+custom-reward-per-kill-0-5: $5
+custom-reward-per-kill-5-10: $7.5
+custom-reward-per-kill-10+: $10

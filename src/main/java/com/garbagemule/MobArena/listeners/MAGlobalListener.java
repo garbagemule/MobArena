@@ -1,12 +1,21 @@
 package com.garbagemule.MobArena.listeners;
 
+import com.garbagemule.MobArena.ArenaPlayerStatistics;
 import com.garbagemule.MobArena.MobArena;
 import com.garbagemule.MobArena.PluginVersionCheck;
+import com.garbagemule.MobArena.events.ArenaKillEvent;
+import com.garbagemule.MobArena.events.ArenaPlayerDeathEvent;
+import com.garbagemule.MobArena.events.NewWaveEvent;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
 import com.garbagemule.MobArena.leaderboards.Stats;
+import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.util.inventory.InventoryManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Instrument;
+import org.bukkit.Note;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -397,7 +406,59 @@ public class MAGlobalListener implements Listener
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    //                                                                       //
+    //                            PER KILL REWARDS                           //
+    //                                                                       //
+    ///////////////////////////////////////////////////////////////////////////
 
+
+    @EventHandler
+    public void kill(ArenaKillEvent event){
+        if (!plugin.getConfig().getBoolean("custom-reward-per-kill")) return;
+        Player player = event.getPlayer();
+        Arena arena = event.getArena();
+        int wave = arena.getWaveManager().getWaveNumber();
+        String rewardPath;
+        if (wave < 5) {
+            rewardPath = "custom-reward-per-kill-0-5";
+        } else if (wave <= 10) {
+            rewardPath = "custom-reward-per-kill-5-10";
+        } else {
+            rewardPath = "custom-reward-per-kill-10+";
+        }
+        try {
+            ThingPicker picker = am.getPlugin().getThingPickerManager().parse(plugin.getConfig().getString(rewardPath));
+            Thing thing = picker.pick();
+            arena.getRewardManager().addReward(player, thing);
+            event.getVictim().setCustomName(ChatColor.YELLOW + "+" + ChatColor.GREEN + thing.toString());
+            event.getVictim().setCustomNameVisible(true);
+            player.playNote(player.getLocation(), Instrument.CHIME, Note.natural(1, Note.Tone.A));
+            player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_CHAIN,5,1);
+
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to reward " + player.getName() + " for kill.");
+            e.printStackTrace();
+        }
+
+    }
+
+    @EventHandler
+    public void WaveEvent(NewWaveEvent event) {
+        if (event.getWaveNumber() > 1){
+            for (Player player : event.getArena().getPlayersInArena()) {
+                ArenaPlayerStatistics aps = event.getArena().getArenaPlayer(player).getStats();
+                player.sendMessage(event.getArena().getSettings().getString("prefix") + ChatColor.RED + "Total Kills: " + ChatColor.YELLOW + aps.getInt("kills"));
+            }
+        }
+    }
+
+    @EventHandler
+    public void ArenaDeath(ArenaPlayerDeathEvent event) {
+        Arena arena = event.getArena();
+        ArenaPlayerStatistics aps = arena.getArenaPlayer(event.getPlayer()).getStats();
+        event.getPlayer().sendMessage(arena.getSettings().getString("prefix") + ChatColor.RED + "Total Kills on death: " + ChatColor.YELLOW + aps.getInt("kills"));
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     //                                                                       //
