@@ -1310,11 +1310,7 @@ public class ArenaImpl implements Arena
 
     private void autoReady(Player p) {
         if (settings.getBoolean("auto-ready", false)) {
-            if (autoStartTimer.getRemaining() <= 0) {
-                playerReady(p);
-            } else {
-                readyPlayers.add(p);
-            }
+            playerReady(p);
         }
     }
 
