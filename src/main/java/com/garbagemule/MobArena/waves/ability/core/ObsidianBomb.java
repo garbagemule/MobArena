@@ -55,7 +55,7 @@ public class ObsidianBomb implements Ability
                     return;
 
                 world.getBlockAt(loc).setType(Material.AIR);
-                world.createExplosion(loc, 3F);
+                world.createExplosion(loc, 3F, false, true, boss.getEntity());
             }
         }, FUSE);
     }
