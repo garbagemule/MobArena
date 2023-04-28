@@ -74,7 +74,7 @@ public class SheepBouncer implements Runnable
             // Create an explosion if there's a player amongst the nearby entities.
             for (Entity entity : e.getNearbyEntities(2D, 2D, 2D)) {
                 if (entity instanceof Player) {
-                    e.getWorld().createExplosion(e.getLocation(), 2f);
+                    e.getWorld().createExplosion(e.getLocation(), 2f, false, true, e);
                     e.remove();
 
                     break;

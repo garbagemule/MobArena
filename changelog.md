@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Fixed
+- Explosion damage caused by Exploding Sheep now correctly counts as monster damage. This means that the explosions only affect other mobs if the per-arena setting `monster-infight` is set to `true`.
 
 ## [0.107] - 2022-07-30
 ### Added
