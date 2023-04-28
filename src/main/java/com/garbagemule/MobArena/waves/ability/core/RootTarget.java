@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 @AbilityInfo(
     name = "Root Target",
@@ -33,6 +34,8 @@ public class RootTarget implements Ability
             return;
 
         Player player = (Player) target;
+        player.setFallDistance(0);
+        player.setVelocity(new Vector(0, 0, 0));
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, DURATION, AMPLIFIER));
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, DURATION, AMPLIFIER));
         player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, DURATION, -AMPLIFIER));
