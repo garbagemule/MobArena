@@ -7,7 +7,6 @@ import com.garbagemule.MobArena.waves.ability.AbilityInfo;
 import com.garbagemule.MobArena.waves.ability.AbilityUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.util.Vector;
 
 @AbilityInfo(
     name = "Pull Target",
@@ -25,14 +24,7 @@ public class PullTarget implements Ability
         LivingEntity target = AbilityUtils.getTarget(arena, boss.getEntity(), RANDOM);
         if (target == null) return;
 
-        Location loc  = target.getLocation();
-        Location bLoc = boss.getEntity().getLocation();
-        Vector v      = new Vector(bLoc.getX() - loc.getX(), 0, bLoc.getZ() - loc.getZ());
-
-        double a = Math.abs(bLoc.getX() - loc.getX());
-        double b = Math.abs(bLoc.getZ() - loc.getZ());
-        double c = Math.sqrt((a*a + b*b));
-
-        target.setVelocity(v.normalize().multiply(c*0.3).setY(0.8));
+        Location destination = boss.getEntity().getLocation();
+        Tosser.yoink(target, destination);
     }
 }
