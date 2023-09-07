@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -487,9 +488,57 @@ public class ArenaImpl implements Arena
         announce(msg.toString());
     }
 
+    private boolean justAddReadyPlayers() {
+        for (Player p : readyPlayers) {
+            lobbyPlayers.remove(p);
+            arenaPlayers.add(p);
+            readyPlayers.remove(p);
+
+            // Teleport player, give full health, initialize map
+            // Remove player from spec list to avoid invincibility issues
+            if (inSpec(p)) {
+                specPlayers.remove(p);
+                System.out.println("[MobArena] Player " + p.getName() + " joined the arena from the spec area!");
+                System.out.println("[MobArena] Invincibility glitch attempt stopped!");
+            }
+
+            movingPlayers.add(p);
+            if (arenaWarpOffset > 0.01) {
+                Location warp = region.getArenaWarp();
+                double x = warp.getX() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                double y = warp.getY();
+                double z = warp.getZ() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                Location offset = new Location(warp.getWorld(), x, y, z);
+                p.teleport(offset);
+            } else {
+                p.teleport(region.getArenaWarp());
+            }
+            movingPlayers.remove(p);
+
+            addClassPermissions(p);
+            arenaPlayerMap.get(p).resetStats();
+
+            Thing price = arenaPlayerMap.get(p).getArenaClass().getPrice();
+            if (price != null) {
+                price.takeFrom(p);
+            }
+
+            scoreboard.removePlayer(p);
+            scoreboard.addPlayer(p);
+
+            getMessenger().tell(p, "Maybe Rejoined?");
+        }
+
+        return true;
+    }
+
     @Override
     public boolean startArena() {
         // Sanity-checks
+        if (running) {
+            return justAddReadyPlayers();
+        }
+
         if (running || lobbyPlayers.isEmpty() || !readyPlayers.containsAll(lobbyPlayers)) {
             return false;
         }
@@ -1581,8 +1630,10 @@ public class ArenaImpl implements Arena
             messenger.tell(p, Msg.JOIN_ARENA_EDIT_MODE);
         else if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
             messenger.tell(p, Msg.JOIN_ALREADY_PLAYING);
-        else if (running)
-            messenger.tell(p, Msg.JOIN_ARENA_IS_RUNNING);
+        else if (running) {
+            return true;
+            //messenger.tell(p, Msg.JOIN_ARENA_IS_RUNNING);
+        }
         else if (!hasPermission(p))
             messenger.tell(p, Msg.JOIN_ARENA_PERMISSION);
         else if (getMaxPlayers() > 0 && lobbyPlayers.size() >= getMaxPlayers())
