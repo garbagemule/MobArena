@@ -266,6 +266,8 @@ public class Leaderboard
                 case SOUTH: return BlockFace.EAST;
                 case WEST: return BlockFace.SOUTH;
                 case EAST: return BlockFace.NORTH;
+                default:
+                    break;
             }
         }
         return null;

@@ -1,3 +1,9 @@
+# OS Files
+.DS_Store
+
+# IDE Files
+.vscode/
+
 # Java
 *.class
 

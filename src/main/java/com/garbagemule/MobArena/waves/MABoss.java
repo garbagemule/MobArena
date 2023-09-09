@@ -1,7 +1,6 @@
 package com.garbagemule.MobArena.waves;
 
 import com.garbagemule.MobArena.healthbar.HealthBar;
-import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;

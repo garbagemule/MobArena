@@ -1402,6 +1402,8 @@ public class ArenaImpl implements Arena
                     case PRIMED_TNT:
                     case SHULKER_BULLET:
                         e.remove();
+                    default:
+                        break;
                 }
             }
         }

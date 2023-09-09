@@ -20,32 +20,26 @@ public class FormulaManager {
         this.parser = parser;
     }
 
-    @SuppressWarnings("unused")
     public void registerConstant(String name, double value) {
         env.registerConstant(name, value);
     }
 
-    @SuppressWarnings("unused")
     public void registerVariable(String name, Formula formula) {
         env.registerVariable(name, formula);
     }
 
-    @SuppressWarnings("unused")
     public void registerUnaryOperator(String symbol, int precedence, UnaryOperation operation) {
         env.registerUnaryOperator(symbol, precedence, operation);
     }
 
-    @SuppressWarnings("unused")
     public void registerBinaryOperator(String symbol, int precedence, boolean left, BinaryOperation operation) {
         env.registerBinaryOperator(symbol, precedence, left, operation);
     }
 
-    @SuppressWarnings("unused")
     public void registerUnaryFunction(String name, UnaryOperation operation) {
         env.registerUnaryFunction(name, operation);
     }
 
-    @SuppressWarnings("unused")
     public void registerBinaryFunction(String name, BinaryOperation operation) {
         env.registerBinaryFunction(name, operation);
     }

@@ -524,8 +524,8 @@ public class ArenaRegion
         }
 
         // Set the coords and save
-        if (lower != null) setLocation(coords, r1.name().toLowerCase(), lower);
-        if (upper != null) setLocation(coords, r2.name().toLowerCase(), upper);
+        if (lower != null && r1 != null) setLocation(coords, r1.name().toLowerCase(), lower);
+        if (upper != null && r2 != null) setLocation(coords, r2.name().toLowerCase(), upper);
         save();
 
         // Reload regions and verify data
