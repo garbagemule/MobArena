@@ -9,7 +9,6 @@ import java.io.Serializable;
  * NOTE: I (garbagemule) DID NOT WRITE THIS CLASS (notice the author below)
  * @author creadri
  */
-@SuppressWarnings("serial")
 public class EntityPosition implements Serializable{
     private double x;
     private double y;

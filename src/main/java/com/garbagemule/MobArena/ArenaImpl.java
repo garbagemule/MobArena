@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class ArenaImpl implements Arena
     private ConfigurationSection settings;
 
     // Run-time settings and critical config settings
-    private boolean enabled, protect, running, edit;
+    private boolean enabled, protect, running, edit, rejoin;
 
     // World stuff
     private boolean allowMonsters, allowAnimals;
@@ -165,6 +166,7 @@ public class ArenaImpl implements Arena
 
         this.enabled = settings.getBoolean("enabled", false);
         this.protect = settings.getBoolean("protect", true);
+        this.rejoin  = settings.getBoolean("rejoin", false);
         this.running = false;
         this.edit    = false;
 
@@ -487,9 +489,62 @@ public class ArenaImpl implements Arena
         announce(msg.toString());
     }
 
+    private boolean addReadyPlayers() {
+        for (Player p : readyPlayers) {
+            lobbyPlayers.remove(p);
+            arenaPlayers.add(p);
+            readyPlayers.remove(p);
+
+            // Teleport player, give full health, initialize map
+            // Remove player from spec list to avoid invincibility issues
+            if (inSpec(p)) {
+                specPlayers.remove(p);
+                System.out.println("[MobArena] Player " + p.getName() + " joined the arena from the spec area!");
+                System.out.println("[MobArena] Invincibility glitch attempt stopped!");
+            }
+
+            movingPlayers.add(p);
+            if (arenaWarpOffset > 0.01) {
+                Location warp = region.getArenaWarp();
+                double x = warp.getX() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                double y = warp.getY();
+                double z = warp.getZ() + (arenaWarpOffset * 2 * (Math.random() - 0.5));
+                Location offset = new Location(warp.getWorld(), x, y, z);
+                p.teleport(offset);
+            } else {
+                p.teleport(region.getArenaWarp());
+            }
+            movingPlayers.remove(p);
+
+            addClassPermissions(p);
+            arenaPlayerMap.get(p).resetStats();
+
+            Thing price = arenaPlayerMap.get(p).getArenaClass().getPrice();
+            if (price != null) {
+                price.takeFrom(p);
+            }
+
+            monsterManager.getBossMonsters().forEach(entity -> {
+                MABoss boss = monsterManager.getBoss(entity);
+                if (boss != null) {
+                    boss.getHealthBar().addPlayer(p);
+                }
+            });
+
+            scoreboard.removePlayer(p);
+            scoreboard.addPlayer(p);
+        }
+
+        return true;
+    }
+
     @Override
     public boolean startArena() {
         // Sanity-checks
+        if (running && rejoin) {
+            return addReadyPlayers();
+        }
+
         if (running || lobbyPlayers.isEmpty() || !readyPlayers.containsAll(lobbyPlayers)) {
             return false;
         }
@@ -1402,6 +1457,8 @@ public class ArenaImpl implements Arena
                     case PRIMED_TNT:
                     case SHULKER_BULLET:
                         e.remove();
+                    default:
+                        break;
                 }
             }
         }
@@ -1457,6 +1514,11 @@ public class ArenaImpl implements Arena
     @Override
     public boolean isDead(Player p) {
         return deadPlayers.contains(p);
+    }
+
+    @Override
+    public boolean canRejoin() {
+        return rejoin;
     }
 
     @Override
@@ -1579,7 +1641,7 @@ public class ArenaImpl implements Arena
             messenger.tell(p, Msg.JOIN_ARENA_EDIT_MODE);
         else if (arenaPlayers.contains(p) || lobbyPlayers.contains(p))
             messenger.tell(p, Msg.JOIN_ALREADY_PLAYING);
-        else if (running)
+        else if (running && !rejoin)
             messenger.tell(p, Msg.JOIN_ARENA_IS_RUNNING);
         else if (!hasPermission(p))
             messenger.tell(p, Msg.JOIN_ARENA_PERMISSION);

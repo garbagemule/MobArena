@@ -81,11 +81,6 @@ public class ScoreboardManager {
             return;
         }
 
-        String name = ChatColor.GRAY + player.getName();
-        if (name.length() > 16) {
-            name = name.substring(0, 15);
-        }
-
         Score score = kills.getScore(player.getName());
         if (score == null) {
             return;
@@ -94,18 +89,25 @@ public class ScoreboardManager {
         int value = score.getScore();
         scoreboard.resetScores(player.getName());
 
-        /* In case the player has no kills, they will not show up on the
-         * scoreboard unless they are first given a different score.
-         * If zero kills, the score is set to 8 (which looks a bit like
-         * 0), and then in the next tick, it's set to 0. Otherwise, the
-         * score is just set to its current value.
-         */
-        final Score fake = kills.getScore(name);
-        if (value == 0) {
-            fake.setScore(8);
-            arena.scheduleTask(() -> fake.setScore(0), 1);
-        } else {
-            fake.setScore(value);
+        if (!arena.canRejoin()) {
+            /* In case the player has no kills, they will not show up on the
+             * scoreboard unless they are first given a different score.
+             * If zero kills, the score is set to 8 (which looks a bit like
+             * 0), and then in the next tick, it's set to 0. Otherwise, the
+             * score is just set to its current value.
+             */
+            String name = ChatColor.GRAY + player.getName();
+            if (name.length() > 16) {
+                name = name.substring(0, 15);
+            }
+
+            final Score fake = kills.getScore(name);
+            if (value == 0) {
+                fake.setScore(8);
+                arena.scheduleTask(() -> fake.setScore(0), 1);
+            } else {
+                fake.setScore(value);
+            }
         }
     }
 

@@ -219,6 +219,8 @@ public interface Arena
 
     boolean isDead(Player p);
 
+    boolean canRejoin();
+
     String configName();
 
     /**

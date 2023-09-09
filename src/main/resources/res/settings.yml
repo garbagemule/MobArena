@@ -48,3 +48,4 @@ announcer-type: title
 global-join-announce: false
 global-end-announce: false
 show-death-messages: true
+rejoin: false
