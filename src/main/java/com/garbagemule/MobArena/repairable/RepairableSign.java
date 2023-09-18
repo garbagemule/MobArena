@@ -27,6 +27,7 @@ public class RepairableSign extends RepairableAttachable
         s.setLine(1, lines[1]);
         s.setLine(2, lines[2]);
         s.setLine(3, lines[3]);
+        s.update();
     }
 
 }
