@@ -4,7 +4,6 @@ import com.garbagemule.MobArena.Msg;
 import com.garbagemule.MobArena.formula.Formula;
 import com.garbagemule.MobArena.formula.Formulas;
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.BossAbilityThread;

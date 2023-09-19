@@ -174,8 +174,6 @@ public class ArenaClass
      * @param p a player
      */
     public void grantItems(Player p) {
-        PlayerInventory inv = p.getInventory();
-
         // Fork over the items.
         items.forEach(item -> item.giveTo(p));
 
