@@ -294,8 +294,9 @@ public class ArenaClass
                 case ENDER_CHEST:
                 case SHULKER_SHELL:
                     return true;
+                default:
+                    return type.name().endsWith("SHULKER_BOX");
             }
-            return type.name().endsWith("SHULKER_BOX");
         }
     }
 }
