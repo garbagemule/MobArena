@@ -128,7 +128,43 @@ class Environment {
         operators.add(i, token);
     }
 
-    @SuppressWarnings("Convert2MethodRef")
+    // math functions implemented here to get rid of "unchecked conversion" warnings...
+    private static Double sqrt(Double a) {
+        return Math.sqrt(a);
+    }
+
+    private static Double abs(Double a) {
+        return Math.abs(a);
+    }
+
+    private static Double ceil(Double a) {
+        return Math.ceil(a);
+    }
+
+    private static Double floor(Double a) {
+        return Math.floor(a);
+    }
+
+    private static Double sin(Double a) {
+        return Math.sin(a);
+    }
+
+    private static Double cos(Double a) {
+        return Math.cos(a);
+    }
+
+    private static Double tan(Double a) {
+        return Math.tan(a);
+    }
+
+    private static Double min(Double a, Double b) {
+        return Math.min(a, b);
+    }
+
+    private static Double max(Double a, Double b) {
+        return Math.max(a, b);
+    }
+
     static Environment createDefault() {
         Environment result = new Environment();
 
@@ -149,20 +185,20 @@ class Environment {
         result.registerBinaryOperator("^", 4, false, (a, b) -> Math.pow(a, b));
 
         // Unary functions
-        result.registerUnaryFunction("sqrt", Math::sqrt);
-        result.registerUnaryFunction("abs", Math::abs);
+        result.registerUnaryFunction("sqrt", Environment::sqrt);
+        result.registerUnaryFunction("abs", Environment::abs);
 
-        result.registerUnaryFunction("ceil", Math::ceil);
-        result.registerUnaryFunction("floor", Math::floor);
+        result.registerUnaryFunction("ceil", Environment::ceil);
+        result.registerUnaryFunction("floor", Environment::floor);
         result.registerUnaryFunction("round", value -> (double) Math.round(value));
 
-        result.registerUnaryFunction("sin", Math::sin);
-        result.registerUnaryFunction("cos", Math::cos);
-        result.registerUnaryFunction("tan", Math::tan);
+        result.registerUnaryFunction("sin", Environment::sin);
+        result.registerUnaryFunction("cos", Environment::cos);
+        result.registerUnaryFunction("tan", Environment::tan);
 
         // Binary functions
-        result.registerBinaryFunction("min", Math::min);
-        result.registerBinaryFunction("max", Math::max);
+        result.registerBinaryFunction("min", Environment::min);
+        result.registerBinaryFunction("max", Environment::max);
 
         return result;
     }
