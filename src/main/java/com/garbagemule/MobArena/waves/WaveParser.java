@@ -98,6 +98,8 @@ public class WaveParser
             case BOSS:
                 result = parseBossWave(arena, name, config);
                 break;
+            default:
+                throw new ConfigError("Unknown wave type for wave " + name + " of arena " + arena.configName() + ": " + t);
         }
 
         // Grab the branch-specific nodes.
