@@ -2,7 +2,7 @@ name: ${project.name}
 author: garbagemule
 main: com.garbagemule.MobArena.MobArena
 version: '${project.version}'
-api-version: 1.13
+api-version: 1.18
 softdepend: [Multiverse-Core,Towny,Heroes,MagicSpells,Vault]
 commands:
     ma:
