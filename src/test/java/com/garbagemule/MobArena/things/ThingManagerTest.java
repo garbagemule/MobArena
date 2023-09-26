@@ -61,7 +61,6 @@ public class ThingManagerTest {
         ThingParser third = mock(ThingParser.class);
         when(first.parse("thing")).thenReturn(null);
         when(second.parse("thing")).thenReturn(thing);
-        when(third.parse("thing")).thenReturn(thing);
         subject.register(first);
         subject.register(second);
         subject.register(third);
