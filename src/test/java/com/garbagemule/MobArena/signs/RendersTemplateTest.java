@@ -28,7 +28,7 @@ public class RendersTemplateTest {
     @Test
     public void rendersArenaName() {
         String name = "castle";
-        Arena arena = arena(name, false, false);
+        Arena arena = arena3(name, false, false);
         Template template = new Template.Builder("template")
             .withBase(new String[]{"<arena-name>", "", "", ""})
             .build();
@@ -41,7 +41,7 @@ public class RendersTemplateTest {
 
     @Test
     public void defaultsToBaseIfArenaIsNotRunning() {
-        Arena arena = arena("castle", false, false);
+        Arena arena = arena3("castle", false, false);
         String[] base = {"this", "is", "the", "base"};
         Template template = new Template.Builder("template")
             .withBase(base)
@@ -55,7 +55,7 @@ public class RendersTemplateTest {
 
     @Test
     public void idleOverridesBaseIfNotRunning() {
-        Arena arena = arena("castle", false, false);
+        Arena arena = arena3("castle", false, false);
         String[] idle = {"relax", "don't", "do", "it"};
         Template template = new Template.Builder("template")
             .withBase(new String[]{"this", "is", "the", "base"})
@@ -69,7 +69,7 @@ public class RendersTemplateTest {
 
     @Test
     public void runningOverridesBaseIfArenaIsRunning() {
-        Arena arena = arena("castle", true, false);
+        Arena arena = arena2("castle", true, false);
         String[] running = {"here", "is", "running", "yo"};
         Template template = new Template.Builder("template")
             .withBase(new String[]{"this", "is", "the", "base"})
@@ -83,7 +83,7 @@ public class RendersTemplateTest {
 
     @Test
     public void lobbyOverridesBaseIfPlayersInLobby() {
-        Arena arena = arena("castle", false, true);
+        Arena arena = arena3("castle", false, true);
         String[] joining = {"we", "in", "da", "lobby"};
         Template template = new Template.Builder("template")
             .withBase(new String[]{"this", "is", "the", "base"})
@@ -159,7 +159,7 @@ public class RendersTemplateTest {
 
     @Test
     public void doesNotRenderInvalidListEntries() {
-        Arena arena = arena("castle", false, true);
+        Arena arena = arena3("castle", false, true);
         String[] base = new String[]{"<ready-0>", "<ready--1>", "<ready-n>", "<ready-999999>"};
         Template template = new Template.Builder("template")
             .withBase(base)
@@ -179,4 +179,19 @@ public class RendersTemplateTest {
         return arena;
     }
 
+    private Arena arena2(String name, boolean running, boolean lobby) {
+        Arena arena = mock(Arena.class);
+        when(arena.configName()).thenReturn(name);
+        when(arena.isRunning()).thenReturn(running);
+        when(arena.getWaveManager()).thenReturn(mock(WaveManager.class));
+        return arena;
+    }
+
+    private Arena arena3(String name, boolean running, boolean lobby) {
+        Arena arena = mock(Arena.class);
+        when(arena.configName()).thenReturn(name);
+        when(arena.isRunning()).thenReturn(running);
+        when(arena.getPlayersInLobby()).thenReturn(lobby ? Collections.singleton(null) : Collections.emptySet());
+        return arena;
+    }
 }
