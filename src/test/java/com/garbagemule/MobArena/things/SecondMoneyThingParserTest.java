@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-public class MoneyThingParserTest {
+public class SecondMoneyThingParserTest {
 
     private MoneyThingParser subject;
     private MobArena plugin;
@@ -26,31 +26,28 @@ public class MoneyThingParserTest {
     public void setup() {
         plugin = mock(MobArena.class);
         Economy economy = mock(Economy.class);
-        when(plugin.getEconomy()).thenReturn(economy);
 
         subject = new MoneyThingParser(plugin);
     }
 
-
     @Test
-    public void shortPrefix() {
-        MoneyThing result = subject.parse("$500");
+    public void noPrefixNoBenjamins() {
+        MoneyThing result = subject.parse("500");
 
-        assertThat(result, not(nullValue()));
-    }
-
-    @Test
-    public void longPrefix() {
-        MoneyThing result = subject.parse("money:500");
-
-        assertThat(result, not(nullValue()));
+        assertThat(result, is(nullValue()));
     }
 
 
     @Test
-    public void numberFormatForNaughtyValues() {
-        exception.expect(NumberFormatException.class);
-        subject.parse("$cash");
+    public void nullEconomyNullMoney() {
+        Logger logger = mock(Logger.class);
+        when(plugin.getEconomy()).thenReturn(null);
+        when(plugin.getLogger()).thenReturn(logger);
+
+        subject.parse("$500");
+
+        verify(logger).severe(anyString());
     }
+
 
 }
