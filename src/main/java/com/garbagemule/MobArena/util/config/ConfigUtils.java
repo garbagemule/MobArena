@@ -16,6 +16,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -46,11 +47,15 @@ public class ConfigUtils
             if (is == null) {
                 throw new IllegalStateException("Couldn't read " + res + " from jar, please re-install MobArena");
             }
-            Scanner scanner = new Scanner(is).useDelimiter("\\A");
-            if (!scanner.hasNext()) {
+
+            String contents;
+            try (Scanner scanner = new Scanner(is)) {
+                scanner.useDelimiter("\\A");
+                contents = scanner.next();
+            } catch (NoSuchElementException e) {
                 throw new IllegalStateException("No content in " + res + " in jar, please re-install MobArena");
             }
-            String contents = scanner.next();
+
             YamlConfiguration yaml = new YamlConfiguration();
             try {
                 yaml.loadFromString(contents);
