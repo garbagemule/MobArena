@@ -53,7 +53,7 @@ public class ConfigUtils
                 scanner.useDelimiter("\\A");
                 contents = scanner.next();
             } catch (NoSuchElementException e) {
-                    throw new IllegalStateException("No content in " + res + " in jar, please re-install MobArena");
+                throw new IllegalStateException("No content in " + res + " in jar, please re-install MobArena");
             }
 
             YamlConfiguration yaml = new YamlConfiguration();
