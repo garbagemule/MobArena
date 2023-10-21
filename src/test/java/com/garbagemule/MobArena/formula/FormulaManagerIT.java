@@ -129,6 +129,32 @@ public class FormulaManagerIT {
 
     }
 
+    /**
+     * With custom constants, we are manipulating the internal
+     * state of the manager, so we need to use a local subject.
+     */
+    public static class CustomConstants {
+
+        FormulaManager subject;
+
+        @Before
+        public void setup() {
+            subject = FormulaManager.createDefault();
+        }
+
+        @Test
+        public void resolveRegisteredCustomConstant() {
+            subject.registerConstant("pie", 3.14);
+
+            Formula formula = subject.parse("pie * 2");
+            double result = formula.evaluate(arena);
+
+            double expected = 6.28;
+            assertThat(result, equalTo(expected));
+        }
+
+    }
+
     @RunWith(Parameterized.class)
     public static class DefaultVariables {
 
@@ -257,6 +283,54 @@ public class FormulaManagerIT {
             Formula formula = subject.parse(input);
             double result = formula.evaluate(arena);
 
+            assertThat(result, equalTo(expected));
+        }
+
+    }
+
+    /**
+     * With custom operators, we are manipulating the internal
+     * state of the manager, so we need to use a local subject.
+     */
+    public static class CustomOperators {
+
+        FormulaManager subject;
+
+        @Before
+        public void setup() {
+            subject = FormulaManager.createDefault();
+        }
+
+        @Test
+        public void resolveRegisteredCustomUnaryOperator() {
+            subject.registerUnaryOperator("_", 1, a -> a - 1);
+
+            Formula formula = subject.parse("_(1 + 1)");
+            double result = formula.evaluate(arena);
+
+            double expected = 1;
+            assertThat(result, equalTo(expected));
+        }
+
+        @Test
+        public void resolveRegisteredCustomBinaryOperator1() {
+            subject.registerBinaryOperator("?", 1, true, (a, b) -> (a >= 0) ? a : b);
+
+            Formula formula = subject.parse("5 ? 6");
+            double result = formula.evaluate(arena);
+
+            double expected = 5;
+            assertThat(result, equalTo(expected));
+        }
+
+        @Test
+        public void resolveRegisteredCustomBinaryOperator2() {
+            subject.registerBinaryOperator("?", 1, true, (a, b) -> (a >= 0) ? a : b);
+
+            Formula formula = subject.parse("(5 - 10) ? (3 + 3)");
+            double result = formula.evaluate(arena);
+
+            double expected = 6;
             assertThat(result, equalTo(expected));
         }
 
