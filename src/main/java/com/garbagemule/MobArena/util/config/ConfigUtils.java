@@ -47,19 +47,13 @@ public class ConfigUtils
             if (is == null) {
                 throw new IllegalStateException("Couldn't read " + res + " from jar, please re-install MobArena");
             }
+
             String contents;
-            Scanner scanner = null;
-            try {
-                scanner = new Scanner(is).useDelimiter("\\A");
+            try (Scanner scanner = new Scanner(is)) {
+                scanner.useDelimiter("\\A");
                 contents = scanner.next();
             } catch (NoSuchElementException e) {
                     throw new IllegalStateException("No content in " + res + " in jar, please re-install MobArena");
-            } catch (Exception e) {
-                throw e;
-            } finally {
-                if (scanner != null) {
-                    scanner.close();
-                }
             }
 
             YamlConfiguration yaml = new YamlConfiguration();
