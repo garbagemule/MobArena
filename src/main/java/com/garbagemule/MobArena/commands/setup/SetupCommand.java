@@ -353,7 +353,7 @@ public class SetupCommand implements Command, Listener {
                     return true;
                 default:
                     return false;
-                }
+            }
         }
 
         private boolean spawns(PlayerInteractEvent event) {
