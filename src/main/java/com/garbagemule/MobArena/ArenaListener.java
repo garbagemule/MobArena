@@ -44,6 +44,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.Event.Result;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
@@ -1089,26 +1090,58 @@ public class ArenaListener
     }
 
     public void onPlayerInteract(PlayerInteractEvent event) {
-        Player p = event.getPlayer();
-        if (!arena.inLobby(p)) return;
+        if (arena.inLobby(event.getPlayer())) {
+            onLobbyPlayerInteract(event);
+        } else {
+            onNonLobbyPlayerInteract(event);
+        }
+    }
 
-        // Prevent placing blocks and using held items
+    private void onLobbyPlayerInteract(PlayerInteractEvent event) {
         if (event.hasItem()) {
             event.setUseItemInHand(Result.DENY);
         }
 
-        // Bail if off-hand or if there's no block involved.
-        if (event.getHand() == EquipmentSlot.OFF_HAND || !event.hasBlock())
+        if (event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
-
-        // Iron block
-        if (event.getClickedBlock().getType() == Material.IRON_BLOCK) {
-            handleReadyBlock(p);
         }
-        // Sign
-        else if (event.getClickedBlock().getState() instanceof Sign) {
+
+        Block block = event.getClickedBlock();
+        if (block == null) {
+            return;
+        }
+
+        if (block.getType() == Material.IRON_BLOCK) {
+            handleReadyBlock(event.getPlayer());
+        } else if (block.getState() instanceof Sign) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                event.setCancelled(true);
+            }
             Sign sign = (Sign) event.getClickedBlock().getState();
-            handleSign(sign, p);
+            handleSign(sign, event.getPlayer());
+        }
+    }
+
+    private void onNonLobbyPlayerInteract(PlayerInteractEvent event) {
+        if (!protect) {
+            return;
+        }
+
+        Block block = event.getClickedBlock();
+        if (block == null) {
+            return;
+        }
+        if (!region.contains(block.getLocation())) {
+            return;
+        }
+        if (arena.inEditMode()) {
+            return;
+        }
+
+        if (block.getState() instanceof Sign) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                event.setCancelled(true);
+            }
         }
     }
 

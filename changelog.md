@@ -15,6 +15,7 @@ These changes will (most likely) be included in the next version.
 - Explosion damage caused by Exploding Sheep now correctly counts as monster damage. This means that the explosions only affect other mobs if the per-arena setting `monster-infight` is set to `true`.
 - Explosion damage caused by the boss ability `obsidian-bomb` now correctly counts as monster damage. This means that the explosions only affect other mobs if the per-arena setting `monster-infight` is set to `true`.
 - An old discrepancy with auto start timers in the auto-ready logic has been removed. This fixes an issue in MobArenaStats where the extension would throw errors in arenas with `auto-ready: true` and a non-zero auto start timer. Note that the combination of `auto-ready: true` and a `default-class` now _requires_ the use of a `start-delay-timer` to prevent the arena from starting immediately when the first player joins.
+- Signs in arena regions, as well as Arena Signs anywhere, can no longer be edited by right-clicking.
 - Signs now correctly restore themselves again in arenas with `soft-restore: true`.
 
 ## [0.107] - 2022-07-30

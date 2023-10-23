@@ -41,6 +41,7 @@ class HandlesSignClicks implements Listener {
 
         ArenaSign sign = signStore.findByLocation(block.getLocation());
         if (sign != null) {
+            event.setCancelled(true);
             purgeAndInvoke(sign, event.getPlayer());
         }
     }
