@@ -14,6 +14,7 @@ These changes will (most likely) be included in the next version.
 ### Added
 - Support for chest references in item syntax. The new `inv` syntax allows for referencing container indices in the config-file. This should help bridge the gap between class chests and various other parts of the config-file, such as rewards and upgrade waves.
 - Support for saved items. The new `/ma save-item` command can be used to save the currently held item to disk, which allows it to be used in various places in the config-file. This should help bridge the gap between the config-file and class chests for config-file centric setups.
+- New permission `mobarena.admin.errors` for better error visibility. Players with this permission will get a message if an arena encounters an error.
 
 ### Fixed
 - Explosion damage caused by Exploding Sheep now correctly counts as monster damage. This means that the explosions only affect other mobs if the per-arena setting `monster-infight` is set to `true`.
