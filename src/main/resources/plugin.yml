@@ -47,6 +47,7 @@ permissions:
             mobarena.admin.force: true
             mobarena.admin.teleport: true
             mobarena.admin.addreward: true
+            mobarena.admin.errors: true
     mobarena.admin.enable:
         description: Enable and disable MobArena and/or arenas.
         default: false
@@ -64,6 +65,9 @@ permissions:
         default: false
     mobarena.admin.addreward:
         description: Add rewards to an arena player's reward list.
+        default: false
+    mobarena.admin.errors:
+        description: Get notified when an arena encounters errors.
         default: false
 
     mobarena.setup:
