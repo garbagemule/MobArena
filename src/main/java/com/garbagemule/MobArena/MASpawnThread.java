@@ -244,6 +244,11 @@ public class MASpawnThread implements Runnable
                     } else {
                         e.setCustomName("SPIGOT ERROR");
                     }
+                    for (Player p : plugin.getServer().getOnlinePlayers()) {
+                        if (p.hasPermission("mobarena.admin.errors")) {
+                            arena.getMessenger().tell(p, "Failed to set boss health (" + health + ") in arena " + arena.configName() + " (wave " + wave + ") because Spigot 'maxHealth' is too low. See console for details.");
+                        }
+                    }
                 }
 
                 // Switch on the type.
