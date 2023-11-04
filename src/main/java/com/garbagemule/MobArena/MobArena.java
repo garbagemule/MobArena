@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.formula.FormulaMacros;
 import com.garbagemule.MobArena.formula.FormulaManager;
 import com.garbagemule.MobArena.framework.Arena;
 import com.garbagemule.MobArena.framework.ArenaMaster;
+import com.garbagemule.MobArena.items.SavedItemsManager;
 import com.garbagemule.MobArena.listeners.MAGlobalListener;
 import com.garbagemule.MobArena.metrics.ArenaCountChart;
 import com.garbagemule.MobArena.metrics.ClassChestsChart;
@@ -67,6 +68,8 @@ public class MobArena extends JavaPlugin
     private FormulaManager formman;
     private FormulaMacros macros;
 
+    private SavedItemsManager itemman;
+
     private SignListeners signListeners;
 
     @Override
@@ -106,6 +109,7 @@ public class MobArena extends JavaPlugin
         try {
             createDataFolder();
             setupFormulaMacros();
+            setupSavedItemsManager();
             setupArenaMaster();
             setupCommandHandler();
 
@@ -132,6 +136,10 @@ public class MobArena extends JavaPlugin
 
     private void setupFormulaMacros() {
         macros = FormulaMacros.create(this);
+    }
+
+    private void setupSavedItemsManager() {
+        itemman = new SavedItemsManager(this);
     }
 
     private void setupArenaMaster() {
@@ -190,6 +198,7 @@ public class MobArena extends JavaPlugin
             reloadConfig();
             reloadGlobalMessenger();
             reloadFormulaMacros();
+            reloadSavedItemsManager();
             reloadArenaMaster();
             reloadAnnouncementsFile();
             reloadSigns();
@@ -224,6 +233,10 @@ public class MobArena extends JavaPlugin
         } catch (IOException e) {
             throw new RuntimeException("There was an error reloading the formulas-file:\n" + e.getMessage());
         }
+    }
+
+    private void reloadSavedItemsManager() {
+        itemman.reload();
     }
 
     private void reloadArenaMaster() {
@@ -316,5 +329,9 @@ public class MobArena extends JavaPlugin
 
     public FormulaMacros getFormulaMacros() {
         return macros;
+    }
+
+    public SavedItemsManager getSavedItemsManager() {
+        return itemman;
     }
 }

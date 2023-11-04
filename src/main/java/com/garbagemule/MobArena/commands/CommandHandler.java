@@ -15,12 +15,15 @@ import com.garbagemule.MobArena.commands.setup.AutoGenerateCommand;
 import com.garbagemule.MobArena.commands.setup.CheckDataCommand;
 import com.garbagemule.MobArena.commands.setup.CheckSpawnsCommand;
 import com.garbagemule.MobArena.commands.setup.ClassChestCommand;
+import com.garbagemule.MobArena.commands.setup.DeleteItemCommand;
 import com.garbagemule.MobArena.commands.setup.EditArenaCommand;
 import com.garbagemule.MobArena.commands.setup.ListClassesCommand;
+import com.garbagemule.MobArena.commands.setup.LoadItemCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveArenaCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveContainerCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveLeaderboardCommand;
 import com.garbagemule.MobArena.commands.setup.RemoveSpawnpointCommand;
+import com.garbagemule.MobArena.commands.setup.SaveItemCommand;
 import com.garbagemule.MobArena.commands.setup.SettingCommand;
 import com.garbagemule.MobArena.commands.setup.SetupCommand;
 import com.garbagemule.MobArena.commands.user.ArenaListCommand;
@@ -340,6 +343,10 @@ public class CommandHandler implements CommandExecutor, TabCompleter
 
         register(RemoveLeaderboardCommand.class);
         register(AutoGenerateCommand.class);
+
+        register(SaveItemCommand.class);
+        register(DeleteItemCommand.class);
+        register(LoadItemCommand.class);
     }
 
     /**

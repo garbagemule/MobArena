@@ -85,6 +85,9 @@ permissions:
             mobarena.setup.leaderboards: true
             mobarena.setup.autogenerate: true
             mobarena.setup.autodegenerate: true
+            mobarena.setup.saveitem: true
+            mobarena.setup.deleteitem: true
+            mobarena.setup.loaditem: true
     mobarena.setup.config:
         description: Save or reload the config-file
         default: false
@@ -129,4 +132,13 @@ permissions:
         default: false
     mobarena.setup.autodegenerate:
         description: Auto-degenerate an arena.
+        default: false
+    mobarena.setup.saveitem:
+        description: Store the currently held item as a saved item.
+        default: false
+    mobarena.setup.deleteitem:
+        description: Delete a saved item.
+        default: false
+    mobarena.setup.loaditem:
+        description: Set a saved item as the currently held item.
         default: false
