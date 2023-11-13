@@ -111,19 +111,19 @@ public class ArenaListener
     private MonsterManager monsters;
     private ClassLimitManager classLimits;
 
-    private boolean softRestore,
-            softRestoreDrops,
-            protect;
-    private boolean monsterExp,
-            monsterInfight,
-            pvpOn,               // pvp-enabled in config
-            pvpEnabled = false,  // activated on first wave
-            foodRegen,
-            lockFoodLevel,
-            useClassChests;
-    private boolean allowTeleport,
-            canShare,
-            autoIgniteTNT;
+    private boolean softRestore;
+    private boolean softRestoreDrops;
+    private boolean protect;
+    private boolean monsterExp;
+    private boolean monsterInfight;
+    private boolean pvpOn;
+    private boolean pvpEnabled;
+    private boolean foodRegen;
+    private boolean lockFoodLevel;
+    private boolean useClassChests;
+    private boolean allowTeleport;
+    private boolean canShare;
+    private boolean autoIgniteTNT;
     private int autoIgniteFuse;
 
     private Set<Player> banned;
