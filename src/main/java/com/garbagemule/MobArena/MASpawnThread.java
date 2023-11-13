@@ -91,10 +91,7 @@ public class MASpawnThread implements Runnable
         }
 
         int delay = arena.getSettings().getInt("first-wave-delay", 5) * 20;
-        task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            arena.getEventListener().pvpActivate();
-            this.run();
-        }, delay);
+        task = Bukkit.getScheduler().runTaskLater(plugin, this, delay);
     }
 
     public void stop() {
@@ -102,8 +99,6 @@ public class MASpawnThread implements Runnable
             plugin.getLogger().warning("Can't stop non-existent spawner in arena " + arena.configName() + ". This should never happen.");
             return;
         }
-
-        arena.getEventListener().pvpDeactivate();
 
         task.cancel();
         task = null;
