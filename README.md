@@ -11,6 +11,7 @@ one of these two sites:
 
 - [Bukkit](https://dev.bukkit.org/projects/mobarena)
 - [Spigot](https://www.spigotmc.org/resources/34110/)
+- [Hangar](https://hangar.papermc.io/garbagemule/MobArena)
 
 The wiki here on Github should have all the information you need to get 
 started using the plugin.
