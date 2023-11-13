@@ -121,6 +121,7 @@ public class ArenaListener
     private boolean lockFoodLevel;
     private boolean useClassChests;
     private boolean allowTeleport;
+    private boolean monsterTeleport;
     private boolean canShare;
     private boolean autoIgniteTNT;
     private int autoIgniteFuse;
@@ -145,6 +146,7 @@ public class ArenaListener
         this.foodRegen        = s.getBoolean("food-regen",           false);
         this.lockFoodLevel    = s.getBoolean("lock-food-level",      true);
         this.allowTeleport    = s.getBoolean("allow-teleporting",    false);
+        this.monsterTeleport  = s.getBoolean("monster-teleporting",  false);
         this.canShare         = s.getBoolean("share-items-in-arena", true);
         this.autoIgniteTNT    = s.getBoolean("auto-ignite-tnt",      false);
         this.autoIgniteFuse   = s.getInt("auto-ignite-fuse",         80);
@@ -893,6 +895,14 @@ public class ArenaListener
         if (monsters.hasPet(event.getEntity()) && region.contains(event.getTo())) {
             return;
         }
+
+        if (isArenaMonster(event.getEntity())) {
+            if (!monsterTeleport || !region.contains(event.getTo())) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+
         if (region.contains(event.getFrom()) || region.contains(event.getTo())) {
             event.setCancelled(true);
         }
