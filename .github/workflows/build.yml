@@ -17,19 +17,13 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-
-      - name: 'Cache dependencies'
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          cache: 'gradle'
 
       - name: 'Build, test, and package'
-        run: mvn -B package --file pom.xml
+        run: ./gradlew build --no-daemon
 
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v3
         with:
           name: MobArena.jar
-          path: target/MobArena.jar
+          path: build/libs/MobArena.jar
