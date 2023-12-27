@@ -11,7 +11,7 @@ public class PotionEffectParser
 {
     private static final int TICKS_PER_SECOND = 20;
     private static final int DEFAULT_POTION_AMPLIFIER = 0;
-    private static final int DEFAULT_POTION_DURATION = Integer.MAX_VALUE;
+    private static final int DEFAULT_POTION_DURATION = -1;
 
     public static List<PotionEffect> parsePotionEffects(String s) {
         if (s == null || s.isEmpty())
