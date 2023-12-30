@@ -58,7 +58,6 @@ tasks {
 
         archiveBaseName = "MobArena"
         archiveClassifier = ""
-        archiveVersion = ""
     }
 
     // We're using shadowJar, so we can skip the regular jar task.
