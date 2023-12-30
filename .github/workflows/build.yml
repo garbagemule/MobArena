@@ -23,7 +23,7 @@ jobs:
         run: ./gradlew build --no-daemon
 
       - name: 'Upload artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MobArena.jar
           path: build/libs/MobArena-*.jar
