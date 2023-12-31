@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v4
@@ -29,3 +32,14 @@ jobs:
         with:
           name: MobArena.jar
           path: build/libs/MobArena-*.jar
+
+      - name: 'Output version'
+        id: version
+        run: |
+          version=$(
+            unzip -p build/libs/MobArena-*.jar plugin.yml \
+            | grep '^version: ' \
+            | awk '{printf $2}' \
+            | tr -d "'" \
+          )
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
