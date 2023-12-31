@@ -1,6 +1,6 @@
 name: build
 
-on: 
+on:
   workflow_dispatch:
   push:
 
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Checkout source code'
+      - name: 'Checkout'
         uses: actions/checkout@v4
 
       - name: 'Set up JDK'
@@ -19,7 +19,7 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: 'Build, test, and package'
+      - name: 'Build'
         run: ./gradlew build --no-daemon
 
       - name: 'Upload artifact'
