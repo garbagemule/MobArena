@@ -43,3 +43,37 @@ jobs:
             | tr -d "'" \
           )
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+  draft:
+    needs: build
+
+    if: |
+      needs.build.result == 'success' &&
+      github.ref_name == 'master' &&
+      startsWith(github.event.head_commit.message, 'Release ') &&
+      !endsWith(needs.build.outputs.version, '-SNAPSHOT')
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Download artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: MobArena.jar
+
+      - name: 'Extract release notes'
+        run: scripts/extract-release-notes -f github "${VERSION}" > release-notes.md
+
+      - name: 'Create release draft'
+        run: gh release create "${VERSION}" --draft --notes-file release-notes.md MobArena-*.jar
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
