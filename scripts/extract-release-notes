@@ -1,0 +1,224 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import re
+import sys
+
+
+VERSION_PREFIX = '## '
+SECTION_PREFIX = '### '
+LIST_ITEM_PREFIX = '- '
+
+
+def main():
+    args = parse_args()
+    lines = extract(args.version)
+    output(lines, args.format)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'version',
+        help='the version to extract release notes from the changelog for',
+    )
+    parser.add_argument(
+        '--format',
+        '-f',
+        choices=['github', 'spigot', 'curse'],
+        help='the format to output the release notes in',
+    )
+
+    return parser.parse_args()
+
+
+def extract(target):
+    filename = 'changelog.md'
+    if not os.path.isfile(filename):
+        filename = os.path.join('..', filename)
+        if not os.path.isfile(filename):
+            print('error: changelog.md not found!')
+            sys.exit(1)
+
+    lines = []
+
+    with open(filename) as changelog:
+        found = False
+
+        for entry in changelog:
+            if entry.startswith(VERSION_PREFIX):
+                if found:
+                    break
+
+                i = entry.find('[') + 1
+                j = entry.find(']')
+                version = entry[i:j]
+
+                if version == target:
+                    if version[0].isdigit():
+                        version = f'v{version}'
+
+                    lines.append(f'{VERSION_PREFIX}{version}')
+                    lines.append('')
+                    found = True
+
+                continue
+
+            if not found:
+                continue
+
+            lines.append(entry.strip())
+
+        if not found:
+            print(f'error: version {target} not found!')
+            sys.exit(1)
+
+    return lines
+
+
+def output(lines, fmt):
+    if fmt == 'github':
+        output_as_github_markdown(lines)
+    elif fmt == 'spigot':
+        output_as_spigot_bbcode(lines)
+    elif fmt == 'curse':
+        output_as_curseforge_html(lines)
+    else:
+        output_raw(lines)
+
+
+def output_as_github_markdown(lines):
+    """
+    GitHub Releases Markdown is printed as the raw output from the changelog
+    except for the version header (the first line), because the version number
+    is already used as the release title, so we don't want it to appear twice.
+    """
+    output_raw(lines[1:])
+
+
+def output_as_spigot_bbcode(lines):
+    """
+    Spigot uses BBCode for resource update descriptions. It's very similar to
+    regular HTML, which makes it fairly easy to convert from Markdown. We just
+    need to use a [FONT] tag with Courier New for code bits.
+    """
+    listing = False
+
+    for line in lines:
+        line = line.strip()
+
+        if line.startswith(VERSION_PREFIX):
+            i = len(VERSION_PREFIX)
+            version = line[i:]
+            print(f'[B]{version}[/B]')
+            continue
+
+        if line.startswith(SECTION_PREFIX):
+            if listing:
+                print('[/LIST]')
+                listing = False
+
+            i = len(SECTION_PREFIX)
+            section = line[i:]
+            print(f'[B]{section}:[/B]')
+            continue
+
+        if line.startswith(LIST_ITEM_PREFIX):
+            if not listing:
+                print('[LIST]')
+                listing = True
+
+            i = len(LIST_ITEM_PREFIX)
+            item = line[i:]
+
+            # Replace **bold** text
+            item = re.sub(r'\*\*(.*?)\*\*', r'[B]\1[/B]', item)
+
+            # Replace _italic_ text
+            item = re.sub(r'_(.*?)_', r'[I]\1[/I]', item)
+
+            # Replace `code` text
+            item = re.sub(r'`(.*?)`', r'[FONT=Courier New]\1[/FONT]', item)
+
+            # Replace [links](url)
+            item = re.sub(r'\[([^\]]+)]\(([^)]+)\)', r'[URL=\2]\1[/URL]', item)
+
+            print(f'[*]{item}')
+            continue
+
+        if len(line) > 0:
+            print(line)
+
+    if listing:
+        print('[/LIST]')
+
+
+def output_as_curseforge_html(lines):
+    """
+    CurseForge uses regular HTML for file update descriptions, which makes it
+    fairly easy to convert from Markdown. Angled brackets need to be replaced
+    with their HTML entity equivalents, but other than that it's very similar
+    to the Spigot BBCode conversion.
+    """
+    listing = False
+
+    for line in lines:
+        line = line.strip()
+
+        if line.startswith(VERSION_PREFIX):
+            i = len(VERSION_PREFIX)
+            version = line[i:]
+            print(f'<p><strong>{version}</strong></p>')
+            continue
+
+        if line.startswith(SECTION_PREFIX):
+            if listing:
+                print('</ul>')
+                listing = False
+
+            i = len(SECTION_PREFIX)
+            section = line[i:]
+            print(f'<p><strong>{section}:</strong></p>')
+            continue
+
+        if line.startswith(LIST_ITEM_PREFIX):
+            if not listing:
+                print('<ul>')
+                listing = True
+
+            i = len(LIST_ITEM_PREFIX)
+            item = line[i:]
+
+            # Replace angled brackets
+            item = item.replace('<', '&lt;')
+            item = item.replace('>', '&gt;')
+
+            # Replace **bold** text
+            item = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', item)
+
+            # Replace _italic_ text
+            item = re.sub(r'_(.*?)_', r'<emph>\1</emph>', item)
+
+            # Replace `code` text
+            item = re.sub(r'`(.*?)`', r'<code>\1</code>', item)
+
+            # Replace [links](url)
+            item = re.sub(r'\[([^\]]+)]\(([^)]+)\)', r'<a href="\2">\1</a>', item)
+
+            print(f'<li>{item}</li>')
+            continue
+
+        if len(line) > 0:
+            print(line)
+
+    if listing:
+        print('</ul>')
+
+
+def output_raw(lines):
+    [print(line.strip()) for line in lines]
+
+
+if __name__ == '__main__':
+    main()
