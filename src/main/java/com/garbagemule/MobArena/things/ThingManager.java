@@ -10,19 +10,15 @@ public class ThingManager implements ThingParser {
     private final List<ThingParser> parsers;
     private final ItemStackThingParser items;
 
-    public ThingManager(MobArena plugin, ItemStackThingParser parser) {
+    public ThingManager(MobArena plugin) {
         parsers = new ArrayList<>();
         parsers.add(new CommandThingParser());
         parsers.add(new MoneyThingParser(plugin));
         parsers.add(new PermissionThingParser(plugin));
         parsers.add(new PotionEffectThingParser());
         parsers.add(new InventoryThingParser(plugin.getServer()));
-        items = parser;
+        items = new ItemStackThingParser();
         items.register(new SavedItemParser(plugin));
-    }
-
-    public ThingManager(MobArena plugin) {
-        this(plugin, new ItemStackThingParser());
     }
 
     /**
