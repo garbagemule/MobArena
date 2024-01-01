@@ -1,0 +1,79 @@
+name: publish-hangar
+
+on:
+  release:
+    types:
+      - 'released'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'The tag name of the release to publish'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      TAG_NAME: ${{ github.event.release.tag_name || inputs.tag_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release assets
+        run: gh release download "${TAG_NAME}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Publish to Hangar
+        run: |
+          echo 'Extract release notes'
+          changelog=$(scripts/extract-release-notes -f hangar "${TAG_NAME}")
+
+          echo 'Create version upload file'
+          cat << EOF > version-upload.jq
+          {
+            version: \$version,
+            channel: "Release",
+            description: \$changelog,
+            platformDependencies: {
+              "PAPER": [
+                "1.13.x",
+                "1.14.x",
+                "1.15.x",
+                "1.16.x",
+                "1.17.x",
+                "1.18.x",
+                "1.19.x",
+                "1.20.x"
+              ]
+            },
+            pluginDependencies: {},
+            files: [ 
+              { platforms: ["PAPER"] }
+            ]
+          }
+          EOF
+
+          jq -c -n \
+            --arg version "${TAG_NAME}" \
+            --arg changelog "${changelog}" \
+            -f version-upload.jq \
+            > version-upload.json
+
+          echo 'Authenticate with Hangar'
+          base_url='https://hangar.papermc.io/api/v1'
+          key=${{ secrets.HANGAR_TOKEN }}
+          jwt=$(curl -s -X POST "${base_url}/authenticate?apiKey=${key}" | jq -r '.token')
+
+          echo 'Publish build to Hangar'
+          project_slug='MobArena'
+          curl -s -X POST "${base_url}/projects/${project_slug}/upload" \
+            -H "Authorization: ${jwt}" \
+            -F 'versionUpload=<version-upload.json;type=application/json' \
+            -F "files=@MobArena-${TAG_NAME}.jar"
