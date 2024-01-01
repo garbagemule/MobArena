@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.108] - 2024-01-01
 ### Added
 - Support for chest references in item syntax. The new `inv` syntax allows for referencing container indices in the config-file. This should help bridge the gap between class chests and various other parts of the config-file, such as rewards and upgrade waves.
 - Support for saved items. The new `/ma save-item` command can be used to save the currently held item to disk, which allows it to be used in various places in the config-file. This should help bridge the gap between the config-file and class chests for config-file centric setups.
@@ -259,7 +261,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.107...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.108...HEAD
+[0.108]: https://github.com/garbagemule/MobArena/compare/0.107...0.108
 [0.107]: https://github.com/garbagemule/MobArena/compare/0.106...0.107
 [0.106]: https://github.com/garbagemule/MobArena/compare/0.105...0.106
 [0.105]: https://github.com/garbagemule/MobArena/compare/0.104.2...0.105
