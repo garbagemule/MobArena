@@ -6,7 +6,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.Objects;
 
-public class LexemeMatcher extends TypeSafeMatcher<Lexeme> {
+class LexemeMatcher extends TypeSafeMatcher<Lexeme> {
 
     private final TokenType type;
     private final String value;
