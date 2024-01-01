@@ -230,8 +230,8 @@ public class FormulaManagerIT {
         @Parameters(name = "{0} = {1}")
         public static Iterable<Object[]> data() {
             return Arrays.asList(new Object[][]{
-                {"1 + +1.2", 1 + +1.2},
-                {"1 + -1.2", 1 + -1.2},
+                {"1 + +1.2", 1 + 1.2},
+                {"1 + -1.2", 1 + (-1.2)},
             });
         }
 
@@ -259,8 +259,8 @@ public class FormulaManagerIT {
         @Parameters(name = "{0} = {1}")
         public static Iterable<Object[]> data() {
             return Arrays.asList(new Object[][]{
-                {"1+-2", 1 + -2},
-                {"3-+4", 3 - +4},
+                {"1+-2", 1 + (-2)},
+                {"3-+4", 3 - 4},
                 {"3*7.5", 3 * 7.5},
                 {"10/2.5", 10 / 2.5},
                 {"9%4", 9 % 4},
