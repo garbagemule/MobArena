@@ -6,7 +6,7 @@ import org.bukkit.World;
 
 import java.util.function.Supplier;
 
-public class InventoryThingParser implements ThingParser {
+class InventoryThingParser implements ThingParser {
 
     private static final String PREFIX = "inv(";
     private static final String SUFFIX = ")";
