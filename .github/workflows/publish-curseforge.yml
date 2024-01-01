@@ -1,0 +1,77 @@
+name: publish-curseforge
+
+on:
+  release:
+    types:
+      - 'released'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'The tag name of the release to publish'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      TAG_NAME: ${{ github.event.release.tag_name || inputs.tag_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release assets
+        run: gh release download "${TAG_NAME}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Publish to CurseForge
+        run: |
+          echo 'Extract release notes'
+          changelog=$(scripts/extract-release-notes -f curse "${TAG_NAME}")
+
+          echo 'Look up game version IDs'
+          game_version_type_id=1
+          game_version_names='"1.20","1.19","1.18","1.17","1.16","1.15","1.14","1.13"'
+
+          type_condition="(.gameVersionTypeID == ${game_version_type_id})"
+          name_condition="(.name | startswith(${game_version_names}))"
+
+          game_version_ids=$(
+            curl -s -X GET 'https://minecraft.curseforge.com/api/game/versions' \
+              -H "X-Api-Token: ${{ secrets.CURSEFORGE_TOKEN }}" \
+              | jq -c ".[] | select(${type_condition} and ${name_condition}) | .id" \
+              | paste -sd, - \
+          )
+
+          echo 'Create metadata file'
+          cat << EOF > metadata.jq
+          {
+            changelog: \$changelog,
+            changelogType: "html",
+            displayName: \$displayName,
+            gameVersions: \$gameVersions,
+            releaseType: "beta"
+          }
+          EOF
+
+          jq -c -n \
+            --arg changelog "${changelog}" \
+            --arg displayName "MobArena v${TAG_NAME}" \
+            --argjson gameVersions "[${game_version_ids}]" \
+            -f metadata.jq \
+            > metadata.json
+
+          echo 'Publish build to CurseForge'
+          base_url='https://minecraft.curseforge.com'
+          project_id=31265
+
+          curl -s -X POST "${base_url}/api/projects/${project_id}/upload-file" \
+            -H "X-Api-Token: ${{ secrets.CURSEFORGE_TOKEN }}" \
+            -F 'metadata=<metadata.json' \
+            -F "file=@MobArena-${TAG_NAME}.jar"
