@@ -114,7 +114,7 @@ public class WaveUtils
                         return -1;
                     else if (w1.getFirstWave() > w2.getFirstWave())
                         return 1;
-                    else return 0;
+                    else return w1.getName().compareTo(w2.getName());
                 }
             };
     }
