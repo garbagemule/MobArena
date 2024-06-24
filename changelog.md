@@ -11,6 +11,10 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Changed
+- Recurrent waves can now be randomized. If two or more recurrent waves clash on wave number, frequency, _and_ priority, MobArena will now randomly pick between them. This should make it easier to create more varied and interesting wave setups without having to resort to only massively randomized default waves.
+- Single waves can now be randomized. If two or more single waves clash on wave number, MobArena will now randomly pick between them. This means it is now possible to make randomly selected bosses for boss waves, for instance.
+
 ### Fixed
 - MobArena no longer throws errors when handling block explosions on Minecraft 1.21.
 
