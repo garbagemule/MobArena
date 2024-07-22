@@ -37,7 +37,7 @@ jobs:
 
           echo 'Look up game version IDs'
           game_version_type_id=1
-          game_version_names='"1.20","1.19","1.18","1.17","1.16","1.15","1.14","1.13"'
+          game_version_names='"1.21","1.20","1.19","1.18","1.17","1.16","1.15","1.14","1.13"'
 
           type_condition="(.gameVersionTypeID == ${game_version_type_id})"
           name_condition="(.name | startswith(${game_version_names}))"
