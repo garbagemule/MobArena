@@ -450,8 +450,12 @@ public class ArenaListener
         if (!softRestoreDrops)
             event.setYield(0);
 
+        handleExplodeEventBlocks(event.blockList());
+    }
+
+    private void handleExplodeEventBlocks(List<Block> blocks) {
         // Handle all the blocks in the block list.
-        for (Block b : event.blockList()) {
+        for (Block b : blocks) {
             BlockState state = b.getState();
 
             if (state.getData() instanceof Door && ((Door) state.getData()).isTopHalf()) {
