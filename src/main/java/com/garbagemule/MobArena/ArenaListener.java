@@ -687,6 +687,7 @@ public class ArenaListener
                 }
             }
 
+            // This also covers the Obsidian Bomb ability!
             if (damager instanceof TNTPrimed) {
                 damager = ((TNTPrimed) damager).getSource();
             }

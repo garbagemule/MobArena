@@ -18,6 +18,7 @@ These changes will (most likely) be included in the next version.
 ### Fixed
 - MobArena no longer throws errors when handling block explosions on Minecraft 1.21.
 - The `shuffle-positions` ability now correctly shuffles the position of the boss as well if `monster-teleport` is set to `false`.
+- The `obsidian-bomb` ability no longer breaks boss waves.
 
 ## [0.108] - 2024-01-01
 ### Added

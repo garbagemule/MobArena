@@ -12,6 +12,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.TNTPrimed;
 
 @AbilityInfo(
     name = "Obsidian Bomb",
@@ -54,8 +55,14 @@ public class ObsidianBomb implements Ability
                 if (!arena.isRunning())
                     return;
 
-                world.getBlockAt(loc).setType(Material.AIR);
-                world.createExplosion(loc, 3F, false, true, boss.getEntity());
+                TNTPrimed scapegoat = world.spawn(loc, TNTPrimed.class);
+                scapegoat.setSource(boss.getEntity());
+                try {
+                    world.getBlockAt(loc).setType(Material.AIR);
+                    world.createExplosion(loc, 3F, false, true, scapegoat);
+                } finally {
+                    scapegoat.remove();
+                }
             }
         }, FUSE);
     }
