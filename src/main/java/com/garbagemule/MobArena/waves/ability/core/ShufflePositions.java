@@ -6,6 +6,8 @@ import com.garbagemule.MobArena.waves.ability.Ability;
 import com.garbagemule.MobArena.waves.ability.AbilityInfo;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +32,11 @@ public class ShufflePositions implements Ability
             locations.add(e.getLocation());
         }
 
+        // Keep track of teleportees
+        MetadataValue metadata = new FixedMetadataValue(arena.getPlugin(), true);
+        List<LivingEntity> teleportees = new ArrayList<>(entities);
+        teleportees.forEach(e -> e.setMetadata("teleporting", metadata));
+
         // Shuffle the entities list.
         Collections.shuffle(entities);
 
@@ -39,5 +46,8 @@ public class ShufflePositions implements Ability
         while (!entities.isEmpty() && !locations.isEmpty()) {
             entities.remove(0).teleport(locations.remove(0));
         }
+
+        // Remove teleportee metadata
+        teleportees.forEach(e -> e.removeMetadata("teleporting", arena.getPlugin()));
     }
 }

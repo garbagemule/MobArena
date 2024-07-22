@@ -93,6 +93,7 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Door;
 import org.bukkit.material.Redstone;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
@@ -928,6 +929,11 @@ public class ArenaListener
         }
 
         if (isArenaMonster(event.getEntity())) {
+            for (MetadataValue metadata : event.getEntity().getMetadata("teleporting")) {
+                if (plugin.equals(metadata.getOwningPlugin())) {
+                    return;
+                }
+            }
             if (!monsterTeleport || !region.contains(event.getTo())) {
                 event.setCancelled(true);
             }
@@ -1326,6 +1332,13 @@ public class ArenaListener
          */
         if (arena.isMoving(p)) {
             return TeleportResponse.ALLOW;
+        }
+
+        // Same deal for players being teleported by shuffle-positions.
+        for (MetadataValue metadata : p.getMetadata("teleporting")) {
+            if (plugin.equals(metadata.getOwningPlugin())) {
+                return TeleportResponse.ALLOW;
+            }
         }
 
         Location to = event.getTo();
