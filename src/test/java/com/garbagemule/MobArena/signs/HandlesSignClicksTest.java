@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,11 +52,26 @@ public class HandlesSignClicksTest {
     }
 
     @Test
+    public void sneakingPlayerNoFun() {
+        Block block = mock(Block.class);
+        when(block.getState()).thenReturn(mock(Sign.class));
+        Player player = mock(Player.class);
+        when(player.isSneaking()).thenReturn(true);
+        PlayerInteractEvent event = event(player, block);
+
+        subject.on(event);
+
+        verifyNoInteractions(signStore, invokesSignAction);
+    }
+
+    @Test
     public void nonArenaSignNoFun() {
         Block block = mock(Block.class);
         when(block.getState()).thenReturn(mock(Sign.class));
+        Player player = mock(Player.class);
+        when(player.isSneaking()).thenReturn(false);
         when(signStore.findByLocation(any())).thenReturn(null);
-        PlayerInteractEvent event = event(null, block);
+        PlayerInteractEvent event = event(player, block);
 
         subject.on(event);
 
@@ -68,9 +84,10 @@ public class HandlesSignClicksTest {
         Block block = mock(Block.class);
         when(block.getLocation()).thenReturn(location);
         when(block.getState()).thenReturn(mock(Sign.class));
+        Player player = mock(Player.class);
+        when(player.isSneaking()).thenReturn(false);
         ArenaSign sign = new ArenaSign(location, "", "", "");
         when(signStore.findByLocation(location)).thenReturn(sign);
-        Player player = mock(Player.class);
         PlayerInteractEvent event = event(player, block);
 
         subject.on(event);
@@ -79,7 +96,8 @@ public class HandlesSignClicksTest {
     }
 
     private PlayerInteractEvent event(Player player, Block block) {
-        return new PlayerInteractEvent(player, null, null, block, null);
+        Action action = Action.LEFT_CLICK_BLOCK;
+        return new PlayerInteractEvent(player, action, null, block, null);
     }
 
 }

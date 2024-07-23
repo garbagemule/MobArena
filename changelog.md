@@ -20,6 +20,7 @@ These changes will (most likely) be included in the next version.
 - The `shuffle-positions` ability now correctly shuffles the position of the boss as well if `monster-teleport` is set to `false`.
 - The `obsidian-bomb` ability no longer breaks boss waves.
 - Text on Arena Signs is no longer explicitly truncated. This fixes an issue where color codes would count towards the character limit, causing the text that would otherwise fit on the sign to be cut off.
+- Arena Signs can once again be destroyed, but it is necessary to break them while sneaking.
 
 ## [0.108] - 2024-01-01
 ### Added

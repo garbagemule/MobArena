@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.HashMap;
@@ -36,6 +37,9 @@ class HandlesSignClicks implements Listener {
             return;
         }
         if (!(block.getState() instanceof Sign)) {
+            return;
+        }
+        if (event.getPlayer().isSneaking() && event.getAction() == Action.LEFT_CLICK_BLOCK) {
             return;
         }
 
