@@ -29,7 +29,7 @@ class HandlesSignClicks implements Listener {
         this.cooldowns = new HashMap<>();
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void on(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
         if (block == null) {
