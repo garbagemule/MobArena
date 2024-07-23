@@ -8,6 +8,7 @@ import com.garbagemule.MobArena.things.InvalidThingInputString;
 import com.garbagemule.MobArena.things.Thing;
 import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.things.ThingPicker;
+import com.garbagemule.MobArena.things.ThingPickerManager;
 import com.garbagemule.MobArena.util.ItemParser;
 import com.garbagemule.MobArena.util.PotionEffectParser;
 import com.garbagemule.MobArena.util.Slugs;
@@ -252,7 +253,8 @@ public class WaveParser
 
     private static Wave parseUpgradeWave(Arena arena, String name, ConfigurationSection config) {
         ThingManager thingman = arena.getPlugin().getThingManager();
-        Map<String,List<Thing>> upgrades = getUpgradeMap(config, name, arena, thingman);
+        ThingPickerManager pickman = arena.getPlugin().getThingPickerManager();
+        Map<String,List<ThingPicker>> upgrades = getUpgradeMap(config, name, arena, pickman, thingman);
 
         return new UpgradeWave(upgrades);
     }
@@ -463,7 +465,7 @@ public class WaveParser
             .collect(Collectors.toList());
     }
 
-    private static Map<String,List<Thing>> getUpgradeMap(ConfigurationSection config, String name, Arena arena, ThingManager thingman) {
+    private static Map<String,List<ThingPicker>> getUpgradeMap(ConfigurationSection config, String name, Arena arena, ThingPickerManager pickman, ThingManager thingman) {
         ConfigurationSection section = config.getConfigurationSection("upgrades");
         if (section == null) {
             throw new ConfigError("Missing 'upgrades' node for wave " + name + " of arena " + arena.configName());
@@ -474,7 +476,7 @@ public class WaveParser
             throw new ConfigError("Empty 'upgrades' node for wave " + name + " of arena " + arena.configName());
         }
 
-        Map<String,List<Thing>> upgrades = new HashMap<>();
+        Map<String,List<ThingPicker>> upgrades = new HashMap<>();
         String path = "upgrades.";
 
         for (String className : classes) {
@@ -483,12 +485,12 @@ public class WaveParser
             // Legacy support
             Object val = config.get(path + className, null);
             if (val instanceof String) {
-                List<Thing> things = loadUpgradesFromString(className, (String) val, name, arena, thingman);
+                List<ThingPicker> things = loadUpgradesFromString(className, (String) val, name, arena, pickman);
                 upgrades.put(slug, things);
             }
             // New complex setup
             else if (val instanceof ConfigurationSection) {
-                List<Thing> list = loadUpgradesFromSection(className, (ConfigurationSection) val, name, arena, thingman);
+                List<ThingPicker> list = loadUpgradesFromSection(className, (ConfigurationSection) val, name, arena, pickman, thingman);
                 upgrades.put(slug, list);
             }
         }
@@ -496,22 +498,20 @@ public class WaveParser
         return upgrades;
     }
 
-    private static List<Thing> loadUpgradesFromString(String className, String value, String name, Arena arena, ThingManager thingman) {
+    private static List<ThingPicker> loadUpgradesFromString(String className, String value, String name, Arena arena, ThingPickerManager pickman) {
         if (value == null || value.isEmpty()) {
             return Collections.emptyList();
         }
         try {
-            return Arrays.stream(value.split(","))
-                .map(String::trim)
-                .map(thingman::parse)
-                .collect(Collectors.toList());
+            ThingPicker picker = pickman.parse("all(" + value + ")");
+            return Collections.singletonList(picker);
         } catch (InvalidThingInputString e) {
             throw new ConfigError("Failed to parse upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
         }
     }
 
-    private static List<Thing> loadUpgradesFromSection(String className, ConfigurationSection classSection, String name, Arena arena, ThingManager thingman) {
-        List<Thing> list = new ArrayList<>();
+    private static List<ThingPicker> loadUpgradesFromSection(String className, ConfigurationSection classSection, String name, Arena arena, ThingPickerManager pickman, ThingManager thingman) {
+        List<ThingPicker> list = new ArrayList<>();
 
         // Items
         List<String> items = classSection.getStringList("items");
@@ -520,13 +520,13 @@ public class WaveParser
             if (value == null || value.isEmpty()) {
                 items = Collections.emptyList();
             } else {
-                items = Arrays.asList(value.split(","));
+                items = Collections.singletonList("all(" + value + ")");
             }
         }
         for (String value : items) {
             try {
-                Thing thing = thingman.parse(value.trim());
-                list.add(thing);
+                ThingPicker picker = pickman.parse(value.trim());
+                list.add(picker);
             } catch (InvalidThingInputString e) {
                 throw new ConfigError("Failed to parse item upgrade for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + value.trim());
             }

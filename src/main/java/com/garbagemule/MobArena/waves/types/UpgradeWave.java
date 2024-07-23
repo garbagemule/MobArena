@@ -1,7 +1,7 @@
 package com.garbagemule.MobArena.waves.types;
 
 import com.garbagemule.MobArena.framework.Arena;
-import com.garbagemule.MobArena.things.Thing;
+import com.garbagemule.MobArena.things.ThingPicker;
 import com.garbagemule.MobArena.waves.AbstractWave;
 import com.garbagemule.MobArena.waves.MACreature;
 import com.garbagemule.MobArena.waves.Wave;
@@ -12,12 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class UpgradeWave extends AbstractWave
 {
-    private Map<String,List<Thing>> upgrades;
+    private Map<String,List<ThingPicker>> upgrades;
 
-    public UpgradeWave(Map<String,List<Thing>> upgrades) {
+    public UpgradeWave(Map<String,List<ThingPicker>> upgrades) {
         this.upgrades = upgrades;
         this.setType(WaveType.UPGRADE);
     }
@@ -28,15 +29,18 @@ public class UpgradeWave extends AbstractWave
     }
 
     public void grantItems(Player p, String slug) {
-        List<Thing> list = upgrades.get(slug);
+        List<ThingPicker> list = upgrades.get(slug);
         if (list == null) return;
 
-        list.forEach(thing -> thing.giveTo(p));
+        list.stream()
+            .map(ThingPicker::pick)
+            .filter(Objects::nonNull)
+            .forEach(thing -> thing.giveTo(p));
     }
 
     public Wave copy() {
-        Map<String,List<Thing>> upgrades = new HashMap<>();
-        for (Map.Entry<String,List<Thing>> entry : this.upgrades.entrySet()) {
+        Map<String,List<ThingPicker>> upgrades = new HashMap<>();
+        for (Map.Entry<String,List<ThingPicker>> entry : this.upgrades.entrySet()) {
             upgrades.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         UpgradeWave result = new UpgradeWave(upgrades);
