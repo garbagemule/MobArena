@@ -523,13 +523,13 @@ public class WaveParser
                 items = Arrays.asList(value.split(","));
             }
         }
-        try {
-            items.stream()
-                .map(String::trim)
-                .map(thingman::parse)
-                .forEach(list::add);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse item upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        for (String value : items) {
+            try {
+                Thing thing = thingman.parse(value.trim());
+                list.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse item upgrade for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + value.trim());
+            }
         }
 
         // Armor
@@ -542,14 +542,14 @@ public class WaveParser
                 armor = Arrays.asList(value.split(","));
             }
         }
-        try {
-            // Prepend "armor:" for the armor thing parser
-            armor.stream()
-                .map(String::trim)
-                .map(s -> thingman.parse("armor", s))
-                .forEach(list::add);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse armor upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        for (String value : armor) {
+            try {
+                // Prepend "armor:" so we get an equippable item
+                Thing thing = thingman.parse("armor:" + value.trim());
+                list.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse armor upgrade for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + value.trim());
+            }
         }
 
         // Effects
@@ -562,23 +562,26 @@ public class WaveParser
                 effects = Arrays.asList(value.split(","));
             }
         }
-        try {
-            // Prepend "effect:" for the potion effect thing parser
-            effects.stream()
-                .map(String::trim)
-                .map(s -> thingman.parse("effect", s))
-                .forEach(list::add);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse potion effects for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        for (String value : effects) {
+            try {
+                // Prepend "effect:" so we get a potion effect
+                Thing thing = thingman.parse("effect:" + value.trim());
+                list.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse potion effect upgrade for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + value.trim());
+            }
         }
 
-        try {
-            // Prepend "perm:" for the permission thing parser
-            classSection.getStringList("permissions").stream()
-                .map(perm -> thingman.parse("perm", perm))
-                .forEach(list::add);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse permission upgrades for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + e.getInput());
+        // Permissions
+        List<String> permissions = classSection.getStringList("permissions");
+        for (String value : permissions) {
+            try {
+                // Prepend "perm:" so we get a permission
+                Thing thing = thingman.parse("perm:" + value.trim());
+                list.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse permission upgrade for class " + className + " in wave " + name + " of arena " + arena.configName() + ": " + value.trim());
+            }
         }
 
         return list;

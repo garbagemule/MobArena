@@ -446,16 +446,18 @@ public class ArenaMasterImpl implements ArenaMaster
             armor = Arrays.asList(value.split(","));
         }
 
-        try {
-            // Prepend "armor:" for the armor thing parser
-            List<Thing> things = armor.stream()
-                .map(String::trim)
-                .map(s -> plugin.getThingManager().parse("armor", s))
-                .collect(Collectors.toList());
-            arenaClass.setArmor(things);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse armor for class " + arenaClass.getConfigName() + ": " + e.getInput());
+        List<Thing> things = new ArrayList<>(armor.size());
+        for (String value : armor) {
+            try {
+                // Prepend "armor:" so we get an equippable item
+                Thing thing = plugin.getThingManager().parse("armor:" + value.trim());
+                things.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse armor for class " + arenaClass.getConfigName() + ": " + value.trim());
+            }
         }
+
+        arenaClass.setArmor(things);
     }
 
     private void loadClassArmorPiece(ConfigurationSection section, String slot, String name, Consumer<Thing> setter) {
@@ -464,11 +466,11 @@ public class ArenaMasterImpl implements ArenaMaster
             return;
         }
         try {
-            // Prepend the slot name for the item parser
-            Thing thing = plugin.getThingManager().parse(slot, value);
+            // Prepend "<slot>:" so we get an equippable item
+            Thing thing = plugin.getThingManager().parse(slot + ":" + value.trim());
             setter.accept(thing);
         } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse " + slot + " slot for class " + name + ": " + e.getInput());
+            throw new ConfigError("Failed to parse " + slot + " slot for class " + name + ": " + value.trim());
         }
     }
 
@@ -482,37 +484,58 @@ public class ArenaMasterImpl implements ArenaMaster
             effects = Arrays.asList(value.split(","));
         }
 
-        try {
-            // Prepend "effect:" for the potion effect thing parser
-            List<Thing> things = effects.stream()
-                .map(String::trim)
-                .map(s -> plugin.getThingManager().parse("effect", s))
-                .collect(Collectors.toList());
-
-            arenaClass.setEffects(things);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse potion effect of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        List<Thing> things = new ArrayList<>(effects.size());
+        for (String value : effects) {
+            try {
+                // Prepend "effect:" so we get a potion effect
+                Thing thing = plugin.getThingManager().parse("effect:" + value.trim());
+                things.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse potion effect for class " + arenaClass.getConfigName() + ": " + value.trim());
+            }
         }
+
+        arenaClass.setEffects(things);
     }
 
     private void loadClassPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        try {
-            section.getStringList("permissions").stream()
-                .map(s -> plugin.getThingManager().parse("perm", s))
-                .forEach(arenaClass::addPermission);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse permission of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        List<String> permissions = section.getStringList("permissions");
+        if (permissions == null || permissions.isEmpty()) {
+            return;
         }
+
+        List<Thing> things = new ArrayList<>(permissions.size());
+        for (String value : permissions) {
+            try {
+                // Prepend "perm:" so we get a permission
+                Thing thing = plugin.getThingManager().parse("perm:" + value.trim());
+                things.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse permission for class " + arenaClass.getConfigName() + ": " + value.trim());
+            }
+        }
+
+        things.forEach(arenaClass::addPermission);
     }
 
     private void loadClassLobbyPermissions(ArenaClass arenaClass, ConfigurationSection section) {
-        try {
-            section.getStringList("lobby-permissions").stream()
-                .map(s -> plugin.getThingManager().parse("perm", s))
-                .forEach(arenaClass::addLobbyPermission);
-        } catch (InvalidThingInputString e) {
-            throw new ConfigError("Failed to parse lobby-permission of class " + arenaClass.getConfigName() + ": " + e.getInput());
+        List<String> permissions = section.getStringList("lobby-permissions");
+        if (permissions == null || permissions.isEmpty()) {
+            return;
         }
+
+        List<Thing> things = new ArrayList<>(permissions.size());
+        for (String value : permissions) {
+            try {
+                // Prepend "perm:" so we get a permission
+                Thing thing = plugin.getThingManager().parse("perm:" + value.trim());
+                things.add(thing);
+            } catch (InvalidThingInputString e) {
+                throw new ConfigError("Failed to parse lobby-permission for class " + arenaClass.getConfigName() + ": " + value.trim());
+            }
+        }
+
+        things.forEach(arenaClass::addLobbyPermission);
     }
 
     /**
