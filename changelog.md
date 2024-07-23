@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Fixed
+- MobArena no longer throws errors when handling block explosions on Minecraft 1.21.
 
 ## [0.108] - 2024-01-01
 ### Added

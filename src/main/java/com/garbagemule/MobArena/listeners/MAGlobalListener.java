@@ -198,19 +198,8 @@ public class MAGlobalListener implements Listener
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void blockExplode(BlockExplodeEvent event) {
-        // Create a copy of the block list so we can clear and re-add
-        List<Block> blocks = new ArrayList<>(event.blockList());
-
-        // Account for Spigot's messy extra event
-        EntityExplodeEvent fake = new EntityExplodeEvent(null, event.getBlock().getLocation(), blocks, event.getYield());
-        fake.setCancelled(event.isCancelled());
-        entityExplode(fake);
-
-        // Copy the values over
-        event.setCancelled(fake.isCancelled());
-        event.blockList().clear();
-        event.blockList().addAll(fake.blockList());
-        event.setYield(fake.getYield());
+        for (Arena arena : am.getArenas())
+            arena.getEventListener().onBlockExplode(event);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)

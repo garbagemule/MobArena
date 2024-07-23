@@ -48,6 +48,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -430,6 +431,32 @@ public class ArenaListener
 
         // The generic remove method removes bosses as well
         monsters.remove(event.getEntity());
+
+        // Cancel if the arena isn't running
+        if (!arena.isRunning()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Uncancel, just in case.
+        event.setCancelled(false);
+
+        // If the arena isn't destructible, just clear the blocklist.
+        if (!softRestore && protect) {
+            List<Block> blocks = new LinkedList<>(arena.getBlocks());
+            event.blockList().retainAll(blocks);
+            return;
+        }
+
+        if (!softRestoreDrops)
+            event.setYield(0);
+
+        handleExplodeEventBlocks(event.blockList());
+    }
+
+    public void onBlockExplode(BlockExplodeEvent event) {
+        if (!arena.getRegion().contains(event.getBlock().getLocation(), 10))
+            return;
 
         // Cancel if the arena isn't running
         if (!arena.isRunning()) {
