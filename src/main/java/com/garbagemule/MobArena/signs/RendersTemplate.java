@@ -26,8 +26,7 @@ class RendersTemplate {
 
         String[] result = new String[lines.length];
         for (int i = 0; i < lines.length; i++) {
-            String rendered = render(lines[i], arena);
-            result[i] = truncate(rendered);
+            result[i] = render(lines[i], arena);
         }
         return result;
     }
@@ -127,13 +126,6 @@ class RendersTemplate {
                 return Collections.emptyList();
             }
         }
-    }
-
-    private String truncate(String rendered) {
-        if (rendered.length() <= 15) {
-            return rendered;
-        }
-        return rendered.substring(0, 15);
     }
 
 }

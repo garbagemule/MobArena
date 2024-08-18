@@ -19,6 +19,7 @@ These changes will (most likely) be included in the next version.
 - MobArena no longer throws errors when handling block explosions on Minecraft 1.21.
 - The `shuffle-positions` ability now correctly shuffles the position of the boss as well if `monster-teleport` is set to `false`.
 - The `obsidian-bomb` ability no longer breaks boss waves.
+- Text on Arena Signs is no longer explicitly truncated. This fixes an issue where color codes would count towards the character limit, causing the text that would otherwise fit on the sign to be cut off.
 
 ## [0.108] - 2024-01-01
 ### Added
