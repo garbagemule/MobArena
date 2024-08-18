@@ -17,7 +17,6 @@ import com.garbagemule.MobArena.metrics.FoodRegenChart;
 import com.garbagemule.MobArena.metrics.IsolatedChatChart;
 import com.garbagemule.MobArena.metrics.MonsterInfightChart;
 import com.garbagemule.MobArena.metrics.PvpEnabledChart;
-import com.garbagemule.MobArena.metrics.VaultChart;
 import com.garbagemule.MobArena.signs.SignBootstrap;
 import com.garbagemule.MobArena.signs.SignListeners;
 import com.garbagemule.MobArena.things.NothingPickerParser;
@@ -180,7 +179,6 @@ public class MobArena extends JavaPlugin
 
     private void setupMetrics() {
         Metrics metrics = new Metrics(this, 2572);
-        metrics.addCustomChart(new VaultChart(this));
         metrics.addCustomChart(new ArenaCountChart(this));
         metrics.addCustomChart(new ClassCountChart(this));
         metrics.addCustomChart(new ClassChestsChart(this));
