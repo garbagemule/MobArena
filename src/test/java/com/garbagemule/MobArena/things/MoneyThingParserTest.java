@@ -1,23 +1,20 @@
 package com.garbagemule.MobArena.things;
 
 import com.garbagemule.MobArena.MobArena;
-import net.milkbowl.vault.economy.Economy;
+import com.garbagemule.MobArena.finance.Finance;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.logging.Logger;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class MoneyThingParserTest {
 
-    private MoneyThingParser subject;
     private MobArena plugin;
+    private MoneyThingParser subject;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -25,8 +22,7 @@ public class MoneyThingParserTest {
     @Before
     public void setup() {
         plugin = mock(MobArena.class);
-        Economy economy = mock(Economy.class);
-        when(plugin.getEconomy()).thenReturn(economy);
+        when(plugin.getFinance()).thenReturn(mock(Finance.class));
 
         subject = new MoneyThingParser(plugin);
     }
@@ -50,17 +46,6 @@ public class MoneyThingParserTest {
         MoneyThing result = subject.parse("money:500");
 
         assertThat(result, not(nullValue()));
-    }
-
-    @Test
-    public void nullEconomyNullMoney() {
-        Logger logger = mock(Logger.class);
-        when(plugin.getEconomy()).thenReturn(null);
-        when(plugin.getLogger()).thenReturn(logger);
-
-        subject.parse("$500");
-
-        verify(logger).severe(anyString());
     }
 
     @Test

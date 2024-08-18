@@ -1,52 +1,36 @@
 package com.garbagemule.MobArena.things;
 
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+import com.garbagemule.MobArena.finance.Finance;
 import org.bukkit.entity.Player;
 
 public class MoneyThing implements Thing {
 
-    private final Economy economy;
+    private final Finance finance;
     private final double amount;
 
-    public MoneyThing(Economy economy, double amount) {
-        this.economy = economy;
+    public MoneyThing(Finance finance, double amount) {
+        this.finance = finance;
         this.amount = amount;
     }
 
     @Override
     public boolean giveTo(Player player) {
-        if (economy == null) {
-            return false;
-        }
-        EconomyResponse result = economy.depositPlayer(player, amount);
-        return result.type == ResponseType.SUCCESS;
+        return finance.deposit(player, amount);
     }
 
     @Override
     public boolean takeFrom(Player player) {
-        if (economy == null) {
-            return false;
-        }
-        EconomyResponse result = economy.withdrawPlayer(player, amount);
-        return result.type == ResponseType.SUCCESS;
+        return finance.withdraw(player, amount);
     }
 
     @Override
     public boolean heldBy(Player player) {
-        if (economy == null) {
-            return false;
-        }
-        return economy.getBalance(player) >= amount;
+        return finance.getBalance(player) >= amount;
     }
 
     @Override
     public String toString() {
-        if (economy == null) {
-            return "$" + amount;
-        }
-        return economy.format(amount);
+        return finance.format(amount);
     }
 
 }

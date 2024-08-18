@@ -1,7 +1,7 @@
 package com.garbagemule.MobArena.things;
 
 import com.garbagemule.MobArena.MobArena;
-import net.milkbowl.vault.economy.Economy;
+import com.garbagemule.MobArena.finance.Finance;
 
 class MoneyThingParser implements ThingParser {
 
@@ -20,11 +20,11 @@ class MoneyThingParser implements ThingParser {
         if (money == null) {
             return null;
         }
-        Economy economy = plugin.getEconomy();
-        if (economy == null) {
-            plugin.getLogger().severe("Vault or economy plugin missing while parsing: " + s);
-        }
-        return new MoneyThing(economy, Double.parseDouble(money));
+
+        Finance finance = plugin.getFinance();
+        double amount = Double.parseDouble(money);
+
+        return new MoneyThing(finance, amount);
     }
 
     private String trimPrefix(String s) {

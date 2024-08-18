@@ -2,6 +2,8 @@ package com.garbagemule.MobArena;
 
 import com.garbagemule.MobArena.commands.CommandHandler;
 import com.garbagemule.MobArena.config.LoadsConfigFile;
+import com.garbagemule.MobArena.finance.Finance;
+import com.garbagemule.MobArena.finance.FinanceFactory;
 import com.garbagemule.MobArena.events.MobArenaPreReloadEvent;
 import com.garbagemule.MobArena.events.MobArenaReloadEvent;
 import com.garbagemule.MobArena.formula.FormulaMacros;
@@ -26,16 +28,12 @@ import com.garbagemule.MobArena.things.ThingManager;
 import com.garbagemule.MobArena.things.ThingPickerManager;
 import com.garbagemule.MobArena.util.config.ConfigUtils;
 import com.garbagemule.MobArena.waves.ability.AbilityManager;
-import net.milkbowl.vault.economy.Economy;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -51,8 +49,7 @@ public class MobArena extends JavaPlugin
 {
     private ArenaMaster arenaMaster;
 
-    // Vault
-    private Economy economy;
+    private Finance finance;
 
     private FileConfiguration config;
     private LoadsConfigFile loadsConfigFile;
@@ -112,7 +109,6 @@ public class MobArena extends JavaPlugin
             setupArenaMaster();
             setupCommandHandler();
 
-            setupVault();
             setupBossAbilities();
             setupListeners();
             setupMetrics();
@@ -149,24 +145,6 @@ public class MobArena extends JavaPlugin
         getCommand("ma").setExecutor(new CommandHandler(this));
     }
 
-    private void setupVault() {
-        Plugin vaultPlugin = this.getServer().getPluginManager().getPlugin("Vault");
-        if (vaultPlugin == null) {
-            getLogger().info("Vault was not found. Economy rewards will not work.");
-            return;
-        }
-
-        ServicesManager manager = this.getServer().getServicesManager();
-        RegisteredServiceProvider<Economy> e = manager.getRegistration(net.milkbowl.vault.economy.Economy.class);
-
-        if (e != null) {
-            economy = e.getProvider();
-            getLogger().info("Vault found; economy rewards enabled.");
-        } else {
-            getLogger().warning("Vault found, but no economy plugin detected. Economy rewards will not work!");
-        }
-    }
-
     private void setupBossAbilities() {
         AbilityManager.loadCoreAbilities();
         AbilityManager.loadCustomAbilities(getDataFolder());
@@ -193,6 +171,7 @@ public class MobArena extends JavaPlugin
         getServer().getPluginManager().callEvent(pre);
 
         try {
+            reloadFinance();
             reloadConfig();
             reloadGlobalMessenger();
             reloadFormulaMacros();
@@ -207,6 +186,10 @@ public class MobArena extends JavaPlugin
 
         MobArenaReloadEvent post = new MobArenaReloadEvent(this);
         getServer().getPluginManager().callEvent(post);
+    }
+
+    private void reloadFinance() {
+        finance = FinanceFactory.create(getServer(), getLogger());
     }
 
     @Override
@@ -305,8 +288,8 @@ public class MobArena extends JavaPlugin
         return arenaMaster;
     }
 
-    public Economy getEconomy() {
-        return economy;
+    public Finance getFinance() {
+        return finance;
     }
 
     public Messenger getGlobalMessenger() {
