@@ -1,0 +1,87 @@
+arena-start: E que a matança comece!
+arena-end: Arena finalizada.
+arena-does-not-exist: Essa arena não existe. digite &e/ma arenas&r para uma lista.
+arena-end-global: Arena &e%&r finalizada! Digite &e/ma j %&r para iniciar um novo
+  jogo!
+arena-join-global: Arena &e%&r está prestes a começar! Digite &e/ma j %&r para entrar!
+arena-lboard-not-found: Essa arena não tem um placar configurado.
+arena-auto-start: Arena vai auto iniciar em &c%&r segundos.
+arena-start-delay: Arena pode começar em &e%&r segundos.
+join-not-enabled: MobArena não está habilitado.
+join-in-other-arena: Você já está na Arena! Saia primeiro.
+join-arena-not-enabled: Essa arena não está habilitada.
+join-arena-not-setup: Essa arena ainda não foi configurada.
+join-arena-edit-mode: Essa arena está em manutenção.
+join-arena-permission: Você não tem permissão para entrar nesta arena.
+join-fee-required: 'Saldo insuficiente. Preço: &c%&r'
+join-fee-paid: 'Preço para entrar é: &c%&r'
+join-arena-is-running: Esta arena já está em progresso.
+join-already-playing: Você já está jogando!
+join-arg-needed: Você deve especificar uma Arena.
+join-no-permission: Você não tem permissão para entrar em qualquer arenas.
+join-too-far: Você está muito longe da arena para entrar (join) assistir(spectate).
+join-empty-inv: Você deve esvaziar seu inventário para entrar na Arena.
+join-player-limit-reached: O limite de jogadores nessa arena foi atingido.
+join-store-inv-fail: Falha ao salvar inventário. Tente novamente.
+join-existing-inv-restored: Os itens do seu antigo inventário foram restaurados.
+join-after-delay: Entrando na arena em &c%&r segundos...
+join-interrupted-by-damage: Entrada cancelada pois você tomou dano.
+join-interrupted-by-movement: Entrada cancelada pois você se moveu.
+join-player-joined: Você entrou na Arena. Divirta-se!
+leave-not-playing: Você não está na arena.
+leave-not-ready: Você não se preparou a tempo! Na próxima, fique pronto clicando em
+  um bloco de ferro.
+leave-player-left: Você saiu da Arena. Obrigada por jogar!
+player-died: '&c%&r morreu!'
+golem-died: Um amigo Golem morreu!
+spec-player-spectate: Aproveite o show!
+spec-from-arena: Aproveite o restante do show!
+spec-not-running: Esta arena não está em andamento.
+spec-empty-inv: Esvazie seu inventário primeiro!
+spec-already-playing: Você não pode assistir quando está na arena!
+not-ready-players: 'Ainda não está pronto: &c%&r'
+force-start-running: A Arena já começou.
+force-start-not-ready: Não pode forçar o inicio, jogadores não estão prontos.
+force-start-started: Arena foi forçada a iniciar.
+force-end-empty: Ninguém está nesta arena.
+force-end-ended: Arena forçada a finalizar.
+force-end-idle: Você não foi rápido o suficiente!
+rewards-give: Aqui estão todas as suas recompensas!
+lobby-drop-item: Sem dividir os itens nesse momento!
+lobby-player-ready: Você foi marcado como pronto!
+lobby-pick-class: Você deve escolher uma classe primeiro!
+lobby-class-full: Essa classe não pode mais ser selecionada, limite de classe atingido!
+lobby-not-enough-players: Sem jogadores suficientes para iniciar. Precisa pelo menos
+  &c%&r jogadores.
+lobby-right-click: Soque a placa. Não clique com o direito.
+lobby-class-picked: Você escolheu &e%&r como sua classe!
+lobby-class-random: Você irá receber uma classe aleatória quando a Arena iniciar.
+lobby-class-permission: Você não tem permissão para usar esta classe!
+lobby-class-price: Essa classe custa &c%&r (pago quando a arena começar).
+lobby-class-too-expensive: Você não consegue pagar essa classe (&c%&r)
+lobby-no-such-class: Não tem classe chamada &c%&r.
+not-in-lobby: Você não está na sala dos heróis
+warp-to-arena: Qualquer forma de teleporte para a Arena não é permitida!
+warp-from-arena: Qualquer forma de teleporte de dentro da Arena não é permitida!
+wave-default: Round &b#%&r!
+wave-special: Round &b#%&r! [ESPECIAL]
+wave-swarm: Round &b#%&r! [ENXAME]
+wave-supply: Round &b#%&r! [SUPRIMENTOS]
+wave-upgrade: Round &b#%&r! [UPGRADE]
+wave-boss: Round &b#%&r! [BOSS]
+wave-boss-ability: 'Boss usou a habilidade: &c%&r!'
+wave-boss-low-health: O Boss tá quase morto!
+wave-boss-killed: '&a%&r matou o boss!'
+wave-boss-reward-earned: 'Você ganhou: &e%'
+wave-reward: 'Você acaba de ganhar uma recompensa: &e%&r'
+misc-reward-added: 'Você acaba de ganhar uma recompensa: &e%&r'
+misc-list-players: 'Jogadores vivos: &a%&r'
+misc-list-arenas: 'Arenas disponíveis: %'
+misc-command-not-allowed: Você não pode usar este comando na Arena!
+misc-no-access: Você não tem acesso a este comando.
+misc-not-from-console: Você não pode usar este comando do console.
+misc-help: 'Para uma lista de comandos digite: &e/ma help&r'
+misc-multiple-matches: Você quis dizer um desses comandos?
+misc-no-matches: 'Comando não encontrado. Digite: &e/ma help&r'
+misc-ma-leave-reminder: Lembre de usar &e/ma leave&r quando tiver terminado.
+misc-none: '&6<none>&r'
