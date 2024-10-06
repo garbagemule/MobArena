@@ -665,7 +665,8 @@ public class ArenaImpl implements Arena
 
         // Auto-leave
         if (settings.getBoolean("auto-leave-on-end", false)) {
-            specPlayers.forEach(this::playerLeave);
+            List<Player> spectators = new ArrayList<>(specPlayers);
+            spectators.forEach(this::playerLeave);
         }
 
         return true;
