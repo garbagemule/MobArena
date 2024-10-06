@@ -27,14 +27,42 @@ public class WaveUtils
             spawnpoints = arena.getRegion().getSpawnpointList();
         }
 
-        // Loop through each one and check if any players are in range.
-        for (Location l : spawnpoints) {
-            for (Player p : players) {
-                if (MAUtils.distanceSquared(plugin, p, l) >= MobArena.MIN_PLAYER_DISTANCE_SQUARED) {
-                    continue;
+        double min = arena.getSpawnpointMinDistanceSquared();
+        double max = arena.getSpawnpointMaxDistanceSquared();
+
+        if (min > 0) {
+            // If the min distance is greater than 0, we need to check the
+            // distance of every player, because one player within the max
+            // range is no longer enough to make a spawnpoint valid. If even
+            // a single player is too close, the spawnpoint is invalid.
+            for (Location l : spawnpoints) {
+                boolean valid = false;
+                for (Player p : players) {
+                    double dist = MAUtils.distanceSquared(plugin, p, l);
+                    if (dist < min) {
+                        valid = false;
+                        break;
+                    }
+                    if (dist <= max) {
+                        valid = true;
+                    }
                 }
-                result.add(l);
-                break;
+                if (valid) {
+                    result.add(l);
+                }
+            }
+        } else {
+            // If the min distance is 0, the old "any player within range"
+            // approach is sufficient, because we can never invalidate a
+            // spawnpoint for being too close to a player.
+            for (Location l : spawnpoints) {
+                for (Player p : players) {
+                    double dist = MAUtils.distanceSquared(plugin, p, l);
+                    if (dist <= max) {
+                        result.add(l);
+                        break;
+                    }
+                }
             }
         }
 
@@ -70,7 +98,7 @@ public class WaveUtils
             }
 
             dist = p.getLocation().distanceSquared(e.getLocation());
-            if (dist < current && dist < MobArena.MIN_PLAYER_DISTANCE_SQUARED)
+            if (dist < current && dist < arena.getSpawnpointMaxDistanceSquared())
             {
                 current = dist;
                 result = p;

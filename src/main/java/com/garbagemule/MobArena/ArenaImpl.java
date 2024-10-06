@@ -125,6 +125,8 @@ public class ArenaImpl implements Arena
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
     private Map<Integer, ThingPicker> everyWaveMap, afterWaveMap, waveTiersMap;
+    private double spawnpointMinDistanceSquared;
+    private double spawnpointMaxDistanceSquared;
 
     // Misc
     private ArenaListener eventListener;
@@ -209,6 +211,8 @@ public class ArenaImpl implements Arena
         this.everyWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "every");
         this.afterWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "after");
         this.waveTiersMap = MAUtils.getArenaRewardMap(plugin, section, name, "tiers");
+        this.spawnpointMinDistanceSquared = Math.pow(settings.getDouble("spawnpoint-min-distance", 0), 2);
+        this.spawnpointMaxDistanceSquared = Math.pow(settings.getDouble("spawnpoint-max-distance", 15), 2);
 
         // Misc
         this.eventListener = new ArenaListener(this, plugin);
@@ -380,6 +384,16 @@ public class ArenaImpl implements Arena
     @Override
     public MASpawnThread getSpawnThread() {
         return spawnThread;
+    }
+
+    @Override
+    public double getSpawnpointMinDistanceSquared() {
+        return spawnpointMinDistanceSquared;
+    }
+
+    @Override
+    public double getSpawnpointMaxDistanceSquared() {
+        return spawnpointMaxDistanceSquared;
     }
 
     @Override

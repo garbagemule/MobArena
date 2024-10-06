@@ -82,6 +82,10 @@ public interface Arena
 
     MASpawnThread getSpawnThread();
 
+    double getSpawnpointMinDistanceSquared();
+
+    double getSpawnpointMaxDistanceSquared();
+
     WaveManager getWaveManager();
 
     ArenaListener getEventListener();

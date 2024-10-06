@@ -88,6 +88,7 @@ public class MAUtils
         /* Iterate through the ArrayList, and update current and result every
          * time a squared distance smaller than current is found. */
         List<Player> players = new ArrayList<>(arena.getPlayersInArena());
+        double max = arena.getSpawnpointMaxDistanceSquared();
         for (Player p : players) {
             if (!arena.getWorld().equals(p.getWorld())) {
                 plugin.getLogger().info("Player '" + p.getName() + "' is not in the right world. Kicking...");
@@ -97,7 +98,7 @@ public class MAUtils
             }
 
             double dist = distanceSquared(plugin, p, e.getLocation());
-            if (dist < current && dist < 256D) {
+            if (dist < current && dist < max) {
                 current = dist;
                 result = p;
             }

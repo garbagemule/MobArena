@@ -648,9 +648,12 @@ public class ArenaRegion
         }
 
         // Find all the spawnpoints that cover the location
+        double min = arena.getSpawnpointMinDistanceSquared();
+        double max = arena.getSpawnpointMaxDistanceSquared();
         Map<String,Location> map = new HashMap<>();
         for (Map.Entry<String,Location> entry : spawnpoints.entrySet()) {
-            if (p.getLocation().distanceSquared(entry.getValue()) < MobArena.MIN_PLAYER_DISTANCE_SQUARED) {
+            double dist = p.getLocation().distanceSquared(entry.getValue());
+            if (min <= dist && dist <= max) {
                 map.put(entry.getKey(), entry.getValue());
             }
         }

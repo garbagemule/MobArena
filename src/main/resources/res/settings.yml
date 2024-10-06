@@ -27,6 +27,8 @@ first-wave-delay: 5
 next-wave-delay: 0
 wave-interval: 15
 final-wave: 0
+spawnpoint-min-distance: 0
+spawnpoint-max-distance: 15
 monster-limit: 100
 monster-exp: false
 keep-exp: false

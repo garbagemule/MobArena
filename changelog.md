@@ -14,6 +14,8 @@ These changes will (most likely) be included in the next version.
 ### Added
 - MobArena now properly supports Vault economy providers registered after MobArena has started. This should make it possible to use custom economy providers that aren't built into Vault, such as those created with Denizen.
 - New wave rewards section `tiers` allows for _non-stacking_ reward tiers for beating certain waves. This allows for configuring reward sets that get "upgraded" as the waves progress, e.g. by granting a full leather armor set for beating wave 15, but beating wave 20 _replaces_ that leather armor set with an iron armor set.
+- New per-arena setting `spawnpoint-max-distance` can be used to tweak how close to any player a given spawnpoint must be to be considered valid when spawning monsters. This should help reduce the amount of spawnpoints required, especially for larger arenas.
+- New per-arena setting `spawnpoint-min-distance` can be used to tweak how far away from all players a given spawnpoint must be to be considered valid when spawning monsters. This should help prevent monsters from spawning directly on top of players.
 
 ### Changed
 - Recurrent waves can now be randomized. If two or more recurrent waves clash on wave number, frequency, _and_ priority, MobArena will now randomly pick between them. This should make it easier to create more varied and interesting wave setups without having to resort to only massively randomized default waves.
