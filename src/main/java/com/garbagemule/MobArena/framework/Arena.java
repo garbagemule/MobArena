@@ -70,6 +70,8 @@ public interface Arena
 
     ThingPicker getAfterWaveReward(int wave);
 
+    ThingPicker getWaveTierReward(int wave);
+
     Set<Player> getPlayersInArena();
 
     Set<Player> getPlayersInLobby();

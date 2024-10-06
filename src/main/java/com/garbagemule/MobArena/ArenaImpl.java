@@ -124,7 +124,7 @@ public class ArenaImpl implements Arena
     private WaveManager   waveManager;
     private MASpawnThread spawnThread;
     private SheepBouncer  sheepBouncer;
-    private Map<Integer, ThingPicker> everyWaveMap, afterWaveMap;
+    private Map<Integer, ThingPicker> everyWaveMap, afterWaveMap, waveTiersMap;
 
     // Misc
     private ArenaListener eventListener;
@@ -208,6 +208,7 @@ public class ArenaImpl implements Arena
         this.waveManager  = new WaveManager(this, section.getConfigurationSection("waves"));
         this.everyWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "every");
         this.afterWaveMap = MAUtils.getArenaRewardMap(plugin, section, name, "after");
+        this.waveTiersMap = MAUtils.getArenaRewardMap(plugin, section, name, "tiers");
 
         // Misc
         this.eventListener = new ArenaListener(this, plugin);
@@ -349,6 +350,11 @@ public class ArenaImpl implements Arena
     @Override
     public ThingPicker getAfterWaveReward(int wave) {
         return afterWaveMap.get(wave);
+    }
+
+    @Override
+    public ThingPicker getWaveTierReward(int wave) {
+        return waveTiersMap.get(wave);
     }
 
     @Override

@@ -7,3 +7,7 @@ waves:
         '7': minecart, chest_minecart, furnace_minecart
         '13': iron_sword, iron_pickaxe, iron_shovel
         '16': diamond_sword
+    tiers:
+        '4': diamond
+        '11': diamond:10
+        '17': diamond:25

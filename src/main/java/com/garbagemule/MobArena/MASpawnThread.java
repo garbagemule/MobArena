@@ -366,6 +366,11 @@ public class MASpawnThread implements Runnable
         if (after != null) {
             addReward(after);
         }
+
+        ThingPicker tier = arena.getWaveTierReward(wave);
+        if (tier != null) {
+            setRewardTier(tier);
+        }
     }
 
     private void updateStats(int wave) {
@@ -397,6 +402,16 @@ public class MASpawnThread implements Runnable
             if (reward != null) {
                 rewardManager.addReward(p, reward);
                 arena.getMessenger().tell(p, Msg.WAVE_REWARD, reward.toString());
+            }
+        }
+    }
+
+    private void setRewardTier(ThingPicker picker) {
+        for (Player p : arena.getPlayersInArena()) {
+            Thing reward = picker.pick();
+            if (reward != null) {
+                rewardManager.setTieredReward(p, reward);
+                arena.getMessenger().tell(p, Msg.WAVE_TIER_REWARD, reward.toString());
             }
         }
     }
