@@ -7,11 +7,11 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Bee;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Hoglin;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.PiglinAbstract;
 import org.bukkit.entity.Rabbit;
@@ -181,9 +181,9 @@ public class MACreature {
                 break;
         }
 
-        if (e instanceof Creature) {
-            Creature c = (Creature) e;
-            c.setTarget(WaveUtils.getClosestPlayer(arena, e));
+        if (e instanceof Mob) {
+            Mob m = (Mob) e;
+            m.setTarget(WaveUtils.getClosestPlayer(arena, e));
         }
 
         return e;
