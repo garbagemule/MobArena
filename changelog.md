@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+
+## [0.109] - 2024-10-13
 ### Added
 - MobArena now properly supports Vault economy providers registered after MobArena has started. This should make it possible to use custom economy providers that aren't built into Vault, such as those created with Denizen.
 - New wave rewards section `tiers` allows for _non-stacking_ reward tiers for beating certain waves. This allows for configuring reward sets that get "upgraded" as the waves progress, e.g. by granting a full leather armor set for beating wave 15, but beating wave 20 _replaces_ that leather armor set with an iron armor set.
@@ -279,7 +281,8 @@ Thanks to:
 - Swatacular for help with testing bug fixes
 - Haileykins for contributions to the code base
 
-[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.108...HEAD
+[Unreleased]: https://github.com/garbagemule/MobArena/compare/0.109...HEAD
+[0.109]: https://github.com/garbagemule/MobArena/compare/0.108...0.109
 [0.108]: https://github.com/garbagemule/MobArena/compare/0.107...0.108
 [0.107]: https://github.com/garbagemule/MobArena/compare/0.106...0.107
 [0.106]: https://github.com/garbagemule/MobArena/compare/0.105...0.106

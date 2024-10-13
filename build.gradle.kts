@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.garbagemule"
-version = "0.108.1-SNAPSHOT"
+version = "0.109"
 
 repositories {
     mavenLocal()
