@@ -8,13 +8,29 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class WaveUtils
 {
+    /**
+     * Test if a wave gets blocked by a given blacklist
+     */
+    public static boolean waveBlocked(Wave wave, String blacklist) {
+        if (blacklist == null) {
+            return true;
+        }
+        if (blacklist.equals("*")) {
+            return false;
+        }
+        String[] blacklistedWaves = blacklist.split(", ?");
+        for (String waveName : blacklistedWaves) {
+            if (waveName.equalsIgnoreCase(wave.getName())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Get all the spawnpoints that have players nearby.
      */

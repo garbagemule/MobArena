@@ -161,6 +161,18 @@ public interface Wave
     void setAmountMultiplier(double amountMultiplier);
 
     /**
+     * Get the wave's shadow blacklist.
+     * @return a list of shadow wave names
+     */
+    String getShadowBlacklist();
+
+    /**
+     * Set the wave's shadow blacklist.
+     * @param blacklist a list of shadow wave names
+     */
+    void setShadowBlacklist(String blacklist);
+
+    /**
      * Check if this wave matches the wave number.
      * The SingleWave class does a simple check if its wave == the parameter.
      * The RecurrentWave class is more complex in that it needs to do some
