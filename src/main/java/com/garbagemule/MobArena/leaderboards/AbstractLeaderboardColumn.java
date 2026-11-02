@@ -1,6 +1,8 @@
 package com.garbagemule.MobArena.leaderboards;
 
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import org.bukkit.Location;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 
 import java.util.List;
@@ -8,10 +10,10 @@ import java.util.List;
 public abstract class AbstractLeaderboardColumn implements LeaderboardColumn
 {
     protected String statname;
-    private Sign header;
-    private List<Sign> signs;
+    private Location header;
+    private List<Location> signs;
 
-    public AbstractLeaderboardColumn(String statname, Sign header, List<Sign> signs) {
+    public AbstractLeaderboardColumn(String statname, Location header, List<Location> signs) {
         this.statname     = statname;
         this.header       = header;
         this.signs        = signs;
@@ -23,7 +25,12 @@ public abstract class AbstractLeaderboardColumn implements LeaderboardColumn
 
         for (int i = 0; i < range; i++) {
             // Grab the right sign.
-            Sign s = signs.get(i/4);
+            Location l = signs.get(i / 4);
+            BlockState state = l.getBlock().getState();
+            if (!(state instanceof Sign)) {
+                continue;
+            }
+            Sign s = (Sign) state;
 
             // Call the template method.
             String value = getLine(stats.get(i));
@@ -37,7 +44,12 @@ public abstract class AbstractLeaderboardColumn implements LeaderboardColumn
     public abstract String getLine(ArenaPlayerStatistics stats);
 
     public void clear() {
-        for (Sign s : signs) {
+        for (Location l : signs) {
+            BlockState state = l.getBlock().getState();
+            if (!(state instanceof Sign)) {
+                continue;
+            }
+            Sign s = (Sign) state;
             s.setLine(0, "");
             s.setLine(1, "");
             s.setLine(2, "");
@@ -46,11 +58,11 @@ public abstract class AbstractLeaderboardColumn implements LeaderboardColumn
         }
     }
 
-    public Sign getHeader() {
+    public Location getHeader() {
         return header;
     }
 
-    public List<Sign> getSigns() {
+    public List<Location> getSigns() {
         return signs;
     }
 }

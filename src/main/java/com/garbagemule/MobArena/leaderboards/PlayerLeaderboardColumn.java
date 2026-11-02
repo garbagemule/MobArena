@@ -1,13 +1,14 @@
 package com.garbagemule.MobArena.leaderboards;
 
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import org.bukkit.Location;
 import org.bukkit.block.Sign;
 
 import java.util.List;
 
 public class PlayerLeaderboardColumn extends AbstractLeaderboardColumn
 {
-    public PlayerLeaderboardColumn(String statname, Sign header, List<Sign> signs) {
+    public PlayerLeaderboardColumn(String statname, Location header, List<Location> signs) {
         super(statname, header, signs);
     }
 

@@ -23,7 +23,6 @@ public class Leaderboard
     private Arena    arena;
 
     private Location  topLeft;
-    private Sign      topLeftSign;
     private BlockFace direction;
     private int rows, cols, trackingId;
 
@@ -132,18 +131,14 @@ public class Leaderboard
             return false;
         }
 
-        // Grab the top left sign and set up a copy for parsing.
-        this.topLeftSign = (Sign) state;
-        Sign current = this.topLeftSign;
-
         // Calculate matrix dimensions.
-        BlockFace direction = getRightDirection(current);
+        BlockFace direction = getRightDirection(topLeft);
         if (direction == null) {
             return false;
         }
         this.direction = direction;
-        this.rows = getSignCount(current, BlockFace.DOWN);
-        this.cols = getSignCount(current, direction);
+        this.rows = getSignCount(topLeft, BlockFace.DOWN);
+        this.cols = getSignCount(topLeft, direction);
 
         // Require at least 2x2 to be valid
         if (rows <= 1 || cols <= 1) {
@@ -151,7 +146,8 @@ public class Leaderboard
         }
 
         // Get the left-most sign in the current row.
-        Sign first = getAdjacentSign(current, BlockFace.DOWN);
+        Location first = getAdjacentSign(topLeft, BlockFace.DOWN);
+        Location current;
 
         for (int i = 1; i < rows; i++)
         {
@@ -177,20 +173,21 @@ public class Leaderboard
     private void initializeBoards()
     {
         boards.clear();
-        Sign header = this.topLeftSign;
-        Sign current;
+        Location header = topLeft;
+        Location current;
 
         do
         {
             // Strip the sign of any colors.
-            String name = ChatColor.stripColor(header.getLine(2));
+            BlockState state = header.getBlock().getState();
+            String name = ChatColor.stripColor(((Sign) state).getLine(2));
 
             // Grab the stat to track.
             Stats stat = Stats.getByFullName(name);
             if (stat == null) continue;
 
             // Create the list of signs
-            List<Sign> signs = new ArrayList<>();
+            List<Location> signs = new ArrayList<>();
             current = header;
             for (int i = 1; i < rows; i++)
             {
@@ -226,7 +223,7 @@ public class Leaderboard
             stats.add(ap.getStats());
     }
 
-    private int getSignCount(Sign s, BlockFace direction)
+    private int getSignCount(Location s, BlockFace direction)
     {
         int i = 1;
 
@@ -248,17 +245,17 @@ public class Leaderboard
         return i;
     }
 
-    private Sign getAdjacentSign(Sign s, BlockFace direction)
+    private Location getAdjacentSign(Location s, BlockFace direction)
     {
         BlockState state = s.getBlock().getRelative(direction).getState();
         if (state instanceof Sign)
-            return (Sign) state;
+            return state.getLocation();
         return null;
     }
 
-    private BlockFace getRightDirection(Sign s)
+    private BlockFace getRightDirection(Location s)
     {
-        BlockData data = s.getBlockData();
+        BlockData data = s.getBlock().getBlockData();
         if (data instanceof Directional) {
             BlockFace direction = ((Directional) data).getFacing();
             switch (direction) {

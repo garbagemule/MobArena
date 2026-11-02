@@ -1,6 +1,7 @@
 package com.garbagemule.MobArena.leaderboards;
 
 import com.garbagemule.MobArena.ArenaPlayerStatistics;
+import org.bukkit.Location;
 import org.bukkit.block.Sign;
 
 import java.util.List;
@@ -32,11 +33,11 @@ public interface LeaderboardColumn
      * The top sign displays the stat name.
      * @return the top sign of the column
      */
-    Sign getHeader();
+    Location getHeader();
 
     /**
      * Get all signs in the column (minus the header).
      * @return all signs in the column (minus the header)
      */
-    List<Sign> getSigns();
+    List<Location> getSigns();
 }

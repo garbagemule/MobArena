@@ -11,6 +11,8 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Fixed
+- Leaderboards logic now evaluates block state in an on-demand fashion instead of relying on potentially stale state from the beginning of the session. Signs now update much more reliably, and this seems to have fixed a long-standing bug of leaderboards "breaking" between sessions.
 
 ## [0.109] - 2024-10-13
 ### Added
