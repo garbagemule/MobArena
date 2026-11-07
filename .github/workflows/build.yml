@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v6
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'gradle'
 
       - name: 'Build'
