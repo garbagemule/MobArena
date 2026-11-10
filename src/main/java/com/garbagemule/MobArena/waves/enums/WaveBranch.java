@@ -19,6 +19,13 @@ public enum WaveBranch
             }
             return ((wave - w.getFirstWave()) % w.getFrequency() == 0);
         }
+    },
+
+    COMBO {
+        @Override
+        public boolean matches(int wave, Wave w) {
+            return false; // doesn't get used anyway on COMBO branch
+        }
     };
 
     public abstract boolean matches(int wave, Wave w);

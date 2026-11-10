@@ -45,6 +45,13 @@ public enum WaveType
         public void announce(Arena arena, int wave) {
             arena.announce(Msg.WAVE_UPGRADE, "" + wave);
         }
+    },
+
+    COMBO {
+        @Override
+        public void announce(Arena arena, int wave) {
+            // announce waveA in MASpawnThread.handleWave(Wave, int, boolean)
+        }
     };
 
     public abstract void announce(Arena arena, int wave);

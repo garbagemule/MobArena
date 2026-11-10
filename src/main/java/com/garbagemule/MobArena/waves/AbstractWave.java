@@ -20,6 +20,7 @@ public abstract class AbstractWave implements Wave
     private double healthMultiplier, amountMultiplier;
 
     private int firstWave, frequency, priority;
+    private String shadowBlacklist;
 
     private List<Location> spawnpoints;
     private List<PotionEffect> effects;
@@ -118,6 +119,16 @@ public abstract class AbstractWave implements Wave
     @Override
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    @Override
+    public String getShadowBlacklist() {
+        return shadowBlacklist;
+    }
+
+    @Override
+    public void setShadowBlacklist(String shadowBlacklist) {
+        this.shadowBlacklist = shadowBlacklist;
     }
 
     @Override
