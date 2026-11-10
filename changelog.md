@@ -11,6 +11,9 @@ These changes will (most likely) be included in the next version.
 
 
 ## [Unreleased]
+### Added
+- New per-arena setting `skip-waves` can be used to start a session a number of waves in, i.e. to skip the first few waves. The wave counter starts at the configured value, so `skip-waves: 5` starts the arena on wave 6. Defaults to `0` for the usual behavior of starting from the first wave.
+
 ### Fixed
 - Leaderboards logic now evaluates block state in an on-demand fashion instead of relying on potentially stale state from the beginning of the session. Signs now update much more reliably, and this seems to have fixed a long-standing bug of leaderboards "breaking" between sessions.
 

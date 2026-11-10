@@ -31,7 +31,6 @@ public class WaveManager
 
     public void reset() {
         reloadWaves();
-        wave = 0;
         determineNextWave();
     }
 
@@ -43,6 +42,7 @@ public class WaveManager
         singleWaves    = WaveParser.parseWaves(arena, sConfig, WaveBranch.SINGLE);
 
         // getParent() => go back to the arena-node to access settings
+        wave = section.getParent().getInt("skip-waves", 0);
         finalWave = section.getParent().getInt("settings.final-wave", 0);
 
         if (recurrentWaves.isEmpty()) {
